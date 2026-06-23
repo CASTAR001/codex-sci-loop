@@ -1,0 +1,1459 @@
+﻿diff --git a/.ai-loop/README.md b/.ai-loop/README.md
+new file mode 100644
+index 0000000..c8558c6
+--- /dev/null
++++ b/.ai-loop/README.md
+@@ -0,0 +1,35 @@
++# .ai-loop
++
++This directory is the project-local source of truth for the Supervisor-Worker
++loop. Do not rely on chat history for phase status, evidence, decisions, or
++audit results.
++
++## Roles
++
++- Codex is Supervisor and owns phase planning, audit, and acceptance.
++- Kimi Code is Worker and may execute only the current phase prompt.
++
++## Standard Layout
++
++```text
++.ai-loop/
++  loop.config.json
++  status.json
++  runs/
++    <phase-id>/
++      base_commit.txt
++      status_before.txt
++      phase_meta.json
++      prompt.md
++      report.md
++      status_after.txt
++      diff.patch
++      verify.log
++      changed_files.txt
++  audits/
++    <phase-id>-audit-input.md
++    <phase-id>-audit.md
++```
++
++Codex must not accept a phase unless required evidence exists and the audit
++checks the report, diff, verify log, status files, and relevant source files.
+diff --git a/.ai-loop/audits/README.md b/.ai-loop/audits/README.md
+new file mode 100644
+index 0000000..9adfd23
+--- /dev/null
++++ b/.ai-loop/audits/README.md
+@@ -0,0 +1,11 @@
++# Audits
++
++Audit input and result files are stored as:
++
++```text
++audits/<phase-id>-audit-input.md
++audits/<phase-id>-audit.md
++```
++
++Codex must inspect the Worker report, diff, verify log, status files, and
++relevant source files before writing an audit result.
+diff --git a/.ai-loop/audits/phase-001-audit-input.md b/.ai-loop/audits/phase-001-audit-input.md
+new file mode 100644
+index 0000000..c31980e
+--- /dev/null
++++ b/.ai-loop/audits/phase-001-audit-input.md
+@@ -0,0 +1,65 @@
++﻿# Codex Audit Input: phase-001
++
++## Project Root
++
++    E:\codexfiles\loop\pilot-project
++
++## Required Evidence Files
++
++- status: E:\codexfiles\loop\pilot-project\.ai-loop\status.json
++- base commit: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\base_commit.txt
++- status before: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\status_before.txt
++- phase metadata: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\phase_meta.json
++- prompt: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\prompt.md
++- Kimi report: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\report.md
++- status after: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\status_after.txt
++- diff: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\diff.patch
++- verify log: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\verify.log
++- changed files: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\changed_files.txt
++- changed business files: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\changed_business_files.txt
++- changed evidence files: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\changed_evidence_files.txt
++
++## Changed Or Relevant Source Files
++
++- .ai-loop/runs/phase-001/diff.patch
++- .ai-loop/runs/phase-001/status_after.txt
++- .ai-loop/runs/phase-001/verify.log
++
++## Changed Business Files
++
++- None recorded.
++
++## Changed Evidence Files
++
++- .ai-loop/runs/phase-001/diff.patch
++- .ai-loop/runs/phase-001/status_after.txt
++- .ai-loop/runs/phase-001/verify.log
++
++## Missing Or Invalid Evidence
++
++None
++
++## Audit Instructions
++
++Codex must inspect the Kimi report, diff, verify log, status files, phase
++metadata, and relevant source files. Codex must not accept based only on the
++Kimi report.
++
++If evidence is missing, contains MISSING:, verification failed, or source
++inspection cannot be completed, Codex must decide BLOCKED or REWORK.
++
++Write the audit result to:
++
++    E:\codexfiles\loop\pilot-project\.ai-loop\audits\phase-001-audit.md
++
++The audit result must contain exactly one decision line:
++
++    Decision: ACCEPTED
++
++or:
++
++    Decision: REWORK
++
++or:
++
++    Decision: BLOCKED
+diff --git a/.ai-loop/audits/phase-001-audit.md b/.ai-loop/audits/phase-001-audit.md
+new file mode 100644
+index 0000000..19f1bf8
+--- /dev/null
++++ b/.ai-loop/audits/phase-001-audit.md
+@@ -0,0 +1,28 @@
++# Codex Audit: phase-001
++
++## Evidence Checked
++
++- status.json: checked
++- phase_meta.json: checked
++- prompt.md: checked
++- Kimi report.md: checked
++- diff.patch: checked
++- verify.log: checked
++- status_before.txt: checked
++- status_after.txt: checked
++- changed_files.txt: checked
++- src/greeting.txt: checked
++- phase-001-audit-input.md: checked
++
++## Findings
++
++- `src/greeting.txt` contains `message=hello` and `phase=worker-complete`.
++- `diff.patch` shows exactly the intended business change in `src/greeting.txt`: `phase=baseline` changed to `phase=worker-complete`.
++- `verify.log` records the required PowerShell command and `exit_code: 0`, with output showing `verify: OK`, `message: hello`, and `phase: worker-complete`.
++- `changed_files.txt` records `src/greeting.txt` and `.ai-loop/`. The `.ai-loop/` changes are expected loop evidence and prompt/audit artifacts, not Worker business-scope expansion.
++- The Kimi report honestly recorded an earlier tooling failure in `collect-evidence.ps1`. Codex fixed the standard script's strict-mode JSON property update bug and re-ran evidence collection and audit-pack preparation. Durable state now records `status: audit_ready`.
++- No required evidence file is missing and no checked evidence file contains a `MISSING:` placeholder.
++
++## Decision
++
++Decision: ACCEPTED
+diff --git a/.ai-loop/context/phase-001-context.md b/.ai-loop/context/phase-001-context.md
+new file mode 100644
+index 0000000..c8db2ab
+--- /dev/null
++++ b/.ai-loop/context/phase-001-context.md
+@@ -0,0 +1,87 @@
++# Phase 001 Context Package
++
++## Discovery
++
++Project root:
++
++`E:\codexfiles\loop\pilot-project`
++
++This pilot project is intentionally tiny:
++
++- `src/greeting.txt` is the only business file.
++- `tests/verify.ps1` is the Windows PowerShell verification script.
++- `.ai-loop/` stores durable loop state and evidence.
++
++Current baseline business state:
++
++```text
++message=hello
++phase=baseline
++```
++
++## Triage
++
++The smallest useful Worker task is to change only the phase marker in
++`src/greeting.txt`:
++
++```text
++phase=baseline
++```
++
++to:
++
++```text
++phase=worker-complete
++```
++
++Do not change `message=hello`. Do not change the verification script. Do not
++change loop-standard files.
++
++## Execution
++
++Kimi Code may edit only:
++
++- `src/greeting.txt`
++
++Kimi must write its report to:
++
++- `.ai-loop/runs/phase-001/report.md`
++
++## Verification
++
++The required verification command is:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
++```
++
++After writing the report, Kimi must collect evidence with:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1 -ProjectRoot E:\codexfiles\loop\pilot-project -PhaseId phase-001
++```
++
++That script must produce:
++
++- `.ai-loop/runs/phase-001/status_after.txt`
++- `.ai-loop/runs/phase-001/diff.patch`
++- `.ai-loop/runs/phase-001/verify.log`
++- `.ai-loop/runs/phase-001/changed_files.txt`
++
++## Memory / Audit
++
++Codex will later prepare the audit pack and inspect:
++
++- `.ai-loop/runs/phase-001/prompt.md`
++- `.ai-loop/prompts/phase-001-kimi-prompt.md`
++- `.ai-loop/context/phase-001-context.md`
++- `.ai-loop/runs/phase-001/report.md`
++- `.ai-loop/runs/phase-001/diff.patch`
++- `.ai-loop/runs/phase-001/verify.log`
++- `.ai-loop/runs/phase-001/status_before.txt`
++- `.ai-loop/runs/phase-001/status_after.txt`
++- `.ai-loop/runs/phase-001/changed_files.txt`
++- `src/greeting.txt`
++
++If any evidence is missing or contains `MISSING:`, Codex must decide `BLOCKED`
++or `REWORK`, not `ACCEPTED`.
+diff --git a/.ai-loop/loop.config.json b/.ai-loop/loop.config.json
+new file mode 100644
+index 0000000..0e3f705
+--- /dev/null
++++ b/.ai-loop/loop.config.json
+@@ -0,0 +1,35 @@
++{
++  "schema_version": "1.1",
++  "loop_name": "supervisor-worker-loop",
++  "supervisor": "Codex",
++  "worker": "Kimi Code",
++  "run_directory": ".ai-loop/runs",
++  "audit_directory": ".ai-loop/audits",
++  "phase_start_files": [
++    "base_commit.txt",
++    "status_before.txt",
++    "phase_meta.json",
++    "prompt.md"
++  ],
++  "phase_evidence_required": [
++    "prompt.md",
++    "report.md",
++    "status_after.txt",
++    "diff.patch",
++    "verify.log",
++    "changed_files.txt"
++  ],
++  "audit_input_pattern": ".ai-loop/audits/<phase-id>-audit-input.md",
++  "audit_result_pattern": ".ai-loop/audits/<phase-id>-audit.md",
++  "decisions": [
++    "ACCEPTED",
++    "REWORK",
++    "BLOCKED"
++  ],
++  "rules": {
++    "chat_history_is_not_source_of_truth": true,
++    "worker_can_only_execute_current_phase": true,
++    "supervisor_must_inspect_diff_verify_status_and_source": true,
++    "missing_evidence_blocks_progress": true
++  }
++}
+diff --git a/.ai-loop/prompts/phase-001-acceptance.md b/.ai-loop/prompts/phase-001-acceptance.md
+new file mode 100644
+index 0000000..255831c
+--- /dev/null
++++ b/.ai-loop/prompts/phase-001-acceptance.md
+@@ -0,0 +1,46 @@
++# Phase 001 Acceptance Criteria
++
++Codex may accept phase 001 only if all criteria below are satisfied.
++
++## Required Business Result
++
++- `src/greeting.txt` contains `message=hello`.
++- `src/greeting.txt` contains `phase=worker-complete`.
++- `src/greeting.txt` no longer contains `phase=baseline`.
++- No business file other than `src/greeting.txt` was changed.
++
++## Required Verification
++
++The verification log must show this command:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
++```
++
++The verification log must show exit code `0` and output containing:
++
++```text
++verify: OK
++phase: worker-complete
++```
++
++## Required Evidence
++
++All files must exist:
++
++- `.ai-loop/runs/phase-001/prompt.md`
++- `.ai-loop/prompts/phase-001-kimi-prompt.md`
++- `.ai-loop/context/phase-001-context.md`
++- `.ai-loop/runs/phase-001/report.md`
++- `.ai-loop/runs/phase-001/status_after.txt`
++- `.ai-loop/runs/phase-001/diff.patch`
++- `.ai-loop/runs/phase-001/verify.log`
++- `.ai-loop/runs/phase-001/changed_files.txt`
++
++None may contain a `MISSING:` placeholder.
++
++## Required Audit Behavior
++
++Codex must inspect the report, diff, verify log, status files, changed file
++list, and `src/greeting.txt`. Codex must not accept based only on the Kimi
++report.
+diff --git a/.ai-loop/prompts/phase-001-kimi-prompt.md b/.ai-loop/prompts/phase-001-kimi-prompt.md
+new file mode 100644
+index 0000000..e0eea63
+--- /dev/null
++++ b/.ai-loop/prompts/phase-001-kimi-prompt.md
+@@ -0,0 +1,109 @@
++# Kimi Code Prompt: phase-001
++
++You are Kimi Code acting as Worker in a Supervisor-Worker coding loop.
++
++Codex is Supervisor. You may execute only the current phase. You must not decide
++the total route, create future phases, or approve your own work.
++
++## Project Root
++
++Work only inside:
++
++```text
++E:\codexfiles\loop\pilot-project
++```
++
++Do not modify files outside that directory.
++
++## Discovery
++
++Read these files first:
++
++- `.ai-loop/context/phase-001-context.md`
++- `.ai-loop/prompts/phase-001-acceptance.md`
++- `.ai-loop/runs/phase-001/phase_meta.json`
++- `README.md`
++- `src/greeting.txt`
++- `tests/verify.ps1`
++
++The project is a tiny text-and-PowerShell pilot. The only business file is
++`src/greeting.txt`.
++
++## Triage
++
++The phase objective is intentionally tiny:
++
++Change only `src/greeting.txt` so this line:
++
++```text
++phase=baseline
++```
++
++becomes:
++
++```text
++phase=worker-complete
++```
++
++Keep this line unchanged:
++
++```text
++message=hello
++```
++
++Do not edit `tests/verify.ps1`, `.ai-loop/loop.config.json`,
++`.ai-loop/status.json`, or any file in `E:\codexfiles\loop\loop-standard`.
++
++## Execution
++
++1. Edit only `src/greeting.txt`.
++2. Write a Worker report to:
++
++```text
++.ai-loop/runs/phase-001/report.md
++```
++
++The report must include:
++
++- summary of the change;
++- files changed;
++- verification command and result;
++- risks or gaps;
++- statement that you executed only this phase and did not approve it.
++
++## Verification
++
++Run this command from `E:\codexfiles\loop\pilot-project`:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
++```
++
++After the report exists, collect durable evidence by running:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1 -ProjectRoot E:\codexfiles\loop\pilot-project -PhaseId phase-001
++```
++
++This must produce:
++
++- `.ai-loop/runs/phase-001/status_after.txt`
++- `.ai-loop/runs/phase-001/diff.patch`
++- `.ai-loop/runs/phase-001/verify.log`
++- `.ai-loop/runs/phase-001/changed_files.txt`
++
++## Memory / Audit
++
++Do not mark the phase accepted. Codex will later inspect:
++
++- your report;
++- `diff.patch`;
++- `verify.log`;
++- `status_before.txt`;
++- `status_after.txt`;
++- `changed_files.txt`;
++- `src/greeting.txt`;
++- acceptance criteria.
++
++If anything fails, record it honestly in the report. Do not hide missing
++evidence or skipped verification.
+diff --git a/.ai-loop/runs/README.md b/.ai-loop/runs/README.md
+new file mode 100644
+index 0000000..7f9a256
+--- /dev/null
++++ b/.ai-loop/runs/README.md
+@@ -0,0 +1,18 @@
++# Runs
++
++Each phase gets one run directory:
++
++```text
++runs/<phase-id>/
++  base_commit.txt
++  status_before.txt
++  phase_meta.json
++  prompt.md
++  report.md
++  status_after.txt
++  diff.patch
++  verify.log
++  changed_files.txt
++```
++
++Missing files or files containing `MISSING:` are blocking evidence defects.
+diff --git a/.ai-loop/runs/phase-001/accepted.txt b/.ai-loop/runs/phase-001/accepted.txt
+new file mode 100644
+index 0000000..8d229b0
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/accepted.txt
+@@ -0,0 +1,2 @@
++﻿accepted_at: 2026-06-23T13:12:34.9149492Z
++audit: .ai-loop/audits/phase-001-audit.md
+diff --git a/.ai-loop/runs/phase-001/base_commit.txt b/.ai-loop/runs/phase-001/base_commit.txt
+new file mode 100644
+index 0000000..2d3e2d5
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/base_commit.txt
+@@ -0,0 +1 @@
++﻿f683ff4d786b9f5f35db6344a2f47bc85c5d6d38
+diff --git a/.ai-loop/runs/phase-001/changed_files.txt b/.ai-loop/runs/phase-001/changed_files.txt
+new file mode 100644
+index 0000000..df4edb2
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/changed_files.txt
+@@ -0,0 +1,4 @@
++﻿.ai-loop/runs/phase-001/diff.patch
++.ai-loop/runs/phase-001/status_after.txt
++.ai-loop/runs/phase-001/verify.log
++
+diff --git a/.ai-loop/runs/phase-001/diff.patch b/.ai-loop/runs/phase-001/diff.patch
+new file mode 100644
+index 0000000..3d62746
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/diff.patch
+@@ -0,0 +1,723 @@
++﻿diff --git a/.ai-loop/README.md b/.ai-loop/README.md
++new file mode 100644
++index 0000000..c8558c6
++--- /dev/null
+++++ b/.ai-loop/README.md
++@@ -0,0 +1,35 @@
+++# .ai-loop
+++
+++This directory is the project-local source of truth for the Supervisor-Worker
+++loop. Do not rely on chat history for phase status, evidence, decisions, or
+++audit results.
+++
+++## Roles
+++
+++- Codex is Supervisor and owns phase planning, audit, and acceptance.
+++- Kimi Code is Worker and may execute only the current phase prompt.
+++
+++## Standard Layout
+++
+++```text
+++.ai-loop/
+++  loop.config.json
+++  status.json
+++  runs/
+++    <phase-id>/
+++      base_commit.txt
+++      status_before.txt
+++      phase_meta.json
+++      prompt.md
+++      report.md
+++      status_after.txt
+++      diff.patch
+++      verify.log
+++      changed_files.txt
+++  audits/
+++    <phase-id>-audit-input.md
+++    <phase-id>-audit.md
+++```
+++
+++Codex must not accept a phase unless required evidence exists and the audit
+++checks the report, diff, verify log, status files, and relevant source files.
++diff --git a/.ai-loop/audits/README.md b/.ai-loop/audits/README.md
++new file mode 100644
++index 0000000..9adfd23
++--- /dev/null
+++++ b/.ai-loop/audits/README.md
++@@ -0,0 +1,11 @@
+++# Audits
+++
+++Audit input and result files are stored as:
+++
+++```text
+++audits/<phase-id>-audit-input.md
+++audits/<phase-id>-audit.md
+++```
+++
+++Codex must inspect the Worker report, diff, verify log, status files, and
+++relevant source files before writing an audit result.
++diff --git a/.ai-loop/audits/phase-001-audit-input.md b/.ai-loop/audits/phase-001-audit-input.md
++new file mode 100644
++index 0000000..e4993e5
++--- /dev/null
+++++ b/.ai-loop/audits/phase-001-audit-input.md
++@@ -0,0 +1,52 @@
+++﻿# Codex Audit Input: phase-001
+++
+++## Project Root
+++
+++    E:\codexfiles\loop\pilot-project
+++
+++## Required Evidence Files
+++
+++- status: E:\codexfiles\loop\pilot-project\.ai-loop\status.json
+++- base commit: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\base_commit.txt
+++- status before: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\status_before.txt
+++- phase metadata: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\phase_meta.json
+++- prompt: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\prompt.md
+++- Kimi report: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\report.md
+++- status after: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\status_after.txt
+++- diff: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\diff.patch
+++- verify log: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\verify.log
+++- changed files: E:\codexfiles\loop\pilot-project\.ai-loop\runs\phase-001\changed_files.txt
+++
+++## Changed Or Relevant Source Files
+++
+++- .ai-loop/
+++- src/greeting.txt
+++
+++## Missing Or Invalid Evidence
+++
+++None
+++
+++## Audit Instructions
+++
+++Codex must inspect the Kimi report, diff, verify log, status files, phase
+++metadata, and relevant source files. Codex must not accept based only on the
+++Kimi report.
+++
+++If evidence is missing, contains MISSING:, verification failed, or source
+++inspection cannot be completed, Codex must decide BLOCKED or REWORK.
+++
+++Write the audit result to:
+++
+++    E:\codexfiles\loop\pilot-project\.ai-loop\audits\phase-001-audit.md
+++
+++The audit result must contain exactly one decision line:
+++
+++    Decision: ACCEPTED
+++
+++or:
+++
+++    Decision: REWORK
+++
+++or:
+++
+++    Decision: BLOCKED
++diff --git a/.ai-loop/audits/phase-001-audit.md b/.ai-loop/audits/phase-001-audit.md
++new file mode 100644
++index 0000000..19f1bf8
++--- /dev/null
+++++ b/.ai-loop/audits/phase-001-audit.md
++@@ -0,0 +1,28 @@
+++# Codex Audit: phase-001
+++
+++## Evidence Checked
+++
+++- status.json: checked
+++- phase_meta.json: checked
+++- prompt.md: checked
+++- Kimi report.md: checked
+++- diff.patch: checked
+++- verify.log: checked
+++- status_before.txt: checked
+++- status_after.txt: checked
+++- changed_files.txt: checked
+++- src/greeting.txt: checked
+++- phase-001-audit-input.md: checked
+++
+++## Findings
+++
+++- `src/greeting.txt` contains `message=hello` and `phase=worker-complete`.
+++- `diff.patch` shows exactly the intended business change in `src/greeting.txt`: `phase=baseline` changed to `phase=worker-complete`.
+++- `verify.log` records the required PowerShell command and `exit_code: 0`, with output showing `verify: OK`, `message: hello`, and `phase: worker-complete`.
+++- `changed_files.txt` records `src/greeting.txt` and `.ai-loop/`. The `.ai-loop/` changes are expected loop evidence and prompt/audit artifacts, not Worker business-scope expansion.
+++- The Kimi report honestly recorded an earlier tooling failure in `collect-evidence.ps1`. Codex fixed the standard script's strict-mode JSON property update bug and re-ran evidence collection and audit-pack preparation. Durable state now records `status: audit_ready`.
+++- No required evidence file is missing and no checked evidence file contains a `MISSING:` placeholder.
+++
+++## Decision
+++
+++Decision: ACCEPTED
++diff --git a/.ai-loop/context/phase-001-context.md b/.ai-loop/context/phase-001-context.md
++new file mode 100644
++index 0000000..c8db2ab
++--- /dev/null
+++++ b/.ai-loop/context/phase-001-context.md
++@@ -0,0 +1,87 @@
+++# Phase 001 Context Package
+++
+++## Discovery
+++
+++Project root:
+++
+++`E:\codexfiles\loop\pilot-project`
+++
+++This pilot project is intentionally tiny:
+++
+++- `src/greeting.txt` is the only business file.
+++- `tests/verify.ps1` is the Windows PowerShell verification script.
+++- `.ai-loop/` stores durable loop state and evidence.
+++
+++Current baseline business state:
+++
+++```text
+++message=hello
+++phase=baseline
+++```
+++
+++## Triage
+++
+++The smallest useful Worker task is to change only the phase marker in
+++`src/greeting.txt`:
+++
+++```text
+++phase=baseline
+++```
+++
+++to:
+++
+++```text
+++phase=worker-complete
+++```
+++
+++Do not change `message=hello`. Do not change the verification script. Do not
+++change loop-standard files.
+++
+++## Execution
+++
+++Kimi Code may edit only:
+++
+++- `src/greeting.txt`
+++
+++Kimi must write its report to:
+++
+++- `.ai-loop/runs/phase-001/report.md`
+++
+++## Verification
+++
+++The required verification command is:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
+++```
+++
+++After writing the report, Kimi must collect evidence with:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1 -ProjectRoot E:\codexfiles\loop\pilot-project -PhaseId phase-001
+++```
+++
+++That script must produce:
+++
+++- `.ai-loop/runs/phase-001/status_after.txt`
+++- `.ai-loop/runs/phase-001/diff.patch`
+++- `.ai-loop/runs/phase-001/verify.log`
+++- `.ai-loop/runs/phase-001/changed_files.txt`
+++
+++## Memory / Audit
+++
+++Codex will later prepare the audit pack and inspect:
+++
+++- `.ai-loop/runs/phase-001/prompt.md`
+++- `.ai-loop/prompts/phase-001-kimi-prompt.md`
+++- `.ai-loop/context/phase-001-context.md`
+++- `.ai-loop/runs/phase-001/report.md`
+++- `.ai-loop/runs/phase-001/diff.patch`
+++- `.ai-loop/runs/phase-001/verify.log`
+++- `.ai-loop/runs/phase-001/status_before.txt`
+++- `.ai-loop/runs/phase-001/status_after.txt`
+++- `.ai-loop/runs/phase-001/changed_files.txt`
+++- `src/greeting.txt`
+++
+++If any evidence is missing or contains `MISSING:`, Codex must decide `BLOCKED`
+++or `REWORK`, not `ACCEPTED`.
++diff --git a/.ai-loop/loop.config.json b/.ai-loop/loop.config.json
++new file mode 100644
++index 0000000..0e3f705
++--- /dev/null
+++++ b/.ai-loop/loop.config.json
++@@ -0,0 +1,35 @@
+++{
+++  "schema_version": "1.1",
+++  "loop_name": "supervisor-worker-loop",
+++  "supervisor": "Codex",
+++  "worker": "Kimi Code",
+++  "run_directory": ".ai-loop/runs",
+++  "audit_directory": ".ai-loop/audits",
+++  "phase_start_files": [
+++    "base_commit.txt",
+++    "status_before.txt",
+++    "phase_meta.json",
+++    "prompt.md"
+++  ],
+++  "phase_evidence_required": [
+++    "prompt.md",
+++    "report.md",
+++    "status_after.txt",
+++    "diff.patch",
+++    "verify.log",
+++    "changed_files.txt"
+++  ],
+++  "audit_input_pattern": ".ai-loop/audits/<phase-id>-audit-input.md",
+++  "audit_result_pattern": ".ai-loop/audits/<phase-id>-audit.md",
+++  "decisions": [
+++    "ACCEPTED",
+++    "REWORK",
+++    "BLOCKED"
+++  ],
+++  "rules": {
+++    "chat_history_is_not_source_of_truth": true,
+++    "worker_can_only_execute_current_phase": true,
+++    "supervisor_must_inspect_diff_verify_status_and_source": true,
+++    "missing_evidence_blocks_progress": true
+++  }
+++}
++diff --git a/.ai-loop/prompts/phase-001-acceptance.md b/.ai-loop/prompts/phase-001-acceptance.md
++new file mode 100644
++index 0000000..255831c
++--- /dev/null
+++++ b/.ai-loop/prompts/phase-001-acceptance.md
++@@ -0,0 +1,46 @@
+++# Phase 001 Acceptance Criteria
+++
+++Codex may accept phase 001 only if all criteria below are satisfied.
+++
+++## Required Business Result
+++
+++- `src/greeting.txt` contains `message=hello`.
+++- `src/greeting.txt` contains `phase=worker-complete`.
+++- `src/greeting.txt` no longer contains `phase=baseline`.
+++- No business file other than `src/greeting.txt` was changed.
+++
+++## Required Verification
+++
+++The verification log must show this command:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
+++```
+++
+++The verification log must show exit code `0` and output containing:
+++
+++```text
+++verify: OK
+++phase: worker-complete
+++```
+++
+++## Required Evidence
+++
+++All files must exist:
+++
+++- `.ai-loop/runs/phase-001/prompt.md`
+++- `.ai-loop/prompts/phase-001-kimi-prompt.md`
+++- `.ai-loop/context/phase-001-context.md`
+++- `.ai-loop/runs/phase-001/report.md`
+++- `.ai-loop/runs/phase-001/status_after.txt`
+++- `.ai-loop/runs/phase-001/diff.patch`
+++- `.ai-loop/runs/phase-001/verify.log`
+++- `.ai-loop/runs/phase-001/changed_files.txt`
+++
+++None may contain a `MISSING:` placeholder.
+++
+++## Required Audit Behavior
+++
+++Codex must inspect the report, diff, verify log, status files, changed file
+++list, and `src/greeting.txt`. Codex must not accept based only on the Kimi
+++report.
++diff --git a/.ai-loop/prompts/phase-001-kimi-prompt.md b/.ai-loop/prompts/phase-001-kimi-prompt.md
++new file mode 100644
++index 0000000..e0eea63
++--- /dev/null
+++++ b/.ai-loop/prompts/phase-001-kimi-prompt.md
++@@ -0,0 +1,109 @@
+++# Kimi Code Prompt: phase-001
+++
+++You are Kimi Code acting as Worker in a Supervisor-Worker coding loop.
+++
+++Codex is Supervisor. You may execute only the current phase. You must not decide
+++the total route, create future phases, or approve your own work.
+++
+++## Project Root
+++
+++Work only inside:
+++
+++```text
+++E:\codexfiles\loop\pilot-project
+++```
+++
+++Do not modify files outside that directory.
+++
+++## Discovery
+++
+++Read these files first:
+++
+++- `.ai-loop/context/phase-001-context.md`
+++- `.ai-loop/prompts/phase-001-acceptance.md`
+++- `.ai-loop/runs/phase-001/phase_meta.json`
+++- `README.md`
+++- `src/greeting.txt`
+++- `tests/verify.ps1`
+++
+++The project is a tiny text-and-PowerShell pilot. The only business file is
+++`src/greeting.txt`.
+++
+++## Triage
+++
+++The phase objective is intentionally tiny:
+++
+++Change only `src/greeting.txt` so this line:
+++
+++```text
+++phase=baseline
+++```
+++
+++becomes:
+++
+++```text
+++phase=worker-complete
+++```
+++
+++Keep this line unchanged:
+++
+++```text
+++message=hello
+++```
+++
+++Do not edit `tests/verify.ps1`, `.ai-loop/loop.config.json`,
+++`.ai-loop/status.json`, or any file in `E:\codexfiles\loop\loop-standard`.
+++
+++## Execution
+++
+++1. Edit only `src/greeting.txt`.
+++2. Write a Worker report to:
+++
+++```text
+++.ai-loop/runs/phase-001/report.md
+++```
+++
+++The report must include:
+++
+++- summary of the change;
+++- files changed;
+++- verification command and result;
+++- risks or gaps;
+++- statement that you executed only this phase and did not approve it.
+++
+++## Verification
+++
+++Run this command from `E:\codexfiles\loop\pilot-project`:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
+++```
+++
+++After the report exists, collect durable evidence by running:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1 -ProjectRoot E:\codexfiles\loop\pilot-project -PhaseId phase-001
+++```
+++
+++This must produce:
+++
+++- `.ai-loop/runs/phase-001/status_after.txt`
+++- `.ai-loop/runs/phase-001/diff.patch`
+++- `.ai-loop/runs/phase-001/verify.log`
+++- `.ai-loop/runs/phase-001/changed_files.txt`
+++
+++## Memory / Audit
+++
+++Do not mark the phase accepted. Codex will later inspect:
+++
+++- your report;
+++- `diff.patch`;
+++- `verify.log`;
+++- `status_before.txt`;
+++- `status_after.txt`;
+++- `changed_files.txt`;
+++- `src/greeting.txt`;
+++- acceptance criteria.
+++
+++If anything fails, record it honestly in the report. Do not hide missing
+++evidence or skipped verification.
++diff --git a/.ai-loop/runs/README.md b/.ai-loop/runs/README.md
++new file mode 100644
++index 0000000..7f9a256
++--- /dev/null
+++++ b/.ai-loop/runs/README.md
++@@ -0,0 +1,18 @@
+++# Runs
+++
+++Each phase gets one run directory:
+++
+++```text
+++runs/<phase-id>/
+++  base_commit.txt
+++  status_before.txt
+++  phase_meta.json
+++  prompt.md
+++  report.md
+++  status_after.txt
+++  diff.patch
+++  verify.log
+++  changed_files.txt
+++```
+++
+++Missing files or files containing `MISSING:` are blocking evidence defects.
++diff --git a/.ai-loop/runs/phase-001/accepted.txt b/.ai-loop/runs/phase-001/accepted.txt
++new file mode 100644
++index 0000000..8d229b0
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/accepted.txt
++@@ -0,0 +1,2 @@
+++﻿accepted_at: 2026-06-23T13:12:34.9149492Z
+++audit: .ai-loop/audits/phase-001-audit.md
++diff --git a/.ai-loop/runs/phase-001/base_commit.txt b/.ai-loop/runs/phase-001/base_commit.txt
++new file mode 100644
++index 0000000..2d3e2d5
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/base_commit.txt
++@@ -0,0 +1 @@
+++﻿f683ff4d786b9f5f35db6344a2f47bc85c5d6d38
++diff --git a/.ai-loop/runs/phase-001/changed_files.txt b/.ai-loop/runs/phase-001/changed_files.txt
++new file mode 100644
++index 0000000..6a44080
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/changed_files.txt
++@@ -0,0 +1,3 @@
+++﻿.ai-loop/
+++src/greeting.txt
+++
++diff --git a/.ai-loop/runs/phase-001/diff.patch b/.ai-loop/runs/phase-001/diff.patch
++new file mode 100644
++index 0000000..e311345
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/diff.patch
++@@ -0,0 +1,9 @@
+++﻿diff --git a/src/greeting.txt b/src/greeting.txt
+++index 938a72f..023312d 100644
+++--- a/src/greeting.txt
++++++ b/src/greeting.txt
+++@@ -1,2 +1,2 @@
+++ message=hello
+++-phase=baseline
++++phase=worker-complete
+++
++diff --git a/.ai-loop/runs/phase-001/phase_meta.json b/.ai-loop/runs/phase-001/phase_meta.json
++new file mode 100644
++index 0000000..0f27af0
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/phase_meta.json
++@@ -0,0 +1,15 @@
+++﻿{
+++    "phase_id":  "phase-001",
+++    "title":  "Mark pilot phase complete",
+++    "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
+++    "status":  "accepted",
+++    "run_dir":  ".ai-loop/runs/phase-001",
+++    "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+++    "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+++    "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
+++    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
+++    "started_at":  "2026-06-23T12:38:20.8128717Z",
+++    "evidence_collected_at":  "2026-06-23T13:11:35.0783552Z",
+++    "audit_prepared_at":  "2026-06-23T13:11:48.1592548Z",
+++    "accepted_at":  "2026-06-23T13:12:34.9149492Z"
+++}
++diff --git a/.ai-loop/runs/phase-001/prompt.md b/.ai-loop/runs/phase-001/prompt.md
++new file mode 100644
++index 0000000..922ab98
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/prompt.md
++@@ -0,0 +1,27 @@
+++﻿# Kimi Worker Prompt: phase-001
+++
+++## Boundary
+++
+++- Execute only this phase.
+++- Do not decide the total route.
+++- Do not approve or accept this phase.
+++- Write a report to .ai-loop/runs/phase-001/report.md.
+++
+++## Phase
+++
+++- Phase ID: phase-001
+++- Title: Mark pilot phase complete
+++- Objective: Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.
+++
+++## Scope
+++
+++- src/greeting.txt
+++
+++## Verification Command
+++
+++`powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
+++`
+++
+++Codex will audit the report, diff, verify log, status files, and relevant source
+++files before deciding ACCEPTED, REWORK, or BLOCKED.
++diff --git a/.ai-loop/runs/phase-001/report.md b/.ai-loop/runs/phase-001/report.md
++new file mode 100644
++index 0000000..24be8d0
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/report.md
++@@ -0,0 +1,53 @@
+++# Worker Report: phase-001
+++
+++## Summary
+++
+++Changed the phase marker in `src/greeting.txt` from `phase=baseline` to `phase=worker-complete`.
+++The `message=hello` line was left unchanged.
+++
+++## Files Changed
+++
+++- `src/greeting.txt`
+++
+++## Verification
+++
+++Command run from `E:\codexfiles\loop\pilot-project`:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tests/verify.ps1 -ExpectedPhase worker-complete
+++```
+++
+++Result:
+++
+++```text
+++verify: OK
+++message: hello
+++phase: worker-complete
+++```
+++
+++Exit code: 0
+++
+++## Evidence Collection
+++The required evidence collection command was run:
+++
+++```powershell
+++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:/codexfiles/loop/loop-standard/scripts/collect-evidence.ps1 -ProjectRoot E:/codexfiles/loop/pilot-project -PhaseId phase-001
+++```
+++
+++The script produced the required files:
+++
+++- `.ai-loop/runs/phase-001/status_after.txt`
+++- `.ai-loop/runs/phase-001/diff.patch`
+++- `.ai-loop/runs/phase-001/verify.log`
+++- `.ai-loop/runs/phase-001/changed_files.txt`
+++
+++The script exited with a non-zero code when updating `phase_meta.json` because PowerShell strict mode prevented adding a new `evidence_collected_at` property to the object deserialized from JSON. The evidence files above were still written before that failure point and contain valid data.
+++
+++## Risks / Gaps
+++
+++- The `collect-evidence.ps1` script did not complete its final metadata update step due to a strict-mode property-assignment error. The required evidence files were produced, but `phase_meta.json` and `.ai-loop/status.json` were not updated to `status=evidence_collected`.
+++- Per instructions, I did not edit `.ai-loop/status.json` to work around the script error.
+++
+++## Scope Statement
+++
+++I executed only phase-001 as instructed. I did not approve this phase, create future phases, or modify any files outside the project root.
++diff --git a/.ai-loop/runs/phase-001/status_after.txt b/.ai-loop/runs/phase-001/status_after.txt
++new file mode 100644
++index 0000000..1af4b5d
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/status_after.txt
++@@ -0,0 +1,2 @@
+++﻿ M .ai-loop/runs/phase-001/verify.log
+++
++diff --git a/.ai-loop/runs/phase-001/status_before.txt b/.ai-loop/runs/phase-001/status_before.txt
++new file mode 100644
++index 0000000..ce2ef5a
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/status_before.txt
++@@ -0,0 +1 @@
+++﻿?? .ai-loop/
++diff --git a/.ai-loop/runs/phase-001/verify.log b/.ai-loop/runs/phase-001/verify.log
++new file mode 100644
++index 0000000..c1f72f9
++--- /dev/null
+++++ b/.ai-loop/runs/phase-001/verify.log
++@@ -0,0 +1,10 @@
+++﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
+++started_at: 2026-06-23T13:42:52.2494989Z
+++finished_at: 2026-06-23T13:42:52.8138493Z
+++exit_code: 0
+++
+++output:
+++verify: OK
+++message: hello
+++phase: worker-complete
+++
++diff --git a/.ai-loop/status.json b/.ai-loop/status.json
++new file mode 100644
++index 0000000..f634164
++--- /dev/null
+++++ b/.ai-loop/status.json
++@@ -0,0 +1,49 @@
+++﻿{
+++    "schema_version":  "1.1",
+++    "project_name":  "pilot-project",
+++    "initialized_at":  "2026-06-23T12:35:52.2238939Z",
+++    "supervisor":  "Codex",
+++    "worker":  "Kimi Code",
+++    "current_phase":  {
+++                          "phase_id":  "phase-001",
+++                          "title":  "Mark pilot phase complete",
+++                          "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
+++                          "status":  "accepted",
+++                          "run_dir":  ".ai-loop/runs/phase-001",
+++                          "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+++                          "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+++                          "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
+++                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
+++                          "started_at":  "2026-06-23T12:38:20.8128717Z",
+++                          "evidence_collected_at":  "2026-06-23T13:11:35.0783552Z",
+++                          "audit_prepared_at":  "2026-06-23T13:11:48.1592548Z",
+++                          "accepted_at":  "2026-06-23T13:12:34.9149492Z"
+++                      },
+++    "phases":  [
+++                   {
+++                       "phase_id":  "phase-001",
+++                       "title":  "Mark pilot phase complete",
+++                       "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
+++                       "status":  "accepted",
+++                       "run_dir":  ".ai-loop/runs/phase-001",
+++                       "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+++                       "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+++                       "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
+++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
+++                       "started_at":  "2026-06-23T12:38:20.8128717Z",
+++                       "audit_prepared_at":  "2026-06-23T13:11:48.1592548Z",
+++                       "evidence_collected_at":  "2026-06-23T13:11:35.0783552Z",
+++                       "accepted_at":  "2026-06-23T13:12:34.9149492Z"
+++                   }
+++               ],
+++    "last_decision":  {
+++                          "phase_id":  "phase-001",
+++                          "decision":  "ACCEPTED",
+++                          "audit":  ".ai-loop/audits/phase-001-audit.md",
+++                          "decided_at":  "2026-06-23T13:12:34.9149492Z"
+++                      },
+++    "notes":  [
+++                  "This file is durable loop state.",
+++                  "Do not infer phase status from chat history."
+++              ]
+++}
++diff --git a/src/greeting.txt b/src/greeting.txt
++index 938a72f..023312d 100644
++--- a/src/greeting.txt
+++++ b/src/greeting.txt
++@@ -1,2 +1,2 @@
++-message=hello
++-phase=baseline
+++message=hello
+++phase=worker-complete
++
+diff --git a/.ai-loop/runs/phase-001/phase_meta.json b/.ai-loop/runs/phase-001/phase_meta.json
+new file mode 100644
+index 0000000..9c58d07
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/phase_meta.json
+@@ -0,0 +1,15 @@
++﻿{
++    "phase_id":  "phase-001",
++    "title":  "Mark pilot phase complete",
++    "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
++    "status":  "audit_ready",
++    "run_dir":  ".ai-loop/runs/phase-001",
++    "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
++    "audit_result":  ".ai-loop/audits/phase-001-audit.md",
++    "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
++    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
++    "started_at":  "2026-06-23T12:38:20.8128717Z",
++    "evidence_collected_at":  "2026-06-23T13:42:53.1970815Z",
++    "audit_prepared_at":  "2026-06-23T13:43:05.4185668Z",
++    "accepted_at":  "2026-06-23T13:12:34.9149492Z"
++}
+diff --git a/.ai-loop/runs/phase-001/prompt.md b/.ai-loop/runs/phase-001/prompt.md
+new file mode 100644
+index 0000000..922ab98
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/prompt.md
+@@ -0,0 +1,27 @@
++﻿# Kimi Worker Prompt: phase-001
++
++## Boundary
++
++- Execute only this phase.
++- Do not decide the total route.
++- Do not approve or accept this phase.
++- Write a report to .ai-loop/runs/phase-001/report.md.
++
++## Phase
++
++- Phase ID: phase-001
++- Title: Mark pilot phase complete
++- Objective: Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.
++
++## Scope
++
++- src/greeting.txt
++
++## Verification Command
++
++`powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
++`
++
++Codex will audit the report, diff, verify log, status files, and relevant source
++files before deciding ACCEPTED, REWORK, or BLOCKED.
+diff --git a/.ai-loop/runs/phase-001/report.md b/.ai-loop/runs/phase-001/report.md
+new file mode 100644
+index 0000000..24be8d0
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/report.md
+@@ -0,0 +1,53 @@
++# Worker Report: phase-001
++
++## Summary
++
++Changed the phase marker in `src/greeting.txt` from `phase=baseline` to `phase=worker-complete`.
++The `message=hello` line was left unchanged.
++
++## Files Changed
++
++- `src/greeting.txt`
++
++## Verification
++
++Command run from `E:\codexfiles\loop\pilot-project`:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tests/verify.ps1 -ExpectedPhase worker-complete
++```
++
++Result:
++
++```text
++verify: OK
++message: hello
++phase: worker-complete
++```
++
++Exit code: 0
++
++## Evidence Collection
++The required evidence collection command was run:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:/codexfiles/loop/loop-standard/scripts/collect-evidence.ps1 -ProjectRoot E:/codexfiles/loop/pilot-project -PhaseId phase-001
++```
++
++The script produced the required files:
++
++- `.ai-loop/runs/phase-001/status_after.txt`
++- `.ai-loop/runs/phase-001/diff.patch`
++- `.ai-loop/runs/phase-001/verify.log`
++- `.ai-loop/runs/phase-001/changed_files.txt`
++
++The script exited with a non-zero code when updating `phase_meta.json` because PowerShell strict mode prevented adding a new `evidence_collected_at` property to the object deserialized from JSON. The evidence files above were still written before that failure point and contain valid data.
++
++## Risks / Gaps
++
++- The `collect-evidence.ps1` script did not complete its final metadata update step due to a strict-mode property-assignment error. The required evidence files were produced, but `phase_meta.json` and `.ai-loop/status.json` were not updated to `status=evidence_collected`.
++- Per instructions, I did not edit `.ai-loop/status.json` to work around the script error.
++
++## Scope Statement
++
++I executed only phase-001 as instructed. I did not approve this phase, create future phases, or modify any files outside the project root.
+diff --git a/.ai-loop/runs/phase-001/status_after.txt b/.ai-loop/runs/phase-001/status_after.txt
+new file mode 100644
+index 0000000..aa13264
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/status_after.txt
+@@ -0,0 +1,10 @@
++﻿ M .ai-loop/audits/phase-001-audit-input.md
++ M .ai-loop/runs/phase-001/changed_files.txt
++ M .ai-loop/runs/phase-001/diff.patch
++ M .ai-loop/runs/phase-001/phase_meta.json
++ M .ai-loop/runs/phase-001/status_after.txt
++ M .ai-loop/runs/phase-001/verify.log
++ M .ai-loop/status.json
++?? .ai-loop/runs/phase-001/changed_business_files.txt
++?? .ai-loop/runs/phase-001/changed_evidence_files.txt
++
+diff --git a/.ai-loop/runs/phase-001/status_before.txt b/.ai-loop/runs/phase-001/status_before.txt
+new file mode 100644
+index 0000000..ce2ef5a
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/status_before.txt
+@@ -0,0 +1 @@
++﻿?? .ai-loop/
+diff --git a/.ai-loop/runs/phase-001/verify.log b/.ai-loop/runs/phase-001/verify.log
+new file mode 100644
+index 0000000..7b404ab
+--- /dev/null
++++ b/.ai-loop/runs/phase-001/verify.log
+@@ -0,0 +1,10 @@
++﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
++started_at: 2026-06-23T13:44:44.6839350Z
++finished_at: 2026-06-23T13:44:45.2196230Z
++exit_code: 0
++
++output:
++verify: OK
++message: hello
++phase: worker-complete
++
+diff --git a/.ai-loop/status.json b/.ai-loop/status.json
+new file mode 100644
+index 0000000..89df5da
+--- /dev/null
++++ b/.ai-loop/status.json
+@@ -0,0 +1,49 @@
++﻿{
++    "schema_version":  "1.1",
++    "project_name":  "pilot-project",
++    "initialized_at":  "2026-06-23T12:35:52.2238939Z",
++    "supervisor":  "Codex",
++    "worker":  "Kimi Code",
++    "current_phase":  {
++                          "phase_id":  "phase-001",
++                          "title":  "Mark pilot phase complete",
++                          "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
++                          "status":  "audit_ready",
++                          "run_dir":  ".ai-loop/runs/phase-001",
++                          "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
++                          "audit_result":  ".ai-loop/audits/phase-001-audit.md",
++                          "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
++                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
++                          "started_at":  "2026-06-23T12:38:20.8128717Z",
++                          "evidence_collected_at":  "2026-06-23T13:42:53.1970815Z",
++                          "audit_prepared_at":  "2026-06-23T13:43:05.4185668Z",
++                          "accepted_at":  "2026-06-23T13:12:34.9149492Z"
++                      },
++    "phases":  [
++                   {
++                       "phase_id":  "phase-001",
++                       "title":  "Mark pilot phase complete",
++                       "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
++                       "status":  "audit_ready",
++                       "run_dir":  ".ai-loop/runs/phase-001",
++                       "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-001-audit.md",
++                       "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
++                       "started_at":  "2026-06-23T12:38:20.8128717Z",
++                       "audit_prepared_at":  "2026-06-23T13:43:05.4185668Z",
++                       "evidence_collected_at":  "2026-06-23T13:42:53.1970815Z",
++                       "accepted_at":  "2026-06-23T13:12:34.9149492Z"
++                   }
++               ],
++    "last_decision":  {
++                          "phase_id":  "phase-001",
++                          "decision":  "ACCEPTED",
++                          "audit":  ".ai-loop/audits/phase-001-audit.md",
++                          "decided_at":  "2026-06-23T13:12:34.9149492Z"
++                      },
++    "notes":  [
++                  "This file is durable loop state.",
++                  "Do not infer phase status from chat history."
++              ]
++}
+diff --git a/src/greeting.txt b/src/greeting.txt
+index 938a72f..023312d 100644
+--- a/src/greeting.txt
++++ b/src/greeting.txt
+@@ -1,2 +1,2 @@
+-message=hello
+-phase=baseline
++message=hello
++phase=worker-complete
+

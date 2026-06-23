@@ -1,0 +1,10 @@
+﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\verify.ps1 -ExpectedPhase worker-complete
+started_at: 2026-06-23T13:44:44.6839350Z
+finished_at: 2026-06-23T13:44:45.2196230Z
+exit_code: 0
+
+output:
+verify: OK
+message: hello
+phase: worker-complete
+

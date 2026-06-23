@@ -32,6 +32,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-LoopStand
 
 After `pilot-project/` exists, add `-AllowPilotProject`.
 
+For global migration planning, read `docs/GLOBAL_INSTALL_PLAN.md`.
+
 ## Required Phase Evidence
 
 Every phase must produce these files under `.ai-loop/evidence/<phase-id>/`:

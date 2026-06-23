@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.1",
+  "loop_name": "supervisor-worker-loop",
+  "supervisor": "Codex",
+  "worker": "Kimi Code",
+  "run_directory": ".ai-loop/runs",
+  "audit_directory": ".ai-loop/audits",
+  "phase_start_files": [
+    "base_commit.txt",
+    "status_before.txt",
+    "phase_meta.json",
+    "prompt.md"
+  ],
+  "phase_evidence_required": [
+    "prompt.md",
+    "report.md",
+    "status_after.txt",
+    "diff.patch",
+    "verify.log",
+    "changed_files.txt"
+  ],
+  "audit_input_pattern": ".ai-loop/audits/<phase-id>-audit-input.md",
+  "audit_result_pattern": ".ai-loop/audits/<phase-id>-audit.md",
+  "decisions": [
+    "ACCEPTED",
+    "REWORK",
+    "BLOCKED"
+  ],
+  "rules": {
+    "chat_history_is_not_source_of_truth": true,
+    "worker_can_only_execute_current_phase": true,
+    "supervisor_must_inspect_diff_verify_status_and_source": true,
+    "missing_evidence_blocks_progress": true
+  }
+}

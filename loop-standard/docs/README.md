@@ -14,6 +14,7 @@ Use the lowercase PowerShell scripts in `scripts/` as the standard interface.
 The earlier PascalCase scripts are retained as compatibility helpers.
 
 See `OPERATOR_RUNBOOK.md` for the concise human operating procedure.
+See `GLOBAL_INSTALL_PLAN.md` for the planned Codex-global layout.
 
 ## Standard Script Flow
 
@@ -44,4 +45,12 @@ Run a complete temporary loop simulation:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\test-pilot-loop.ps1
+```
+
+## Dry Global Install
+
+Install into an explicit Codex home path:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\install-global.ps1 -CodexHome "E:\codexfiles\loop\.tmp-codex-home"
 ```

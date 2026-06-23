@@ -1,0 +1,49 @@
+﻿{
+    "schema_version":  "1.1",
+    "project_name":  "pilot-project",
+    "initialized_at":  "2026-06-23T12:35:52.2238939Z",
+    "supervisor":  "Codex",
+    "worker":  "Kimi Code",
+    "current_phase":  {
+                          "phase_id":  "phase-001",
+                          "title":  "Mark pilot phase complete",
+                          "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
+                          "status":  "accepted",
+                          "run_dir":  ".ai-loop/runs/phase-001",
+                          "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+                          "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
+                          "started_at":  "2026-06-23T12:38:20.8128717Z",
+                          "evidence_collected_at":  "2026-06-23T13:44:45.5690563Z",
+                          "audit_prepared_at":  "2026-06-23T13:45:57.8362432Z",
+                          "accepted_at":  "2026-06-23T13:46:11.1261685Z"
+                      },
+    "phases":  [
+                   {
+                       "phase_id":  "phase-001",
+                       "title":  "Mark pilot phase complete",
+                       "objective":  "Change only src/greeting.txt so phase=baseline becomes phase=worker-complete, then verify with PowerShell.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-001",
+                       "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+                       "base_commit":  "f683ff4d786b9f5f35db6344a2f47bc85c5d6d38",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\verify.ps1 -ExpectedPhase worker-complete",
+                       "started_at":  "2026-06-23T12:38:20.8128717Z",
+                       "audit_prepared_at":  "2026-06-23T13:45:57.8362432Z",
+                       "evidence_collected_at":  "2026-06-23T13:44:45.5690563Z",
+                       "accepted_at":  "2026-06-23T13:46:11.1261685Z"
+                   }
+               ],
+    "last_decision":  {
+                          "phase_id":  "phase-001",
+                          "decision":  "ACCEPTED",
+                          "audit":  ".ai-loop/audits/phase-001-audit.md",
+                          "decided_at":  "2026-06-23T13:46:11.1261685Z"
+                      },
+    "notes":  [
+                  "This file is durable loop state.",
+                  "Do not infer phase status from chat history."
+              ]
+}
