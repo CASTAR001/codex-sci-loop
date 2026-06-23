@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
     [Parameter(Mandatory = $true)][string]$PhaseId,
     [string]$ReportPath = "",
-    [string]$VerifyCommand = ""
+    [string]$VerifyCommand = "",
+    [switch]$Force
 )
 
 Set-StrictMode -Version Latest
@@ -31,7 +32,7 @@ function Set-JsonProperty {
 }
 
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
-$ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-C", $ProjectRoot)
+$ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
 $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
 $StatusPath = Join-Path $LoopDir "status.json"
@@ -49,6 +50,9 @@ if (-not [string]::IsNullOrWhiteSpace($ReportPath)) {
 }
 
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
+if ($Meta.status -eq "accepted" -and -not $Force) {
+    throw "Cannot collect evidence for accepted phase $PhaseId."
+}
 $CommandToRun = if (-not [string]::IsNullOrWhiteSpace($VerifyCommand)) { $VerifyCommand } else { $Meta.verify_command }
 $VerifyLog = Join-Path $RunDir "verify.log"
 if (-not [string]::IsNullOrWhiteSpace($CommandToRun)) {
@@ -78,6 +82,8 @@ $Git = Get-Command git -ErrorAction SilentlyContinue
 $StatusAfterPath = Join-Path $RunDir "status_after.txt"
 $DiffPath = Join-Path $RunDir "diff.patch"
 $ChangedFilesPath = Join-Path $RunDir "changed_files.txt"
+$ChangedBusinessFilesPath = Join-Path $RunDir "changed_business_files.txt"
+$ChangedEvidenceFilesPath = Join-Path $RunDir "changed_evidence_files.txt"
 if ($null -ne $Git) {
     $Inside = & git @ProjectGitArgs rev-parse --is-inside-work-tree 2>$null
     if ($LASTEXITCODE -eq 0 -and $Inside -eq "true") {
@@ -85,22 +91,33 @@ if ($null -ne $Git) {
         $BaseCommit = (Get-Content -LiteralPath (Join-Path $RunDir "base_commit.txt") -Raw).Trim()
         if ($BaseCommit -notmatch "^MISSING:" -and -not [string]::IsNullOrWhiteSpace($BaseCommit)) {
             (& git @ProjectGitArgs diff --binary $BaseCommit -- . 2>&1 | Out-String) | Set-Content -LiteralPath $DiffPath -Encoding utf8
+            $ChangedFiles = @(& git @ProjectGitArgs diff --name-only $BaseCommit -- . 2>&1 |
+                Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+                Sort-Object -Unique)
         } else {
             (& git @ProjectGitArgs diff --binary -- . 2>&1 | Out-String) | Set-Content -LiteralPath $DiffPath -Encoding utf8
+            $ChangedFiles = @(& git @ProjectGitArgs status --short 2>&1 |
+                ForEach-Object { if ($_ -match "^\s*\S+\s+(.+)$") { $Matches[1] } } |
+                Sort-Object -Unique)
         }
-        (& git @ProjectGitArgs status --short 2>&1 |
-            ForEach-Object { if ($_ -match "^\s*\S+\s+(.+)$") { $Matches[1] } } |
-            Sort-Object -Unique |
-            Out-String) | Set-Content -LiteralPath $ChangedFilesPath -Encoding utf8
+        ($ChangedFiles | Out-String) | Set-Content -LiteralPath $ChangedFilesPath -Encoding utf8
+        ($ChangedFiles | Where-Object { $_ -notlike ".ai-loop/*" -and $_ -ne ".ai-loop/" } | Out-String) |
+            Set-Content -LiteralPath $ChangedBusinessFilesPath -Encoding utf8
+        ($ChangedFiles | Where-Object { $_ -like ".ai-loop/*" -or $_ -eq ".ai-loop/" } | Out-String) |
+            Set-Content -LiteralPath $ChangedEvidenceFilesPath -Encoding utf8
     } else {
         "MISSING: target project is not a git repository." | Set-Content -LiteralPath $StatusAfterPath -Encoding utf8
         "MISSING: target project is not a git repository." | Set-Content -LiteralPath $DiffPath -Encoding utf8
         "MISSING: target project is not a git repository." | Set-Content -LiteralPath $ChangedFilesPath -Encoding utf8
+        "MISSING: target project is not a git repository." | Set-Content -LiteralPath $ChangedBusinessFilesPath -Encoding utf8
+        "MISSING: target project is not a git repository." | Set-Content -LiteralPath $ChangedEvidenceFilesPath -Encoding utf8
     }
 } else {
     "MISSING: git executable was not found." | Set-Content -LiteralPath $StatusAfterPath -Encoding utf8
     "MISSING: git executable was not found." | Set-Content -LiteralPath $DiffPath -Encoding utf8
     "MISSING: git executable was not found." | Set-Content -LiteralPath $ChangedFilesPath -Encoding utf8
+    "MISSING: git executable was not found." | Set-Content -LiteralPath $ChangedBusinessFilesPath -Encoding utf8
+    "MISSING: git executable was not found." | Set-Content -LiteralPath $ChangedEvidenceFilesPath -Encoding utf8
 }
 
 Set-JsonProperty -Object $Meta -Name "status" -Value "evidence_collected"

@@ -23,7 +23,7 @@ function Write-JsonFile {
 function Get-SafeGitArgs {
     param([Parameter(Mandatory = $true)][string]$Root)
     $SafeRoot = $Root.Replace("\", "/")
-    return @("-c", "safe.directory=$SafeRoot", "-c", "core.excludesFile=", "-C", $Root)
+    return @("-c", "safe.directory=$SafeRoot", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $Root)
 }
 
 function Invoke-GitText {
@@ -41,6 +41,15 @@ $LoopDir = Join-Path $ProjectRoot ".ai-loop"
 $StatusPath = Join-Path $LoopDir "status.json"
 if (-not (Test-Path -LiteralPath $StatusPath)) {
     throw "Missing .ai-loop/status.json. Run init-loop.ps1 first."
+}
+
+$Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
+if ($null -ne $Status.current_phase -and -not $Force) {
+    $CurrentStatus = $Status.current_phase.status
+    $CurrentPhaseId = $Status.current_phase.phase_id
+    if ($CurrentStatus -notin @("accepted", "rework", "blocked")) {
+        throw "Cannot start $PhaseId because current phase $CurrentPhaseId is $CurrentStatus. Finish or use -Force intentionally."
+    }
 }
 
 $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
@@ -117,7 +126,6 @@ $PhaseMeta = [ordered]@{
 }
 Write-JsonFile -Value ([pscustomobject]$PhaseMeta) -Path (Join-Path $RunDir "phase_meta.json")
 
-$Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
 $Status.current_phase = $PhaseMeta
 $Status.phases = @($Status.phases) + @([pscustomobject]$PhaseMeta)
 Write-JsonFile -Value $Status -Path $StatusPath

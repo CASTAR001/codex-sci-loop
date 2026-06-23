@@ -49,7 +49,9 @@ $Required = @(
     "status_after.txt",
     "diff.patch",
     "verify.log",
-    "changed_files.txt"
+    "changed_files.txt",
+    "changed_business_files.txt",
+    "changed_evidence_files.txt"
 )
 
 $Problems = New-Object System.Collections.Generic.List[string]
@@ -66,14 +68,34 @@ foreach ($Name in $Required) {
 }
 
 $ChangedFilesPath = Join-Path $RunDir "changed_files.txt"
+$ChangedBusinessFilesPath = Join-Path $RunDir "changed_business_files.txt"
+$ChangedEvidenceFilesPath = Join-Path $RunDir "changed_evidence_files.txt"
 $ChangedFiles = @()
 if (Test-Path -LiteralPath $ChangedFilesPath) {
     $ChangedFiles = @(Get-Content -LiteralPath $ChangedFilesPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+$ChangedBusinessFiles = @()
+if (Test-Path -LiteralPath $ChangedBusinessFilesPath) {
+    $ChangedBusinessFiles = @(Get-Content -LiteralPath $ChangedBusinessFilesPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+$ChangedEvidenceFiles = @()
+if (Test-Path -LiteralPath $ChangedEvidenceFilesPath) {
+    $ChangedEvidenceFiles = @(Get-Content -LiteralPath $ChangedEvidenceFilesPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 }
 $ChangedFilesText = if ($ChangedFiles.Count -gt 0) {
     ($ChangedFiles | ForEach-Object { "- $_" }) -join [Environment]::NewLine
 } else {
     "- MISSING: no changed files recorded."
+}
+$ChangedBusinessFilesText = if ($ChangedBusinessFiles.Count -gt 0) {
+    ($ChangedBusinessFiles | ForEach-Object { "- $_" }) -join [Environment]::NewLine
+} else {
+    "- None recorded."
+}
+$ChangedEvidenceFilesText = if ($ChangedEvidenceFiles.Count -gt 0) {
+    ($ChangedEvidenceFiles | ForEach-Object { "- $_" }) -join [Environment]::NewLine
+} else {
+    "- None recorded."
 }
 
 $ProblemText = if ($Problems.Count -eq 0) { "None" } else { ($Problems | ForEach-Object { "- $_" }) -join [Environment]::NewLine }
@@ -98,10 +120,20 @@ $AuditInput = @"
 - diff: $(Join-Path $RunDir "diff.patch")
 - verify log: $(Join-Path $RunDir "verify.log")
 - changed files: $(Join-Path $RunDir "changed_files.txt")
+- changed business files: $(Join-Path $RunDir "changed_business_files.txt")
+- changed evidence files: $(Join-Path $RunDir "changed_evidence_files.txt")
 
 ## Changed Or Relevant Source Files
 
 $ChangedFilesText
+
+## Changed Business Files
+
+$ChangedBusinessFilesText
+
+## Changed Evidence Files
+
+$ChangedEvidenceFilesText
 
 ## Missing Or Invalid Evidence
 

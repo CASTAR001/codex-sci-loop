@@ -13,6 +13,8 @@ runs/<phase-id>/
   diff.patch
   verify.log
   changed_files.txt
+  changed_business_files.txt
+  changed_evidence_files.txt
 ```
 
 Missing files or files containing `MISSING:` are blocking evidence defects.

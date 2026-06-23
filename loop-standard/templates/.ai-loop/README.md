@@ -26,6 +26,8 @@ audit results.
       diff.patch
       verify.log
       changed_files.txt
+      changed_business_files.txt
+      changed_evidence_files.txt
   audits/
     <phase-id>-audit-input.md
     <phase-id>-audit.md

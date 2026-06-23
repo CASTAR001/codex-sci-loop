@@ -19,7 +19,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\
 ```text
 Loop standard self-check: OK
 Kit root: E:\codexfiles\loop\loop-standard
-Checked paths: 36
+Checked paths: 38
 ```
 
 ## Additional Check

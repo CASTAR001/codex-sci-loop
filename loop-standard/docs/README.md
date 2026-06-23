@@ -13,6 +13,8 @@ loop-standard/
 Use the lowercase PowerShell scripts in `scripts/` as the standard interface.
 The earlier PascalCase scripts are retained as compatibility helpers.
 
+See `OPERATOR_RUNBOOK.md` for the concise human operating procedure.
+
 ## Standard Script Flow
 
 ```powershell
@@ -34,4 +36,12 @@ After `pilot-project/` exists, run:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+```
+
+## Full Disposable E2E
+
+Run a complete temporary loop simulation:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\test-pilot-loop.ps1
 ```

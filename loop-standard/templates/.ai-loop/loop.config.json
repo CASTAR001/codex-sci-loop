@@ -17,7 +17,9 @@
     "status_after.txt",
     "diff.patch",
     "verify.log",
-    "changed_files.txt"
+    "changed_files.txt",
+    "changed_business_files.txt",
+    "changed_evidence_files.txt"
   ],
   "audit_input_pattern": ".ai-loop/audits/<phase-id>-audit-input.md",
   "audit_result_pattern": ".ai-loop/audits/<phase-id>-audit.md",

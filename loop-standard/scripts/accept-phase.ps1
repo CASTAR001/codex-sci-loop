@@ -32,7 +32,7 @@ function Set-JsonProperty {
 }
 
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
-$ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-C", $ProjectRoot)
+$ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
 $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
 $AuditDir = Join-Path $LoopDir "audits"
@@ -57,7 +57,12 @@ if ($AuditText -notmatch "(?m)^\s*Decision:\s*ACCEPTED\s*$") {
     throw "Cannot accept phase because audit result does not contain 'Decision: ACCEPTED'."
 }
 
-$Required = @("prompt.md", "report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt")
+$Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
+if ($Meta.status -notin @("audit_ready", "accepted")) {
+    throw "Cannot accept phase from status '$($Meta.status)'. Expected audit_ready."
+}
+
+$Required = @("prompt.md", "report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt", "changed_business_files.txt", "changed_evidence_files.txt")
 $Problems = New-Object System.Collections.Generic.List[string]
 foreach ($Name in $Required) {
     $Path = Join-Path $RunDir $Name
@@ -90,7 +95,6 @@ $AcceptedAt = (Get-Date).ToUniversalTime().ToString("o")
 "accepted_at: $AcceptedAt`naudit: .ai-loop/audits/$PhaseId-audit.md" |
     Set-Content -LiteralPath (Join-Path $RunDir "accepted.txt") -Encoding utf8
 
-$Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
 Set-JsonProperty -Object $Meta -Name "status" -Value "accepted"
 Set-JsonProperty -Object $Meta -Name "accepted_at" -Value $AcceptedAt
 Set-JsonProperty -Object $Meta -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"

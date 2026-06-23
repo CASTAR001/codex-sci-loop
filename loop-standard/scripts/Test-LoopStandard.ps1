@@ -38,6 +38,7 @@ $RequiredPaths = @(
     "templates\.ai-loop\runs\README.md",
     "templates\.ai-loop\audits\README.md",
     "docs\README.md",
+    "docs\OPERATOR_RUNBOOK.md",
     ".ai-loop\README.md",
     ".ai-loop\loop.config.json",
     ".ai-loop\status.json",
@@ -57,6 +58,7 @@ $RequiredPaths = @(
     "scripts\collect-evidence.ps1",
     "scripts\prepare-audit-pack.ps1",
     "scripts\accept-phase.ps1",
+    "scripts\test-pilot-loop.ps1",
     "scripts\Initialize-AiLoop.ps1",
     "scripts\Start-LoopPhase.ps1",
     "scripts\Collect-LoopEvidence.ps1",
@@ -83,7 +85,7 @@ foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.js
 $ConfigPath = Join-Path $KitRoot ".ai-loop\loop.config.json"
 if (Test-Path -LiteralPath $ConfigPath) {
     $Config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
-    $RequiredEvidence = @("prompt.md", "report.md", "diff.patch", "verify.log", "status.txt")
+    $RequiredEvidence = @("prompt.md", "report.md", "diff.patch", "verify.log")
     foreach ($EvidenceName in $RequiredEvidence) {
         if ($Config.phase_evidence_required -notcontains $EvidenceName) {
             Add-Problem "loop.config.json missing phase evidence: $EvidenceName"
