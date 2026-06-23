@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_name": "",
+  "initialized_at": "",
+  "supervisor": "Codex",
+  "worker": "Kimi Code",
+  "current_phase": null,
+  "phases": [],
+  "last_decision": null,
+  "notes": [
+    "This file is the durable state record for the loop.",
+    "Do not infer current phase status from chat history."
+  ]
+}
