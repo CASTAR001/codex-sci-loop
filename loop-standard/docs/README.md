@@ -15,6 +15,10 @@ The earlier PascalCase scripts are retained as compatibility helpers.
 
 See `OPERATOR_RUNBOOK.md` for the concise human operating procedure.
 See `GLOBAL_INSTALL_PLAN.md` for the planned Codex-global layout.
+See `CONTROL_PLANE_BUILD_PLAN.md` for the next-stage memory, evidence, state,
+role, recovery, change-control, and skill-dispatch plan.
+See `AGENTS_VS_AI_LOOP_BOUNDARY.md` for the boundary between root bootstrap,
+project loop memory, and agent runtime assets.
 
 ## Standard Script Flow
 

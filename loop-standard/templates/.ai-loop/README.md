@@ -1,8 +1,8 @@
-# .ai-loop
+# .ai-loop Template
 
 This directory is the project-local source of truth for the Supervisor-Worker
-loop. Do not rely on chat history for phase status, evidence, decisions, or
-audit results.
+loop after it is copied into a target project. Do not rely on chat history for
+phase status, evidence, decisions, or audit results.
 
 ## Roles
 

@@ -40,6 +40,8 @@ $RequiredPaths = @(
     "docs\README.md",
     "docs\OPERATOR_RUNBOOK.md",
     "docs\GLOBAL_INSTALL_PLAN.md",
+    "docs\CONTROL_PLANE_BUILD_PLAN.md",
+    "docs\AGENTS_VS_AI_LOOP_BOUNDARY.md",
     ".ai-loop\README.md",
     ".ai-loop\loop.config.json",
     ".ai-loop\status.json",
