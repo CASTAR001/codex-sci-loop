@@ -34,6 +34,20 @@ After `pilot-project/` exists, add `-AllowPilotProject`.
 
 For global migration planning, read `docs/GLOBAL_INSTALL_PLAN.md`.
 
+## Unified Command
+
+Use `scripts/ai-loop.ps1` as the preferred command surface:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 doctor
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 init "C:\path\to\project"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 link-skills "C:\path\to\project" -SkillProfile full-research
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 start "C:\path\to\project" phase-001 -TaskKind physics-research -SkillProfile physics-sim
+```
+
+The lower-level scripts remain available for compatibility, but new workflows
+should call `ai-loop.ps1`.
+
 ## Required Phase Evidence
 
 Every phase must produce these files under `.ai-loop/evidence/<phase-id>/`:
@@ -77,7 +91,16 @@ Initialized projects include:
 The 8 scientific workflow skills are referenced by name. They are not copied
 into every project. Use `-TaskKind physics-research`, `research-writing`, or
 `data-analysis` to trigger default required skill artifacts. Use
-`-RequiredSkills` when the Supervisor needs a specific skill gate.
+`-RequiredSkills` when the Supervisor needs a specific skill gate. Use
+`link-skills.ps1` or `ai-loop.ps1 link-skills` to expose skills through
+project-local `.agents/skills/`.
+
+Research profiles:
+
+- `research-core`
+- `physics-sim`
+- `manuscript`
+- `full-research`
 
 Validate a phase gate directly:
 

@@ -36,6 +36,7 @@ if (Test-Path -LiteralPath $LoopDir) {
 foreach ($Subdir in @("runs", "audits", "logs")) {
     New-Item -ItemType Directory -Force -Path (Join-Path $LoopDir $Subdir) | Out-Null
 }
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectRoot ".agents\skills") | Out-Null
 
 $StatusPath = Join-Path $LoopDir "status.json"
 $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json

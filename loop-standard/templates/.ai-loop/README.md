@@ -43,6 +43,7 @@ phase status, evidence, decisions, or audit results.
     skill-trigger-matrix.md
     skill-usage-ledger.md
     skill-artifact-map.md
+    skill-source-map.md
   evolution/
     project-loop-evolution.md
 ```

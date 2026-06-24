@@ -14,3 +14,6 @@
 | D010 | 2026-06-24 | Add evidence ledgers, skill trigger matrix, phase gate automation, and project-local evolution file | Prevent prose-only acceptance and make skill requirements auditable | Active |
 | D011 | 2026-06-24 | Reference scientific workflow skills by name instead of copying skill packages into every project | Avoid version drift while preserving project-local evidence records | Active |
 | D012 | 2026-06-24 | Allow force accept only with explicit override reason recorded in event log | Keep emergency escape hatch auditable rather than silent | Active |
+| D013 | 2026-06-24 | Use `loop-standard/scripts/ai-loop.ps1` as the recommended user-facing command wrapper | Keep bottom-level scripts stable while giving users one portable entrypoint | Active |
+| D014 | 2026-06-24 | Distribute workflow discovery through `plugins/codex-loop-harness/` while keeping project state in `.ai-loop/` | Plugin should help agents find and operate the harness without owning project memory | Active |
+| D015 | 2026-06-24 | Link project skills through `.agents/skills/` and record availability in `.ai-loop/skills/skill-source-map.md` | Preserve a single skill library while making each project's enabled skills auditable | Active |

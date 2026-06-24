@@ -14,13 +14,16 @@ Verified only the reusable `loop-standard/` kit. Did not create or run
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-LoopStandard.ps1
 ```
 
-## Latest Result
+## Phase A Result
 
 ```text
 Loop standard self-check: OK
 Kit root: E:\codexfiles\loop\loop-standard
 Checked paths: 61
 ```
+
+Later harness layers extended the self-check to 71 paths after evidence, skill,
+gate, wrapper, and plugin scaffolding were added.
 
 ## Additional Check
 

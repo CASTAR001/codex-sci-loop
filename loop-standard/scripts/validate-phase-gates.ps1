@@ -77,6 +77,7 @@ $MetaPath = Join-Path $RunDir "phase_meta.json"
 $RequirementsPath = Join-Path $RunDir "phase_requirements.json"
 $EvidenceLedger = Join-Path $LoopDir "evidence\evidence-ledger.md"
 $SkillUsageLedger = Join-Path $LoopDir "skills\skill-usage-ledger.md"
+$SkillSourceMap = Join-Path $LoopDir "skills\skill-source-map.md"
 
 if (-not (Test-Path -LiteralPath $StatusPath -PathType Leaf)) {
     Add-Problem "missing .ai-loop/status.json"
@@ -157,6 +158,16 @@ if ($null -ne $Requirements) {
         if ([string]::IsNullOrWhiteSpace($Skill)) { continue }
         if (-not (Test-LedgerMentions -LedgerPath $SkillUsageLedger -Phase $PhaseId -Needle $Skill)) {
             Add-Problem "skill usage ledger missing required skill row: $Skill"
+        }
+        $ProjectSkillPath = Join-Path $ProjectRoot ".agents\skills\$Skill\SKILL.md"
+        $ProjectSkillResult = Test-NonEmptyFile -Path $ProjectSkillPath
+        if (-not [string]::IsNullOrWhiteSpace($ProjectSkillResult)) {
+            Add-Problem "required skill is not available in .agents/skills: $Skill ($ProjectSkillResult)"
+        }
+        if (-not (Test-LedgerMentions -LedgerPath $SkillSourceMap -Phase $Skill -Needle $Skill)) {
+            Add-Problem "skill source map missing required skill row: $Skill"
+        } elseif (-not (Select-String -LiteralPath $SkillSourceMap -SimpleMatch -Pattern "| $Skill " | Where-Object { $_.Line -match "\|\s*available\s*\|" })) {
+            Add-Problem "skill source map does not mark required skill available: $Skill"
         }
         foreach ($Artifact in @($Requirement.artifacts)) {
             if ([string]::IsNullOrWhiteSpace($Artifact)) {

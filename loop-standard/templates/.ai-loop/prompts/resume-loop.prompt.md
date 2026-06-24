@@ -14,7 +14,8 @@ Read in order:
 8. `.ai-loop/gates/phase-gates.md`
 9. `.ai-loop/evidence/evidence-ledger.md`
 10. `.ai-loop/skills/skill-usage-ledger.md`
-11. `.ai-loop/evolution/project-loop-evolution.md`
+11. `.ai-loop/skills/skill-source-map.md`
+12. `.ai-loop/evolution/project-loop-evolution.md`
 
 Then output:
 

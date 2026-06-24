@@ -23,9 +23,44 @@
   "skill_ledgers": [
     ".ai-loop/skills/skill-trigger-matrix.md",
     ".ai-loop/skills/skill-usage-ledger.md",
-    ".ai-loop/skills/skill-artifact-map.md"
+    ".ai-loop/skills/skill-artifact-map.md",
+    ".ai-loop/skills/skill-source-map.md"
   ],
   "evolution_file": ".ai-loop/evolution/project-loop-evolution.md",
+  "skill_profiles": {
+    "research-core": [
+      "research-task-tree",
+      "invariant-contract",
+      "deterministic-verification",
+      "skill-compliance-audit"
+    ],
+    "physics-sim": [
+      "research-task-tree",
+      "invariant-contract",
+      "bounded-experiment-loop",
+      "deterministic-verification",
+      "independent-crosscheck",
+      "result-provenance-audit",
+      "skill-compliance-audit"
+    ],
+    "manuscript": [
+      "research-task-tree",
+      "deterministic-verification",
+      "result-provenance-audit",
+      "manuscript-consistency-audit",
+      "skill-compliance-audit"
+    ],
+    "full-research": [
+      "research-task-tree",
+      "invariant-contract",
+      "bounded-experiment-loop",
+      "deterministic-verification",
+      "independent-crosscheck",
+      "result-provenance-audit",
+      "manuscript-consistency-audit",
+      "skill-compliance-audit"
+    ]
+  },
   "audit_required_inputs": [
     "status.json",
     "prompt.md",

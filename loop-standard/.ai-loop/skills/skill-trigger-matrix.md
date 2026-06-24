@@ -14,3 +14,11 @@ does not copy skill packages into each project.
 | paper, report, LaTeX, research notes, result summary | manuscript-consistency-audit | Writing contains scientific claims, equations, figures, symbols, or citations. | drafts/symbol-table.md; drafts/claim-source-ledger.md; drafts/zombie-section-report.md | Stop if key claims lack sources or symbols/equations are inconsistent. |
 | skill-pack update or task-completion compliance audit | skill-compliance-audit | Skills were installed/updated, or a research task claims compliance. | audits/skill-compliance-audit-report.md | Stop if evidence is prose-only or required artifacts are insufficient. |
 
+## Research Profiles
+
+| Profile | Skills |
+| --- | --- |
+| research-core | research-task-tree; invariant-contract; deterministic-verification; skill-compliance-audit |
+| physics-sim | research-task-tree; invariant-contract; bounded-experiment-loop; deterministic-verification; independent-crosscheck; result-provenance-audit; skill-compliance-audit |
+| manuscript | research-task-tree; deterministic-verification; result-provenance-audit; manuscript-consistency-audit; skill-compliance-audit |
+| full-research | research-task-tree; invariant-contract; bounded-experiment-loop; deterministic-verification; independent-crosscheck; result-provenance-audit; manuscript-consistency-audit; skill-compliance-audit |

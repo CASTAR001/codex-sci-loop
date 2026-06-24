@@ -28,15 +28,27 @@
   evidence requirements, and required skill artifacts.
 - Verified ordinary fullstack phase gate passes, physics-research missing skill
   artifacts block audit readiness, and force accept requires an override event.
+- Added unified `ai-loop.ps1` command wrapper for init, start, collect,
+  audit-pack, validate, accept, resume, link-skills, and doctor.
+- Added `link-skills.ps1` with Windows-first directory junctions, symlink
+  fallback, mapped-only fallback, source-map recording, and profile support for
+  research-core, physics-sim, manuscript, and full-research.
+- Added `plugins/codex-loop-harness/` Codex plugin scaffold with Supervisor,
+  Auditor, Recovery, and Research Orchestrator workflow skills.
+- Verified wrapper behavior in a temporary project: init creates `.ai-loop/` and
+  `.agents/skills/`, full-research links 8 skills, fullstack phase can pass
+  ordinary gates, physics-research blocks on missing skill artifacts, force
+  accept records an override, and broken skill links block validation.
 
 ## In Progress
 
-- Hardening recovery, state validation, and global entrypoint flow.
+- Hardening recovery, state validation, global installation, and plugin
+  packaging flow.
 
 ## Pending
 
 - Recovery protocol enforcement.
-- Global `ai-loop.ps1` entrypoint.
+- Stable PATH/plugin install packaging for `ai-loop.ps1`.
 - Uppercase compatibility script alignment.
 - Broader validation CLI coverage.
 

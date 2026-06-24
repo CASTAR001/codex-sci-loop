@@ -1,0 +1,22 @@
+{
+  "name": "codex-loop-harness",
+  "version": "0.1.0",
+  "description": "Supervisor-Worker loop harness with evidence gates, research skill orchestration, and local project memory.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Loop Harness",
+    "shortDescription": "Run evidence-gated Supervisor-Worker loops.",
+    "longDescription": "Codex Loop Harness helps initialize .ai-loop, link research skills, start bounded phases, collect evidence, prepare audits, validate gates, and recover loop state.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use Codex Loop Harness to initialize this project.",
+      "Use Codex Loop Harness to start a physics-research phase.",
+      "Use Codex Loop Harness to audit the current phase evidence."
+    ]
+  }
+}

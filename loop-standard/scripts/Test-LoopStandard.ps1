@@ -45,6 +45,7 @@ $RequiredPaths = @(
     "templates\.ai-loop\skills\skill-trigger-matrix.md",
     "templates\.ai-loop\skills\skill-usage-ledger.md",
     "templates\.ai-loop\skills\skill-artifact-map.md",
+    "templates\.ai-loop\skills\skill-source-map.md",
     "templates\.ai-loop\evolution\project-loop-evolution.md",
     "docs\README.md",
     "docs\OPERATOR_RUNBOOK.md",
@@ -63,6 +64,7 @@ $RequiredPaths = @(
     ".ai-loop\skills\skill-trigger-matrix.md",
     ".ai-loop\skills\skill-usage-ledger.md",
     ".ai-loop\skills\skill-artifact-map.md",
+    ".ai-loop\skills\skill-source-map.md",
     ".ai-loop\evolution\project-loop-evolution.md",
     ".ai-loop\audits\README.md",
     ".ai-loop\logs\README.md",
@@ -74,7 +76,9 @@ $RequiredPaths = @(
     "prompts\codex-supervisor.md",
     "prompts\kimi-worker.md",
     "prompts\codex-audit.md",
+    "scripts\ai-loop.ps1",
     "scripts\init-loop.ps1",
+    "scripts\link-skills.ps1",
     "scripts\start-phase.ps1",
     "scripts\collect-evidence.ps1",
     "scripts\prepare-audit-pack.ps1",
@@ -87,7 +91,13 @@ $RequiredPaths = @(
     "scripts\Collect-LoopEvidence.ps1",
     "scripts\Prepare-LoopAuditPackage.ps1",
     "scripts\Accept-LoopPhase.ps1",
-    "scripts\Test-LoopStandard.ps1"
+    "scripts\Test-LoopStandard.ps1",
+    "..\plugins\codex-loop-harness\.codex-plugin\plugin.json",
+    "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\loop-recovery\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\research-loop-orchestrator\SKILL.md",
+    "..\plugins\codex-loop-harness\scripts\ai-loop.ps1"
 )
 
 foreach ($RelativePath in $RequiredPaths) {
@@ -101,6 +111,36 @@ foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.js
             $null = Get-Content -LiteralPath $JsonPath -Raw | ConvertFrom-Json
         } catch {
             Add-Problem "Invalid JSON: $JsonRelativePath :: $($_.Exception.Message)"
+        }
+    }
+}
+
+$PluginJsonPath = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-loop-harness\.codex-plugin\plugin.json"
+if (Test-Path -LiteralPath $PluginJsonPath) {
+    try {
+        $Plugin = Get-Content -LiteralPath $PluginJsonPath -Raw | ConvertFrom-Json
+        if ($Plugin.name -ne "codex-loop-harness") {
+            Add-Problem "Plugin manifest has unexpected name: $($Plugin.name)"
+        }
+        if ([string]::IsNullOrWhiteSpace($Plugin.skills)) {
+            Add-Problem "Plugin manifest does not point to skills directory."
+        }
+    } catch {
+        Add-Problem "Invalid plugin JSON: $($_.Exception.Message)"
+    }
+}
+
+foreach ($SkillFile in @(
+    "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\loop-recovery\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\research-loop-orchestrator\SKILL.md"
+)) {
+    $Path = Join-Path $KitRoot $SkillFile
+    if (Test-Path -LiteralPath $Path) {
+        $Text = Get-Content -LiteralPath $Path -Raw
+        if ($Text -notmatch "(?s)^---.*?name:\s*.+?description:\s*.+?---") {
+            Add-Problem "Plugin skill missing frontmatter name/description: $SkillFile"
         }
     }
 }

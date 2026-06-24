@@ -8,6 +8,8 @@ param(
     [string]$VerifyCommand = "",
     [ValidateSet("generic", "fullstack", "physics-research", "research-writing", "data-analysis")]
     [string]$TaskKind = "generic",
+    [ValidateSet("none", "research-core", "physics-sim", "manuscript", "full-research")]
+    [string]$SkillProfile = "none",
     [ValidateSet("research-task-tree", "invariant-contract", "bounded-experiment-loop", "deterministic-verification", "independent-crosscheck", "result-provenance-audit", "manuscript-consistency-audit", "skill-compliance-audit")]
     [string[]]$RequiredSkills = @(),
     [string[]]$ClaimIds = @(),
@@ -53,6 +55,17 @@ function Get-DefaultSkillsForTaskKind {
         "physics-research" { return @("invariant-contract", "deterministic-verification") }
         "research-writing" { return @("manuscript-consistency-audit", "deterministic-verification") }
         "data-analysis" { return @("invariant-contract", "deterministic-verification", "result-provenance-audit") }
+        default { return @() }
+    }
+}
+
+function Get-SkillsForProfile {
+    param([Parameter(Mandatory = $true)][string]$Name)
+    switch ($Name) {
+        "research-core" { return @("research-task-tree", "invariant-contract", "deterministic-verification", "skill-compliance-audit") }
+        "physics-sim" { return @("research-task-tree", "invariant-contract", "bounded-experiment-loop", "deterministic-verification", "independent-crosscheck", "result-provenance-audit", "skill-compliance-audit") }
+        "manuscript" { return @("research-task-tree", "deterministic-verification", "result-provenance-audit", "manuscript-consistency-audit", "skill-compliance-audit") }
+        "full-research" { return @("research-task-tree", "invariant-contract", "bounded-experiment-loop", "deterministic-verification", "independent-crosscheck", "result-provenance-audit", "manuscript-consistency-audit", "skill-compliance-audit") }
         default { return @() }
     }
 }
@@ -137,7 +150,8 @@ if ($null -eq $Git) {
 }
 
 $DefaultSkills = @(Get-DefaultSkillsForTaskKind -Kind $TaskKind)
-$AllRequiredSkills = @($DefaultSkills + $RequiredSkills | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+$ProfileSkills = @(Get-SkillsForProfile -Name $SkillProfile)
+$AllRequiredSkills = @($DefaultSkills + $ProfileSkills + $RequiredSkills | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
 $SkillRequirements = @()
 foreach ($Skill in $AllRequiredSkills) {
     $SkillRequirements += [pscustomobject]@{
@@ -163,6 +177,7 @@ $EvidenceRequired = @(
 $Requirements = [ordered]@{
     phase_id = $PhaseId
     task_kind = $TaskKind
+    skill_profile = $SkillProfile
     claim_ids = @($ClaimIds)
     evidence_required = @($EvidenceRequired)
     required_skills = @($AllRequiredSkills)
@@ -197,6 +212,7 @@ $Prompt = @"
 - Title: $Title
 - Objective: $Objective
 - Task kind: $TaskKind
+- Skill profile: $SkillProfile
 
 ## Scope
 
@@ -239,6 +255,7 @@ $PhaseMeta = [ordered]@{
     base_commit = $BaseCommit.Trim()
     verify_command = $VerifyCommand
     task_kind = $TaskKind
+    skill_profile = $SkillProfile
     claim_ids = @($ClaimIds)
     required_skills = @($AllRequiredSkills)
     requirements = ".ai-loop/runs/$PhaseId/phase_requirements.json"

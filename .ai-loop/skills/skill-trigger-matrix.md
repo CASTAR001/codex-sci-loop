@@ -24,3 +24,11 @@ does not copy skill packages into each project.
 | research-writing | manuscript-consistency-audit; deterministic-verification |
 | data-analysis | invariant-contract; deterministic-verification; result-provenance-audit |
 
+## Research Profiles
+
+| Profile | Skills |
+| --- | --- |
+| research-core | research-task-tree; invariant-contract; deterministic-verification; skill-compliance-audit |
+| physics-sim | research-task-tree; invariant-contract; bounded-experiment-loop; deterministic-verification; independent-crosscheck; result-provenance-audit; skill-compliance-audit |
+| manuscript | research-task-tree; deterministic-verification; result-provenance-audit; manuscript-consistency-audit; skill-compliance-audit |
+| full-research | research-task-tree; invariant-contract; bounded-experiment-loop; deterministic-verification; independent-crosscheck; result-provenance-audit; manuscript-consistency-audit; skill-compliance-audit |
