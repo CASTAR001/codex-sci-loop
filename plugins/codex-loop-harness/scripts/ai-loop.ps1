@@ -21,4 +21,4 @@ if (-not (Test-Path -LiteralPath $LoopScript -PathType Leaf)) {
 }
 
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $LoopScript @Arguments
-
+exit $LASTEXITCODE

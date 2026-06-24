@@ -64,6 +64,26 @@ function Test-ResearchSkills {
     return $Problems
 }
 
+function Test-PluginSkillFile {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return "missing"
+    }
+    $Text = Get-Content -LiteralPath $Path -Raw
+    if ($Text -notmatch "(?s)^---.*?name:\s*.+?description:\s*.+?---") {
+        return "frontmatter-invalid"
+    }
+    return "ok"
+}
+
+function Test-NonEmptyFile {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return "missing" }
+    $Item = Get-Item -LiteralPath $Path
+    if ($Item.Length -le 0) { return "empty" }
+    return "ok"
+}
+
 function Exit-IfScriptFailed {
     param([Parameter(Mandatory = $true)][bool]$Succeeded)
     if (-not $Succeeded) {
@@ -178,6 +198,94 @@ switch ($Command) {
     }
     "resume" {
         $LoopDir = Join-Path $ProjectRoot ".ai-loop"
+        $StatusPath = Join-Path $LoopDir "status.json"
+        $Blocked = $false
+        $Status = $null
+        Write-Output "# AI Loop Resume Summary"
+        Write-Output ""
+        Write-Output "Project root: $ProjectRoot"
+        if (-not (Test-Path -LiteralPath $StatusPath -PathType Leaf)) {
+            Write-Output "Recovery decision: BLOCKED"
+            Write-Output "Reason: missing .ai-loop/status.json"
+            exit 2
+        }
+        try {
+            $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
+        } catch {
+            Write-Output "Recovery decision: BLOCKED"
+            Write-Output "Reason: invalid .ai-loop/status.json :: $($_.Exception.Message)"
+            exit 2
+        }
+        $CurrentPhase = $Status.current_phase
+        if ($null -eq $CurrentPhase) {
+            Write-Output "Current phase: none"
+            Write-Output "Phase status: initialized"
+            Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
+            Write-Output "Missing evidence: n/a"
+            Write-Output "Required skills: none"
+            Write-Output "Next safe action: start a bounded phase with ai-loop start."
+        } else {
+            $PhaseId = $CurrentPhase.phase_id
+            $PhaseStatus = if ($null -ne $CurrentPhase.status) { $CurrentPhase.status } elseif ($null -ne $CurrentPhase.phase_status) { $CurrentPhase.phase_status } else { "unknown" }
+            $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
+            $RequirementsPath = Join-Path $RunDir "phase_requirements.json"
+            $RequiredSkills = @()
+            $MissingEvidence = New-Object System.Collections.Generic.List[string]
+            $RequiredFiles = @("prompt.md", "report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt", "changed_business_files.txt", "changed_evidence_files.txt", "phase_requirements.json")
+            foreach ($Name in $RequiredFiles) {
+                $Check = Test-NonEmptyFile -Path (Join-Path $RunDir $Name)
+                if ($Check -ne "ok") {
+                    $MissingEvidence.Add("$Name ($Check)")
+                }
+            }
+            if (Test-Path -LiteralPath $RequirementsPath -PathType Leaf) {
+                try {
+                    $Requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
+                    $RequiredSkills = @($Requirements.required_skills)
+                    if ($null -ne $Requirements.PSObject.Properties["required_skill_artifacts"]) {
+                        foreach ($Requirement in @($Requirements.required_skill_artifacts)) {
+                            foreach ($Artifact in @($Requirement.artifacts)) {
+                                $ArtifactCheck = Test-NonEmptyFile -Path (Join-Path $ProjectRoot $Artifact)
+                                if ($ArtifactCheck -ne "ok") {
+                                    $MissingEvidence.Add("$Artifact ($ArtifactCheck)")
+                                }
+                            }
+                        }
+                    }
+                } catch {
+                    $MissingEvidence.Add("phase_requirements.json (invalid json)")
+                }
+            }
+            $NextSafeAction = switch ($PhaseStatus) {
+                "started" { "Give the Worker the phase prompt, then collect evidence after execution." }
+                "phase_started" { "Give the Worker the phase prompt, then collect evidence after execution." }
+                "evidence_collected" { "Run ai-loop audit-pack and inspect the generated audit input." }
+                "audit_ready" { "Write a Codex audit decision after inspecting report, diff, verify log, ledgers, and source." }
+                "accepted" { "Start the next bounded phase or update memory/handoff." }
+                "rework" { "Start a rework phase using the audit findings as scope." }
+                "blocked" { "Resolve the blocker before starting or accepting another phase." }
+                default { "Run ai-loop validate; if state cannot be reconstructed, mark BLOCKED." }
+            }
+            if ($MissingEvidence.Count -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
+                $Blocked = $true
+            }
+            Write-Output "Current phase: $PhaseId"
+            Write-Output "Phase status: $PhaseStatus"
+            Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
+            Write-Output "Required skills: $(if ($RequiredSkills.Count -gt 0) { $RequiredSkills -join ', ' } else { 'none' })"
+            Write-Output "Missing evidence:"
+            if ($MissingEvidence.Count -eq 0) {
+                Write-Output "- none"
+            } else {
+                foreach ($Item in $MissingEvidence) { Write-Output "- $Item" }
+            }
+            Write-Output "Next safe action: $NextSafeAction"
+            if ($Blocked) {
+                Write-Output "Recovery decision: BLOCKED"
+            } else {
+                Write-Output "Recovery decision: RESUMABLE"
+            }
+        }
         foreach ($Path in @(
             "memory\handoff-summary.md",
             "memory\activeContext.md",
@@ -195,6 +303,7 @@ switch ($Command) {
                 Write-Output "MISSING: $FullPath"
             }
         }
+        if ($Blocked) { exit 2 }
     }
     "link-skills" {
         $ScriptParams = @{
@@ -210,21 +319,43 @@ switch ($Command) {
     }
     "doctor" {
         $TemplateDir = Join-Path $KitRoot "templates\.ai-loop"
-        $PluginManifest = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-loop-harness\.codex-plugin\plugin.json"
+        $InstallRoot = Split-Path -Parent $KitRoot
+        $PluginRoot = Join-Path $InstallRoot "plugins\codex-loop-harness"
+        $PluginManifest = Join-Path $PluginRoot ".codex-plugin\plugin.json"
+        $ShimPath = Join-Path $InstallRoot "bin\ai-loop.ps1"
         $SkillProblems = @(Test-ResearchSkills -Root $SkillLibraryRoot)
         Write-Output "ai-loop doctor"
         Write-Output "Kit root: $KitRoot"
         Write-Output "Template: $TemplateDir"
         Write-Output "Skill library: $SkillLibraryRoot"
         Write-Output "Plugin manifest: $PluginManifest"
+        Write-Output "Shim: $ShimPath"
         if (-not (Test-Path -LiteralPath $TemplateDir -PathType Container)) { throw "Template directory missing: $TemplateDir" }
         if (-not (Test-Path -LiteralPath $PluginManifest -PathType Leaf)) { throw "Plugin manifest missing: $PluginManifest" }
-        $null = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
+        $Plugin = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
+        if ($Plugin.name -ne "codex-loop-harness") { throw "Unexpected plugin name: $($Plugin.name)" }
+        foreach ($SkillName in @("loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")) {
+            $SkillPath = Join-Path $PluginRoot (Join-Path "skills\$SkillName" "SKILL.md")
+            $SkillCheck = Test-PluginSkillFile -Path $SkillPath
+            if ($SkillCheck -ne "ok") {
+                throw "Plugin skill check failed: $SkillName ($SkillCheck)"
+            }
+        }
+        $PluginWrapper = Join-Path $PluginRoot "scripts\ai-loop.ps1"
+        if (-not (Test-Path -LiteralPath $PluginWrapper -PathType Leaf)) {
+            throw "Plugin wrapper missing: $PluginWrapper"
+        }
         if ($SkillProblems.Count -gt 0) {
             throw "Missing required research skills: $($SkillProblems -join ', ')"
         }
+        if (Test-Path -LiteralPath $ShimPath -PathType Leaf) {
+            Write-Output "Shim status: OK"
+        } else {
+            Write-Output "Shim status: not installed in this layout"
+        }
         Write-Output "Required research skills: OK"
         Write-Output "Plugin manifest JSON: OK"
+        Write-Output "Plugin skill frontmatter: OK"
         Write-Output "Doctor: OK"
     }
 }

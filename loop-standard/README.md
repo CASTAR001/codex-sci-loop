@@ -36,7 +36,7 @@ For global migration planning, read `docs/GLOBAL_INSTALL_PLAN.md`.
 
 ## Unified Command
 
-Use `scripts/ai-loop.ps1` as the preferred command surface:
+Use `scripts/ai-loop.ps1` as the canonical command surface:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 doctor
@@ -48,20 +48,38 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 st
 The lower-level scripts remain available for compatibility, but new workflows
 should call `ai-loop.ps1`.
 
+To install a temporary global layout with a shim:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-global.ps1 `
+  -InstallRoot "C:\path\to\loop-install" `
+  -InstallPlugin `
+  -CreateShim `
+  -SkillLibraryRoot "E:\codexfiles\test\.agents\skills" `
+  -Force
+```
+
+Then call:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\path\to\loop-install\bin\ai-loop.ps1" -Command doctor
+```
+
 ## Required Phase Evidence
 
-Every phase must produce these files under `.ai-loop/evidence/<phase-id>/`:
+Every phase must produce these files under `.ai-loop/runs/<phase-id>/`:
 
 - `prompt.md` - Codex-generated Worker prompt for the current phase.
 - `report.md` - Kimi Worker report after executing the phase.
 - `diff.patch` - project diff captured by the evidence script.
 - `verify.log` - verification command output and exit code.
-- `status.txt` - git status or repository status notes.
+- `status_after.txt` - git status after Worker execution.
 - `phase_requirements.json` - task kind, claim IDs, required evidence, and
   required skill artifacts for gate validation.
 
-The audit package is created under `.ai-loop/audits/<phase-id>/` and must
-include an `audit.md` with exactly one decision:
+The audit input is created under `.ai-loop/audits/<phase-id>-audit-input.md`.
+The final audit result is written to `.ai-loop/audits/<phase-id>-audit.md` with
+exactly one decision:
 
 - `ACCEPTED`
 - `REWORK`
@@ -71,9 +89,8 @@ Codex must not accept a phase by reading only the Worker report. It must inspect
 the report, diff, verification log, status, phase requirements, evidence
 ledgers, skill ledgers, and relevant source files.
 
-Required evidence file names are canonical in the first version:
-`prompt.md`, `report.md`, `diff.patch`, `verify.log`, `status.txt`, and
-`audit.md`. The newer `runs/`-based scripts additionally require
+Required evidence file names are canonical:
+`prompt.md`, `report.md`, `diff.patch`, `verify.log`, `status_after.txt`,
 `phase_requirements.json`, `changed_files.txt`, `changed_business_files.txt`,
 and `changed_evidence_files.txt`.
 
@@ -116,13 +133,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-phase
 From this kit directory:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\init-loop.ps1 -ProjectRoot "C:\path\to\project"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 -Command init -ProjectRoot "C:\path\to\project" -CreateAgentsBootstrap
 ```
 
 Start a phase:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-phase.ps1 `
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command start `
   -ProjectRoot "C:\path\to\project" `
   -PhaseId "phase-001" `
   -Title "Implement minimal feature" `
@@ -133,7 +151,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-phase.ps
 After Kimi executes the generated prompt, collect evidence:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\collect-evidence.ps1 `
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command collect `
   -ProjectRoot "C:\path\to\project" `
   -PhaseId "phase-001" `
   -ReportPath "C:\path\to\report.md" `
@@ -143,7 +162,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\collect-eviden
 Prepare the audit package:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-audit-pack.ps1 `
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command audit-pack `
   -ProjectRoot "C:\path\to\project" `
   -PhaseId "phase-001"
 ```
@@ -151,7 +171,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-audit-
 After Codex writes `.ai-loop/audits/phase-001-audit.md`, record the decision:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase.ps1 `
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command accept `
   -ProjectRoot "C:\path\to\project" `
   -PhaseId "phase-001"
 ```

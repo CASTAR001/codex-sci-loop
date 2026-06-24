@@ -1,37 +1,124 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$CodexHome,
+    [string]$InstallRoot = "",
+    [string]$CodexHome = "",
+    [string]$SkillLibraryRoot = "E:\codexfiles\test\.agents\skills",
+    [switch]$InstallPlugin,
+    [switch]$CreateShim,
     [switch]$Force
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$KitRoot = Split-Path -Parent $PSScriptRoot
-$CodexHome = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CodexHome)
-$Destination = Join-Path $CodexHome "loop-standard"
-
-if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
-    throw "Destination already exists: $Destination. Use -Force to replace files."
-}
-
-New-Item -ItemType Directory -Force -Path $CodexHome | Out-Null
-New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-
-foreach ($Name in @("templates", "prompts", "scripts", "docs")) {
-    $Source = Join-Path $KitRoot $Name
-    $Target = Join-Path $Destination $Name
-    if (Test-Path -LiteralPath $Target) {
-        if (-not $Force) {
-            throw "Target exists: $Target. Use -Force to replace files."
+function Resolve-TargetRoot {
+    if (-not [string]::IsNullOrWhiteSpace($InstallRoot) -and -not [string]::IsNullOrWhiteSpace($CodexHome)) {
+        $ResolvedInstall = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InstallRoot)
+        $ResolvedCodex = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CodexHome)
+        if ($ResolvedInstall -ne $ResolvedCodex) {
+            throw "Use either -InstallRoot or -CodexHome, or pass the same path for both."
         }
-        Remove-Item -LiteralPath $Target -Recurse -Force
+        return $ResolvedInstall
     }
-    Copy-Item -LiteralPath $Source -Destination $Target -Recurse -Force
+    if (-not [string]::IsNullOrWhiteSpace($InstallRoot)) {
+        return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InstallRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($CodexHome)) {
+        return $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($CodexHome)
+    }
+    throw "Missing install target. Use -InstallRoot <path>."
 }
 
-Copy-Item -LiteralPath (Join-Path $KitRoot "README.md") -Destination (Join-Path $Destination "README.md") -Force
+function Copy-CleanDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination,
+        [Parameter(Mandatory = $true)][bool]$AllowReplace
+    )
+    if (-not (Test-Path -LiteralPath $Source -PathType Container)) {
+        throw "Missing source directory: $Source"
+    }
+    if (Test-Path -LiteralPath $Destination) {
+        if (-not $AllowReplace) {
+            throw "Destination already exists: $Destination. Use -Force to replace files."
+        }
+        Remove-Item -LiteralPath $Destination -Recurse -Force
+    }
+    Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
+}
 
-Write-Output "Installed loop-standard to $Destination"
-Write-Output "Initialize a project with:"
-Write-Output "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$Destination\scripts\init-loop.ps1`" -ProjectRoot <project-root>"
+$KitRoot = Split-Path -Parent $PSScriptRoot
+$RepoRoot = Split-Path -Parent $KitRoot
+$InstallRoot = Resolve-TargetRoot
+$LoopStandardDestination = Join-Path $InstallRoot "loop-standard"
+$PluginSource = Join-Path $RepoRoot "plugins\codex-loop-harness"
+$PluginDestination = Join-Path $InstallRoot "plugins\codex-loop-harness"
+$BinDir = Join-Path $InstallRoot "bin"
+$ShimPath = Join-Path $BinDir "ai-loop.ps1"
+
+New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
+
+Copy-CleanDirectory -Source $KitRoot -Destination $LoopStandardDestination -AllowReplace ([bool]$Force)
+
+if ($InstallPlugin) {
+    Copy-CleanDirectory -Source $PluginSource -Destination $PluginDestination -AllowReplace ([bool]$Force)
+}
+
+if ($CreateShim) {
+    New-Item -ItemType Directory -Force -Path $BinDir | Out-Null
+    if ((Test-Path -LiteralPath $ShimPath) -and -not $Force) {
+        throw "Shim already exists: $ShimPath. Use -Force to replace it."
+    }
+    $ShimText = @"
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = `$true, Position = 0)]
+    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "accept", "resume", "link-skills", "doctor")]
+    [string]`$Command,
+
+    [Parameter(Position = 1)]
+    [string]`$ProjectRoot = (Get-Location).Path,
+
+    [Parameter(Position = 2)]
+    [string]`$PhaseId = "",
+
+    [Parameter(ValueFromRemainingArguments = `$true)]
+    [object[]]`$RemainingArguments
+)
+
+Set-StrictMode -Version Latest
+`$ErrorActionPreference = "Stop"
+
+`$LoopScript = Join-Path (Split-Path -Parent `$PSScriptRoot) "loop-standard\scripts\ai-loop.ps1"
+if (-not (Test-Path -LiteralPath `$LoopScript -PathType Leaf)) {
+    throw "Missing installed loop entrypoint: `$LoopScript"
+}
+
+`$ForwardArguments = @("-Command", `$Command, "-ProjectRoot", `$ProjectRoot, "-SkillLibraryRoot", "$SkillLibraryRoot")
+if (-not [string]::IsNullOrWhiteSpace(`$PhaseId)) {
+    `$ForwardArguments += @("-PhaseId", `$PhaseId)
+}
+`$ForwardArguments += @(`$RemainingArguments)
+
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File `$LoopScript @ForwardArguments
+exit `$LASTEXITCODE
+"@
+    $ShimText | Set-Content -LiteralPath $ShimPath -Encoding utf8
+}
+
+$DoctorScript = Join-Path $LoopStandardDestination "scripts\ai-loop.ps1"
+Write-Output "Installed loop-standard to $LoopStandardDestination"
+if ($InstallPlugin) {
+    Write-Output "Installed plugin to $PluginDestination"
+}
+if ($CreateShim) {
+    Write-Output "Created shim: $ShimPath"
+    Write-Output "Optional PATH entry:"
+    Write-Output $BinDir
+}
+Write-Output "Verify installation with:"
+if ($CreateShim) {
+    Write-Output "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$ShimPath`" -Command doctor"
+} else {
+    Write-Output "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$DoctorScript`" -Command doctor -SkillLibraryRoot `"$SkillLibraryRoot`""
+}

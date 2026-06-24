@@ -16,24 +16,46 @@ artifact.
 
 ## Proposed Global Layout
 
-Install into a Codex home directory such as:
+Install into an explicit loop harness root such as:
 
 ```text
-%USERPROFILE%\.codex\loop-standard\
+%USERPROFILE%\.codex\loop-harness\
 ```
 
-or an explicit directory passed to the installer:
+The installer creates this shape:
 
 ```text
-<CodexHome>\loop-standard\
-  templates/
-  prompts/
-  scripts/
-  docs/
+<InstallRoot>\
+  bin\
+    ai-loop.ps1
+  loop-standard\
+    templates/
+    prompts/
+    scripts/
+    docs/
+  plugins\
+    codex-loop-harness/
 ```
 
-Projects should not depend on this repo path directly. They should call the
-global scripts by absolute path or through a future small wrapper command.
+Projects should not depend on this repo path directly. They should call the shim
+under `<InstallRoot>\bin\ai-loop.ps1` or add that `bin` directory to PATH
+manually.
+
+## Installer
+
+Recommended dry install:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\install-global.ps1 `
+  -InstallRoot .\.tmp-install `
+  -InstallPlugin `
+  -CreateShim `
+  -SkillLibraryRoot E:\codexfiles\test\.agents\skills `
+  -Force
+```
+
+Legacy `-CodexHome` remains accepted as an alias-like compatibility path for
+older calls, but new documentation should use `-InstallRoot`.
 
 ## Required Global Capabilities
 
@@ -47,33 +69,21 @@ global scripts by absolute path or through a future small wrapper command.
 
 ## Next Systems To Add
 
-1. Memory system:
-   - project memory;
-   - phase memory;
-   - reusable lessons;
-   - known constraints.
-2. Constraint system:
-   - hard rules;
-   - soft preferences;
-   - phase-specific constraints;
-   - refusal/blocking rules.
-3. Evidence system:
-   - required artifact manifest;
-   - hashes;
-   - verification command registry;
-   - source inspection checklist.
-4. Skill usage record:
-   - skill name;
-   - why it was used;
-   - files read;
-   - outputs generated.
-5. State machine:
+1. Recovery automation:
+   - resumable current-phase summary;
+   - missing evidence report;
+   - BLOCKED recommendation when state cannot be reconstructed.
+2. State machine:
    - explicit allowed transitions;
-   - transition logs;
-   - recovery paths.
+   - compatibility wrappers that cannot bypass gates;
+   - transition logs.
+3. Evidence automation:
+   - stronger artifact indexing;
+   - hashes;
+   - verification command registry.
 
 ## Non-Goals For This Step
 
-- Do not write into the real Codex global directory yet.
+- Do not modify PATH automatically.
 - Do not assume a single machine-specific `%USERPROFILE%`.
 - Do not depend on chat history.

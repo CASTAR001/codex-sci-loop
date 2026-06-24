@@ -39,19 +39,30 @@
   `.agents/skills/`, full-research links 8 skills, fullstack phase can pass
   ordinary gates, physics-research blocks on missing skill artifacts, force
   accept records an override, and broken skill links block validation.
+- Added UTF-8 Chinese root `README.md` and English `README_EN.md`.
+- Upgraded `install-global.ps1` to install `loop-standard/`, optional plugin
+  source, and a `bin/ai-loop.ps1` shim without modifying PATH.
+- Enhanced `ai-loop doctor` to validate plugin manifest, plugin skill
+  frontmatter, plugin wrapper, required research skills, and shim status.
+- Enhanced `ai-loop resume` to report current phase, phase status, required
+  skills, missing evidence, next safe action, and BLOCKED/RESUMABLE decision.
+- Converted uppercase compatibility scripts into thin wrappers around the
+  canonical `ai-loop.ps1` workflow.
+- Verified installed shim doctor, installed project init/link-skills, fullstack
+  gates, physics artifact blocking, force override, broken skill link blocking,
+  missing-status recovery blocking, and compatibility wrapper smoke flow.
 
 ## In Progress
 
-- Hardening recovery, state validation, global installation, and plugin
-  packaging flow.
+- Deeper state-machine enforcement and evidence-ledger automation.
 
 ## Pending
 
-- Recovery protocol enforcement.
-- Stable PATH/plugin install packaging for `ai-loop.ps1`.
-- Uppercase compatibility script alignment.
-- Broader validation CLI coverage.
+- Choose final non-temporary global install root.
+- Add artifact hashing and stronger evidence ledger automation.
+- Expand skill trigger matrix for full-stack and physics workflows.
+- Add stricter state transition logs and recovery paths.
 
 ## Last Updated
 
-2026-06-24
+2026-06-25

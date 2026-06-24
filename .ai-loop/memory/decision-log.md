@@ -17,3 +17,6 @@
 | D013 | 2026-06-24 | Use `loop-standard/scripts/ai-loop.ps1` as the recommended user-facing command wrapper | Keep bottom-level scripts stable while giving users one portable entrypoint | Active |
 | D014 | 2026-06-24 | Distribute workflow discovery through `plugins/codex-loop-harness/` while keeping project state in `.ai-loop/` | Plugin should help agents find and operate the harness without owning project memory | Active |
 | D015 | 2026-06-24 | Link project skills through `.agents/skills/` and record availability in `.ai-loop/skills/skill-source-map.md` | Preserve a single skill library while making each project's enabled skills auditable | Active |
+| D016 | 2026-06-25 | Generate a `bin/ai-loop.ps1` shim during install instead of modifying PATH automatically | Keep global invocation simple while avoiding hidden user environment changes | Active |
+| D017 | 2026-06-25 | Keep uppercase scripts only as compatibility wrappers around canonical `ai-loop.ps1` | Prevent old entrypoints from bypassing evidence, skill, and accept gates | Active |
+| D018 | 2026-06-25 | Make `ai-loop resume` summarize state and return BLOCKED when required state cannot be reconstructed | Recovery must be file-based and must not continue from chat memory alone | Active |

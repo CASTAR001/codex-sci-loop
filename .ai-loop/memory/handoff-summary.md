@@ -2,15 +2,15 @@
 
 ## Current Phase
 
-Unified script entrypoint, skill linking, research profiles, and Codex plugin
-scaffold implemented. Next phase is recovery enforcement, global install
-packaging, plugin install validation, or compatibility script alignment.
+Global-callable harness convergence implemented. The repo now has a canonical
+script entrypoint, temporary/global install script, shim support, plugin
+validation, recovery summary, and compatibility wrappers.
 
 ## Last Verified State
 
 `loop-standard/` exists with scripts, docs, prompts, templates, pilot fixture,
 and e2e validation. `pilot-project/` is a root-tracked fixture, not a nested git
-repository. The latest self-check reports 71 required paths.
+repository. The latest self-check reports 73 required paths.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -25,8 +25,10 @@ files include `.ai-loop/evidence/*`, `.ai-loop/skills/*`,
 Reusable control-plane templates under `loop-standard/templates/.ai-loop/` now
 include evidence ledgers, skill ledgers, the skill source map, and the
 project-local evolution file. `loop-standard/scripts/ai-loop.ps1` is the
-recommended user-facing command. The plugin scaffold lives under
-`plugins/codex-loop-harness/` and stores no project-local `.ai-loop` state.
+recommended user-facing command. `install-global.ps1` can create
+`<InstallRoot>/bin/ai-loop.ps1`, copy `loop-standard/`, and optionally copy
+`plugins/codex-loop-harness/`. The plugin scaffold stores no project-local
+`.ai-loop` state.
 
 ## Must Preserve
 
@@ -41,10 +43,11 @@ recommended user-facing command. The plugin scaffold lives under
   `.ai-loop/skills/skill-source-map.md`.
 - Root entrypoint is `AGENTS.md`; detailed rules live in `.ai-loop/`.
 - `.agents/` is for agent runtime assets, not durable project memory.
+- Uppercase compatibility scripts must remain thin wrappers and must not contain
+  independent legacy state logic.
 
 ## Next Safe Action
 
-Run `Test-LoopStandard.ps1 -AllowPilotProject`, then choose whether to harden
-recovery prompts, package/install the Codex plugin, create a stable global PATH
-shim for `ai-loop.ps1`, or align uppercase compatibility scripts with the newer
-lowercase gate-aware scripts.
+Run `Test-LoopStandard.ps1 -AllowPilotProject`, then choose whether to promote a
+real global install root, add artifact hashing, deepen state-machine transition
+logs, or expand the skill trigger matrix.

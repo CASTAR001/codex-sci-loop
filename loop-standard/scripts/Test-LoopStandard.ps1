@@ -92,6 +92,8 @@ $RequiredPaths = @(
     "scripts\Prepare-LoopAuditPackage.ps1",
     "scripts\Accept-LoopPhase.ps1",
     "scripts\Test-LoopStandard.ps1",
+    "..\README.md",
+    "..\README_EN.md",
     "..\plugins\codex-loop-harness\.codex-plugin\plugin.json",
     "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
@@ -168,6 +170,53 @@ Get-ChildItem -LiteralPath (Join-Path $KitRoot "scripts") -Filter "*.ps1" | ForE
     if ($Errors.Count -gt 0) {
         foreach ($ParseError in $Errors) {
             Add-Problem "PowerShell parse error in scripts\$($_.Name): $($ParseError.Message)"
+        }
+    }
+}
+
+$PluginScriptsDir = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-loop-harness\scripts"
+if (Test-Path -LiteralPath $PluginScriptsDir -PathType Container) {
+    Get-ChildItem -LiteralPath $PluginScriptsDir -Filter "*.ps1" | ForEach-Object {
+        $Tokens = $null
+        $Errors = $null
+        $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$Tokens, [ref]$Errors)
+        if ($Errors.Count -gt 0) {
+            foreach ($ParseError in $Errors) {
+                Add-Problem "PowerShell parse error in plugin scripts\$($_.Name): $($ParseError.Message)"
+            }
+        }
+    }
+}
+
+$InstallScriptPath = Join-Path $KitRoot "scripts\install-global.ps1"
+if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
+    $InstallText = Get-Content -LiteralPath $InstallScriptPath -Raw
+    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "ShimPath", "ai-loop.ps1")) {
+        if ($InstallText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "install-global.ps1 missing expected interface text: $Needle"
+        }
+    }
+}
+
+foreach ($WrapperName in @("Initialize-AiLoop.ps1", "Start-LoopPhase.ps1", "Collect-LoopEvidence.ps1", "Prepare-LoopAuditPackage.ps1", "Accept-LoopPhase.ps1")) {
+    $WrapperPath = Join-Path $KitRoot (Join-Path "scripts" $WrapperName)
+    if (Test-Path -LiteralPath $WrapperPath -PathType Leaf) {
+        $WrapperText = Get-Content -LiteralPath $WrapperPath -Raw
+        if ($WrapperText -notmatch "ai-loop\.ps1") {
+            Add-Problem "Compatibility wrapper does not call ai-loop.ps1: $WrapperName"
+        }
+        if ($WrapperText -match "Write-JsonFile") {
+            Add-Problem "Compatibility wrapper still contains legacy state logic: $WrapperName"
+        }
+    }
+}
+
+$RootReadme = Join-Path (Split-Path -Parent $KitRoot) "README.md"
+if (Test-Path -LiteralPath $RootReadme -PathType Leaf) {
+    $ReadmeText = Get-Content -LiteralPath $RootReadme -Encoding utf8 -Raw
+    foreach ($Needle in @("README_EN.md", "AGENTS.md", "ai-loop.ps1", "loop-standard")) {
+        if ($ReadmeText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "Root README.md missing expected UTF-8 text: $Needle"
         }
     }
 }

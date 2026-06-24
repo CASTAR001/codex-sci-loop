@@ -2,16 +2,17 @@
 
 ## Current Phase
 
-Unified script entrypoint and Codex plugin distribution scaffold implemented on
-top of the evidence, skill, and phase-gate layer.
+Global-callable harness convergence implemented on top of the unified script
+entrypoint and Codex plugin scaffold.
 
 ## Current Objective
 
 Root-level `.ai-loop/` control plane now includes memory, constraints, evidence
 ledgers, skill trigger records, phase gate checks, project-local loop evolution
 notes, and skill source maps. `loop-standard/scripts/ai-loop.ps1` is the
-recommended command entrypoint, while `plugins/codex-loop-harness/` provides the
-first Codex plugin distribution scaffold.
+recommended command entrypoint. `install-global.ps1` can now create a temporary
+or global install layout with `loop-standard/`, `plugins/codex-loop-harness/`,
+and `bin/ai-loop.ps1`.
 
 ## Active Plan
 
@@ -27,17 +28,17 @@ The near-term build order is now:
 2. Evidence ledger + skill dispatcher.
 3. Phase gate automation.
 4. Global entrypoint + Codex plugin distribution.
-5. Recovery protocol + change control.
+5. Recovery summary and state validation.
 6. Broader validation CLI.
 
 ## Current Work Boundary
 
 The memory/constraint layer, evidence/skills/gate layer, unified wrapper, skill
-linker, and plugin scaffold are now in place. The harness references the 8
-scientific workflow skills by name, links them into project `.agents/skills/`
-via junctions when available, and records availability in
-`.ai-loop/skills/skill-source-map.md`; it does not vendor-copy skills into each
-project.
+linker, plugin scaffold, install shim, compatibility wrappers, and recovery
+summary are now in place. The harness references the 8 scientific workflow
+skills by name, links them into project `.agents/skills/` via junctions when
+available, and records availability in `.ai-loop/skills/skill-source-map.md`;
+it does not vendor-copy skills into each project.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -46,8 +47,8 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-Proceed to recovery enforcement, global install polishing, or plugin install
-packaging only after reviewing:
+Proceed to deeper state-machine enforcement, evidence-ledger automation, or
+global install promotion only after reviewing:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -58,7 +59,6 @@ packaging only after reviewing:
 
 ## Open Questions
 
-- Should future global installation write a stable `ai-loop.ps1` shim into a
-  PATH directory, or rely on plugin wrapper discovery first?
-- Should uppercase compatibility scripts be fully aligned with the newer
-  lowercase scripts, or retained as legacy wrappers?
+- What final global install root should be used outside temporary tests?
+- Should evidence ledger artifact hashing be added before broader skill trigger
+  expansion?
