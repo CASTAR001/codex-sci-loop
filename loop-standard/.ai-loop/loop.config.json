@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "loop_name": "supervisor-worker-loop",
   "supervisor": "Codex",
-  "worker": "Kimi Code",
+  "worker": "Worker Agent",
   "phase_evidence_required": [
     "prompt.md",
     "report.md",
@@ -10,8 +10,22 @@
     "verify.log",
     "status.txt",
     "changed_business_files.txt",
-    "changed_evidence_files.txt"
+    "changed_evidence_files.txt",
+    "phase_requirements.json"
   ],
+  "evidence_ledgers": [
+    ".ai-loop/evidence/evidence-ledger.md",
+    ".ai-loop/evidence/artifact-index.md",
+    ".ai-loop/evidence/command-log.md",
+    ".ai-loop/evidence/test-log.md",
+    ".ai-loop/evidence/provenance-map.md"
+  ],
+  "skill_ledgers": [
+    ".ai-loop/skills/skill-trigger-matrix.md",
+    ".ai-loop/skills/skill-usage-ledger.md",
+    ".ai-loop/skills/skill-artifact-map.md"
+  ],
+  "evolution_file": ".ai-loop/evolution/project-loop-evolution.md",
   "audit_required_inputs": [
     "status.json",
     "prompt.md",
@@ -30,6 +44,8 @@
     "chat_history_is_not_source_of_truth": true,
     "worker_can_only_execute_current_phase": true,
     "supervisor_must_inspect_diff_verify_status_and_source": true,
-    "missing_evidence_blocks_progress": true
+    "missing_evidence_blocks_progress": true,
+    "required_skill_artifacts_block_progress": true,
+    "force_accept_requires_override_reason": true
   }
 }

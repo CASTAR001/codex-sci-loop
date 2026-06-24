@@ -2,7 +2,8 @@
 
 This `.ai-loop/` directory is the local, git-trackable control plane for this
 repository. It stores memory, constraints, roles, gates, events, prompts, and
-templates for a reusable Supervisor-Worker loop harness.
+templates for a reusable Supervisor-Worker loop harness. It now also includes
+evidence ledgers, skill trigger records, and project-local loop evolution notes.
 
 ## Bootstrap Read Order
 
@@ -32,12 +33,16 @@ Governance directories:
 - `.ai-loop/roles/`
 - `.ai-loop/gates/`
 - `.ai-loop/events/`
+- `.ai-loop/evidence/`
+- `.ai-loop/skills/`
+- `.ai-loop/evolution/`
 - `.ai-loop/prompts/`
 - `.ai-loop/templates/`
 
 ## Current Phase
 
-Current phase: memory and constraint system bootstrap.
+Current phase: evidence ledger, skill trigger matrix, and phase gate automation
+bootstrap.
 
-The next systems after this phase are evidence ledger, skill trigger matrix,
-phase gate automation, and richer state-machine enforcement.
+The next systems after this phase are richer recovery enforcement, global
+entrypoint hardening, and broader state-machine validation.

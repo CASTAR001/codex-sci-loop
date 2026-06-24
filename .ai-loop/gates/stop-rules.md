@@ -7,6 +7,9 @@ Stop before continuing when:
 - A governance file would be modified outside harness maintenance.
 - Worker changed files outside scope without justification.
 - A scientific correctness claim lacks required verification or skill artifact.
+- A required skill trigger is present but its required artifact is missing.
+- Phase gate validation fails and no Supervisor override reason is recorded.
+- A force accept would be silent or undocumented.
 - Same failure repeats without a new countermeasure.
 - Current state cannot be reconstructed from files.
 - The next action would depend only on chat history.

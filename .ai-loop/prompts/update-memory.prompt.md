@@ -8,6 +8,9 @@ Read:
 2. `.ai-loop/memory/progress.md`
 3. `.ai-loop/memory/handoff-summary.md`
 4. `.ai-loop/events/event-schema.md`
+5. `.ai-loop/evidence/evidence-ledger.md`
+6. `.ai-loop/skills/skill-usage-ledger.md`
+7. `.ai-loop/evolution/project-loop-evolution.md`
 
 Update:
 
@@ -17,5 +20,7 @@ Update:
 - `handoff-summary.md` with a compact new-session summary.
 - `event-log.ndjson` with decision, attempt, fix, verification, failure, or
   handoff event as appropriate.
+- Evidence and skill ledgers only when new durable artifacts or skill triggers
+  were actually produced.
 
 Do not rewrite stable facts unless new evidence supports the change.

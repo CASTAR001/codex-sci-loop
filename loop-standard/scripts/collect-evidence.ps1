@@ -31,6 +31,25 @@ function Set-JsonProperty {
     }
 }
 
+function Add-MarkdownRow {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string[]]$Columns
+    )
+    $Escaped = $Columns | ForEach-Object { ($_ -replace "\|", "/").Trim() }
+    Add-Content -LiteralPath $Path -Encoding utf8 -Value ("| " + ($Escaped -join " | ") + " |")
+}
+
+function Get-VerifyExitCode {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { return "" }
+    $Text = Get-Content -LiteralPath $Path -Raw
+    if ($Text -match "(?m)^exit_code:\s*(-?\d+)\s*$") {
+        return $Matches[1]
+    }
+    return ""
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
@@ -46,7 +65,7 @@ $ReportTarget = Join-Path $RunDir "report.md"
 if (-not [string]::IsNullOrWhiteSpace($ReportPath)) {
     Copy-Item -LiteralPath (Resolve-Path -LiteralPath $ReportPath).Path -Destination $ReportTarget -Force
 } elseif (-not (Test-Path -LiteralPath $ReportTarget)) {
-    "MISSING: Kimi Worker report was not provided." | Set-Content -LiteralPath $ReportTarget -Encoding utf8
+    "MISSING: Worker report was not provided." | Set-Content -LiteralPath $ReportTarget -Encoding utf8
 }
 
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
@@ -137,6 +156,45 @@ if (Test-Path -LiteralPath $StatusPath) {
         }
     }
     Write-JsonFile -Value $Status -Path $StatusPath
+}
+
+$EvidenceDir = Join-Path $LoopDir "evidence"
+New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
+$EvidenceLedger = Join-Path $EvidenceDir "evidence-ledger.md"
+$ArtifactIndex = Join-Path $EvidenceDir "artifact-index.md"
+$CommandLog = Join-Path $EvidenceDir "command-log.md"
+$TestLog = Join-Path $EvidenceDir "test-log.md"
+$ProvenanceMap = Join-Path $EvidenceDir "provenance-map.md"
+$RelativeRunDir = ".ai-loop/runs/$PhaseId"
+$EvidenceRows = @(
+    @("EVD-$PhaseId-003", $PhaseId, "CLAIM-$PhaseId", "worker-report", "$RelativeRunDir/report.md", "Worker", "pending", "recorded", "Worker report captured."),
+    @("EVD-$PhaseId-004", $PhaseId, "CLAIM-$PhaseId", "status", "$RelativeRunDir/status_after.txt", "collect-evidence.ps1", "pending", "recorded", "Repository status captured after Worker execution."),
+    @("EVD-$PhaseId-005", $PhaseId, "CLAIM-$PhaseId", "diff", "$RelativeRunDir/diff.patch", "collect-evidence.ps1", "pending", "recorded", "Diff captured."),
+    @("EVD-$PhaseId-006", $PhaseId, "CLAIM-$PhaseId", "verification-log", "$RelativeRunDir/verify.log", "collect-evidence.ps1", "pending", "recorded", "Verification log captured."),
+    @("EVD-$PhaseId-007", $PhaseId, "CLAIM-$PhaseId", "changed-files", "$RelativeRunDir/changed_files.txt", "collect-evidence.ps1", "pending", "recorded", "Changed files captured."),
+    @("EVD-$PhaseId-008", $PhaseId, "CLAIM-$PhaseId", "business-files", "$RelativeRunDir/changed_business_files.txt", "collect-evidence.ps1", "pending", "recorded", "Changed business files captured."),
+    @("EVD-$PhaseId-009", $PhaseId, "CLAIM-$PhaseId", "evidence-files", "$RelativeRunDir/changed_evidence_files.txt", "collect-evidence.ps1", "pending", "recorded", "Changed evidence files captured.")
+)
+if (Test-Path -LiteralPath $EvidenceLedger) {
+    foreach ($Row in $EvidenceRows) { Add-MarkdownRow -Path $EvidenceLedger -Columns $Row }
+}
+if (Test-Path -LiteralPath $ArtifactIndex) {
+    foreach ($Name in @("report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt", "changed_business_files.txt", "changed_evidence_files.txt")) {
+        Add-MarkdownRow -Path $ArtifactIndex -Columns @("ART-$PhaseId-$Name", $PhaseId, "phase-evidence", "$RelativeRunDir/$Name", "collect-evidence.ps1", "active", "Phase evidence artifact.")
+    }
+}
+if (Test-Path -LiteralPath $CommandLog) {
+    $ExitCode = Get-VerifyExitCode -Path $VerifyLog
+    $CommandStatus = if ($ExitCode -eq "0") { "passed" } elseif ([string]::IsNullOrWhiteSpace($ExitCode)) { "unknown" } else { "failed" }
+    Add-MarkdownRow -Path $CommandLog -Columns @("CMD-$PhaseId-VERIFY", $PhaseId, "verification", $CommandToRun, $ExitCode, "$RelativeRunDir/verify.log", $CommandStatus, "Verification command executed by collect-evidence.ps1.")
+}
+if (Test-Path -LiteralPath $TestLog) {
+    $ExitCode = Get-VerifyExitCode -Path $VerifyLog
+    $TestStatus = if ($ExitCode -eq "0") { "passed" } elseif ([string]::IsNullOrWhiteSpace($ExitCode)) { "unknown" } else { "failed" }
+    Add-MarkdownRow -Path $TestLog -Columns @("TEST-$PhaseId-VERIFY", $PhaseId, $CommandToRun, "$RelativeRunDir/verify.log", $ExitCode, $TestStatus, "Primary phase verification.")
+}
+if (Test-Path -LiteralPath $ProvenanceMap) {
+    Add-MarkdownRow -Path $ProvenanceMap -Columns @("PROV-$PhaseId-DIFF", $PhaseId, "$RelativeRunDir/diff.patch", "$RelativeRunDir/base_commit.txt; $RelativeRunDir/status_after.txt", "git diff", "base commit recorded", "recorded", "Diff provenance for phase audit.")
 }
 
 Write-Output "Collected evidence for $PhaseId in $RunDir"

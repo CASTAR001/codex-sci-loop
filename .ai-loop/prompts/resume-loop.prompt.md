@@ -12,11 +12,15 @@ Read in order:
 6. `.ai-loop/memory/failure-ledger.md`
 7. `.ai-loop/gates/pre-action-check.md`
 8. `.ai-loop/gates/phase-gates.md`
+9. `.ai-loop/evidence/evidence-ledger.md`
+10. `.ai-loop/skills/skill-usage-ledger.md`
+11. `.ai-loop/evolution/project-loop-evolution.md`
 
 Then output:
 
 - current phase;
 - last verified evidence;
+- required skill artifacts and their status;
 - open blockers;
 - next safe action;
 - files to inspect before modifying anything.

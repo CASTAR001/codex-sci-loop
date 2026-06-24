@@ -9,10 +9,12 @@ history for phase status, evidence, decisions, or audit results.
 ## Contract
 
 - Codex is Supervisor and owns the route.
-- Kimi Code is Worker and executes only the current phase prompt.
-- Kimi must not approve, expand, or redefine the overall route.
+- A Worker Agent executes only the current phase prompt.
+- The Worker must not approve, expand, or redefine the overall route.
 - Codex must audit evidence before phase acceptance.
 - Missing evidence blocks phase progression.
+- Missing required skill artifacts block phase progression unless the Supervisor
+  records an override reason.
 
 ## Evidence Contract
 
@@ -22,6 +24,8 @@ Each phase must have:
 - `evidence/<phase-id>/report.md`
 - `evidence/<phase-id>/diff.patch`
 - `evidence/<phase-id>/verify.log`
+- `runs/<phase-id>/phase_requirements.json` when using the newer scripts
+- rows in `.ai-loop/evidence/` and `.ai-loop/skills/` ledgers when applicable
 - `audits/<phase-id>/audit.md`
 
 If any required evidence is missing or only contains a `MISSING:` placeholder,

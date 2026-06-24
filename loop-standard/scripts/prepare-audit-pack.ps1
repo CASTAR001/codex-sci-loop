@@ -44,6 +44,7 @@ $Required = @(
     "base_commit.txt",
     "status_before.txt",
     "phase_meta.json",
+    "phase_requirements.json",
     "prompt.md",
     "report.md",
     "status_after.txt",
@@ -65,6 +66,19 @@ foreach ($Name in $Required) {
     if ($Text -match "(?m)^\s*MISSING:") {
         $Problems.Add("$Name contains MISSING placeholder")
     }
+}
+
+$GateScript = Join-Path $PSScriptRoot "validate-phase-gates.ps1"
+$GateOutput = @()
+$GateExitCode = 0
+if (Test-Path -LiteralPath $GateScript) {
+    $GateOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $GateScript -ProjectRoot $ProjectRoot -PhaseId $PhaseId -TargetStatus audit_ready 2>&1)
+    $GateExitCode = $LASTEXITCODE
+    if ($GateExitCode -ne 0) {
+        $Problems.Add("phase gate validation failed")
+    }
+} else {
+    $Problems.Add("missing validate-phase-gates.ps1")
 }
 
 $ChangedFilesPath = Join-Path $RunDir "changed_files.txt"
@@ -99,6 +113,7 @@ $ChangedEvidenceFilesText = if ($ChangedEvidenceFiles.Count -gt 0) {
 }
 
 $ProblemText = if ($Problems.Count -eq 0) { "None" } else { ($Problems | ForEach-Object { "- $_" }) -join [Environment]::NewLine }
+$GateText = if ($GateOutput.Count -gt 0) { ($GateOutput | Out-String).TrimEnd() } else { "No gate output captured." }
 $AuditInputPath = Join-Path $AuditDir "$PhaseId-audit-input.md"
 $AuditResultPath = Join-Path $AuditDir "$PhaseId-audit.md"
 $AuditInput = @"
@@ -114,14 +129,23 @@ $AuditInput = @"
 - base commit: $(Join-Path $RunDir "base_commit.txt")
 - status before: $(Join-Path $RunDir "status_before.txt")
 - phase metadata: $(Join-Path $RunDir "phase_meta.json")
+- phase requirements: $(Join-Path $RunDir "phase_requirements.json")
 - prompt: $(Join-Path $RunDir "prompt.md")
-- Kimi report: $(Join-Path $RunDir "report.md")
+- Worker report: $(Join-Path $RunDir "report.md")
 - status after: $(Join-Path $RunDir "status_after.txt")
 - diff: $(Join-Path $RunDir "diff.patch")
 - verify log: $(Join-Path $RunDir "verify.log")
 - changed files: $(Join-Path $RunDir "changed_files.txt")
 - changed business files: $(Join-Path $RunDir "changed_business_files.txt")
 - changed evidence files: $(Join-Path $RunDir "changed_evidence_files.txt")
+- evidence ledger: $(Join-Path $LoopDir "evidence\evidence-ledger.md")
+- artifact index: $(Join-Path $LoopDir "evidence\artifact-index.md")
+- command log: $(Join-Path $LoopDir "evidence\command-log.md")
+- test log: $(Join-Path $LoopDir "evidence\test-log.md")
+- provenance map: $(Join-Path $LoopDir "evidence\provenance-map.md")
+- skill trigger matrix: $(Join-Path $LoopDir "skills\skill-trigger-matrix.md")
+- skill usage ledger: $(Join-Path $LoopDir "skills\skill-usage-ledger.md")
+- skill artifact map: $(Join-Path $LoopDir "skills\skill-artifact-map.md")
 
 ## Changed Or Relevant Source Files
 
@@ -139,14 +163,21 @@ $ChangedEvidenceFilesText
 
 $ProblemText
 
+## Phase Gate Validation
+
+```text
+$GateText
+```
+
 ## Audit Instructions
 
-Codex must inspect the Kimi report, diff, verify log, status files, phase
-metadata, and relevant source files. Codex must not accept based only on the
-Kimi report.
+Codex must inspect the Worker report, diff, verify log, status files, phase
+metadata, phase requirements, evidence ledger, skill usage ledger, and relevant
+source files. Codex must not accept based only on the Worker report.
 
-If evidence is missing, contains `MISSING:`, verification failed, or source
-inspection cannot be completed, Codex must decide `BLOCKED` or `REWORK`.
+If evidence is missing, contains `MISSING:`, verification failed, required skill
+artifacts are missing, or source inspection cannot be completed, Codex must
+decide `BLOCKED` or `REWORK`.
 
 Write the audit result to:
 

@@ -2,13 +2,13 @@
 
 ## Current Phase
 
-Memory + constraint system bootstrap completed.
+Project loop control plane initialized.
 
 ## Current Objective
 
 Project-local `.ai-loop/` control plane has been created for this project. The
-system is local-first, markdown-first, git-trackable, human-readable, and
-suitable for later global Codex usage.
+system includes memory, constraints, roles, gates, events, evidence ledgers,
+skill trigger records, prompts, templates, and project-local loop evolution.
 
 ## Active Plan
 
@@ -16,8 +16,8 @@ Record the current project plan here after initialization.
 
 ## Current Work Boundary
 
-The first-stage memory and constraint layer plus role contracts, gates, event
-schema, prompts, templates, and bootstrap report are now in place.
+The reusable control-plane layer is in place. Project-specific facts, decisions,
+evidence, skill usage, and evolution proposals should now be recorded here.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -25,16 +25,15 @@ Keep reusable framework code separate from project work.
 
 ## Next Safe Action
 
-Proceed to evidence ledger and skill dispatcher only after reviewing:
+Before planning or modifying project files, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
 - `.ai-loop/gates/pre-action-check.md`
+- `.ai-loop/evidence/evidence-ledger.md`
+- `.ai-loop/skills/skill-trigger-matrix.md`
 
 ## Open Questions
 
-- Should future global installation write an `ai-loop.ps1` wrapper into a PATH
-  directory, or keep absolute script invocation?
-- Should the new root `.ai-loop/` control-plane files be copied into
-  `loop-standard/templates/.ai-loop/` next, or should template migration wait
-  until evidence and skill ledgers are added?
+- What is the current project objective?
+- Which task kind and required skills apply to the next phase?

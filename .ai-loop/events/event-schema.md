@@ -20,6 +20,11 @@ line.
 - `verification`: command or artifact verification.
 - `handoff`: compact, resume, or new-session handoff.
 - `constraint_update`: added or changed constraint.
+- `evidence_recorded`: evidence ledger or artifact-index update.
+- `skill_trigger`: required or optional skill trigger recorded for a phase.
+- `gate_check`: phase gate validation result.
+- `override`: Supervisor override of a blocking gate, with reason.
+- `evolution_proposal`: project-local loop improvement proposal.
 
 ## Optional Fields
 

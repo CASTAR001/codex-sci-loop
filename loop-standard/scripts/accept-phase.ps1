@@ -4,7 +4,9 @@ param(
     [Parameter(Mandatory = $true)][string]$PhaseId,
     [string]$AuditPath = "",
     [switch]$Commit,
-    [string]$CommitMessage = ""
+    [string]$CommitMessage = "",
+    [switch]$Force,
+    [string]$OverrideReason = ""
 )
 
 Set-StrictMode -Version Latest
@@ -29,6 +31,17 @@ function Set-JsonProperty {
     } else {
         $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
     }
+}
+
+function Add-EventLogEntry {
+    param(
+        [Parameter(Mandatory = $true)][string]$LoopDir,
+        [Parameter(Mandatory = $true)]$Event
+    )
+    $EventDir = Join-Path $LoopDir "events"
+    New-Item -ItemType Directory -Force -Path $EventDir | Out-Null
+    $EventLog = Join-Path $EventDir "event-log.ndjson"
+    ($Event | ConvertTo-Json -Depth 20 -Compress) | Add-Content -LiteralPath $EventLog -Encoding utf8
 }
 
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
@@ -57,8 +70,39 @@ if ($AuditText -notmatch "(?m)^\s*Decision:\s*ACCEPTED\s*$") {
     throw "Cannot accept phase because audit result does not contain 'Decision: ACCEPTED'."
 }
 
+$GateScript = Join-Path $PSScriptRoot "validate-phase-gates.ps1"
+$GateOutput = @()
+$GateExitCode = 0
+if (Test-Path -LiteralPath $GateScript) {
+    $GateOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $GateScript -ProjectRoot $ProjectRoot -PhaseId $PhaseId -TargetStatus accepted 2>&1)
+    $GateExitCode = $LASTEXITCODE
+} else {
+    $GateOutput = @("Phase gate validation: FAILED", "- missing validate-phase-gates.ps1")
+    $GateExitCode = 2
+}
+if ($GateExitCode -ne 0 -and -not $Force) {
+    throw "Cannot accept phase because phase gate validation failed.`n$($GateOutput | Out-String)"
+}
+if ($Force -and [string]::IsNullOrWhiteSpace($OverrideReason)) {
+    throw "Cannot use -Force without -OverrideReason."
+}
+if ($Force) {
+    Add-EventLogEntry -LoopDir $LoopDir -Event ([ordered]@{
+        ts = (Get-Date).ToUniversalTime().ToString("o")
+        type = "override"
+        actor = "Codex Supervisor"
+        summary = "Force accepted phase gate result for $PhaseId"
+        phase = $PhaseId
+        result = if ($GateExitCode -eq 0) { "gate_ok_force_recorded" } else { "gate_failed_force_override" }
+        override_reason = $OverrideReason
+        evidence = @(".ai-loop/audits/$PhaseId-audit.md", ".ai-loop/runs/$PhaseId/phase_meta.json")
+        paths = @(".ai-loop/events/event-log.ndjson")
+        gate_output = @($GateOutput)
+    })
+}
+
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
-if ($Meta.status -notin @("audit_ready", "accepted")) {
+if ($Meta.status -notin @("audit_ready", "accepted") -and -not $Force) {
     throw "Cannot accept phase from status '$($Meta.status)'. Expected audit_ready."
 }
 
@@ -75,7 +119,7 @@ foreach ($Name in $Required) {
         $Problems.Add("$Name contains MISSING placeholder")
     }
 }
-if ($Problems.Count -gt 0) {
+if ($Problems.Count -gt 0 -and -not $Force) {
     throw "Cannot accept with missing evidence: $($Problems -join '; ')"
 }
 

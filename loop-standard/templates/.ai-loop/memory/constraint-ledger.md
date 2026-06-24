@@ -8,13 +8,16 @@
 - Worker must not modify governance files unless the Supervisor explicitly
   declares a harness maintenance phase.
 - Governance files include `.ai-loop/memory/`, `.ai-loop/roles/`,
-  `.ai-loop/gates/`, `.ai-loop/events/`, `.ai-loop/prompts/`, and
+  `.ai-loop/gates/`, `.ai-loop/events/`, `.ai-loop/evidence/`,
+  `.ai-loop/skills/`, `.ai-loop/evolution/`, `.ai-loop/prompts/`, and
   `.ai-loop/templates/`.
 - Verification must produce command output, logs, tests, diffs, or reproducible
   artifacts.
 - "Looks correct", "it runs", "probably fixed", and fluent prose are not
   evidence.
 - If evidence is missing, mark `BLOCKED` or `REWORK`, not `ACCEPTED`.
+- If required skill artifacts are missing, mark `BLOCKED` or `REWORK`, unless
+  the Supervisor records an explicit force-override reason.
 - If an invariant or stop rule fails, stop and report; do not patch around it.
 - Do not skip required scientific correctness skills when the task involves
   numerical, symbolic, experimental, research, or correctness-sensitive claims.

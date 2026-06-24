@@ -43,6 +43,8 @@ Every phase must produce these files under `.ai-loop/evidence/<phase-id>/`:
 - `diff.patch` - project diff captured by the evidence script.
 - `verify.log` - verification command output and exit code.
 - `status.txt` - git status or repository status notes.
+- `phase_requirements.json` - task kind, claim IDs, required evidence, and
+  required skill artifacts for gate validation.
 
 The audit package is created under `.ai-loop/audits/<phase-id>/` and must
 include an `audit.md` with exactly one decision:
@@ -52,11 +54,39 @@ include an `audit.md` with exactly one decision:
 - `BLOCKED`
 
 Codex must not accept a phase by reading only the Worker report. It must inspect
-the report, diff, verification log, status, and relevant source files.
+the report, diff, verification log, status, phase requirements, evidence
+ledgers, skill ledgers, and relevant source files.
 
 Required evidence file names are canonical in the first version:
 `prompt.md`, `report.md`, `diff.patch`, `verify.log`, `status.txt`, and
-`audit.md`.
+`audit.md`. The newer `runs/`-based scripts additionally require
+`phase_requirements.json`, `changed_files.txt`, `changed_business_files.txt`,
+and `changed_evidence_files.txt`.
+
+## Evidence, Skills, And Gates
+
+Initialized projects include:
+
+- `.ai-loop/evidence/` - evidence ledger, artifact index, command log, test log,
+  and provenance map.
+- `.ai-loop/skills/` - skill trigger matrix, skill usage ledger, and skill
+  artifact map.
+- `.ai-loop/evolution/project-loop-evolution.md` - append-only project-local
+  loop improvement proposals.
+
+The 8 scientific workflow skills are referenced by name. They are not copied
+into every project. Use `-TaskKind physics-research`, `research-writing`, or
+`data-analysis` to trigger default required skill artifacts. Use
+`-RequiredSkills` when the Supervisor needs a specific skill gate.
+
+Validate a phase gate directly:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-phase-gates.ps1 `
+  -ProjectRoot "C:\path\to\project" `
+  -PhaseId "phase-001" `
+  -TargetStatus audit_ready
+```
 
 ## Quick Start In A Project
 
@@ -73,7 +103,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-phase.ps
   -ProjectRoot "C:\path\to\project" `
   -PhaseId "phase-001" `
   -Title "Implement minimal feature" `
-  -Objective "Make the smallest scoped code change and verify it."
+  -Objective "Make the smallest scoped code change and verify it." `
+  -TaskKind "fullstack"
 ```
 
 After Kimi executes the generated prompt, collect evidence:
@@ -101,6 +132,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\accept-phase.p
   -ProjectRoot "C:\path\to\project" `
   -PhaseId "phase-001"
 ```
+
+If a Supervisor intentionally overrides a failed gate, the command must include
+both `-Force` and `-OverrideReason`; the override is appended to
+`.ai-loop/events/event-log.ndjson`.
 
 Use `REWORK` or `BLOCKED` instead of `ACCEPTED` when evidence is incomplete,
 verification fails, the diff does not match the phase objective, or source

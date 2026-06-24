@@ -11,3 +11,6 @@
 | D007 | 2026-06-24 | Governance files are read-mostly for normal Workers | Prevent accidental mutation of loop rules | Active |
 | D008 | 2026-06-24 | Remove duplicate `agent.md` entrypoint | Root should have one bootstrap file: `AGENTS.md` | Active |
 | D009 | 2026-06-24 | Keep `.agents/` for agent runtime assets and `.ai-loop/` for project state | Prevent runtime/tool assets from mixing with durable loop memory | Active |
+| D010 | 2026-06-24 | Add evidence ledgers, skill trigger matrix, phase gate automation, and project-local evolution file | Prevent prose-only acceptance and make skill requirements auditable | Active |
+| D011 | 2026-06-24 | Reference scientific workflow skills by name instead of copying skill packages into every project | Avoid version drift while preserving project-local evidence records | Active |
+| D012 | 2026-06-24 | Allow force accept only with explicit override reason recorded in event log | Keep emergency escape hatch auditable rather than silent | Active |

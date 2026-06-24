@@ -7,7 +7,8 @@ phase status, evidence, decisions, or audit results.
 ## Roles
 
 - Codex is Supervisor and owns phase planning, audit, and acceptance.
-- Kimi Code is Worker and may execute only the current phase prompt.
+- A Worker Agent executes only the current phase prompt. The Worker may be Kimi
+  Code, another external coding agent, or Codex running in Worker mode.
 
 ## Standard Layout
 
@@ -20,6 +21,7 @@ phase status, evidence, decisions, or audit results.
       base_commit.txt
       status_before.txt
       phase_meta.json
+      phase_requirements.json
       prompt.md
       report.md
       status_after.txt
@@ -31,7 +33,21 @@ phase status, evidence, decisions, or audit results.
   audits/
     <phase-id>-audit-input.md
     <phase-id>-audit.md
+  evidence/
+    evidence-ledger.md
+    artifact-index.md
+    command-log.md
+    test-log.md
+    provenance-map.md
+  skills/
+    skill-trigger-matrix.md
+    skill-usage-ledger.md
+    skill-artifact-map.md
+  evolution/
+    project-loop-evolution.md
 ```
 
-Codex must not accept a phase unless required evidence exists and the audit
-checks the report, diff, verify log, status files, and relevant source files.
+Codex must not accept a phase unless required evidence exists, required skill
+artifacts are present or explicitly overridden, and the audit checks the report,
+diff, verify log, status files, phase requirements, ledgers, and relevant source
+files.

@@ -1,4 +1,4 @@
-# Kimi Worker Report
+# Worker Report
 
 ## Phase
 

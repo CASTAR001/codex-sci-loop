@@ -37,6 +37,15 @@ $RequiredPaths = @(
     "templates\.ai-loop\status.json",
     "templates\.ai-loop\runs\README.md",
     "templates\.ai-loop\audits\README.md",
+    "templates\.ai-loop\evidence\evidence-ledger.md",
+    "templates\.ai-loop\evidence\artifact-index.md",
+    "templates\.ai-loop\evidence\command-log.md",
+    "templates\.ai-loop\evidence\test-log.md",
+    "templates\.ai-loop\evidence\provenance-map.md",
+    "templates\.ai-loop\skills\skill-trigger-matrix.md",
+    "templates\.ai-loop\skills\skill-usage-ledger.md",
+    "templates\.ai-loop\skills\skill-artifact-map.md",
+    "templates\.ai-loop\evolution\project-loop-evolution.md",
     "docs\README.md",
     "docs\OPERATOR_RUNBOOK.md",
     "docs\GLOBAL_INSTALL_PLAN.md",
@@ -46,6 +55,15 @@ $RequiredPaths = @(
     ".ai-loop\loop.config.json",
     ".ai-loop\status.json",
     ".ai-loop\evidence\README.md",
+    ".ai-loop\evidence\evidence-ledger.md",
+    ".ai-loop\evidence\artifact-index.md",
+    ".ai-loop\evidence\command-log.md",
+    ".ai-loop\evidence\test-log.md",
+    ".ai-loop\evidence\provenance-map.md",
+    ".ai-loop\skills\skill-trigger-matrix.md",
+    ".ai-loop\skills\skill-usage-ledger.md",
+    ".ai-loop\skills\skill-artifact-map.md",
+    ".ai-loop\evolution\project-loop-evolution.md",
     ".ai-loop\audits\README.md",
     ".ai-loop\logs\README.md",
     ".ai-loop\templates\phase-plan.md",
@@ -61,6 +79,7 @@ $RequiredPaths = @(
     "scripts\collect-evidence.ps1",
     "scripts\prepare-audit-pack.ps1",
     "scripts\accept-phase.ps1",
+    "scripts\validate-phase-gates.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Initialize-AiLoop.ps1",
@@ -89,7 +108,7 @@ foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.js
 $ConfigPath = Join-Path $KitRoot ".ai-loop\loop.config.json"
 if (Test-Path -LiteralPath $ConfigPath) {
     $Config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
-    $RequiredEvidence = @("prompt.md", "report.md", "diff.patch", "verify.log")
+    $RequiredEvidence = @("prompt.md", "report.md", "diff.patch", "verify.log", "phase_requirements.json")
     foreach ($EvidenceName in $RequiredEvidence) {
         if ($Config.phase_evidence_required -notcontains $EvidenceName) {
             Add-Problem "loop.config.json missing phase evidence: $EvidenceName"
