@@ -68,6 +68,79 @@ function Get-VerifyExitCode {
     return $null
 }
 
+function ConvertTo-NormalizedArtifactPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    return ($Path -replace "\\", "/").Trim()
+}
+
+function Read-ArtifactManifest {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        Add-Problem "missing artifact manifest: .ai-loop/evidence/artifact-manifest.json; rerun collect evidence"
+        return $null
+    }
+    try {
+        $Manifest = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+        if ($null -eq $Manifest.PSObject.Properties["artifacts"]) {
+            Add-Problem "artifact manifest missing artifacts array"
+            return $null
+        }
+        return $Manifest
+    } catch {
+        Add-Problem "invalid artifact manifest JSON: $($_.Exception.Message)"
+        return $null
+    }
+}
+
+function Find-ArtifactRecord {
+    param(
+        [AllowNull()]$Manifest,
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$RelativePath
+    )
+    if ($null -eq $Manifest) { return $null }
+    $Normalized = ConvertTo-NormalizedArtifactPath -Path $RelativePath
+    $Matches = @($Manifest.artifacts | Where-Object {
+        $_.phase -eq $Phase -and (ConvertTo-NormalizedArtifactPath -Path ([string]$_.path)) -eq $Normalized
+    })
+    if ($Matches.Count -eq 0) { return $null }
+    return $Matches[-1]
+}
+
+function Test-ArtifactManifestRecord {
+    param(
+        [AllowNull()]$Manifest,
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [switch]$Required
+    )
+    $Record = Find-ArtifactRecord -Manifest $Manifest -Phase $Phase -RelativePath $RelativePath
+    if ($null -eq $Record) {
+        if ($Required) {
+            Add-Problem "artifact manifest missing required evidence row: $RelativePath"
+        }
+        return
+    }
+    $AbsolutePath = ConvertTo-AbsoluteProjectPath -Root $ProjectRoot -RelativePath $RelativePath
+    if (-not (Test-Path -LiteralPath $AbsolutePath -PathType Leaf)) {
+        Add-Problem "artifact manifest records missing file: $RelativePath"
+        return
+    }
+    if ($Record.status -ne "recorded") {
+        Add-Problem "artifact manifest marks required evidence invalid: $RelativePath status=$($Record.status)"
+    }
+    $CurrentHash = (Get-FileHash -LiteralPath $AbsolutePath -Algorithm SHA256).Hash
+    if ([string]::IsNullOrWhiteSpace([string]$Record.sha256)) {
+        Add-Problem "artifact manifest missing sha256 for $RelativePath"
+    } elseif ($CurrentHash -ne $Record.sha256) {
+        Add-Problem "artifact hash mismatch for $RelativePath"
+    }
+    $CurrentSize = (Get-Item -LiteralPath $AbsolutePath).Length
+    if ($null -ne $Record.PSObject.Properties["size_bytes"] -and [int64]$Record.size_bytes -ne [int64]$CurrentSize) {
+        Add-Problem "artifact size mismatch for $RelativePath"
+    }
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $Problems = New-Object System.Collections.Generic.List[string]
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
@@ -76,8 +149,10 @@ $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
 $MetaPath = Join-Path $RunDir "phase_meta.json"
 $RequirementsPath = Join-Path $RunDir "phase_requirements.json"
 $EvidenceLedger = Join-Path $LoopDir "evidence\evidence-ledger.md"
+$ArtifactManifestPath = Join-Path $LoopDir "evidence\artifact-manifest.json"
 $SkillUsageLedger = Join-Path $LoopDir "skills\skill-usage-ledger.md"
 $SkillSourceMap = Join-Path $LoopDir "skills\skill-source-map.md"
+$ArtifactManifest = Read-ArtifactManifest -Path $ArtifactManifestPath
 
 if (-not (Test-Path -LiteralPath $StatusPath -PathType Leaf)) {
     Add-Problem "missing .ai-loop/status.json"
@@ -141,6 +216,7 @@ foreach ($RelativePath in $RequiredEvidence) {
     if ($RelativePath -notlike "*phase_requirements.json" -and -not (Test-LedgerMentions -LedgerPath $EvidenceLedger -Phase $PhaseId -Needle $RelativePath)) {
         Add-Problem "evidence ledger missing row for $RelativePath"
     }
+    Test-ArtifactManifestRecord -Manifest $ArtifactManifest -Phase $PhaseId -RelativePath $RelativePath -Required
 }
 
 $VerifyLog = Join-Path $RunDir "verify.log"
@@ -179,6 +255,7 @@ if ($null -ne $Requirements) {
             if (-not [string]::IsNullOrWhiteSpace($ArtifactResult)) {
                 Add-Problem "required skill artifact for $Skill missing or invalid: $Artifact ($ArtifactResult)"
             }
+            Test-ArtifactManifestRecord -Manifest $ArtifactManifest -Phase $PhaseId -RelativePath ([string]$Artifact)
         }
     }
 }

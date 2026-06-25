@@ -50,6 +50,98 @@ function Get-VerifyExitCode {
     return ""
 }
 
+function ConvertTo-RelativeArtifactPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    return ($Path -replace "\\", "/").Trim()
+}
+
+function New-ArtifactRecord {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$ArtifactId,
+        [Parameter(Mandatory = $true)][string]$Type,
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [Parameter(Mandatory = $true)][string]$ProducedBy
+    )
+    $NormalizedPath = ConvertTo-RelativeArtifactPath -Path $RelativePath
+    $AbsolutePath = Join-Path $ProjectRoot ($NormalizedPath -replace "/", "\")
+    $Status = "recorded"
+    $Sha256 = ""
+    $SizeBytes = 0
+    $ModifiedUtc = ""
+    $Notes = "ok"
+    if (-not (Test-Path -LiteralPath $AbsolutePath -PathType Leaf)) {
+        $Status = "missing"
+        $Notes = "file missing"
+    } else {
+        $Item = Get-Item -LiteralPath $AbsolutePath
+        $SizeBytes = [int64]$Item.Length
+        $ModifiedUtc = $Item.LastWriteTimeUtc.ToString("o")
+        if ($Item.Length -eq 0) {
+            $Status = "invalid"
+            $Notes = "file empty"
+        } else {
+            $Text = Get-Content -LiteralPath $AbsolutePath -Raw -ErrorAction SilentlyContinue
+            if ($Text -match "(?m)^\s*MISSING:") {
+                $Status = "invalid"
+                $Notes = "contains MISSING placeholder"
+            }
+            $Sha256 = (Get-FileHash -LiteralPath $AbsolutePath -Algorithm SHA256).Hash
+        }
+    }
+    return [pscustomobject][ordered]@{
+        artifact_id = $ArtifactId
+        phase = $Phase
+        type = $Type
+        path = $NormalizedPath
+        sha256 = $Sha256
+        size_bytes = $SizeBytes
+        modified_utc = $ModifiedUtc
+        produced_by = $ProducedBy
+        status = $Status
+        recorded_at = (Get-Date).ToUniversalTime().ToString("o")
+        notes = $Notes
+    }
+}
+
+function Write-ArtifactManifest {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][object[]]$Records
+    )
+    $Manifest = [pscustomobject][ordered]@{
+        schema_version = "1.0"
+        artifacts = @()
+    }
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        try {
+            $Manifest = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+            if ($null -eq $Manifest.PSObject.Properties["artifacts"]) {
+                $Manifest | Add-Member -NotePropertyName "artifacts" -NotePropertyValue @()
+            }
+        } catch {
+            $Manifest = [pscustomobject][ordered]@{
+                schema_version = "1.0"
+                artifacts = @()
+            }
+        }
+    }
+    $Remaining = @($Manifest.artifacts | Where-Object {
+        $Existing = $_
+        -not (@($Records | Where-Object { $_.phase -eq $Existing.phase -and $_.path -eq $Existing.path }).Count -gt 0)
+    })
+    $Manifest.artifacts = @($Remaining + $Records)
+    Write-JsonFile -Value $Manifest -Path $Path
+}
+
+function Get-ShortHash {
+    param([AllowNull()][string]$Hash)
+    if ([string]::IsNullOrWhiteSpace($Hash)) { return "n/a" }
+    if ($Hash.Length -le 12) { return $Hash }
+    return $Hash.Substring(0, 12)
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
@@ -161,6 +253,7 @@ if (Test-Path -LiteralPath $StatusPath) {
 $EvidenceDir = Join-Path $LoopDir "evidence"
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
 $EvidenceLedger = Join-Path $EvidenceDir "evidence-ledger.md"
+$ArtifactManifest = Join-Path $EvidenceDir "artifact-manifest.json"
 $ArtifactIndex = Join-Path $EvidenceDir "artifact-index.md"
 $CommandLog = Join-Path $EvidenceDir "command-log.md"
 $TestLog = Join-Path $EvidenceDir "test-log.md"
@@ -179,8 +272,12 @@ if (Test-Path -LiteralPath $EvidenceLedger) {
     foreach ($Row in $EvidenceRows) { Add-MarkdownRow -Path $EvidenceLedger -Columns $Row }
 }
 if (Test-Path -LiteralPath $ArtifactIndex) {
-    foreach ($Name in @("report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt", "changed_business_files.txt", "changed_evidence_files.txt")) {
-        Add-MarkdownRow -Path $ArtifactIndex -Columns @("ART-$PhaseId-$Name", $PhaseId, "phase-evidence", "$RelativeRunDir/$Name", "collect-evidence.ps1", "active", "Phase evidence artifact.")
+    foreach ($Name in @("prompt.md", "phase_requirements.json", "report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt", "changed_business_files.txt", "changed_evidence_files.txt")) {
+        $ArtifactPath = "$RelativeRunDir/$Name"
+        $Producer = if ($Name -in @("prompt.md", "phase_requirements.json")) { "start-phase.ps1" } elseif ($Name -eq "report.md") { "Worker" } else { "collect-evidence.ps1" }
+        $Record = New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-$Name" -Type "phase-evidence" -RelativePath $ArtifactPath -ProducedBy $Producer
+        $Notes = "sha256=$(Get-ShortHash -Hash $Record.sha256); size=$($Record.size_bytes); status=$($Record.status)"
+        Add-MarkdownRow -Path $ArtifactIndex -Columns @("ART-$PhaseId-$Name", $PhaseId, "phase-evidence", $ArtifactPath, $Producer, $Record.status, $Notes)
     }
 }
 if (Test-Path -LiteralPath $CommandLog) {
@@ -196,5 +293,18 @@ if (Test-Path -LiteralPath $TestLog) {
 if (Test-Path -LiteralPath $ProvenanceMap) {
     Add-MarkdownRow -Path $ProvenanceMap -Columns @("PROV-$PhaseId-DIFF", $PhaseId, "$RelativeRunDir/diff.patch", "$RelativeRunDir/base_commit.txt; $RelativeRunDir/status_after.txt", "git diff", "base commit recorded", "recorded", "Diff provenance for phase audit.")
 }
+
+$ManifestRecords = @(
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-prompt.md" -Type "phase-evidence" -RelativePath "$RelativeRunDir/prompt.md" -ProducedBy "start-phase.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-phase_requirements.json" -Type "phase-evidence" -RelativePath "$RelativeRunDir/phase_requirements.json" -ProducedBy "start-phase.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-report.md" -Type "phase-evidence" -RelativePath "$RelativeRunDir/report.md" -ProducedBy "Worker"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-status_after.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/status_after.txt" -ProducedBy "collect-evidence.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-diff.patch" -Type "phase-evidence" -RelativePath "$RelativeRunDir/diff.patch" -ProducedBy "collect-evidence.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-verify.log" -Type "phase-evidence" -RelativePath "$RelativeRunDir/verify.log" -ProducedBy "collect-evidence.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_files.txt" -ProducedBy "collect-evidence.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_business_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_business_files.txt" -ProducedBy "collect-evidence.ps1"
+    New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_evidence_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_evidence_files.txt" -ProducedBy "collect-evidence.ps1"
+)
+Write-ArtifactManifest -Path $ArtifactManifest -Records $ManifestRecords
 
 Write-Output "Collected evidence for $PhaseId in $RunDir"

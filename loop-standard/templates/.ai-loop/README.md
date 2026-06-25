@@ -35,6 +35,7 @@ phase status, evidence, decisions, or audit results.
     <phase-id>-audit.md
   evidence/
     evidence-ledger.md
+    artifact-manifest.json
     artifact-index.md
     command-log.md
     test-log.md
@@ -48,7 +49,11 @@ phase status, evidence, decisions, or audit results.
     project-loop-evolution.md
 ```
 
-Codex must not accept a phase unless required evidence exists, required skill
-artifacts are present or explicitly overridden, and the audit checks the report,
-diff, verify log, status files, phase requirements, ledgers, and relevant source
-files.
+Evidence uses a dual-track model: Markdown ledgers remain the human-readable
+audit surface, while `artifact-manifest.json` records SHA256, file size, mtime,
+phase, and path for gate validation.
+
+Codex must not accept a phase unless required evidence exists, artifact
+integrity matches the manifest, required skill artifacts are present or
+explicitly overridden, and the audit checks the report, diff, verify log, status
+files, phase requirements, ledgers, and relevant source files.

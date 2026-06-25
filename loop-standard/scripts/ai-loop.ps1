@@ -84,6 +84,11 @@ function Test-NonEmptyFile {
     return "ok"
 }
 
+function ConvertTo-NormalizedArtifactPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    return ($Path -replace "\\", "/").Trim()
+}
+
 function Exit-IfScriptFailed {
     param([Parameter(Mandatory = $true)][bool]$Succeeded)
     if (-not $Succeeded) {
@@ -229,10 +234,15 @@ switch ($Command) {
             $PhaseStatus = if ($null -ne $CurrentPhase.status) { $CurrentPhase.status } elseif ($null -ne $CurrentPhase.phase_status) { $CurrentPhase.phase_status } else { "unknown" }
             $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
             $RequirementsPath = Join-Path $RunDir "phase_requirements.json"
+            $ArtifactManifestPath = Join-Path $LoopDir "evidence\artifact-manifest.json"
+            $ArtifactManifestStatus = "missing"
+            $ArtifactIntegrityProblemCount = 0
             $RequiredSkills = @()
             $MissingEvidence = New-Object System.Collections.Generic.List[string]
+            $RequiredEvidencePaths = New-Object System.Collections.Generic.List[string]
             $RequiredFiles = @("prompt.md", "report.md", "status_after.txt", "diff.patch", "verify.log", "changed_files.txt", "changed_business_files.txt", "changed_evidence_files.txt", "phase_requirements.json")
             foreach ($Name in $RequiredFiles) {
+                $RequiredEvidencePaths.Add(".ai-loop/runs/$PhaseId/$Name")
                 $Check = Test-NonEmptyFile -Path (Join-Path $RunDir $Name)
                 if ($Check -ne "ok") {
                     $MissingEvidence.Add("$Name ($Check)")
@@ -242,6 +252,13 @@ switch ($Command) {
                 try {
                     $Requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
                     $RequiredSkills = @($Requirements.required_skills)
+                    if ($null -ne $Requirements.PSObject.Properties["evidence_required"]) {
+                        $RequiredEvidencePaths = New-Object System.Collections.Generic.List[string]
+                        foreach ($EvidencePath in @($Requirements.evidence_required)) {
+                            $RequiredEvidencePaths.Add([string]$EvidencePath)
+                        }
+                        $RequiredEvidencePaths.Add(".ai-loop/runs/$PhaseId/phase_requirements.json")
+                    }
                     if ($null -ne $Requirements.PSObject.Properties["required_skill_artifacts"]) {
                         foreach ($Requirement in @($Requirements.required_skill_artifacts)) {
                             foreach ($Artifact in @($Requirement.artifacts)) {
@@ -256,6 +273,36 @@ switch ($Command) {
                     $MissingEvidence.Add("phase_requirements.json (invalid json)")
                 }
             }
+            if (Test-Path -LiteralPath $ArtifactManifestPath -PathType Leaf) {
+                try {
+                    $ArtifactManifest = Get-Content -LiteralPath $ArtifactManifestPath -Raw | ConvertFrom-Json
+                    $ArtifactManifestStatus = "present"
+                    foreach ($EvidencePath in @($RequiredEvidencePaths)) {
+                        $NormalizedPath = ConvertTo-NormalizedArtifactPath -Path $EvidencePath
+                        $Record = @($ArtifactManifest.artifacts | Where-Object {
+                            $_.phase -eq $PhaseId -and (ConvertTo-NormalizedArtifactPath -Path ([string]$_.path)) -eq $NormalizedPath
+                        } | Select-Object -Last 1)
+                        if ($Record.Count -eq 0) {
+                            $ArtifactIntegrityProblemCount++
+                            continue
+                        }
+                        $AbsolutePath = Join-Path $ProjectRoot ($NormalizedPath -replace "/", "\")
+                        if (-not (Test-Path -LiteralPath $AbsolutePath -PathType Leaf)) {
+                            $ArtifactIntegrityProblemCount++
+                            continue
+                        }
+                        $CurrentHash = (Get-FileHash -LiteralPath $AbsolutePath -Algorithm SHA256).Hash
+                        if ($Record[0].status -ne "recorded" -or $CurrentHash -ne $Record[0].sha256) {
+                            $ArtifactIntegrityProblemCount++
+                        }
+                    }
+                } catch {
+                    $ArtifactManifestStatus = "invalid"
+                    $ArtifactIntegrityProblemCount++
+                }
+            } else {
+                $ArtifactIntegrityProblemCount = @($RequiredEvidencePaths).Count
+            }
             $NextSafeAction = switch ($PhaseStatus) {
                 "started" { "Give the Worker the phase prompt, then collect evidence after execution." }
                 "phase_started" { "Give the Worker the phase prompt, then collect evidence after execution." }
@@ -269,10 +316,15 @@ switch ($Command) {
             if ($MissingEvidence.Count -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
                 $Blocked = $true
             }
+            if ($ArtifactIntegrityProblemCount -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
+                $Blocked = $true
+            }
             Write-Output "Current phase: $PhaseId"
             Write-Output "Phase status: $PhaseStatus"
             Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
             Write-Output "Required skills: $(if ($RequiredSkills.Count -gt 0) { $RequiredSkills -join ', ' } else { 'none' })"
+            Write-Output "Artifact manifest: $ArtifactManifestStatus"
+            Write-Output "Artifact integrity problems: $ArtifactIntegrityProblemCount"
             Write-Output "Missing evidence:"
             if ($MissingEvidence.Count -eq 0) {
                 Write-Output "- none"
@@ -331,6 +383,10 @@ switch ($Command) {
         Write-Output "Plugin manifest: $PluginManifest"
         Write-Output "Shim: $ShimPath"
         if (-not (Test-Path -LiteralPath $TemplateDir -PathType Container)) { throw "Template directory missing: $TemplateDir" }
+        $TemplateManifest = Join-Path $TemplateDir "evidence\artifact-manifest.json"
+        if (-not (Test-Path -LiteralPath $TemplateManifest -PathType Leaf)) { throw "Template artifact manifest missing: $TemplateManifest" }
+        $TemplateManifestJson = Get-Content -LiteralPath $TemplateManifest -Raw | ConvertFrom-Json
+        if ($null -eq $TemplateManifestJson.PSObject.Properties["artifacts"]) { throw "Template artifact manifest missing artifacts array." }
         if (-not (Test-Path -LiteralPath $PluginManifest -PathType Leaf)) { throw "Plugin manifest missing: $PluginManifest" }
         $Plugin = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
         if ($Plugin.name -ne "codex-loop-harness") { throw "Unexpected plugin name: $($Plugin.name)" }
@@ -356,6 +412,7 @@ switch ($Command) {
         Write-Output "Required research skills: OK"
         Write-Output "Plugin manifest JSON: OK"
         Write-Output "Plugin skill frontmatter: OK"
+        Write-Output "Template artifact manifest: OK"
         Write-Output "Doctor: OK"
     }
 }

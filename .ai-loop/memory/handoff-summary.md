@@ -2,15 +2,15 @@
 
 ## Current Phase
 
-Global-callable harness convergence implemented. The repo now has a canonical
-script entrypoint, temporary/global install script, shim support, plugin
-validation, recovery summary, and compatibility wrappers.
+Artifact hashing and evidence ledger automation implemented on top of the
+global-callable harness. Required phase evidence now has machine-readable
+SHA256 integrity records.
 
 ## Last Verified State
 
 `loop-standard/` exists with scripts, docs, prompts, templates, pilot fixture,
 and e2e validation. `pilot-project/` is a root-tracked fixture, not a nested git
-repository. The latest self-check reports 73 required paths.
+repository. The latest self-check reports 75 required paths.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -30,6 +30,10 @@ recommended user-facing command. `install-global.ps1` can create
 `plugins/codex-loop-harness/`. The plugin scaffold stores no project-local
 `.ai-loop` state.
 
+Evidence now uses a dual-track model: Markdown ledgers are the human-readable
+surface, while `.ai-loop/evidence/artifact-manifest.json` is the gate-validated
+integrity source for required phase evidence.
+
 ## Must Preserve
 
 - Worker must not own the global route.
@@ -45,9 +49,11 @@ recommended user-facing command. `install-global.ps1` can create
 - `.agents/` is for agent runtime assets, not durable project memory.
 - Uppercase compatibility scripts must remain thin wrappers and must not contain
   independent legacy state logic.
+- Required phase evidence must have a matching artifact manifest row and current
+  SHA256 hash before audit/accept can pass.
 
 ## Next Safe Action
 
-Run `Test-LoopStandard.ps1 -AllowPilotProject`, then choose whether to promote a
-real global install root, add artifact hashing, deepen state-machine transition
-logs, or expand the skill trigger matrix.
+Run `Test-LoopStandard.ps1 -AllowPilotProject`, then choose whether to deepen
+state-machine transition logs, expand the skill trigger matrix, or make required
+skill artifacts first-class manifest entries.

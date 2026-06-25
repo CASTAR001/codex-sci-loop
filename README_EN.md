@@ -188,9 +188,17 @@ A valid phase must include evidence such as:
 - changed files
 - phase requirements
 - evidence ledgers
+- artifact manifest hashing
 - skill usage records
 - required skill artifacts when triggers apply
 - Codex audit result
+
+Evidence integrity uses a dual-track model:
+
+- Markdown ledgers are for human audit.
+- `.ai-loop/evidence/artifact-manifest.json` is machine-readable and records SHA256, size, mtime, phase, and path.
+
+`validate` blocks required evidence that is missing, empty, unregistered, or hash-mismatched.
 
 If evidence is missing, verification fails, skill artifacts are missing, or a
 required skill link is unavailable, the phase must be `BLOCKED` or `REWORK`
@@ -222,6 +230,7 @@ Implemented:
 - reusable `loop-standard/` kit
 - `.ai-loop/` memory and constraint system
 - evidence ledgers
+- artifact manifest hashing
 - skill trigger matrix and skill usage records
 - phase gate automation
 - project-local evolution file

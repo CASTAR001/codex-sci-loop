@@ -205,9 +205,17 @@ Codex 不能只根据 worker report 接受阶段。
 - changed files
 - phase requirements
 - evidence ledgers
+- artifact manifest hashing
 - skill usage records
 - 触发 skill 后要求的 skill artifacts
 - Codex audit result
+
+证据完整性使用双轨模型：
+
+- Markdown ledgers 面向人工审计。
+- `.ai-loop/evidence/artifact-manifest.json` 面向脚本校验，记录 SHA256、文件大小、mtime、phase 和 path。
+
+`validate` 会阻断缺失、空文件、未登记、hash 不匹配的 required evidence。
 
 如果证据缺失、验证失败、skill artifact 缺失、required skill 链接不可用，
 阶段必须是 `BLOCKED` 或 `REWORK`。只有 Supervisor 记录明确 override reason
@@ -238,6 +246,7 @@ Codex 不能只根据 worker report 接受阶段。
 - 可复用 `loop-standard/` kit。
 - `.ai-loop/` 记忆与约束系统。
 - evidence ledgers。
+- artifact manifest hashing。
 - skill trigger matrix 与 skill usage records。
 - phase gate automation。
 - project-local evolution file。

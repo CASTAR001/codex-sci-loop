@@ -20,3 +20,5 @@
 | D016 | 2026-06-25 | Generate a `bin/ai-loop.ps1` shim during install instead of modifying PATH automatically | Keep global invocation simple while avoiding hidden user environment changes | Active |
 | D017 | 2026-06-25 | Keep uppercase scripts only as compatibility wrappers around canonical `ai-loop.ps1` | Prevent old entrypoints from bypassing evidence, skill, and accept gates | Active |
 | D018 | 2026-06-25 | Make `ai-loop resume` summarize state and return BLOCKED when required state cannot be reconstructed | Recovery must be file-based and must not continue from chat memory alone | Active |
+| D019 | 2026-06-25 | Use Markdown plus JSON for artifact integrity | Keep evidence human-auditable while giving gates a stable machine-readable manifest | Active |
+| D020 | 2026-06-25 | Require manifest hash matches for phase required evidence before audit/accept | Detect stale, missing, or tampered evidence instead of trusting file presence alone | Active |

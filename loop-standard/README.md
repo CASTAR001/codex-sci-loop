@@ -98,8 +98,8 @@ and `changed_evidence_files.txt`.
 
 Initialized projects include:
 
-- `.ai-loop/evidence/` - evidence ledger, artifact index, command log, test log,
-  and provenance map.
+- `.ai-loop/evidence/` - evidence ledger, artifact index, artifact manifest,
+  command log, test log, and provenance map.
 - `.ai-loop/skills/` - skill trigger matrix, skill usage ledger, and skill
   artifact map.
 - `.ai-loop/evolution/project-loop-evolution.md` - append-only project-local
@@ -127,6 +127,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-phase
   -PhaseId "phase-001" `
   -TargetStatus audit_ready
 ```
+
+Evidence integrity uses a dual-track model. Markdown ledgers are for human
+audit. `.ai-loop/evidence/artifact-manifest.json` is machine-readable and
+records SHA256, file size, modified time, phase, and path. `validate` blocks
+required evidence that is missing, empty, unregistered, or hash-mismatched.
 
 ## Quick Start In A Project
 

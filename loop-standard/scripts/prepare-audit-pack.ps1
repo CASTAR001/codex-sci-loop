@@ -28,12 +28,92 @@ function Set-JsonProperty {
     }
 }
 
+function ConvertTo-NormalizedArtifactPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    return ($Path -replace "\\", "/").Trim()
+}
+
+function ConvertTo-AbsoluteProjectPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$RelativePath
+    )
+    return Join-Path $Root (($RelativePath -replace "/", "\").Trim())
+}
+
+function Get-ShortHash {
+    param([AllowNull()][string]$Hash)
+    if ([string]::IsNullOrWhiteSpace($Hash)) { return "n/a" }
+    if ($Hash.Length -le 12) { return $Hash }
+    return $Hash.Substring(0, 12)
+}
+
+function Get-ArtifactIntegritySummary {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string[]]$RelativePaths,
+        [Parameter(Mandatory = $true)][string]$ManifestPath
+    )
+    $Problems = New-Object System.Collections.Generic.List[string]
+    $Rows = New-Object System.Collections.Generic.List[string]
+    $Rows.Add("| Path | Manifest Status | SHA256 | Size | Check |")
+    $Rows.Add("| --- | --- | --- | --- | --- |")
+    $Manifest = $null
+    if (-not (Test-Path -LiteralPath $ManifestPath -PathType Leaf)) {
+        $Problems.Add("missing artifact manifest: .ai-loop/evidence/artifact-manifest.json")
+        foreach ($RelativePath in $RelativePaths) {
+            $Rows.Add("| $RelativePath | missing manifest | n/a | n/a | FAIL |")
+        }
+        return [pscustomobject]@{ text = ($Rows -join [Environment]::NewLine); problems = @($Problems) }
+    }
+    try {
+        $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
+    } catch {
+        $Problems.Add("invalid artifact manifest JSON: $($_.Exception.Message)")
+        foreach ($RelativePath in $RelativePaths) {
+            $Rows.Add("| $RelativePath | invalid manifest | n/a | n/a | FAIL |")
+        }
+        return [pscustomobject]@{ text = ($Rows -join [Environment]::NewLine); problems = @($Problems) }
+    }
+    foreach ($RelativePath in $RelativePaths) {
+        $NormalizedPath = ConvertTo-NormalizedArtifactPath -Path $RelativePath
+        $Record = @($Manifest.artifacts | Where-Object {
+            $_.phase -eq $Phase -and (ConvertTo-NormalizedArtifactPath -Path ([string]$_.path)) -eq $NormalizedPath
+        } | Select-Object -Last 1)
+        $AbsolutePath = ConvertTo-AbsoluteProjectPath -Root $ProjectRoot -RelativePath $RelativePath
+        if ($Record.Count -eq 0) {
+            $Rows.Add("| $RelativePath | missing row | n/a | n/a | FAIL |")
+            $Problems.Add("artifact manifest missing required evidence row: $RelativePath")
+            continue
+        }
+        $Entry = $Record[0]
+        if (-not (Test-Path -LiteralPath $AbsolutePath -PathType Leaf)) {
+            $Rows.Add("| $RelativePath | $($Entry.status) | $(Get-ShortHash -Hash $Entry.sha256) | $($Entry.size_bytes) | FAIL missing file |")
+            $Problems.Add("artifact manifest records missing file: $RelativePath")
+            continue
+        }
+        $CurrentHash = (Get-FileHash -LiteralPath $AbsolutePath -Algorithm SHA256).Hash
+        $CurrentSize = (Get-Item -LiteralPath $AbsolutePath).Length
+        $Check = "OK"
+        if ($Entry.status -ne "recorded") { $Check = "FAIL status=$($Entry.status)" }
+        elseif ($CurrentHash -ne $Entry.sha256) { $Check = "FAIL hash mismatch" }
+        elseif ([int64]$CurrentSize -ne [int64]$Entry.size_bytes) { $Check = "FAIL size mismatch" }
+        if ($Check -ne "OK") {
+            $Problems.Add("artifact integrity failed for ${RelativePath}: $Check")
+        }
+        $Rows.Add("| $RelativePath | $($Entry.status) | $(Get-ShortHash -Hash $Entry.sha256) | $($Entry.size_bytes) | $Check |")
+    }
+    return [pscustomobject]@{ text = ($Rows -join [Environment]::NewLine); problems = @($Problems) }
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
 $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
 $AuditDir = Join-Path $LoopDir "audits"
 $StatusPath = Join-Path $LoopDir "status.json"
 $MetaPath = Join-Path $RunDir "phase_meta.json"
+$ArtifactManifestPath = Join-Path $LoopDir "evidence\artifact-manifest.json"
 
 if (-not (Test-Path -LiteralPath $MetaPath)) {
     throw "Missing phase metadata: $MetaPath"
@@ -66,6 +146,34 @@ foreach ($Name in $Required) {
     if ($Text -match "(?m)^\s*MISSING:") {
         $Problems.Add("$Name contains MISSING placeholder")
     }
+}
+
+$RequiredArtifactPaths = @(
+    ".ai-loop/runs/$PhaseId/prompt.md",
+    ".ai-loop/runs/$PhaseId/report.md",
+    ".ai-loop/runs/$PhaseId/status_after.txt",
+    ".ai-loop/runs/$PhaseId/diff.patch",
+    ".ai-loop/runs/$PhaseId/verify.log",
+    ".ai-loop/runs/$PhaseId/changed_files.txt",
+    ".ai-loop/runs/$PhaseId/changed_business_files.txt",
+    ".ai-loop/runs/$PhaseId/changed_evidence_files.txt",
+    ".ai-loop/runs/$PhaseId/phase_requirements.json"
+)
+$RequirementsPath = Join-Path $RunDir "phase_requirements.json"
+if (Test-Path -LiteralPath $RequirementsPath -PathType Leaf) {
+    try {
+        $Requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
+        if ($null -ne $Requirements.PSObject.Properties["evidence_required"]) {
+            $RequiredArtifactPaths = @($Requirements.evidence_required) + @(".ai-loop/runs/$PhaseId/phase_requirements.json")
+        }
+    } catch {
+        $Problems.Add("phase_requirements.json cannot be parsed for artifact integrity summary: $($_.Exception.Message)")
+    }
+}
+
+$ArtifactSummary = Get-ArtifactIntegritySummary -ProjectRoot $ProjectRoot -Phase $PhaseId -RelativePaths $RequiredArtifactPaths -ManifestPath $ArtifactManifestPath
+foreach ($ArtifactProblem in @($ArtifactSummary.problems)) {
+    $Problems.Add($ArtifactProblem)
 }
 
 $GateScript = Join-Path $PSScriptRoot "validate-phase-gates.ps1"
@@ -139,6 +247,7 @@ $AuditInput = @"
 - changed business files: $(Join-Path $RunDir "changed_business_files.txt")
 - changed evidence files: $(Join-Path $RunDir "changed_evidence_files.txt")
 - evidence ledger: $(Join-Path $LoopDir "evidence\evidence-ledger.md")
+- artifact manifest: $(Join-Path $LoopDir "evidence\artifact-manifest.json")
 - artifact index: $(Join-Path $LoopDir "evidence\artifact-index.md")
 - command log: $(Join-Path $LoopDir "evidence\command-log.md")
 - test log: $(Join-Path $LoopDir "evidence\test-log.md")
@@ -159,6 +268,10 @@ $ChangedBusinessFilesText
 
 $ChangedEvidenceFilesText
 
+## Artifact Integrity Summary
+
+$($ArtifactSummary.text)
+
 ## Missing Or Invalid Evidence
 
 $ProblemText
@@ -176,8 +289,8 @@ metadata, phase requirements, evidence ledger, skill usage ledger, and relevant
 source files. Codex must not accept based only on the Worker report.
 
 If evidence is missing, contains `MISSING:`, verification failed, required skill
-artifacts are missing, or source inspection cannot be completed, Codex must
-decide `BLOCKED` or `REWORK`.
+artifacts are missing, artifact integrity is missing or mismatched, or source
+inspection cannot be completed, Codex must decide `BLOCKED` or `REWORK`.
 
 Write the audit result to:
 

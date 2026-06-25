@@ -38,6 +38,7 @@ $RequiredPaths = @(
     "templates\.ai-loop\runs\README.md",
     "templates\.ai-loop\audits\README.md",
     "templates\.ai-loop\evidence\evidence-ledger.md",
+    "templates\.ai-loop\evidence\artifact-manifest.json",
     "templates\.ai-loop\evidence\artifact-index.md",
     "templates\.ai-loop\evidence\command-log.md",
     "templates\.ai-loop\evidence\test-log.md",
@@ -57,6 +58,7 @@ $RequiredPaths = @(
     ".ai-loop\status.json",
     ".ai-loop\evidence\README.md",
     ".ai-loop\evidence\evidence-ledger.md",
+    ".ai-loop\evidence\artifact-manifest.json",
     ".ai-loop\evidence\artifact-index.md",
     ".ai-loop\evidence\command-log.md",
     ".ai-loop\evidence\test-log.md",
@@ -106,7 +108,7 @@ foreach ($RelativePath in $RequiredPaths) {
     Test-RequiredPath -RelativePath $RelativePath
 }
 
-foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.json", "templates\.ai-loop\loop.config.json", "templates\.ai-loop\status.json")) {
+foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.json", ".ai-loop\evidence\artifact-manifest.json", "templates\.ai-loop\loop.config.json", "templates\.ai-loop\status.json", "templates\.ai-loop\evidence\artifact-manifest.json")) {
     $JsonPath = Join-Path $KitRoot $JsonRelativePath
     if (Test-Path -LiteralPath $JsonPath) {
         try {
@@ -160,6 +162,9 @@ if (Test-Path -LiteralPath $ConfigPath) {
         if ($Config.decisions -notcontains $Decision) {
             Add-Problem "loop.config.json missing decision: $Decision"
         }
+    }
+    if ($Config.evidence_ledgers -notcontains ".ai-loop/evidence/artifact-manifest.json") {
+        Add-Problem "loop.config.json missing artifact manifest ledger entry."
     }
 }
 

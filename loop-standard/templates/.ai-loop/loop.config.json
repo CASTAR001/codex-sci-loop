@@ -24,6 +24,7 @@
   ],
   "evidence_ledgers": [
     ".ai-loop/evidence/evidence-ledger.md",
+    ".ai-loop/evidence/artifact-manifest.json",
     ".ai-loop/evidence/artifact-index.md",
     ".ai-loop/evidence/command-log.md",
     ".ai-loop/evidence/test-log.md",

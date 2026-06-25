@@ -51,17 +51,27 @@
 - Verified installed shim doctor, installed project init/link-skills, fullstack
   gates, physics artifact blocking, force override, broken skill link blocking,
   missing-status recovery blocking, and compatibility wrapper smoke flow.
+- Added dual-track artifact integrity: Markdown artifact index for human audit
+  and `artifact-manifest.json` for machine validation.
+- `collect-evidence.ps1` now records SHA256, size, mtime, phase, path, producer,
+  and status for required phase evidence.
+- `validate-phase-gates.ps1` now blocks missing manifests, missing rows, empty
+  evidence, stale hashes, and artifact size mismatches.
+- `prepare-audit-pack.ps1` now includes an Artifact Integrity Summary.
+- Verified hash mismatch, missing manifest row, missing file, empty file, and
+  missing manifest all block validation.
 
 ## In Progress
 
-- Deeper state-machine enforcement and evidence-ledger automation.
+- Deeper state-machine enforcement and broader evidence-ledger automation.
 
 ## Pending
 
 - Choose final non-temporary global install root.
-- Add artifact hashing and stronger evidence ledger automation.
 - Expand skill trigger matrix for full-stack and physics workflows.
 - Add stricter state transition logs and recovery paths.
+- Decide whether skill artifacts should become required manifest entries in the
+  next evidence hardening phase.
 
 ## Last Updated
 
