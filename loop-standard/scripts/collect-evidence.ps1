@@ -48,7 +48,7 @@ function Remove-MarkdownRowsForPhase {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return }
     $Lines = @(Get-Content -LiteralPath $Path)
     $Filtered = @($Lines | Where-Object { $_ -notlike "*| $Phase |*" })
-    $Filtered | Set-Content -LiteralPath $Path -Encoding utf8
+    Set-Content -LiteralPath $Path -Encoding utf8 -Value $Filtered
 }
 
 function Get-VerifyExitCode {
@@ -211,8 +211,14 @@ if (-not [string]::IsNullOrWhiteSpace($CommandToRun)) {
     Push-Location -LiteralPath $ProjectRoot
     try {
         $Started = (Get-Date).ToUniversalTime().ToString("o")
-        $Output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $CommandToRun 2>&1
-        $ExitCode = $LASTEXITCODE
+        $PreviousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $Output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $CommandToRun 2>&1
+            $ExitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $PreviousErrorActionPreference
+        }
         $Finished = (Get-Date).ToUniversalTime().ToString("o")
         @(
             "verify_command: $CommandToRun"

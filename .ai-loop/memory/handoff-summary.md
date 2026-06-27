@@ -3,10 +3,9 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phase-001 have been
-accepted. Root self-loop phase-002 has a repo-local plugin install/discovery
-smoke test accepted. Root self-loop phase-003 added loop-wide state validation
-and is ready for final acceptance.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-004 have
+been accepted. Root phase-004 added negative fixture coverage for loop-wide
+state validation.
 
 ## Last Verified State
 
@@ -50,6 +49,16 @@ Root self-loop phase-003 added `validate-loop.ps1` and exposed it through
 critical files, `status.json`, duplicate phase IDs, current phase consistency,
 accepted audit decisions, accepted phase `accepted.txt`, and accepted phase
 gates.
+Root self-loop phase-004 added `Test-ValidateLoopFailures.ps1`, a fixture test
+suite that copies the root `.ai-loop/` into ignored temp projects and mutates
+the copied state to prove `validate-loop.ps1` rejects duplicate phase IDs,
+broken `current_phase`, illegal statuses, missing accepted audits, stale
+artifact hashes, and missing recovery-critical files. `Test-Phase004.ps1`
+aggregates the main self-check, plugin install smoke test, failure fixtures,
+collect idempotence, and root loop validation. The same phase fixed
+`collect-evidence.ps1` so ledger row refreshes do not fail on same-file
+read/write streams and non-fatal verification stderr is captured as log evidence
+instead of aborting collection.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -98,9 +107,9 @@ integrity source for required phase evidence.
 
 ## Next Safe Action
 
-Repo-local plugin install/discovery smoke testing is now in place. The remaining
-plugin-form stability step is a live global Codex plugin install/discovery test,
-which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are fixture-level
-failure tests for `validate-loop.ps1`, schema/migration versioning, or
-start-phase ledger idempotence.
+Repo-local plugin install/discovery smoke testing and validate-loop negative
+fixture testing are now in place. The remaining plugin-form stability step is a
+live global Codex plugin install/discovery test, which must wait for explicit
+user approval because it modifies real Codex/plugin configuration. Good
+non-global next candidates are schema/migration versioning for `.ai-loop`
+templates/installed projects or start-phase ledger idempotence.

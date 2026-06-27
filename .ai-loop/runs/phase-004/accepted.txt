@@ -1,0 +1,2 @@
+﻿accepted_at: 2026-06-27T15:12:07.8978673Z
+audit: .ai-loop/audits/phase-004-audit.md

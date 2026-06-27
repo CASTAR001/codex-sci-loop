@@ -1,0 +1,19 @@
+﻿ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/artifact-manifest.json
+ M .ai-loop/evidence/command-log.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/evidence/provenance-map.md
+ M .ai-loop/evidence/test-log.md
+ M .ai-loop/memory/activeContext.md
+ M .ai-loop/memory/handoff-summary.md
+ M .ai-loop/memory/progress.md
+ M .ai-loop/status.json
+ M loop-standard/scripts/Test-LoopStandard.ps1
+ M loop-standard/scripts/collect-evidence.ps1
+?? .ai-loop/audits/phase-004-audit-input.md
+?? .ai-loop/audits/phase-004-audit.md
+?? .ai-loop/runs/phase-004/
+?? loop-standard/scripts/Test-CollectLedgerIdempotence.ps1
+?? loop-standard/scripts/Test-Phase004.ps1
+?? loop-standard/scripts/Test-ValidateLoopFailures.ps1
+

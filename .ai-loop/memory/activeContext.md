@@ -58,6 +58,16 @@ Root phase-003 added loop-wide state validation through `validate-loop.ps1` and
 `ai-loop -Command validate-loop`, covering control-plane structure,
 `status.json` consistency, phase references, accepted audits, accepted phase
 gates, and recovery-critical files.
+Root phase-004 added negative fixture tests for `validate-loop.ps1` through
+`Test-ValidateLoopFailures.ps1`, proving the loop-wide validator rejects
+duplicate phase IDs, broken `current_phase` references, illegal statuses,
+missing accepted audits, stale artifact hashes, and missing recovery-critical
+files. The same phase also fixed collect-time Markdown ledger refreshes and
+verification stderr capture, then added `Test-CollectLedgerIdempotence.ps1` to
+prove repeated collect refreshes do not duplicate evidence/command/test/
+provenance ledger rows. `Test-Phase004.ps1` now runs the main self-check,
+plugin install smoke test, negative fixtures, collect idempotence, and root
+loop validation.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -66,8 +76,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is schema/migration versioning or deeper
-state/recovery transition tests inside the already runnable root `.ai-loop`.
+The next best optimization is schema/migration versioning for `.ai-loop`
+templates and installed projects, or making start-time Markdown ledger rows
+idempotent like collect-time evidence rows.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
@@ -90,6 +101,5 @@ approval. Before further harness changes, review:
   `phase_requirements.json` for phases that use an external Worker?
 - Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`
   as well as `collect-evidence.ps1`?
-- Should `validate-loop.ps1` grow fixture tests for duplicate phases, broken
-  current phase references, missing accepted audits, and stale artifact
-  manifests?
+- Should `validate-loop.ps1` also verify schema version compatibility once a
+  migration file exists?

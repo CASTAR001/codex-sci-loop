@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-004",
+    "title":  "Validate loop failure fixtures",
+    "objective":  "Add negative fixture coverage proving validate-loop rejects broken control-plane states.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-004",
+    "audit_input":  ".ai-loop/audits/phase-004-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-004-audit.md",
+    "base_commit":  "793c118304b2e646aa33f21849a115e71cd95e49",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase004.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-004/phase_requirements.json",
+    "started_at":  "2026-06-27T14:48:27.1857522Z",
+    "evidence_collected_at":  "2026-06-27T15:10:41.1004083Z",
+    "audit_prepared_at":  "2026-06-27T15:11:19.0427001Z",
+    "accepted_at":  "2026-06-27T15:12:07.8978673Z"
+}

@@ -1,0 +1,6 @@
+﻿loop-standard/scripts/collect-evidence.ps1
+loop-standard/scripts/Test-CollectLedgerIdempotence.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase004.ps1
+loop-standard/scripts/Test-ValidateLoopFailures.ps1
+

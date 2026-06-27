@@ -103,11 +103,20 @@
   `validate-loop.ps1`, exposed it as `ai-loop -Command validate-loop`, included
   it in generated install shims, documented it, updated plugin recovery
   guidance, and verified it against the root control plane.
+- Ran root self-loop phase-004 under the repository root `.ai-loop`: added
+  `Test-ValidateLoopFailures.ps1` and `Test-Phase004.ps1`, wired them into the
+  canonical self-check, and verified that `validate-loop.ps1` rejects duplicate
+  phase IDs, broken current phase references, illegal statuses, missing
+  accepted audits, stale artifact hashes, and missing recovery-critical files.
+- Extended root self-loop phase-004 after collect exposed real failure modes:
+  `collect-evidence.ps1` now rewrites filtered Markdown ledger rows with
+  `Set-Content -Value`, captures non-fatal verification stderr into
+  `verify.log`, and `Test-CollectLedgerIdempotence.ps1` proves repeated collect
+  refreshes do not duplicate ledger rows.
 
 ## In Progress
 
-- Continue state/recovery hardening toward 1.0 without modifying real global
-  Codex configuration.
+- Continue 1.0 hardening without modifying real global Codex configuration.
 
 ## Pending
 
@@ -123,11 +132,10 @@
   external-service invocation is explicitly approved for that phase.
 - Decide whether start-time Markdown ledger rows should be made idempotent like
   collect-time evidence rows.
-- Add fixture-level tests for `validate-loop.ps1` failure modes: duplicate
-  phases, broken current phase references, missing accepted audits, illegal
-  statuses, and stale accepted gates.
 - Add schema/migration versioning for `.ai-loop` templates and installed
   projects.
+- Make start-time Markdown ledger rows idempotent like collect-time evidence
+  rows, or explicitly document why start rows are append-only.
 
 ## Last Updated
 

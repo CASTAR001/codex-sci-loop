@@ -94,6 +94,9 @@ $RequiredPaths = @(
     "scripts\accept-phase.ps1",
     "scripts\validate-phase-gates.ps1",
     "scripts\validate-loop.ps1",
+    "scripts\Test-ValidateLoopFailures.ps1",
+    "scripts\Test-CollectLedgerIdempotence.ps1",
+    "scripts\Test-Phase004.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -244,10 +247,13 @@ if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
 $CollectEvidenceScriptPath = Join-Path $KitRoot "scripts\collect-evidence.ps1"
 if (Test-Path -LiteralPath $CollectEvidenceScriptPath -PathType Leaf) {
     $CollectEvidenceText = Get-Content -LiteralPath $CollectEvidenceScriptPath -Raw
-    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "ConvertFrom-GitStatusLine", "Remove-MarkdownRowsForPhase", "rev-parse --show-prefix", "status --porcelain", "changed_business_files.txt", "changed_evidence_files.txt")) {
+    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "ConvertFrom-GitStatusLine", "Remove-MarkdownRowsForPhase", "PreviousErrorActionPreference", "rev-parse --show-prefix", "status --porcelain", "changed_business_files.txt", "changed_evidence_files.txt")) {
         if ($CollectEvidenceText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "collect-evidence.ps1 missing expected classification text: $Needle"
         }
+    }
+    if ($CollectEvidenceText -notmatch "Set-Content\s+-LiteralPath\s+\`$Path\s+-Encoding\s+utf8\s+-Value\s+\`$Filtered") {
+        Add-Problem "collect-evidence.ps1 should rewrite filtered ledger rows with Set-Content -Value to avoid read/write stream conflicts."
     }
 }
 
