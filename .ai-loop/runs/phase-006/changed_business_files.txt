@@ -1,0 +1,13 @@
+﻿loop-standard/README.md
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/decide-phase.ps1
+loop-standard/scripts/install-global.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase006.ps1
+loop-standard/scripts/Test-PhaseDecisions.ps1
+loop-standard/scripts/validate-loop.ps1
+plugins/codex-loop-harness/skills/loop-auditor/SKILL.md
+plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
+README.md
+README_EN.md
+

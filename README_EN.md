@@ -29,6 +29,7 @@ Important pieces:
 - `scripts/validate-phase-gates.ps1`: blocks phases with missing evidence,
   invalid state, missing skill artifacts, or broken skill links.
 - `scripts/accept-phase.ps1`: accepts a phase only after audit and gate checks.
+- `scripts/decide-phase.ps1`: records `REWORK` / `BLOCKED` audit outcomes as durable state.
 - `scripts/link-skills.ps1`: links shared skills into a project `.agents/skills/`.
 - `scripts/ai-loop.ps1`: the recommended unified entrypoint.
 
@@ -151,6 +152,18 @@ Accept only after Codex writes an audit with `Decision: ACCEPTED`:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command accept -ProjectRoot E:\some-project -PhaseId phase-001
 ```
 
+If the audit decision is `REWORK` or `BLOCKED`, do not run `accept`; record the
+non-accepted decision:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision REWORK -Reason "Audit found a scoped fix is required."
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision BLOCKED -Reason "Required evidence is missing."
+```
+
+`decide` writes `.ai-loop/status.json`, `phase_meta.json`, `rework.txt` or
+`blocked.txt`, and appends `.ai-loop/events/event-log.ndjson`. Later `resume`
+uses those files to report the next safe action.
+
 ## Research Skill Profiles
 
 The first version assumes the shared skill library is:
@@ -232,7 +245,7 @@ Recent checks passed:
   marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
   wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
 - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
-  structure, `status.json`, phase references, accepted audits,
+  structure, `status.json`, phase references, accepted/rework/blocked audits,
   recovery-critical files, and schema versions.
 - `ai-loop.ps1 doctor`.
 - Plugin wrapper `doctor`.
@@ -242,6 +255,8 @@ Recent checks passed:
   - full-stack phase can pass ordinary evidence gates.
   - physics-research phase blocks when required skill artifacts are missing.
   - force accept requires an override reason.
+  - `REWORK` / `BLOCKED` can be recorded with `decide` and recovered by
+    `resume`.
   - broken skill links block validation.
 
 See `.ai-loop/reports/fixed-wrapper-plugin-report.md` for the latest detailed

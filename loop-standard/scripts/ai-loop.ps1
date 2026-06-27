@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -16,6 +16,10 @@ param(
     [string]$VerifyCommand = "",
     [string]$ReportPath = "",
     [string]$AuditPath = "",
+    [ValidateSet("REWORK", "BLOCKED")]
+    [string]$Decision = "REWORK",
+    [string]$Reason = "",
+    [string]$NextSafeAction = "",
     [ValidateSet("generic", "fullstack", "physics-research", "research-writing", "data-analysis")]
     [string]$TaskKind = "generic",
     [Alias("Profile")]
@@ -222,6 +226,21 @@ switch ($Command) {
         if ($Force) { $ScriptParams.Force = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "accept-phase.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "decide" {
+        Require-PhaseId
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            PhaseId = $PhaseId
+            Decision = $Decision
+        }
+        if (-not [string]::IsNullOrWhiteSpace($AuditPath)) { $ScriptParams.AuditPath = $AuditPath }
+        if (-not [string]::IsNullOrWhiteSpace($Reason)) { $ScriptParams.Reason = $Reason }
+        if (-not [string]::IsNullOrWhiteSpace($NextSafeAction)) { $ScriptParams.NextSafeAction = $NextSafeAction }
+        if ($Force) { $ScriptParams.Force = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "decide-phase.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "resume" {

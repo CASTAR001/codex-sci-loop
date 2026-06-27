@@ -282,6 +282,25 @@ if ($null -ne $Status) {
                 Add-Problem "missing validate-phase-gates.ps1"
             }
         }
+        if ($PhaseStatus -eq "rework" -or $PhaseStatus -eq "blocked") {
+            $ExpectedDecision = if ($PhaseStatus -eq "rework") { "REWORK" } else { "BLOCKED" }
+            $DecisionFileName = if ($PhaseStatus -eq "rework") { "rework.txt" } else { "blocked.txt" }
+            $AuditResult = Join-Path $LoopDir "audits\$PhaseId-audit.md"
+            $DecisionFile = Join-Path $RunDir $DecisionFileName
+            $AuditResultCheck = Test-NonEmptyFile -Path $AuditResult
+            if ($AuditResultCheck -ne "ok") {
+                Add-Problem "phase $PhaseId missing $ExpectedDecision audit result: $AuditResultCheck"
+            } else {
+                $AuditText = Get-Content -LiteralPath $AuditResult -Raw
+                if ($AuditText -notmatch "(?m)^\s*Decision:\s*$ExpectedDecision\s*$") {
+                    Add-Problem "phase $PhaseId $PhaseStatus without $ExpectedDecision audit decision"
+                }
+            }
+            $DecisionCheck = Test-NonEmptyFile -Path $DecisionFile
+            if ($DecisionCheck -ne "ok") {
+                Add-Problem "phase $PhaseId missing $DecisionFileName`: $DecisionCheck"
+            }
+        }
         if (($TerminalStatuses -notcontains $PhaseStatus) -and ($null -ne $Status.current_phase) -and ([string]$Status.current_phase.phase_id -ne $PhaseId)) {
             Add-Problem "non-terminal phase is not current_phase: $PhaseId status=$PhaseStatus"
         }

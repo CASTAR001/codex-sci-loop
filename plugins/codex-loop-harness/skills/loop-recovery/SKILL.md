@@ -30,3 +30,7 @@ Then identify:
 - files to inspect before edits
 
 If current state cannot be reconstructed from files, mark the loop `BLOCKED`.
+
+For a durable non-accepted outcome, write an audit file with `Decision: REWORK`
+or `Decision: BLOCKED`, then record it with `ai-loop decide`. Do not leave
+rework or blocked decisions only in prose.

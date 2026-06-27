@@ -3,9 +3,9 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-005 have
-been accepted. Root phase-005 added schema/migration versioning for project
-control planes.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-006 have
+been accepted. Root phase-006 added durable `REWORK` / `BLOCKED` phase
+decisions.
 
 ## Last Verified State
 
@@ -66,6 +66,13 @@ properties, config schema compatibility, future schemas, config/manifest
 mismatches, and status schema compatibility. `Test-SchemaVersioning.ps1` covers
 valid init plus six blocking schema cases, and `Test-Phase005.ps1` aggregates
 the current non-global verification matrix.
+Root self-loop phase-006 added `decide-phase.ps1` and exposed it as
+`ai-loop -Command decide`. `ACCEPTED` still uses `accept`; `REWORK` and
+`BLOCKED` now require matching audit decisions and are recorded into
+`status.json`, `phase_meta.json`, `rework.txt` or `blocked.txt`, and
+`event-log.ndjson`. `validate-loop.ps1` validates those non-accepted terminal
+states, and `Test-PhaseDecisions.ps1` proves REWORK, BLOCKED, resume recovery,
+and decision mismatch rejection.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -117,8 +124,10 @@ integrity source for required phase evidence.
 
 Repo-local plugin install/discovery smoke testing and validate-loop negative
 fixture testing are now in place, and schema/migration compatibility is
-detectable through `validate-loop`. The remaining plugin-form stability step is
-a live global Codex plugin install/discovery test, which must wait for explicit
-user approval because it modifies real Codex/plugin configuration. Good
-non-global next candidates are deeper recovery/state transition automation,
-explicit migration commands for old projects, or start-phase ledger idempotence.
+detectable through `validate-loop`. Durable REWORK/BLOCKED outcomes are now
+recoverable from files. The remaining plugin-form stability step is a live
+global Codex plugin install/discovery test, which must wait for explicit user
+approval because it modifies real Codex/plugin configuration. Good non-global
+next candidates are stricter state transition logs, explicit migration commands
+for old projects, optional rework phase scaffolding, or start-phase ledger
+idempotence.

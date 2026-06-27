@@ -34,3 +34,13 @@ Read the audit input and inspect:
 
 Do not accept based on the Worker report alone.
 
+## Recording The Decision
+
+After writing `.ai-loop/audits/<phase-id>-audit.md`:
+
+- For `ACCEPTED`, use `ai-loop accept`.
+- For `REWORK` or `BLOCKED`, use `ai-loop decide -Decision REWORK` or
+  `ai-loop decide -Decision BLOCKED` with a concise `-Reason`.
+
+This keeps non-accepted outcomes in `status.json`, `phase_meta.json`,
+`rework.txt` or `blocked.txt`, and the event log.

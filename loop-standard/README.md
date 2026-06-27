@@ -225,6 +225,28 @@ Use `REWORK` or `BLOCKED` instead of `ACCEPTED` when evidence is incomplete,
 verification fails, the diff does not match the phase objective, or source
 inspection reveals unresolved issues.
 
+Record non-accepted decisions with `decide`, not `accept`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command decide `
+  -ProjectRoot "C:\path\to\project" `
+  -PhaseId "phase-001" `
+  -Decision REWORK `
+  -Reason "Audit found a scoped fix is required."
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command decide `
+  -ProjectRoot "C:\path\to\project" `
+  -PhaseId "phase-001" `
+  -Decision BLOCKED `
+  -Reason "Required evidence is missing."
+```
+
+The decision command writes `rework.txt` or `blocked.txt`, updates
+`status.json` and `phase_meta.json`, appends an event-log row, and lets
+`resume` reconstruct the next safe action from files.
+
 ## Next Phase
 
 Phase B should create `pilot-project/`, initialize `.ai-loop` inside it, run one

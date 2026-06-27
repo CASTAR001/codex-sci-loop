@@ -120,6 +120,12 @@
   `Test-SchemaVersioning.ps1` for missing schema, old/future config schemas,
   config/manifest mismatch, missing schema property, and status schema mismatch;
   and added `Test-Phase005.ps1` as the current non-global verification matrix.
+- Ran root self-loop phase-006 under the repository root `.ai-loop`: added
+  `decide-phase.ps1` and `ai-loop -Command decide` for durable `REWORK` and
+  `BLOCKED` outcomes, updated the installed shim command surface, made
+  `validate-loop.ps1` require matching audits and `rework.txt` / `blocked.txt`,
+  added `Test-PhaseDecisions.ps1`, and documented non-accepted decisions in the
+  README files and plugin skills.
 
 ## In Progress
 
@@ -129,7 +135,8 @@
 
 - Choose final non-temporary global install root.
 - Expand skill trigger matrix for full-stack and physics workflows.
-- Add stricter state transition logs and recovery paths.
+- Add stricter state transition logs and recovery paths beyond durable
+  non-accepted decisions.
 - Decide whether skill artifacts should become required manifest entries in the
   next evidence hardening phase.
 - Validate plugin discovery in real global Codex configuration after explicit
@@ -143,6 +150,8 @@
   rows, or explicitly document why start rows are append-only.
 - Decide whether explicit in-place migration commands are needed for old
   `.ai-loop` projects before 1.0, or whether detect-and-block is sufficient.
+- Decide whether `REWORK` should optionally scaffold a follow-up phase from the
+  audit findings.
 
 ## Last Updated
 

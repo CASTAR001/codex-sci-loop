@@ -1,0 +1,2354 @@
+﻿diff --git a/.ai-loop/evidence/artifact-index.md b/.ai-loop/evidence/artifact-index.md
+index 0172145..0bc9320 100644
+--- a/.ai-loop/evidence/artifact-index.md
++++ b/.ai-loop/evidence/artifact-index.md
+@@ -1,18 +1,27 @@
+-﻿| ART-phase-004-prompt.md | phase-004 | phase-evidence | .ai-loop/runs/phase-004/prompt.md | start-phase.ps1 | recorded | sha256=EF407C5A35F3; size=1201; status=recorded |
+-| ART-phase-004-phase_requirements.json | phase-004 | phase-evidence | .ai-loop/runs/phase-004/phase_requirements.json | start-phase.ps1 | recorded | sha256=2CC615B385E6; size=986; status=recorded |
+-| ART-phase-004-report.md | phase-004 | phase-evidence | .ai-loop/runs/phase-004/report.md | Worker | recorded | sha256=3431540555F1; size=886; status=recorded |
+-| ART-phase-004-status_after.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/status_after.txt | collect-evidence.ps1 | recorded | sha256=B86B6F43C64C; size=743; status=recorded |
+-| ART-phase-004-diff.patch | phase-004 | phase-evidence | .ai-loop/runs/phase-004/diff.patch | collect-evidence.ps1 | recorded | sha256=7C0BF7C81866; size=107523; status=recorded |
+-| ART-phase-004-verify.log | phase-004 | phase-evidence | .ai-loop/runs/phase-004/verify.log | collect-evidence.ps1 | recorded | sha256=64BF1E272CBD; size=2016; status=recorded |
+-| ART-phase-004-changed_files.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/changed_files.txt | collect-evidence.ps1 | recorded | sha256=E0B46B514A02; size=1206; status=recorded |
+-| ART-phase-004-changed_business_files.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=AA788641C6D1; size=245; status=recorded |
+-| ART-phase-004-changed_evidence_files.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=5A3A78312CD5; size=966; status=recorded |
+-| ART-phase-005-prompt.md | phase-005 | phase-evidence | .ai-loop/runs/phase-005/prompt.md | start-phase.ps1 | recorded | sha256=DC270B543385; size=1253; status=recorded |
+-| ART-phase-005-phase_requirements.json | phase-005 | phase-evidence | .ai-loop/runs/phase-005/phase_requirements.json | start-phase.ps1 | recorded | sha256=EE27593793DA; size=986; status=recorded |
+-| ART-phase-005-report.md | phase-005 | phase-evidence | .ai-loop/runs/phase-005/report.md | Worker | recorded | sha256=90527B9740AD; size=1107; status=recorded |
+-| ART-phase-005-status_after.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/status_after.txt | collect-evidence.ps1 | recorded | sha256=C8CFE26F7EB1; size=897; status=recorded |
+-| ART-phase-005-diff.patch | phase-005 | phase-evidence | .ai-loop/runs/phase-005/diff.patch | collect-evidence.ps1 | recorded | sha256=45CA08147FD2; size=139611; status=recorded |
+-| ART-phase-005-verify.log | phase-005 | phase-evidence | .ai-loop/runs/phase-005/verify.log | collect-evidence.ps1 | recorded | sha256=F726FC376262; size=2188; status=recorded |
+-| ART-phase-005-changed_files.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/changed_files.txt | collect-evidence.ps1 | recorded | sha256=BC256B9C15EC; size=1536; status=recorded |
+-| ART-phase-005-changed_business_files.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=FB66A7E1823C; size=484; status=recorded |
+-| ART-phase-005-changed_evidence_files.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=81269F36B567; size=1057; status=recorded |
++﻿| ART-phase-004-prompt.md | phase-004 | phase-evidence | .ai-loop/runs/phase-004/prompt.md | start-phase.ps1 | recorded | sha256=EF407C5A35F3; size=1201; status=recorded |
++| ART-phase-004-phase_requirements.json | phase-004 | phase-evidence | .ai-loop/runs/phase-004/phase_requirements.json | start-phase.ps1 | recorded | sha256=2CC615B385E6; size=986; status=recorded |
++| ART-phase-004-report.md | phase-004 | phase-evidence | .ai-loop/runs/phase-004/report.md | Worker | recorded | sha256=3431540555F1; size=886; status=recorded |
++| ART-phase-004-status_after.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/status_after.txt | collect-evidence.ps1 | recorded | sha256=B86B6F43C64C; size=743; status=recorded |
++| ART-phase-004-diff.patch | phase-004 | phase-evidence | .ai-loop/runs/phase-004/diff.patch | collect-evidence.ps1 | recorded | sha256=7C0BF7C81866; size=107523; status=recorded |
++| ART-phase-004-verify.log | phase-004 | phase-evidence | .ai-loop/runs/phase-004/verify.log | collect-evidence.ps1 | recorded | sha256=64BF1E272CBD; size=2016; status=recorded |
++| ART-phase-004-changed_files.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/changed_files.txt | collect-evidence.ps1 | recorded | sha256=E0B46B514A02; size=1206; status=recorded |
++| ART-phase-004-changed_business_files.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=AA788641C6D1; size=245; status=recorded |
++| ART-phase-004-changed_evidence_files.txt | phase-004 | phase-evidence | .ai-loop/runs/phase-004/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=5A3A78312CD5; size=966; status=recorded |
++| ART-phase-005-prompt.md | phase-005 | phase-evidence | .ai-loop/runs/phase-005/prompt.md | start-phase.ps1 | recorded | sha256=DC270B543385; size=1253; status=recorded |
++| ART-phase-005-phase_requirements.json | phase-005 | phase-evidence | .ai-loop/runs/phase-005/phase_requirements.json | start-phase.ps1 | recorded | sha256=EE27593793DA; size=986; status=recorded |
++| ART-phase-005-report.md | phase-005 | phase-evidence | .ai-loop/runs/phase-005/report.md | Worker | recorded | sha256=90527B9740AD; size=1107; status=recorded |
++| ART-phase-005-status_after.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/status_after.txt | collect-evidence.ps1 | recorded | sha256=C8CFE26F7EB1; size=897; status=recorded |
++| ART-phase-005-diff.patch | phase-005 | phase-evidence | .ai-loop/runs/phase-005/diff.patch | collect-evidence.ps1 | recorded | sha256=45CA08147FD2; size=139611; status=recorded |
++| ART-phase-005-verify.log | phase-005 | phase-evidence | .ai-loop/runs/phase-005/verify.log | collect-evidence.ps1 | recorded | sha256=F726FC376262; size=2188; status=recorded |
++| ART-phase-005-changed_files.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/changed_files.txt | collect-evidence.ps1 | recorded | sha256=BC256B9C15EC; size=1536; status=recorded |
++| ART-phase-005-changed_business_files.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=FB66A7E1823C; size=484; status=recorded |
++| ART-phase-005-changed_evidence_files.txt | phase-005 | phase-evidence | .ai-loop/runs/phase-005/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=81269F36B567; size=1057; status=recorded |
++| ART-phase-006-prompt.md | phase-006 | phase-evidence | .ai-loop/runs/phase-006/prompt.md | start-phase.ps1 | recorded | sha256=DEAC491CF582; size=1251; status=recorded |
++| ART-phase-006-phase_requirements.json | phase-006 | phase-evidence | .ai-loop/runs/phase-006/phase_requirements.json | start-phase.ps1 | recorded | sha256=E1EB0A20D50E; size=986; status=recorded |
++| ART-phase-006-report.md | phase-006 | phase-evidence | .ai-loop/runs/phase-006/report.md | Worker | recorded | sha256=1DD62D6EDF9F; size=1068; status=recorded |
++| ART-phase-006-status_after.txt | phase-006 | phase-evidence | .ai-loop/runs/phase-006/status_after.txt | collect-evidence.ps1 | recorded | sha256=13115DB14C45; size=632; status=recorded |
++| ART-phase-006-diff.patch | phase-006 | phase-evidence | .ai-loop/runs/phase-006/diff.patch | collect-evidence.ps1 | recorded | sha256=C15934F9188A; size=64422; status=recorded |
++| ART-phase-006-verify.log | phase-006 | phase-evidence | .ai-loop/runs/phase-006/verify.log | collect-evidence.ps1 | recorded | sha256=F1EEB87D95A7; size=2947; status=recorded |
++| ART-phase-006-changed_files.txt | phase-006 | phase-evidence | .ai-loop/runs/phase-006/changed_files.txt | collect-evidence.ps1 | recorded | sha256=DAC9E6F2C6CF; size=916; status=recorded |
++| ART-phase-006-changed_business_files.txt | phase-006 | phase-evidence | .ai-loop/runs/phase-006/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=C1AA4382BBD8; size=461; status=recorded |
++| ART-phase-006-changed_evidence_files.txt | phase-006 | phase-evidence | .ai-loop/runs/phase-006/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=E7EA54263F33; size=460; status=recorded |
+diff --git a/.ai-loop/evidence/artifact-manifest.json b/.ai-loop/evidence/artifact-manifest.json
+index af4b104..1412688 100644
+--- a/.ai-loop/evidence/artifact-manifest.json
++++ b/.ai-loop/evidence/artifact-manifest.json
+@@ -1,590 +1,707 @@
+-﻿{
+-    "schema_version":  "1.0",
+-    "artifacts":  [
+-                      {
+-                          "artifact_id":  "ART-phase-001-prompt.md",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/prompt.md",
+-                          "sha256":  "18C1EFF1850B3CE6D96F99DBA9F435A17912EE085FF2B3FE09278B837DFA6605",
+-                          "size_bytes":  1277,
+-                          "modified_utc":  "2026-06-27T09:40:41.5932779Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0292319Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-phase_requirements.json",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/phase_requirements.json",
+-                          "sha256":  "FA16479F479D1AD6334CCF3661606C14A1BE1E01821CE4E853CCCFE83D76479B",
+-                          "size_bytes":  986,
+-                          "modified_utc":  "2026-06-27T09:40:41.5806400Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0360302Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-report.md",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/report.md",
+-                          "sha256":  "AB3690C941FD03A31EC8536EDDF92DA1B5F01175FD92178B4CDE5E4D5B2F40F9",
+-                          "size_bytes":  1347,
+-                          "modified_utc":  "2026-06-27T09:41:12.8008024Z",
+-                          "produced_by":  "Worker",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0395080Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-status_after.txt",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/status_after.txt",
+-                          "sha256":  "F2364F7E1057980DB79CE723629D3EE8D7E14267B67445CE091A854325D6FBE2",
+-                          "size_bytes":  1084,
+-                          "modified_utc":  "2026-06-27T09:50:30.2608198Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0446525Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-diff.patch",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/diff.patch",
+-                          "sha256":  "B9AA9653A1A703FE916701F34A568F84A50F06D81CAC9076ADA8717A0AC9E9AC",
+-                          "size_bytes":  34229,
+-                          "modified_utc":  "2026-06-27T09:50:30.3807163Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0514361Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-verify.log",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/verify.log",
+-                          "sha256":  "35439220EC37DFE8FFB6387691812870EA3F960F5B571474090FCA84C8A1AFB8",
+-                          "size_bytes":  346,
+-                          "modified_utc":  "2026-06-27T09:50:29.9605609Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0572114Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-changed_files.txt",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/changed_files.txt",
+-                          "sha256":  "1D0EA2D78BAD0B3C8F8CB95D8405AF8A6BCD9D5CC943B1108636D730F9F62BAE",
+-                          "size_bytes":  1642,
+-                          "modified_utc":  "2026-06-27T09:50:30.6509195Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0631972Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-changed_business_files.txt",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/changed_business_files.txt",
+-                          "sha256":  "F93105306BF78EEF993BF8094EB8C6D50CE11F00D62C27373D4047A2E885DB46",
+-                          "size_bytes":  444,
+-                          "modified_utc":  "2026-06-27T09:50:30.6575785Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0691084Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-001-changed_evidence_files.txt",
+-                          "phase":  "phase-001",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-001/changed_evidence_files.txt",
+-                          "sha256":  "2FE9ED10EAFAFBA57C9C80EAB5A0F8455FDED087327CD3622F1D1D954AFF938A",
+-                          "size_bytes":  1203,
+-                          "modified_utc":  "2026-06-27T09:50:30.6614919Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T09:50:31.0749800Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-prompt.md",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/prompt.md",
+-                          "sha256":  "101D00E7EB4961420536D42A10670E0FE9ED76569A4F1717ABB03D0DE94CBE01",
+-                          "size_bytes":  1325,
+-                          "modified_utc":  "2026-06-27T10:03:50.7339856Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8599109Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-phase_requirements.json",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/phase_requirements.json",
+-                          "sha256":  "D5911CE64AF5BB5BCB715DDF9F44A0ACDFB0BFB20F8850FBEBE062B51028D361",
+-                          "size_bytes":  986,
+-                          "modified_utc":  "2026-06-27T10:03:50.7275711Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8648000Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-report.md",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/report.md",
+-                          "sha256":  "3D896E9D9758F592D376E4865D6313FAEAC7D07C404B8E36388E72201937D03F",
+-                          "size_bytes":  1398,
+-                          "modified_utc":  "2026-06-27T10:09:25.8784015Z",
+-                          "produced_by":  "Worker",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8692366Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-status_after.txt",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/status_after.txt",
+-                          "sha256":  "70FEE173A1552AD50C02081B1AB25FAF7806BC7EA7F5AB6AB0F15376EE8C9D4E",
+-                          "size_bytes":  848,
+-                          "modified_utc":  "2026-06-27T10:18:49.1362066Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8728914Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-diff.patch",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/diff.patch",
+-                          "sha256":  "0196A3472EFB1FB9FE0667CCDB08195A3D1C11CE44BA6CB7F34337B31B326D58",
+-                          "size_bytes":  70026,
+-                          "modified_utc":  "2026-06-27T10:18:49.2890013Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8839089Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-verify.log",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/verify.log",
+-                          "sha256":  "B4BA084654D424006D4DC1470E1360039A45E23F898768A9C3ED8067D827B988",
+-                          "size_bytes":  768,
+-                          "modified_utc":  "2026-06-27T10:18:48.9199689Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8874104Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-changed_files.txt",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/changed_files.txt",
+-                          "sha256":  "07552593BA86EFF11F1EC178CFD982E4E8F76AFE057C9A1056009E3011B3A1CB",
+-                          "size_bytes":  1264,
+-                          "modified_utc":  "2026-06-27T10:18:49.5332108Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8907417Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-changed_business_files.txt",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/changed_business_files.txt",
+-                          "sha256":  "36BBD191A488978FA6EBBB21713EC8045BA9B047974854F592DC633EFCF8A3C1",
+-                          "size_bytes":  377,
+-                          "modified_utc":  "2026-06-27T10:18:49.5399770Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.8951461Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-002-changed_evidence_files.txt",
+-                          "phase":  "phase-002",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-002/changed_evidence_files.txt",
+-                          "sha256":  "D64B7E50352205428FB505A51F8615F6218C528F556F2EAF2AFEBFD3B41E1EED",
+-                          "size_bytes":  892,
+-                          "modified_utc":  "2026-06-27T10:18:49.5449716Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T10:18:49.9000309Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-prompt.md",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/prompt.md",
+-                          "sha256":  "F2719FEBE8E4B0D671E7206178BF7C2C2EFF86317D8A6FF6187827EF8EFC8BBD",
+-                          "size_bytes":  1474,
+-                          "modified_utc":  "2026-06-27T14:29:26.3060136Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.5976015Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-phase_requirements.json",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/phase_requirements.json",
+-                          "sha256":  "07AE155BC8CE28D1DBE485574A438177E283D39A8AAFC73A028225063596CDB6",
+-                          "size_bytes":  986,
+-                          "modified_utc":  "2026-06-27T14:29:26.2999874Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6006001Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-report.md",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/report.md",
+-                          "sha256":  "EDFFE4F291B1E1487BAE2FF717DCB125AEBD0AC66FDD55F43F5DCD6DE7580D6B",
+-                          "size_bytes":  1224,
+-                          "modified_utc":  "2026-06-27T14:36:15.6786639Z",
+-                          "produced_by":  "Worker",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6036012Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-status_after.txt",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/status_after.txt",
+-                          "sha256":  "109C7693068A25193D94457384D5178BF55B8796EE0854FA4E97BD0B8399400B",
+-                          "size_bytes":  744,
+-                          "modified_utc":  "2026-06-27T14:39:40.0192700Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6067269Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-diff.patch",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/diff.patch",
+-                          "sha256":  "761719164B9AC2EB167962DB43AD60BB8370C4887BF0C2E229D7D55CBFAB8737",
+-                          "size_bytes":  90096,
+-                          "modified_utc":  "2026-06-27T14:39:40.1551197Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6155752Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-verify.log",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/verify.log",
+-                          "sha256":  "3922B2AFF44EAC2B3A349D7D10DF3536AE2151147D153E7902CC87E35FA57D34",
+-                          "size_bytes":  910,
+-                          "modified_utc":  "2026-06-27T14:39:39.7873947Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6195835Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-changed_files.txt",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/changed_files.txt",
+-                          "sha256":  "76382C192606E48F7BA7C4B2E562684579BCAA8609E4BEC2CE468D654027F399",
+-                          "size_bytes":  1163,
+-                          "modified_utc":  "2026-06-27T14:39:40.3295593Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6226599Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-changed_business_files.txt",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/changed_business_files.txt",
+-                          "sha256":  "89B4661A8E84864881A1BDA3A20576798820CE31C5A64808A2704801EF8B68A9",
+-                          "size_bytes":  276,
+-                          "modified_utc":  "2026-06-27T14:39:40.3335556Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6258839Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-003-changed_evidence_files.txt",
+-                          "phase":  "phase-003",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-003/changed_evidence_files.txt",
+-                          "sha256":  "CAEBB3208BB5E31CFDAAB264AE607ADA80D3089448392D92A2A7251F8A9E9525",
+-                          "size_bytes":  892,
+-                          "modified_utc":  "2026-06-27T14:39:40.3369995Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T14:39:40.6299089Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-prompt.md",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/prompt.md",
+-                          "sha256":  "EF407C5A35F350365817F9CD2968B7152F676D2700C832AE1DE64A0689CA4B62",
+-                          "size_bytes":  1201,
+-                          "modified_utc":  "2026-06-27T14:48:27.1827501Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.3558159Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-phase_requirements.json",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/phase_requirements.json",
+-                          "sha256":  "2CC615B385E663BACA5B0FF743C7DDC35BF2DA39FB64B9B3D971E49D6DB20D6E",
+-                          "size_bytes":  986,
+-                          "modified_utc":  "2026-06-27T14:48:27.1763350Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.3598585Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-report.md",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/report.md",
+-                          "sha256":  "3431540555F12A4F92BAA512B44D0E72A8FC90D3ADF40FC7A42AF03A13F25105",
+-                          "size_bytes":  886,
+-                          "modified_utc":  "2026-06-27T14:51:51.8446383Z",
+-                          "produced_by":  "Worker",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.3629961Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-status_after.txt",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/status_after.txt",
+-                          "sha256":  "B86B6F43C64CEFAC49ED2EDF57DE1F25ACAC55DC3F1DEE7428B06BADCFABA979",
+-                          "size_bytes":  743,
+-                          "modified_utc":  "2026-06-27T15:10:40.7761634Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.3660178Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-diff.patch",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/diff.patch",
+-                          "sha256":  "7C0BF7C81866BC5B1ADB999EDDB189FD1BDFEE228DB8BD37F57E3D406FE3E246",
+-                          "size_bytes":  107523,
+-                          "modified_utc":  "2026-06-27T15:10:40.9115983Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.3948831Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-verify.log",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/verify.log",
+-                          "sha256":  "64BF1E272CBD75D7CADA2C151A4B1333F04DC2E8FE89C0F242E5C9C06D786F27",
+-                          "size_bytes":  2016,
+-                          "modified_utc":  "2026-06-27T15:10:40.5700351Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.3980847Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-changed_files.txt",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/changed_files.txt",
+-                          "sha256":  "E0B46B514A02F34D2263ADFE0D6B056B6D51CF2C8BB2EEF6989262AC86F78306",
+-                          "size_bytes":  1206,
+-                          "modified_utc":  "2026-06-27T15:10:41.0849055Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.4006334Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-changed_business_files.txt",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/changed_business_files.txt",
+-                          "sha256":  "AA788641C6D174651315760F57684DB706B698731CC9573D6838D26C0D0FD0EC",
+-                          "size_bytes":  245,
+-                          "modified_utc":  "2026-06-27T15:10:41.0903719Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.4029691Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-004-changed_evidence_files.txt",
+-                          "phase":  "phase-004",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-004/changed_evidence_files.txt",
+-                          "sha256":  "5A3A78312CD5D8ADDFD3140FD6C3636AD577AAA825A5EC79078DA7A597FFA9AE",
+-                          "size_bytes":  966,
+-                          "modified_utc":  "2026-06-27T15:10:41.0933699Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:10:41.4053175Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-prompt.md",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/prompt.md",
+-                          "sha256":  "DC270B543385A98DF69F21DB5BD2D33FB69843BB22D9520E29D9E0680F3C1250",
+-                          "size_bytes":  1253,
+-                          "modified_utc":  "2026-06-27T15:15:57.3703676Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.2962186Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-phase_requirements.json",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/phase_requirements.json",
+-                          "sha256":  "EE27593793DAE1B06F5B1D28A48D221154CEECDF3A7032FF5026DF1A2128EFEB",
+-                          "size_bytes":  986,
+-                          "modified_utc":  "2026-06-27T15:15:57.3643678Z",
+-                          "produced_by":  "start-phase.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.2982146Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-report.md",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/report.md",
+-                          "sha256":  "90527B9740ADEA2A326056A062F9CFFA4F05E7916F875ACB5DB420A21E67DA27",
+-                          "size_bytes":  1107,
+-                          "modified_utc":  "2026-06-27T15:26:08.5248874Z",
+-                          "produced_by":  "Worker",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3012149Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-status_after.txt",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/status_after.txt",
+-                          "sha256":  "C8CFE26F7EB15EC0171D95364B6D5470B884F871E1399085058AC064BCE1533D",
+-                          "size_bytes":  897,
+-                          "modified_utc":  "2026-06-27T15:37:07.5894444Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3032146Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-diff.patch",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/diff.patch",
+-                          "sha256":  "45CA08147FD281B6B74E2EED8AE1F471250FD4FC8DA538FFA56D09BF7616F2E9",
+-                          "size_bytes":  139611,
+-                          "modified_utc":  "2026-06-27T15:37:07.7497915Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3285348Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-verify.log",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/verify.log",
+-                          "sha256":  "F726FC37626209997EFD4870B9D9E8C9613AB0024EE5B567EE4C561D1B74F14F",
+-                          "size_bytes":  2188,
+-                          "modified_utc":  "2026-06-27T15:37:07.3606699Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3305344Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-changed_files.txt",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/changed_files.txt",
+-                          "sha256":  "BC256B9C15EC6DA13B37869020D7DDF2C57AC184BB07DA8A068A9148EED6BBFE",
+-                          "size_bytes":  1536,
+-                          "modified_utc":  "2026-06-27T15:37:07.9527985Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3335341Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-changed_business_files.txt",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/changed_business_files.txt",
+-                          "sha256":  "FB66A7E1823CC8DC4190132B485D2532A162B486FC69BFA4D32958C9A368BE4B",
+-                          "size_bytes":  484,
+-                          "modified_utc":  "2026-06-27T15:37:07.9597979Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3365384Z",
+-                          "notes":  "ok"
+-                      },
+-                      {
+-                          "artifact_id":  "ART-phase-005-changed_evidence_files.txt",
+-                          "phase":  "phase-005",
+-                          "type":  "phase-evidence",
+-                          "path":  ".ai-loop/runs/phase-005/changed_evidence_files.txt",
+-                          "sha256":  "81269F36B56712DDF541D03ADC36EEAC9451FF1A7277E4A2F5F2463689AD2F90",
+-                          "size_bytes":  1057,
+-                          "modified_utc":  "2026-06-27T15:37:07.9640068Z",
+-                          "produced_by":  "collect-evidence.ps1",
+-                          "status":  "recorded",
+-                          "recorded_at":  "2026-06-27T15:37:08.3385360Z",
+-                          "notes":  "ok"
+-                      }
+-                  ]
+-}
++﻿{
++    "schema_version":  "1.0",
++    "artifacts":  [
++                      {
++                          "artifact_id":  "ART-phase-001-prompt.md",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/prompt.md",
++                          "sha256":  "18C1EFF1850B3CE6D96F99DBA9F435A17912EE085FF2B3FE09278B837DFA6605",
++                          "size_bytes":  1277,
++                          "modified_utc":  "2026-06-27T09:40:41.5932779Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0292319Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-phase_requirements.json",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/phase_requirements.json",
++                          "sha256":  "FA16479F479D1AD6334CCF3661606C14A1BE1E01821CE4E853CCCFE83D76479B",
++                          "size_bytes":  986,
++                          "modified_utc":  "2026-06-27T09:40:41.5806400Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0360302Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-report.md",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/report.md",
++                          "sha256":  "AB3690C941FD03A31EC8536EDDF92DA1B5F01175FD92178B4CDE5E4D5B2F40F9",
++                          "size_bytes":  1347,
++                          "modified_utc":  "2026-06-27T09:41:12.8008024Z",
++                          "produced_by":  "Worker",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0395080Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-status_after.txt",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/status_after.txt",
++                          "sha256":  "F2364F7E1057980DB79CE723629D3EE8D7E14267B67445CE091A854325D6FBE2",
++                          "size_bytes":  1084,
++                          "modified_utc":  "2026-06-27T09:50:30.2608198Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0446525Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-diff.patch",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/diff.patch",
++                          "sha256":  "B9AA9653A1A703FE916701F34A568F84A50F06D81CAC9076ADA8717A0AC9E9AC",
++                          "size_bytes":  34229,
++                          "modified_utc":  "2026-06-27T09:50:30.3807163Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0514361Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-verify.log",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/verify.log",
++                          "sha256":  "35439220EC37DFE8FFB6387691812870EA3F960F5B571474090FCA84C8A1AFB8",
++                          "size_bytes":  346,
++                          "modified_utc":  "2026-06-27T09:50:29.9605609Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0572114Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-changed_files.txt",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/changed_files.txt",
++                          "sha256":  "1D0EA2D78BAD0B3C8F8CB95D8405AF8A6BCD9D5CC943B1108636D730F9F62BAE",
++                          "size_bytes":  1642,
++                          "modified_utc":  "2026-06-27T09:50:30.6509195Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0631972Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-changed_business_files.txt",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/changed_business_files.txt",
++                          "sha256":  "F93105306BF78EEF993BF8094EB8C6D50CE11F00D62C27373D4047A2E885DB46",
++                          "size_bytes":  444,
++                          "modified_utc":  "2026-06-27T09:50:30.6575785Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0691084Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-001-changed_evidence_files.txt",
++                          "phase":  "phase-001",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-001/changed_evidence_files.txt",
++                          "sha256":  "2FE9ED10EAFAFBA57C9C80EAB5A0F8455FDED087327CD3622F1D1D954AFF938A",
++                          "size_bytes":  1203,
++                          "modified_utc":  "2026-06-27T09:50:30.6614919Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T09:50:31.0749800Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-prompt.md",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/prompt.md",
++                          "sha256":  "101D00E7EB4961420536D42A10670E0FE9ED76569A4F1717ABB03D0DE94CBE01",
++                          "size_bytes":  1325,
++                          "modified_utc":  "2026-06-27T10:03:50.7339856Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8599109Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-phase_requirements.json",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/phase_requirements.json",
++                          "sha256":  "D5911CE64AF5BB5BCB715DDF9F44A0ACDFB0BFB20F8850FBEBE062B51028D361",
++                          "size_bytes":  986,
++                          "modified_utc":  "2026-06-27T10:03:50.7275711Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8648000Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-report.md",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/report.md",
++                          "sha256":  "3D896E9D9758F592D376E4865D6313FAEAC7D07C404B8E36388E72201937D03F",
++                          "size_bytes":  1398,
++                          "modified_utc":  "2026-06-27T10:09:25.8784015Z",
++                          "produced_by":  "Worker",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8692366Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-status_after.txt",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/status_after.txt",
++                          "sha256":  "70FEE173A1552AD50C02081B1AB25FAF7806BC7EA7F5AB6AB0F15376EE8C9D4E",
++                          "size_bytes":  848,
++                          "modified_utc":  "2026-06-27T10:18:49.1362066Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8728914Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-diff.patch",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/diff.patch",
++                          "sha256":  "0196A3472EFB1FB9FE0667CCDB08195A3D1C11CE44BA6CB7F34337B31B326D58",
++                          "size_bytes":  70026,
++                          "modified_utc":  "2026-06-27T10:18:49.2890013Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8839089Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-verify.log",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/verify.log",
++                          "sha256":  "B4BA084654D424006D4DC1470E1360039A45E23F898768A9C3ED8067D827B988",
++                          "size_bytes":  768,
++                          "modified_utc":  "2026-06-27T10:18:48.9199689Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8874104Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-changed_files.txt",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/changed_files.txt",
++                          "sha256":  "07552593BA86EFF11F1EC178CFD982E4E8F76AFE057C9A1056009E3011B3A1CB",
++                          "size_bytes":  1264,
++                          "modified_utc":  "2026-06-27T10:18:49.5332108Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8907417Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-changed_business_files.txt",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/changed_business_files.txt",
++                          "sha256":  "36BBD191A488978FA6EBBB21713EC8045BA9B047974854F592DC633EFCF8A3C1",
++                          "size_bytes":  377,
++                          "modified_utc":  "2026-06-27T10:18:49.5399770Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.8951461Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-002-changed_evidence_files.txt",
++                          "phase":  "phase-002",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-002/changed_evidence_files.txt",
++                          "sha256":  "D64B7E50352205428FB505A51F8615F6218C528F556F2EAF2AFEBFD3B41E1EED",
++                          "size_bytes":  892,
++                          "modified_utc":  "2026-06-27T10:18:49.5449716Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T10:18:49.9000309Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-prompt.md",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/prompt.md",
++                          "sha256":  "F2719FEBE8E4B0D671E7206178BF7C2C2EFF86317D8A6FF6187827EF8EFC8BBD",
++                          "size_bytes":  1474,
++                          "modified_utc":  "2026-06-27T14:29:26.3060136Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.5976015Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-phase_requirements.json",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/phase_requirements.json",
++                          "sha256":  "07AE155BC8CE28D1DBE485574A438177E283D39A8AAFC73A028225063596CDB6",
++                          "size_bytes":  986,
++                          "modified_utc":  "2026-06-27T14:29:26.2999874Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6006001Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-report.md",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/report.md",
++                          "sha256":  "EDFFE4F291B1E1487BAE2FF717DCB125AEBD0AC66FDD55F43F5DCD6DE7580D6B",
++                          "size_bytes":  1224,
++                          "modified_utc":  "2026-06-27T14:36:15.6786639Z",
++                          "produced_by":  "Worker",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6036012Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-status_after.txt",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/status_after.txt",
++                          "sha256":  "109C7693068A25193D94457384D5178BF55B8796EE0854FA4E97BD0B8399400B",
++                          "size_bytes":  744,
++                          "modified_utc":  "2026-06-27T14:39:40.0192700Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6067269Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-diff.patch",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/diff.patch",
++                          "sha256":  "761719164B9AC2EB167962DB43AD60BB8370C4887BF0C2E229D7D55CBFAB8737",
++                          "size_bytes":  90096,
++                          "modified_utc":  "2026-06-27T14:39:40.1551197Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6155752Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-verify.log",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/verify.log",
++                          "sha256":  "3922B2AFF44EAC2B3A349D7D10DF3536AE2151147D153E7902CC87E35FA57D34",
++                          "size_bytes":  910,
++                          "modified_utc":  "2026-06-27T14:39:39.7873947Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6195835Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-changed_files.txt",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/changed_files.txt",
++                          "sha256":  "76382C192606E48F7BA7C4B2E562684579BCAA8609E4BEC2CE468D654027F399",
++                          "size_bytes":  1163,
++                          "modified_utc":  "2026-06-27T14:39:40.3295593Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6226599Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-changed_business_files.txt",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/changed_business_files.txt",
++                          "sha256":  "89B4661A8E84864881A1BDA3A20576798820CE31C5A64808A2704801EF8B68A9",
++                          "size_bytes":  276,
++                          "modified_utc":  "2026-06-27T14:39:40.3335556Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6258839Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-003-changed_evidence_files.txt",
++                          "phase":  "phase-003",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-003/changed_evidence_files.txt",
++                          "sha256":  "CAEBB3208BB5E31CFDAAB264AE607ADA80D3089448392D92A2A7251F8A9E9525",
++                          "size_bytes":  892,
++                          "modified_utc":  "2026-06-27T14:39:40.3369995Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T14:39:40.6299089Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-prompt.md",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/prompt.md",
++                          "sha256":  "EF407C5A35F350365817F9CD2968B7152F676D2700C832AE1DE64A0689CA4B62",
++                          "size_bytes":  1201,
++                          "modified_utc":  "2026-06-27T14:48:27.1827501Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.3558159Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-phase_requirements.json",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/phase_requirements.json",
++                          "sha256":  "2CC615B385E663BACA5B0FF743C7DDC35BF2DA39FB64B9B3D971E49D6DB20D6E",
++                          "size_bytes":  986,
++                          "modified_utc":  "2026-06-27T14:48:27.1763350Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.3598585Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-report.md",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/report.md",
++                          "sha256":  "3431540555F12A4F92BAA512B44D0E72A8FC90D3ADF40FC7A42AF03A13F25105",
++                          "size_bytes":  886,
++                          "modified_utc":  "2026-06-27T14:51:51.8446383Z",
++                          "produced_by":  "Worker",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.3629961Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-status_after.txt",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/status_after.txt",
++                          "sha256":  "B86B6F43C64CEFAC49ED2EDF57DE1F25ACAC55DC3F1DEE7428B06BADCFABA979",
++                          "size_bytes":  743,
++                          "modified_utc":  "2026-06-27T15:10:40.7761634Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.3660178Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-diff.patch",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/diff.patch",
++                          "sha256":  "7C0BF7C81866BC5B1ADB999EDDB189FD1BDFEE228DB8BD37F57E3D406FE3E246",
++                          "size_bytes":  107523,
++                          "modified_utc":  "2026-06-27T15:10:40.9115983Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.3948831Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-verify.log",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/verify.log",
++                          "sha256":  "64BF1E272CBD75D7CADA2C151A4B1333F04DC2E8FE89C0F242E5C9C06D786F27",
++                          "size_bytes":  2016,
++                          "modified_utc":  "2026-06-27T15:10:40.5700351Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.3980847Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-changed_files.txt",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/changed_files.txt",
++                          "sha256":  "E0B46B514A02F34D2263ADFE0D6B056B6D51CF2C8BB2EEF6989262AC86F78306",
++                          "size_bytes":  1206,
++                          "modified_utc":  "2026-06-27T15:10:41.0849055Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.4006334Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-changed_business_files.txt",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/changed_business_files.txt",
++                          "sha256":  "AA788641C6D174651315760F57684DB706B698731CC9573D6838D26C0D0FD0EC",
++                          "size_bytes":  245,
++                          "modified_utc":  "2026-06-27T15:10:41.0903719Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.4029691Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-004-changed_evidence_files.txt",
++                          "phase":  "phase-004",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-004/changed_evidence_files.txt",
++                          "sha256":  "5A3A78312CD5D8ADDFD3140FD6C3636AD577AAA825A5EC79078DA7A597FFA9AE",
++                          "size_bytes":  966,
++                          "modified_utc":  "2026-06-27T15:10:41.0933699Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:10:41.4053175Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-prompt.md",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/prompt.md",
++                          "sha256":  "DC270B543385A98DF69F21DB5BD2D33FB69843BB22D9520E29D9E0680F3C1250",
++                          "size_bytes":  1253,
++                          "modified_utc":  "2026-06-27T15:15:57.3703676Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.2962186Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-phase_requirements.json",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/phase_requirements.json",
++                          "sha256":  "EE27593793DAE1B06F5B1D28A48D221154CEECDF3A7032FF5026DF1A2128EFEB",
++                          "size_bytes":  986,
++                          "modified_utc":  "2026-06-27T15:15:57.3643678Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.2982146Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-report.md",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/report.md",
++                          "sha256":  "90527B9740ADEA2A326056A062F9CFFA4F05E7916F875ACB5DB420A21E67DA27",
++                          "size_bytes":  1107,
++                          "modified_utc":  "2026-06-27T15:26:08.5248874Z",
++                          "produced_by":  "Worker",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3012149Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-status_after.txt",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/status_after.txt",
++                          "sha256":  "C8CFE26F7EB15EC0171D95364B6D5470B884F871E1399085058AC064BCE1533D",
++                          "size_bytes":  897,
++                          "modified_utc":  "2026-06-27T15:37:07.5894444Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3032146Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-diff.patch",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/diff.patch",
++                          "sha256":  "45CA08147FD281B6B74E2EED8AE1F471250FD4FC8DA538FFA56D09BF7616F2E9",
++                          "size_bytes":  139611,
++                          "modified_utc":  "2026-06-27T15:37:07.7497915Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3285348Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-verify.log",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/verify.log",
++                          "sha256":  "F726FC37626209997EFD4870B9D9E8C9613AB0024EE5B567EE4C561D1B74F14F",
++                          "size_bytes":  2188,
++                          "modified_utc":  "2026-06-27T15:37:07.3606699Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3305344Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-changed_files.txt",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/changed_files.txt",
++                          "sha256":  "BC256B9C15EC6DA13B37869020D7DDF2C57AC184BB07DA8A068A9148EED6BBFE",
++                          "size_bytes":  1536,
++                          "modified_utc":  "2026-06-27T15:37:07.9527985Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3335341Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-changed_business_files.txt",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/changed_business_files.txt",
++                          "sha256":  "FB66A7E1823CC8DC4190132B485D2532A162B486FC69BFA4D32958C9A368BE4B",
++                          "size_bytes":  484,
++                          "modified_utc":  "2026-06-27T15:37:07.9597979Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3365384Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-005-changed_evidence_files.txt",
++                          "phase":  "phase-005",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-005/changed_evidence_files.txt",
++                          "sha256":  "81269F36B56712DDF541D03ADC36EEAC9451FF1A7277E4A2F5F2463689AD2F90",
++                          "size_bytes":  1057,
++                          "modified_utc":  "2026-06-27T15:37:07.9640068Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:37:08.3385360Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-prompt.md",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/prompt.md",
++                          "sha256":  "DEAC491CF58221F0A1CFCDA0D82D3EFBB7C8003204A8F364C4783D2BD2500CBF",
++                          "size_bytes":  1251,
++                          "modified_utc":  "2026-06-27T15:42:09.6413818Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1477764Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-phase_requirements.json",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/phase_requirements.json",
++                          "sha256":  "E1EB0A20D50E714A9ED3DBA4017941D029EB7E891B1AF3D3F5BA4863909EEC3C",
++                          "size_bytes":  986,
++                          "modified_utc":  "2026-06-27T15:42:09.6341586Z",
++                          "produced_by":  "start-phase.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1505510Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-report.md",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/report.md",
++                          "sha256":  "1DD62D6EDF9FA14A7D5D2425987941529ADE94E0CA558CAF589436925A61F602",
++                          "size_bytes":  1068,
++                          "modified_utc":  "2026-06-27T15:55:39.9572601Z",
++                          "produced_by":  "Worker",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1535591Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-status_after.txt",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/status_after.txt",
++                          "sha256":  "13115DB14C45B7F54657F31833A012FA1607DCA54389E210FE60C499FB7393AE",
++                          "size_bytes":  632,
++                          "modified_utc":  "2026-06-27T15:57:40.4696794Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1565562Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-diff.patch",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/diff.patch",
++                          "sha256":  "C15934F9188A115DADD3742CB671FEC6687C1E06095791DD468CB94E3914D6C9",
++                          "size_bytes":  64422,
++                          "modified_utc":  "2026-06-27T15:57:40.5942460Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1615560Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-verify.log",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/verify.log",
++                          "sha256":  "F1EEB87D95A71D2FB8E736706E030A096237BF3ED00958BC3D9DD9E036BAA713",
++                          "size_bytes":  2947,
++                          "modified_utc":  "2026-06-27T15:57:40.2588032Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1651995Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-changed_files.txt",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/changed_files.txt",
++                          "sha256":  "DAC9E6F2C6CFC39287B28688A53F746B6501486F55AD5A9BD1C684038A188106",
++                          "size_bytes":  916,
++                          "modified_utc":  "2026-06-27T15:57:40.7796761Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1683313Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-changed_business_files.txt",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/changed_business_files.txt",
++                          "sha256":  "C1AA4382BBD87717825EA45A2E8BECFA4C0D7094D73DFB7102BD65762F9466C3",
++                          "size_bytes":  461,
++                          "modified_utc":  "2026-06-27T15:57:40.7849686Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1703346Z",
++                          "notes":  "ok"
++                      },
++                      {
++                          "artifact_id":  "ART-phase-006-changed_evidence_files.txt",
++                          "phase":  "phase-006",
++                          "type":  "phase-evidence",
++                          "path":  ".ai-loop/runs/phase-006/changed_evidence_files.txt",
++                          "sha256":  "E7EA54263F336368FD0EAAFAD64C839DF4A0F043316D67CE062AC83D4D17703B",
++                          "size_bytes":  460,
++                          "modified_utc":  "2026-06-27T15:57:40.7879696Z",
++                          "produced_by":  "collect-evidence.ps1",
++                          "status":  "recorded",
++                          "recorded_at":  "2026-06-27T15:57:41.1733317Z",
++                          "notes":  "ok"
++                      }
++                  ]
++}
+diff --git a/.ai-loop/evidence/command-log.md b/.ai-loop/evidence/command-log.md
+index e17fe4c..aa780ff 100644
+--- a/.ai-loop/evidence/command-log.md
++++ b/.ai-loop/evidence/command-log.md
+@@ -1,14 +1,15 @@
+-﻿# Command Log
+-
+-Record commands that produce verification, build, test, audit, provenance, or
+-gate evidence.
+-
+-| Command ID | Phase | Purpose | Command | Exit Code | Output Path | Status | Notes |
+-| --- | --- | --- | --- | --- | --- | --- | --- |
+-| CMD-BOOTSTRAP-001 | harness | initialize-ledger | manual template creation | 0 | .ai-loop/evidence/command-log.md | recorded | Command log initialized. |
+-
+-| CMD-phase-001-VERIFY | phase-001 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject | 0 | .ai-loop/runs/phase-001/verify.log | passed | Verification command executed by collect-evidence.ps1. |
+-| CMD-phase-002-VERIFY | phase-002 | verification | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; exit 0 | 0 | .ai-loop/runs/phase-002/verify.log | passed | Verification command executed by collect-evidence.ps1. |
+-| CMD-phase-003-VERIFY | phase-003 | verification | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\validate-loop.ps1' -ProjectRoot .; if (-not $?) { exit 1 }; exit 0 | 0 | .ai-loop/runs/phase-003/verify.log | passed | Verification command executed by collect-evidence.ps1. |
+-| CMD-phase-004-VERIFY | phase-004 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase004.ps1 | 0 | .ai-loop/runs/phase-004/verify.log | passed | Verification command executed by collect-evidence.ps1. |
+-| CMD-phase-005-VERIFY | phase-005 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase005.ps1 | 0 | .ai-loop/runs/phase-005/verify.log | passed | Verification command executed by collect-evidence.ps1. |
++﻿# Command Log
++
++Record commands that produce verification, build, test, audit, provenance, or
++gate evidence.
++
++| Command ID | Phase | Purpose | Command | Exit Code | Output Path | Status | Notes |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| CMD-BOOTSTRAP-001 | harness | initialize-ledger | manual template creation | 0 | .ai-loop/evidence/command-log.md | recorded | Command log initialized. |
++
++| CMD-phase-001-VERIFY | phase-001 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject | 0 | .ai-loop/runs/phase-001/verify.log | passed | Verification command executed by collect-evidence.ps1. |
++| CMD-phase-002-VERIFY | phase-002 | verification | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; exit 0 | 0 | .ai-loop/runs/phase-002/verify.log | passed | Verification command executed by collect-evidence.ps1. |
++| CMD-phase-003-VERIFY | phase-003 | verification | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\validate-loop.ps1' -ProjectRoot .; if (-not $?) { exit 1 }; exit 0 | 0 | .ai-loop/runs/phase-003/verify.log | passed | Verification command executed by collect-evidence.ps1. |
++| CMD-phase-004-VERIFY | phase-004 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase004.ps1 | 0 | .ai-loop/runs/phase-004/verify.log | passed | Verification command executed by collect-evidence.ps1. |
++| CMD-phase-005-VERIFY | phase-005 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase005.ps1 | 0 | .ai-loop/runs/phase-005/verify.log | passed | Verification command executed by collect-evidence.ps1. |
++| CMD-phase-006-VERIFY | phase-006 | verification | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase006.ps1 | 0 | .ai-loop/runs/phase-006/verify.log | passed | Verification command executed by collect-evidence.ps1. |
+diff --git a/.ai-loop/evidence/evidence-ledger.md b/.ai-loop/evidence/evidence-ledger.md
+index 463e27e..32ff832 100644
+--- a/.ai-loop/evidence/evidence-ledger.md
++++ b/.ai-loop/evidence/evidence-ledger.md
+@@ -1,54 +1,63 @@
+-﻿# Evidence Ledger
+-
+-This ledger maps phase claims to durable evidence. Evidence must be a real file,
+-command, log, test output, provenance record, or source inspection record.
+-
+-| Evidence ID | Phase | Claim ID | Type | Path or Command | Produced By | Verified By | Status | Notes |
+-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+-| EVD-BOOTSTRAP-001 | harness | CLAIM-BOOTSTRAP | bootstrap | .ai-loop/evidence/evidence-ledger.md | Codex | Codex | recorded | Ledger initialized for evidence-gated loop work. |
+-
+-| EVD-phase-001-001 | phase-001 | CLAIM-phase-001 | prompt | .ai-loop/runs/phase-001/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+-| EVD-phase-001-002 | phase-001 | CLAIM-phase-001 | requirements | .ai-loop/runs/phase-001/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+-| EVD-phase-001-003 | phase-001 | CLAIM-phase-001 | worker-report | .ai-loop/runs/phase-001/report.md | Worker | pending | recorded | Worker report captured. |
+-| EVD-phase-001-004 | phase-001 | CLAIM-phase-001 | status | .ai-loop/runs/phase-001/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+-| EVD-phase-001-005 | phase-001 | CLAIM-phase-001 | diff | .ai-loop/runs/phase-001/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+-| EVD-phase-001-006 | phase-001 | CLAIM-phase-001 | verification-log | .ai-loop/runs/phase-001/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+-| EVD-phase-001-007 | phase-001 | CLAIM-phase-001 | changed-files | .ai-loop/runs/phase-001/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+-| EVD-phase-001-008 | phase-001 | CLAIM-phase-001 | business-files | .ai-loop/runs/phase-001/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+-| EVD-phase-001-009 | phase-001 | CLAIM-phase-001 | evidence-files | .ai-loop/runs/phase-001/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
+-| EVD-phase-002-001 | phase-002 | CLAIM-phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+-| EVD-phase-002-002 | phase-002 | CLAIM-phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+-| EVD-phase-002-003 | phase-002 | CLAIM-phase-002 | worker-report | .ai-loop/runs/phase-002/report.md | Worker | pending | recorded | Worker report captured. |
+-| EVD-phase-002-004 | phase-002 | CLAIM-phase-002 | status | .ai-loop/runs/phase-002/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+-| EVD-phase-002-005 | phase-002 | CLAIM-phase-002 | diff | .ai-loop/runs/phase-002/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+-| EVD-phase-002-006 | phase-002 | CLAIM-phase-002 | verification-log | .ai-loop/runs/phase-002/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+-| EVD-phase-002-007 | phase-002 | CLAIM-phase-002 | changed-files | .ai-loop/runs/phase-002/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+-| EVD-phase-002-008 | phase-002 | CLAIM-phase-002 | business-files | .ai-loop/runs/phase-002/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+-| EVD-phase-002-009 | phase-002 | CLAIM-phase-002 | evidence-files | .ai-loop/runs/phase-002/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
+-| EVD-phase-003-001 | phase-003 | CLAIM-phase-003 | prompt | .ai-loop/runs/phase-003/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+-| EVD-phase-003-002 | phase-003 | CLAIM-phase-003 | requirements | .ai-loop/runs/phase-003/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+-| EVD-phase-003-003 | phase-003 | CLAIM-phase-003 | worker-report | .ai-loop/runs/phase-003/report.md | Worker | pending | recorded | Worker report captured. |
+-| EVD-phase-003-004 | phase-003 | CLAIM-phase-003 | status | .ai-loop/runs/phase-003/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+-| EVD-phase-003-005 | phase-003 | CLAIM-phase-003 | diff | .ai-loop/runs/phase-003/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+-| EVD-phase-003-006 | phase-003 | CLAIM-phase-003 | verification-log | .ai-loop/runs/phase-003/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+-| EVD-phase-003-007 | phase-003 | CLAIM-phase-003 | changed-files | .ai-loop/runs/phase-003/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+-| EVD-phase-003-008 | phase-003 | CLAIM-phase-003 | business-files | .ai-loop/runs/phase-003/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+-| EVD-phase-003-009 | phase-003 | CLAIM-phase-003 | evidence-files | .ai-loop/runs/phase-003/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
+-| EVD-phase-004-001 | phase-004 | CLAIM-phase-004 | prompt | .ai-loop/runs/phase-004/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+-| EVD-phase-004-002 | phase-004 | CLAIM-phase-004 | requirements | .ai-loop/runs/phase-004/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+-| EVD-phase-004-003 | phase-004 | CLAIM-phase-004 | worker-report | .ai-loop/runs/phase-004/report.md | Worker | pending | recorded | Worker report captured. |
+-| EVD-phase-004-004 | phase-004 | CLAIM-phase-004 | status | .ai-loop/runs/phase-004/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+-| EVD-phase-004-005 | phase-004 | CLAIM-phase-004 | diff | .ai-loop/runs/phase-004/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+-| EVD-phase-004-006 | phase-004 | CLAIM-phase-004 | verification-log | .ai-loop/runs/phase-004/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+-| EVD-phase-004-007 | phase-004 | CLAIM-phase-004 | changed-files | .ai-loop/runs/phase-004/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+-| EVD-phase-004-008 | phase-004 | CLAIM-phase-004 | business-files | .ai-loop/runs/phase-004/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+-| EVD-phase-004-009 | phase-004 | CLAIM-phase-004 | evidence-files | .ai-loop/runs/phase-004/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
+-| EVD-phase-005-001 | phase-005 | CLAIM-phase-005 | prompt | .ai-loop/runs/phase-005/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+-| EVD-phase-005-002 | phase-005 | CLAIM-phase-005 | requirements | .ai-loop/runs/phase-005/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+-| EVD-phase-005-003 | phase-005 | CLAIM-phase-005 | worker-report | .ai-loop/runs/phase-005/report.md | Worker | pending | recorded | Worker report captured. |
+-| EVD-phase-005-004 | phase-005 | CLAIM-phase-005 | status | .ai-loop/runs/phase-005/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+-| EVD-phase-005-005 | phase-005 | CLAIM-phase-005 | diff | .ai-loop/runs/phase-005/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+-| EVD-phase-005-006 | phase-005 | CLAIM-phase-005 | verification-log | .ai-loop/runs/phase-005/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+-| EVD-phase-005-007 | phase-005 | CLAIM-phase-005 | changed-files | .ai-loop/runs/phase-005/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+-| EVD-phase-005-008 | phase-005 | CLAIM-phase-005 | business-files | .ai-loop/runs/phase-005/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+-| EVD-phase-005-009 | phase-005 | CLAIM-phase-005 | evidence-files | .ai-loop/runs/phase-005/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++﻿# Evidence Ledger
++
++This ledger maps phase claims to durable evidence. Evidence must be a real file,
++command, log, test output, provenance record, or source inspection record.
++
++| Evidence ID | Phase | Claim ID | Type | Path or Command | Produced By | Verified By | Status | Notes |
++| --- | --- | --- | --- | --- | --- | --- | --- | --- |
++| EVD-BOOTSTRAP-001 | harness | CLAIM-BOOTSTRAP | bootstrap | .ai-loop/evidence/evidence-ledger.md | Codex | Codex | recorded | Ledger initialized for evidence-gated loop work. |
++
++| EVD-phase-001-001 | phase-001 | CLAIM-phase-001 | prompt | .ai-loop/runs/phase-001/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-001-002 | phase-001 | CLAIM-phase-001 | requirements | .ai-loop/runs/phase-001/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-001-003 | phase-001 | CLAIM-phase-001 | worker-report | .ai-loop/runs/phase-001/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-001-004 | phase-001 | CLAIM-phase-001 | status | .ai-loop/runs/phase-001/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-001-005 | phase-001 | CLAIM-phase-001 | diff | .ai-loop/runs/phase-001/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-001-006 | phase-001 | CLAIM-phase-001 | verification-log | .ai-loop/runs/phase-001/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-001-007 | phase-001 | CLAIM-phase-001 | changed-files | .ai-loop/runs/phase-001/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-001-008 | phase-001 | CLAIM-phase-001 | business-files | .ai-loop/runs/phase-001/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-001-009 | phase-001 | CLAIM-phase-001 | evidence-files | .ai-loop/runs/phase-001/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-002-001 | phase-002 | CLAIM-phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-002-002 | phase-002 | CLAIM-phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-002-003 | phase-002 | CLAIM-phase-002 | worker-report | .ai-loop/runs/phase-002/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-002-004 | phase-002 | CLAIM-phase-002 | status | .ai-loop/runs/phase-002/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-002-005 | phase-002 | CLAIM-phase-002 | diff | .ai-loop/runs/phase-002/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-002-006 | phase-002 | CLAIM-phase-002 | verification-log | .ai-loop/runs/phase-002/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-002-007 | phase-002 | CLAIM-phase-002 | changed-files | .ai-loop/runs/phase-002/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-002-008 | phase-002 | CLAIM-phase-002 | business-files | .ai-loop/runs/phase-002/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-002-009 | phase-002 | CLAIM-phase-002 | evidence-files | .ai-loop/runs/phase-002/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-003-001 | phase-003 | CLAIM-phase-003 | prompt | .ai-loop/runs/phase-003/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-003-002 | phase-003 | CLAIM-phase-003 | requirements | .ai-loop/runs/phase-003/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-003-003 | phase-003 | CLAIM-phase-003 | worker-report | .ai-loop/runs/phase-003/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-003-004 | phase-003 | CLAIM-phase-003 | status | .ai-loop/runs/phase-003/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-003-005 | phase-003 | CLAIM-phase-003 | diff | .ai-loop/runs/phase-003/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-003-006 | phase-003 | CLAIM-phase-003 | verification-log | .ai-loop/runs/phase-003/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-003-007 | phase-003 | CLAIM-phase-003 | changed-files | .ai-loop/runs/phase-003/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-003-008 | phase-003 | CLAIM-phase-003 | business-files | .ai-loop/runs/phase-003/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-003-009 | phase-003 | CLAIM-phase-003 | evidence-files | .ai-loop/runs/phase-003/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-004-001 | phase-004 | CLAIM-phase-004 | prompt | .ai-loop/runs/phase-004/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-004-002 | phase-004 | CLAIM-phase-004 | requirements | .ai-loop/runs/phase-004/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-004-003 | phase-004 | CLAIM-phase-004 | worker-report | .ai-loop/runs/phase-004/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-004-004 | phase-004 | CLAIM-phase-004 | status | .ai-loop/runs/phase-004/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-004-005 | phase-004 | CLAIM-phase-004 | diff | .ai-loop/runs/phase-004/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-004-006 | phase-004 | CLAIM-phase-004 | verification-log | .ai-loop/runs/phase-004/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-004-007 | phase-004 | CLAIM-phase-004 | changed-files | .ai-loop/runs/phase-004/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-004-008 | phase-004 | CLAIM-phase-004 | business-files | .ai-loop/runs/phase-004/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-004-009 | phase-004 | CLAIM-phase-004 | evidence-files | .ai-loop/runs/phase-004/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-005-001 | phase-005 | CLAIM-phase-005 | prompt | .ai-loop/runs/phase-005/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-005-002 | phase-005 | CLAIM-phase-005 | requirements | .ai-loop/runs/phase-005/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-005-003 | phase-005 | CLAIM-phase-005 | worker-report | .ai-loop/runs/phase-005/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-005-004 | phase-005 | CLAIM-phase-005 | status | .ai-loop/runs/phase-005/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-005-005 | phase-005 | CLAIM-phase-005 | diff | .ai-loop/runs/phase-005/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-005-006 | phase-005 | CLAIM-phase-005 | verification-log | .ai-loop/runs/phase-005/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-005-007 | phase-005 | CLAIM-phase-005 | changed-files | .ai-loop/runs/phase-005/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-005-008 | phase-005 | CLAIM-phase-005 | business-files | .ai-loop/runs/phase-005/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-005-009 | phase-005 | CLAIM-phase-005 | evidence-files | .ai-loop/runs/phase-005/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-006-001 | phase-006 | CLAIM-phase-006 | prompt | .ai-loop/runs/phase-006/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-006-002 | phase-006 | CLAIM-phase-006 | requirements | .ai-loop/runs/phase-006/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-006-003 | phase-006 | CLAIM-phase-006 | worker-report | .ai-loop/runs/phase-006/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-006-004 | phase-006 | CLAIM-phase-006 | status | .ai-loop/runs/phase-006/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-006-005 | phase-006 | CLAIM-phase-006 | diff | .ai-loop/runs/phase-006/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-006-006 | phase-006 | CLAIM-phase-006 | verification-log | .ai-loop/runs/phase-006/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-006-007 | phase-006 | CLAIM-phase-006 | changed-files | .ai-loop/runs/phase-006/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-006-008 | phase-006 | CLAIM-phase-006 | business-files | .ai-loop/runs/phase-006/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-006-009 | phase-006 | CLAIM-phase-006 | evidence-files | .ai-loop/runs/phase-006/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
+diff --git a/.ai-loop/evidence/provenance-map.md b/.ai-loop/evidence/provenance-map.md
+index c22d2df..7502427 100644
+--- a/.ai-loop/evidence/provenance-map.md
++++ b/.ai-loop/evidence/provenance-map.md
+@@ -1,15 +1,16 @@
+-﻿# Provenance Map
+-
+-Track data, figure, table, generated artifact, and decision provenance. For
+-scientific results, final artifacts must trace to source data, commands, hashes,
+-or direct verification records.
+-
+-| Provenance ID | Phase | Artifact | Source Inputs | Producing Command | Hash Or Commit | Status | Notes |
+-| --- | --- | --- | --- | --- | --- | --- | --- |
+-| PROV-BOOTSTRAP-001 | harness | .ai-loop/evidence/provenance-map.md | local template | manual template creation | git-tracked | recorded | Provenance map initialized. |
+-
+-| PROV-phase-001-DIFF | phase-001 | .ai-loop/runs/phase-001/diff.patch | .ai-loop/runs/phase-001/base_commit.txt; .ai-loop/runs/phase-001/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
+-| PROV-phase-002-DIFF | phase-002 | .ai-loop/runs/phase-002/diff.patch | .ai-loop/runs/phase-002/base_commit.txt; .ai-loop/runs/phase-002/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
+-| PROV-phase-003-DIFF | phase-003 | .ai-loop/runs/phase-003/diff.patch | .ai-loop/runs/phase-003/base_commit.txt; .ai-loop/runs/phase-003/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
+-| PROV-phase-004-DIFF | phase-004 | .ai-loop/runs/phase-004/diff.patch | .ai-loop/runs/phase-004/base_commit.txt; .ai-loop/runs/phase-004/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
+-| PROV-phase-005-DIFF | phase-005 | .ai-loop/runs/phase-005/diff.patch | .ai-loop/runs/phase-005/base_commit.txt; .ai-loop/runs/phase-005/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
++﻿# Provenance Map
++
++Track data, figure, table, generated artifact, and decision provenance. For
++scientific results, final artifacts must trace to source data, commands, hashes,
++or direct verification records.
++
++| Provenance ID | Phase | Artifact | Source Inputs | Producing Command | Hash Or Commit | Status | Notes |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| PROV-BOOTSTRAP-001 | harness | .ai-loop/evidence/provenance-map.md | local template | manual template creation | git-tracked | recorded | Provenance map initialized. |
++
++| PROV-phase-001-DIFF | phase-001 | .ai-loop/runs/phase-001/diff.patch | .ai-loop/runs/phase-001/base_commit.txt; .ai-loop/runs/phase-001/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
++| PROV-phase-002-DIFF | phase-002 | .ai-loop/runs/phase-002/diff.patch | .ai-loop/runs/phase-002/base_commit.txt; .ai-loop/runs/phase-002/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
++| PROV-phase-003-DIFF | phase-003 | .ai-loop/runs/phase-003/diff.patch | .ai-loop/runs/phase-003/base_commit.txt; .ai-loop/runs/phase-003/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
++| PROV-phase-004-DIFF | phase-004 | .ai-loop/runs/phase-004/diff.patch | .ai-loop/runs/phase-004/base_commit.txt; .ai-loop/runs/phase-004/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
++| PROV-phase-005-DIFF | phase-005 | .ai-loop/runs/phase-005/diff.patch | .ai-loop/runs/phase-005/base_commit.txt; .ai-loop/runs/phase-005/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
++| PROV-phase-006-DIFF | phase-006 | .ai-loop/runs/phase-006/diff.patch | .ai-loop/runs/phase-006/base_commit.txt; .ai-loop/runs/phase-006/status_after.txt | git diff | base commit recorded | recorded | Diff provenance for phase audit. |
+diff --git a/.ai-loop/evidence/test-log.md b/.ai-loop/evidence/test-log.md
+index 22d0359..a456f67 100644
+--- a/.ai-loop/evidence/test-log.md
++++ b/.ai-loop/evidence/test-log.md
+@@ -1,14 +1,15 @@
+-﻿# Test Log
+-
+-Record test, build, lint, typecheck, simulation, or validation outputs that
+-support a phase decision.
+-
+-| Test ID | Phase | Command | Output Path | Exit Code | Status | Notes |
+-| --- | --- | --- | --- | --- | --- | --- |
+-| TEST-BOOTSTRAP-001 | harness | manual template creation | .ai-loop/evidence/test-log.md | 0 | recorded | Test log initialized. |
+-
+-| TEST-phase-001-VERIFY | phase-001 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject | .ai-loop/runs/phase-001/verify.log | 0 | passed | Primary phase verification. |
+-| TEST-phase-002-VERIFY | phase-002 | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; exit 0 | .ai-loop/runs/phase-002/verify.log | 0 | passed | Primary phase verification. |
+-| TEST-phase-003-VERIFY | phase-003 | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\validate-loop.ps1' -ProjectRoot .; if (-not $?) { exit 1 }; exit 0 | .ai-loop/runs/phase-003/verify.log | 0 | passed | Primary phase verification. |
+-| TEST-phase-004-VERIFY | phase-004 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase004.ps1 | .ai-loop/runs/phase-004/verify.log | 0 | passed | Primary phase verification. |
+-| TEST-phase-005-VERIFY | phase-005 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase005.ps1 | .ai-loop/runs/phase-005/verify.log | 0 | passed | Primary phase verification. |
++﻿# Test Log
++
++Record test, build, lint, typecheck, simulation, or validation outputs that
++support a phase decision.
++
++| Test ID | Phase | Command | Output Path | Exit Code | Status | Notes |
++| --- | --- | --- | --- | --- | --- | --- |
++| TEST-BOOTSTRAP-001 | harness | manual template creation | .ai-loop/evidence/test-log.md | 0 | recorded | Test log initialized. |
++
++| TEST-phase-001-VERIFY | phase-001 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject | .ai-loop/runs/phase-001/verify.log | 0 | passed | Primary phase verification. |
++| TEST-phase-002-VERIFY | phase-002 | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; exit 0 | .ai-loop/runs/phase-002/verify.log | 0 | passed | Primary phase verification. |
++| TEST-phase-003-VERIFY | phase-003 | & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\validate-loop.ps1' -ProjectRoot .; if (-not $?) { exit 1 }; exit 0 | .ai-loop/runs/phase-003/verify.log | 0 | passed | Primary phase verification. |
++| TEST-phase-004-VERIFY | phase-004 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase004.ps1 | .ai-loop/runs/phase-004/verify.log | 0 | passed | Primary phase verification. |
++| TEST-phase-005-VERIFY | phase-005 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase005.ps1 | .ai-loop/runs/phase-005/verify.log | 0 | passed | Primary phase verification. |
++| TEST-phase-006-VERIFY | phase-006 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase006.ps1 | .ai-loop/runs/phase-006/verify.log | 0 | passed | Primary phase verification. |
+diff --git a/.ai-loop/memory/activeContext.md b/.ai-loop/memory/activeContext.md
+index a3f8ad1..eb58a83 100644
+--- a/.ai-loop/memory/activeContext.md
++++ b/.ai-loop/memory/activeContext.md
+@@ -76,6 +76,13 @@ properties, unsupported old config schemas, future config schemas,
+ config/manifest mismatches, and status schema mismatches.
+ `Test-SchemaVersioning.ps1` covers these cases, and `Test-Phase005.ps1`
+ aggregates the current full non-global verification matrix.
++Root phase-006 added durable non-accepted phase decisions. `ai-loop -Command
++decide` now records `REWORK` and `BLOCKED` audit outcomes into `status.json`,
++`phase_meta.json`, `rework.txt` or `blocked.txt`, and the event log.
++`validate-loop.ps1` now requires matching audit decisions and decision files for
++terminal `rework` and `blocked` states. `Test-PhaseDecisions.ps1` covers
++REWORK, BLOCKED, resume reconstruction, loop validation, and decision/audit
++mismatch rejection.
+ 
+ Do not install external memory dependencies.
+ Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
+@@ -84,9 +91,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
+ 
+ ## Next Safe Action
+ 
+-The next best optimization is deeper recovery/state transition automation, or
+-deciding whether start-time Markdown ledger rows should become idempotent like
+-collect-time evidence rows.
++The next best optimization is stricter state transition logs, explicit migration
++commands for old `.ai-loop` projects, or deciding whether start-time Markdown
++ledger rows should become idempotent like collect-time evidence rows.
+ Real global Codex plugin installation validation still requires explicit user
+ approval. Before further harness changes, review:
+ 
+diff --git a/.ai-loop/memory/handoff-summary.md b/.ai-loop/memory/handoff-summary.md
+index 44b9f50..2f5930f 100644
+--- a/.ai-loop/memory/handoff-summary.md
++++ b/.ai-loop/memory/handoff-summary.md
+@@ -3,9 +3,9 @@
+ ## Current Phase
+ 
+ External Worker invocation hardening is implemented; dogfood phase-001,
+-loop-standard self-loop phases 002-003, and root self-loop phases 001-005 have
+-been accepted. Root phase-005 added schema/migration versioning for project
+-control planes.
++loop-standard self-loop phases 002-003, and root self-loop phases 001-006 have
++been accepted. Root phase-006 added durable `REWORK` / `BLOCKED` phase
++decisions.
+ 
+ ## Last Verified State
+ 
+@@ -66,6 +66,13 @@ properties, config schema compatibility, future schemas, config/manifest
+ mismatches, and status schema compatibility. `Test-SchemaVersioning.ps1` covers
+ valid init plus six blocking schema cases, and `Test-Phase005.ps1` aggregates
+ the current non-global verification matrix.
++Root self-loop phase-006 added `decide-phase.ps1` and exposed it as
++`ai-loop -Command decide`. `ACCEPTED` still uses `accept`; `REWORK` and
++`BLOCKED` now require matching audit decisions and are recorded into
++`status.json`, `phase_meta.json`, `rework.txt` or `blocked.txt`, and
++`event-log.ndjson`. `validate-loop.ps1` validates those non-accepted terminal
++states, and `Test-PhaseDecisions.ps1` proves REWORK, BLOCKED, resume recovery,
++and decision mismatch rejection.
+ 
+ Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
+ merged into `.ai-loop/` memory and the file was removed.
+@@ -117,8 +124,10 @@ integrity source for required phase evidence.
+ 
+ Repo-local plugin install/discovery smoke testing and validate-loop negative
+ fixture testing are now in place, and schema/migration compatibility is
+-detectable through `validate-loop`. The remaining plugin-form stability step is
+-a live global Codex plugin install/discovery test, which must wait for explicit
+-user approval because it modifies real Codex/plugin configuration. Good
+-non-global next candidates are deeper recovery/state transition automation,
+-explicit migration commands for old projects, or start-phase ledger idempotence.
++detectable through `validate-loop`. Durable REWORK/BLOCKED outcomes are now
++recoverable from files. The remaining plugin-form stability step is a live
++global Codex plugin install/discovery test, which must wait for explicit user
++approval because it modifies real Codex/plugin configuration. Good non-global
++next candidates are stricter state transition logs, explicit migration commands
++for old projects, optional rework phase scaffolding, or start-phase ledger
++idempotence.
+diff --git a/.ai-loop/memory/progress.md b/.ai-loop/memory/progress.md
+index 84d3e57..df26a12 100644
+--- a/.ai-loop/memory/progress.md
++++ b/.ai-loop/memory/progress.md
+@@ -120,6 +120,12 @@
+   `Test-SchemaVersioning.ps1` for missing schema, old/future config schemas,
+   config/manifest mismatch, missing schema property, and status schema mismatch;
+   and added `Test-Phase005.ps1` as the current non-global verification matrix.
++- Ran root self-loop phase-006 under the repository root `.ai-loop`: added
++  `decide-phase.ps1` and `ai-loop -Command decide` for durable `REWORK` and
++  `BLOCKED` outcomes, updated the installed shim command surface, made
++  `validate-loop.ps1` require matching audits and `rework.txt` / `blocked.txt`,
++  added `Test-PhaseDecisions.ps1`, and documented non-accepted decisions in the
++  README files and plugin skills.
+ 
+ ## In Progress
+ 
+@@ -129,7 +135,8 @@
+ 
+ - Choose final non-temporary global install root.
+ - Expand skill trigger matrix for full-stack and physics workflows.
+-- Add stricter state transition logs and recovery paths.
++- Add stricter state transition logs and recovery paths beyond durable
++  non-accepted decisions.
+ - Decide whether skill artifacts should become required manifest entries in the
+   next evidence hardening phase.
+ - Validate plugin discovery in real global Codex configuration after explicit
+@@ -143,6 +150,8 @@
+   rows, or explicitly document why start rows are append-only.
+ - Decide whether explicit in-place migration commands are needed for old
+   `.ai-loop` projects before 1.0, or whether detect-and-block is sufficient.
++- Decide whether `REWORK` should optionally scaffold a follow-up phase from the
++  audit findings.
+ 
+ ## Last Updated
+ 
+diff --git a/.ai-loop/status.json b/.ai-loop/status.json
+index ba342cb..7029355 100644
+--- a/.ai-loop/status.json
++++ b/.ai-loop/status.json
+@@ -1,163 +1,187 @@
+-﻿{
+-    "schema_version":  "1.1",
+-    "project_name":  "loop",
+-    "initialized_at":  "2026-06-27T09:38:23.4132839Z",
+-    "supervisor":  "Codex",
+-    "worker":  "Worker Agent",
+-    "current_phase":  {
+-                          "phase_id":  "phase-005",
+-                          "title":  "Add control-plane schema versioning",
+-                          "objective":  "Add lightweight schema manifest and migration validation so initialized projects can be checked for supported .ai-loop schema versions.",
+-                          "status":  "accepted",
+-                          "run_dir":  ".ai-loop/runs/phase-005",
+-                          "audit_input":  ".ai-loop/audits/phase-005-audit-input.md",
+-                          "audit_result":  ".ai-loop/audits/phase-005-audit.md",
+-                          "base_commit":  "3c5af024fccff5e24e9f70ce94ed15d720d45935",
+-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase005.ps1",
+-                          "task_kind":  "fullstack",
+-                          "skill_profile":  "none",
+-                          "claim_ids":  [
+-
+-                                        ],
+-                          "required_skills":  [
+-
+-                                              ],
+-                          "requirements":  ".ai-loop/runs/phase-005/phase_requirements.json",
+-                          "started_at":  "2026-06-27T15:15:57.3723765Z",
+-                          "evidence_collected_at":  "2026-06-27T15:37:07.9737210Z",
+-                          "audit_prepared_at":  "2026-06-27T15:38:00.3762102Z",
+-                          "accepted_at":  "2026-06-27T15:38:14.0507180Z"
+-                      },
+-    "phases":  [
+-                   {
+-                       "phase_id":  "phase-001",
+-                       "title":  "Make root control plane runnable",
+-                       "objective":  "Make the repository root .ai-loop usable with ai-loop start, collect, validate, audit-pack, and accept without overwriting existing memory.",
+-                       "status":  "accepted",
+-                       "run_dir":  ".ai-loop/runs/phase-001",
+-                       "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+-                       "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+-                       "base_commit":  "5c7b61ca23d5a2fdabd8f188e155fd2d971b6d68",
+-                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+-                       "task_kind":  "fullstack",
+-                       "skill_profile":  "none",
+-                       "claim_ids":  [
+-
+-                                     ],
+-                       "required_skills":  [
+-
+-                                           ],
+-                       "requirements":  ".ai-loop/runs/phase-001/phase_requirements.json",
+-                       "started_at":  "2026-06-27T09:40:41.5965531Z",
+-                       "evidence_collected_at":  "2026-06-27T09:50:30.6735413Z",
+-                       "audit_prepared_at":  "2026-06-27T09:50:46.8023228Z",
+-                       "accepted_at":  "2026-06-27T09:51:40.5128214Z"
+-                   },
+-                   {
+-                       "phase_id":  "phase-002",
+-                       "title":  "Smoke test Codex plugin install layout",
+-                       "objective":  "Validate codex-loop-harness plugin packaging, temporary installation layout, manifest discovery, plugin skills, and installed shim without modifying real global Codex configuration.",
+-                       "status":  "accepted",
+-                       "run_dir":  ".ai-loop/runs/phase-002",
+-                       "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
+-                       "audit_result":  ".ai-loop/audits/phase-002-audit.md",
+-                       "base_commit":  "0ce094172686aba396a3041fa658507fccc193f4",
+-                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+-                       "task_kind":  "fullstack",
+-                       "skill_profile":  "none",
+-                       "claim_ids":  [
+-
+-                                     ],
+-                       "required_skills":  [
+-
+-                                           ],
+-                       "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
+-                       "started_at":  "2026-06-27T10:03:50.7359506Z",
+-                       "evidence_collected_at":  "2026-06-27T10:18:49.5551209Z",
+-                       "audit_prepared_at":  "2026-06-27T10:19:08.8737634Z",
+-                       "accepted_at":  "2026-06-27T10:19:58.9435005Z"
+-                   },
+-                   {
+-                       "phase_id":  "phase-003",
+-                       "title":  "Add loop-wide state validation",
+-                       "objective":  "Add a loop-wide validation command that checks .ai-loop control-plane structure, status consistency, phase references, accepted audits, and recovery-critical files before broader 1.0 hardening.",
+-                       "status":  "accepted",
+-                       "run_dir":  ".ai-loop/runs/phase-003",
+-                       "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
+-                       "audit_result":  ".ai-loop/audits/phase-003-audit.md",
+-                       "base_commit":  "2eff996a7d467845966ef64d8da3dd30b8f244aa",
+-                       "verify_command":  "\u0026 \u0027.\\loop-standard\\scripts\\Test-LoopStandard.ps1\u0027 -AllowPilotProject; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\Test-PluginInstall.ps1\u0027; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\validate-loop.ps1\u0027 -ProjectRoot .; if (-not $?) { exit 1 }; exit 0",
+-                       "task_kind":  "fullstack",
+-                       "skill_profile":  "none",
+-                       "claim_ids":  [
+-
+-                                     ],
+-                       "required_skills":  [
+-
+-                                           ],
+-                       "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
+-                       "started_at":  "2026-06-27T14:29:26.3090120Z",
+-                       "evidence_collected_at":  "2026-06-27T14:39:40.3461844Z",
+-                       "audit_prepared_at":  "2026-06-27T14:40:29.1660636Z",
+-                       "accepted_at":  "2026-06-27T14:40:59.6887437Z"
+-                   },
+-                   {
+-                       "phase_id":  "phase-004",
+-                       "title":  "Validate loop failure fixtures",
+-                       "objective":  "Add negative fixture coverage proving validate-loop rejects broken control-plane states.",
+-                       "status":  "accepted",
+-                       "run_dir":  ".ai-loop/runs/phase-004",
+-                       "audit_input":  ".ai-loop/audits/phase-004-audit-input.md",
+-                       "audit_result":  ".ai-loop/audits/phase-004-audit.md",
+-                       "base_commit":  "793c118304b2e646aa33f21849a115e71cd95e49",
+-                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase004.ps1",
+-                       "task_kind":  "fullstack",
+-                       "skill_profile":  "none",
+-                       "claim_ids":  [
+-
+-                                     ],
+-                       "required_skills":  [
+-
+-                                           ],
+-                       "requirements":  ".ai-loop/runs/phase-004/phase_requirements.json",
+-                       "started_at":  "2026-06-27T14:48:27.1857522Z",
+-                       "evidence_collected_at":  "2026-06-27T15:10:41.1004083Z",
+-                       "audit_prepared_at":  "2026-06-27T15:11:19.0427001Z",
+-                       "accepted_at":  "2026-06-27T15:12:07.8978673Z"
+-                   },
+-                   {
+-                       "phase_id":  "phase-005",
+-                       "title":  "Add control-plane schema versioning",
+-                       "objective":  "Add lightweight schema manifest and migration validation so initialized projects can be checked for supported .ai-loop schema versions.",
+-                       "status":  "accepted",
+-                       "run_dir":  ".ai-loop/runs/phase-005",
+-                       "audit_input":  ".ai-loop/audits/phase-005-audit-input.md",
+-                       "audit_result":  ".ai-loop/audits/phase-005-audit.md",
+-                       "base_commit":  "3c5af024fccff5e24e9f70ce94ed15d720d45935",
+-                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase005.ps1",
+-                       "task_kind":  "fullstack",
+-                       "skill_profile":  "none",
+-                       "claim_ids":  [
+-
+-                                     ],
+-                       "required_skills":  [
+-
+-                                           ],
+-                       "requirements":  ".ai-loop/runs/phase-005/phase_requirements.json",
+-                       "started_at":  "2026-06-27T15:15:57.3723765Z",
+-                       "evidence_collected_at":  "2026-06-27T15:37:07.9737210Z",
+-                       "audit_prepared_at":  "2026-06-27T15:38:00.3762102Z",
+-                       "accepted_at":  "2026-06-27T15:38:14.0507180Z"
+-                   }
+-               ],
+-    "last_decision":  {
+-                          "phase_id":  "phase-005",
+-                          "decision":  "ACCEPTED",
+-                          "audit":  ".ai-loop/audits/phase-005-audit.md",
+-                          "decided_at":  "2026-06-27T15:38:14.0507180Z"
+-                      },
+-    "notes":  [
+-                  "This file is durable loop state.",
+-                  "Do not infer phase status from chat history."
+-              ]
+-}
++﻿{
++    "schema_version":  "1.1",
++    "project_name":  "loop",
++    "initialized_at":  "2026-06-27T09:38:23.4132839Z",
++    "supervisor":  "Codex",
++    "worker":  "Worker Agent",
++    "current_phase":  {
++                          "phase_id":  "phase-006",
++                          "title":  "Add rework and blocked phase decisions",
++                          "objective":  "Add gate-aware REWORK and BLOCKED phase decision handling plus recovery tests so non-accepted audit outcomes become durable state.",
++                          "status":  "accepted",
++                          "run_dir":  ".ai-loop/runs/phase-006",
++                          "audit_input":  ".ai-loop/audits/phase-006-audit-input.md",
++                          "audit_result":  ".ai-loop/audits/phase-006-audit.md",
++                          "base_commit":  "8cfeae1b9389a2de363e880b4c1930973b05e0ba",
++                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase006.ps1",
++                          "task_kind":  "fullstack",
++                          "skill_profile":  "none",
++                          "claim_ids":  [
++
++                                        ],
++                          "required_skills":  [
++
++                                              ],
++                          "requirements":  ".ai-loop/runs/phase-006/phase_requirements.json",
++                          "started_at":  "2026-06-27T15:42:09.6438982Z",
++                          "evidence_collected_at":  "2026-06-27T15:57:40.7969684Z",
++                          "audit_prepared_at":  "2026-06-27T15:58:18.7636269Z",
++                          "accepted_at":  "2026-06-27T15:59:31.7352503Z"
++                      },
++    "phases":  [
++                   {
++                       "phase_id":  "phase-001",
++                       "title":  "Make root control plane runnable",
++                       "objective":  "Make the repository root .ai-loop usable with ai-loop start, collect, validate, audit-pack, and accept without overwriting existing memory.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-001",
++                       "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-001-audit.md",
++                       "base_commit":  "5c7b61ca23d5a2fdabd8f188e155fd2d971b6d68",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-001/phase_requirements.json",
++                       "started_at":  "2026-06-27T09:40:41.5965531Z",
++                       "evidence_collected_at":  "2026-06-27T09:50:30.6735413Z",
++                       "audit_prepared_at":  "2026-06-27T09:50:46.8023228Z",
++                       "accepted_at":  "2026-06-27T09:51:40.5128214Z"
++                   },
++                   {
++                       "phase_id":  "phase-002",
++                       "title":  "Smoke test Codex plugin install layout",
++                       "objective":  "Validate codex-loop-harness plugin packaging, temporary installation layout, manifest discovery, plugin skills, and installed shim without modifying real global Codex configuration.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-002",
++                       "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-002-audit.md",
++                       "base_commit":  "0ce094172686aba396a3041fa658507fccc193f4",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
++                       "started_at":  "2026-06-27T10:03:50.7359506Z",
++                       "evidence_collected_at":  "2026-06-27T10:18:49.5551209Z",
++                       "audit_prepared_at":  "2026-06-27T10:19:08.8737634Z",
++                       "accepted_at":  "2026-06-27T10:19:58.9435005Z"
++                   },
++                   {
++                       "phase_id":  "phase-003",
++                       "title":  "Add loop-wide state validation",
++                       "objective":  "Add a loop-wide validation command that checks .ai-loop control-plane structure, status consistency, phase references, accepted audits, and recovery-critical files before broader 1.0 hardening.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-003",
++                       "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-003-audit.md",
++                       "base_commit":  "2eff996a7d467845966ef64d8da3dd30b8f244aa",
++                       "verify_command":  "\u0026 \u0027.\\loop-standard\\scripts\\Test-LoopStandard.ps1\u0027 -AllowPilotProject; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\Test-PluginInstall.ps1\u0027; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\validate-loop.ps1\u0027 -ProjectRoot .; if (-not $?) { exit 1 }; exit 0",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
++                       "started_at":  "2026-06-27T14:29:26.3090120Z",
++                       "evidence_collected_at":  "2026-06-27T14:39:40.3461844Z",
++                       "audit_prepared_at":  "2026-06-27T14:40:29.1660636Z",
++                       "accepted_at":  "2026-06-27T14:40:59.6887437Z"
++                   },
++                   {
++                       "phase_id":  "phase-004",
++                       "title":  "Validate loop failure fixtures",
++                       "objective":  "Add negative fixture coverage proving validate-loop rejects broken control-plane states.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-004",
++                       "audit_input":  ".ai-loop/audits/phase-004-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-004-audit.md",
++                       "base_commit":  "793c118304b2e646aa33f21849a115e71cd95e49",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase004.ps1",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-004/phase_requirements.json",
++                       "started_at":  "2026-06-27T14:48:27.1857522Z",
++                       "evidence_collected_at":  "2026-06-27T15:10:41.1004083Z",
++                       "audit_prepared_at":  "2026-06-27T15:11:19.0427001Z",
++                       "accepted_at":  "2026-06-27T15:12:07.8978673Z"
++                   },
++                   {
++                       "phase_id":  "phase-005",
++                       "title":  "Add control-plane schema versioning",
++                       "objective":  "Add lightweight schema manifest and migration validation so initialized projects can be checked for supported .ai-loop schema versions.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-005",
++                       "audit_input":  ".ai-loop/audits/phase-005-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-005-audit.md",
++                       "base_commit":  "3c5af024fccff5e24e9f70ce94ed15d720d45935",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase005.ps1",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-005/phase_requirements.json",
++                       "started_at":  "2026-06-27T15:15:57.3723765Z",
++                       "evidence_collected_at":  "2026-06-27T15:37:07.9737210Z",
++                       "audit_prepared_at":  "2026-06-27T15:38:00.3762102Z",
++                       "accepted_at":  "2026-06-27T15:38:14.0507180Z"
++                   },
++                   {
++                       "phase_id":  "phase-006",
++                       "title":  "Add rework and blocked phase decisions",
++                       "objective":  "Add gate-aware REWORK and BLOCKED phase decision handling plus recovery tests so non-accepted audit outcomes become durable state.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-006",
++                       "audit_input":  ".ai-loop/audits/phase-006-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-006-audit.md",
++                       "base_commit":  "8cfeae1b9389a2de363e880b4c1930973b05e0ba",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase006.ps1",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-006/phase_requirements.json",
++                       "started_at":  "2026-06-27T15:42:09.6438982Z",
++                       "evidence_collected_at":  "2026-06-27T15:57:40.7969684Z",
++                       "audit_prepared_at":  "2026-06-27T15:58:18.7636269Z",
++                       "accepted_at":  "2026-06-27T15:59:31.7352503Z"
++                   }
++               ],
++    "last_decision":  {
++                          "phase_id":  "phase-006",
++                          "decision":  "ACCEPTED",
++                          "audit":  ".ai-loop/audits/phase-006-audit.md",
++                          "decided_at":  "2026-06-27T15:59:31.7352503Z"
++                      },
++    "notes":  [
++                  "This file is durable loop state.",
++                  "Do not infer phase status from chat history."
++              ]
++}
+diff --git a/README.md b/README.md
+index e9cff33..375cfef 100644
+--- a/README.md
++++ b/README.md
+@@ -35,6 +35,7 @@ Supervisor、Worker、Auditor、Verifier、Recovery 这些角色协议稳定存
+ - `scripts/prepare-audit-pack.ps1`：整理 Codex 审计入口文件。
+ - `scripts/validate-phase-gates.ps1`：检查阶段 gate，缺证据、缺 skill artifact、坏链接都会阻断。
+ - `scripts/accept-phase.ps1`：Codex 审计通过后才允许接受阶段。
++- `scripts/decide-phase.ps1`：把 `REWORK` / `BLOCKED` 审计结果写入 durable state。
+ - `scripts/link-skills.ps1`：把共享 skill 库链接到目标项目的 `.agents/skills/`。
+ - `scripts/preflight-worker.ps1`：外部 Worker 调用前的安全性和可行性审查。
+ - `scripts/invoke-worker.ps1`：仅在 preflight 通过后调用外部 Worker。
+@@ -207,6 +208,18 @@ config/status schema 不匹配的项目。人类可读的迁移记录保存在
+ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command accept -ProjectRoot E:\some-project -PhaseId phase-001
+ ```
+ 
++如果 Codex 审计结论是 `REWORK` 或 `BLOCKED`，不要运行 `accept`，而是记录
++非接受决策：
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision REWORK -Reason "Audit found a scoped fix is required."
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision BLOCKED -Reason "Required evidence is missing."
++```
++
++`decide` 会写入 `.ai-loop/status.json`、`phase_meta.json`、`rework.txt` 或
++`blocked.txt`，并追加 `.ai-loop/events/event-log.ndjson`。之后 `resume`
++会基于这些文件给出下一步安全动作。
++
+ ## 科研 Skill Profiles
+ 
+ 第一版默认共享 skill 库来源是：
+@@ -265,7 +278,8 @@ Codex 不能只根据 worker report 接受阶段。
+   install root、local marketplace、plugin manifest、plugin skills、shim
+   `doctor` 和 plugin wrapper `doctor`。
+ - `ai-loop.ps1 -Command validate-loop`：检查整个 `.ai-loop` 控制面结构、
+-  `status.json`、phase 引用、accepted audit、恢复关键文件和 schema 版本。
++  `status.json`、phase 引用、accepted/rework/blocked audit、恢复关键文件和
++  schema 版本。
+ - `ai-loop.ps1 doctor`。
+ - 插件 wrapper `doctor`。
+ - 临时项目行为测试：
+@@ -274,6 +288,8 @@ Codex 不能只根据 worker report 接受阶段。
+   - full-stack 阶段可以通过普通 evidence gates。
+   - physics-research 阶段在缺少 required skill artifacts 时阻断。
+   - force accept 必须写 override reason。
++  - `REWORK` / `BLOCKED` 可以通过 `decide` 写入 durable state 并由
++    `resume` 恢复。
+   - broken skill link 会阻断 validation。
+ 
+ 详细报告见 `.ai-loop/reports/fixed-wrapper-plugin-report.md`。
+diff --git a/README_EN.md b/README_EN.md
+index 61fa965..00d5424 100644
+--- a/README_EN.md
++++ b/README_EN.md
+@@ -29,6 +29,7 @@ Important pieces:
+ - `scripts/validate-phase-gates.ps1`: blocks phases with missing evidence,
+   invalid state, missing skill artifacts, or broken skill links.
+ - `scripts/accept-phase.ps1`: accepts a phase only after audit and gate checks.
++- `scripts/decide-phase.ps1`: records `REWORK` / `BLOCKED` audit outcomes as durable state.
+ - `scripts/link-skills.ps1`: links shared skills into a project `.agents/skills/`.
+ - `scripts/ai-loop.ps1`: the recommended unified entrypoint.
+ 
+@@ -151,6 +152,18 @@ Accept only after Codex writes an audit with `Decision: ACCEPTED`:
+ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command accept -ProjectRoot E:\some-project -PhaseId phase-001
+ ```
+ 
++If the audit decision is `REWORK` or `BLOCKED`, do not run `accept`; record the
++non-accepted decision:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision REWORK -Reason "Audit found a scoped fix is required."
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision BLOCKED -Reason "Required evidence is missing."
++```
++
++`decide` writes `.ai-loop/status.json`, `phase_meta.json`, `rework.txt` or
++`blocked.txt`, and appends `.ai-loop/events/event-log.ndjson`. Later `resume`
++uses those files to report the next safe action.
++
+ ## Research Skill Profiles
+ 
+ The first version assumes the shared skill library is:
+@@ -232,7 +245,7 @@ Recent checks passed:
+   marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
+   wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
+ - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
+-  structure, `status.json`, phase references, accepted audits,
++  structure, `status.json`, phase references, accepted/rework/blocked audits,
+   recovery-critical files, and schema versions.
+ - `ai-loop.ps1 doctor`.
+ - Plugin wrapper `doctor`.
+@@ -242,6 +255,8 @@ Recent checks passed:
+   - full-stack phase can pass ordinary evidence gates.
+   - physics-research phase blocks when required skill artifacts are missing.
+   - force accept requires an override reason.
++  - `REWORK` / `BLOCKED` can be recorded with `decide` and recovered by
++    `resume`.
+   - broken skill links block validation.
+ 
+ See `.ai-loop/reports/fixed-wrapper-plugin-report.md` for the latest detailed
+diff --git a/loop-standard/README.md b/loop-standard/README.md
+index f70d4d4..03a3d79 100644
+--- a/loop-standard/README.md
++++ b/loop-standard/README.md
+@@ -225,6 +225,28 @@ Use `REWORK` or `BLOCKED` instead of `ACCEPTED` when evidence is incomplete,
+ verification fails, the diff does not match the phase objective, or source
+ inspection reveals unresolved issues.
+ 
++Record non-accepted decisions with `decide`, not `accept`:
++
++```powershell
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
++  -Command decide `
++  -ProjectRoot "C:\path\to\project" `
++  -PhaseId "phase-001" `
++  -Decision REWORK `
++  -Reason "Audit found a scoped fix is required."
++
++powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
++  -Command decide `
++  -ProjectRoot "C:\path\to\project" `
++  -PhaseId "phase-001" `
++  -Decision BLOCKED `
++  -Reason "Required evidence is missing."
++```
++
++The decision command writes `rework.txt` or `blocked.txt`, updates
++`status.json` and `phase_meta.json`, appends an event-log row, and lets
++`resume` reconstruct the next safe action from files.
++
+ ## Next Phase
+ 
+ Phase B should create `pilot-project/`, initialize `.ai-loop` inside it, run one
+diff --git a/loop-standard/scripts/Test-LoopStandard.ps1 b/loop-standard/scripts/Test-LoopStandard.ps1
+index 3c043a6..f0fa723 100644
+--- a/loop-standard/scripts/Test-LoopStandard.ps1
++++ b/loop-standard/scripts/Test-LoopStandard.ps1
+@@ -96,6 +96,7 @@ $RequiredPaths = @(
+     "scripts\collect-evidence.ps1",
+     "scripts\prepare-audit-pack.ps1",
+     "scripts\accept-phase.ps1",
++    "scripts\decide-phase.ps1",
+     "scripts\validate-phase-gates.ps1",
+     "scripts\validate-loop.ps1",
+     "scripts\Test-ValidateLoopFailures.ps1",
+@@ -103,6 +104,8 @@ $RequiredPaths = @(
+     "scripts\Test-Phase004.ps1",
+     "scripts\Test-SchemaVersioning.ps1",
+     "scripts\Test-Phase005.ps1",
++    "scripts\Test-PhaseDecisions.ps1",
++    "scripts\Test-Phase006.ps1",
+     "scripts\test-pilot-loop.ps1",
+     "scripts\install-global.ps1",
+     "scripts\Test-PluginInstall.ps1",
+@@ -243,7 +246,7 @@ if (Test-Path -LiteralPath $PluginScriptsDir -PathType Container) {
+ $InstallScriptPath = Join-Path $KitRoot "scripts\install-global.ps1"
+ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
+     $InstallText = Get-Content -LiteralPath $InstallScriptPath -Raw
+-    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "validate-loop", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1")) {
++    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "validate-loop", "decide", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1")) {
+         if ($InstallText -notmatch [regex]::Escape($Needle)) {
+             Add-Problem "install-global.ps1 missing expected interface text: $Needle"
+         }
+@@ -253,13 +256,23 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
+ $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
+ if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
+     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
+-    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "worker-preflight", "invoke-worker")) {
++    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "decide-phase.ps1", "worker-preflight", "invoke-worker")) {
+         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
+             Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
+         }
+     }
+ }
+ 
++$DecideScriptPath = Join-Path $KitRoot "scripts\decide-phase.ps1"
++if (Test-Path -LiteralPath $DecideScriptPath -PathType Leaf) {
++    $DecideText = Get-Content -LiteralPath $DecideScriptPath -Raw
++    foreach ($Needle in @("REWORK", "BLOCKED", "phase_decision", "rework.txt", "blocked.txt", "last_decision")) {
++        if ($DecideText -notmatch [regex]::Escape($Needle)) {
++            Add-Problem "decide-phase.ps1 missing expected decision text: $Needle"
++        }
++    }
++}
++
+ $CollectEvidenceScriptPath = Join-Path $KitRoot "scripts\collect-evidence.ps1"
+ if (Test-Path -LiteralPath $CollectEvidenceScriptPath -PathType Leaf) {
+     $CollectEvidenceText = Get-Content -LiteralPath $CollectEvidenceScriptPath -Raw
+diff --git a/loop-standard/scripts/ai-loop.ps1 b/loop-standard/scripts/ai-loop.ps1
+index dfe1d86..beb1a4f 100644
+--- a/loop-standard/scripts/ai-loop.ps1
++++ b/loop-standard/scripts/ai-loop.ps1
+@@ -1,7 +1,7 @@
+ [CmdletBinding()]
+ param(
+     [Parameter(Mandatory = $true, Position = 0)]
+-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
++    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+     [string]$Command,
+ 
+     [Parameter(Position = 1)]
+@@ -16,6 +16,10 @@ param(
+     [string]$VerifyCommand = "",
+     [string]$ReportPath = "",
+     [string]$AuditPath = "",
++    [ValidateSet("REWORK", "BLOCKED")]
++    [string]$Decision = "REWORK",
++    [string]$Reason = "",
++    [string]$NextSafeAction = "",
+     [ValidateSet("generic", "fullstack", "physics-research", "research-writing", "data-analysis")]
+     [string]$TaskKind = "generic",
+     [Alias("Profile")]
+@@ -224,6 +228,21 @@ switch ($Command) {
+         & (Join-Path $PSScriptRoot "accept-phase.ps1") @ScriptParams
+         Exit-IfScriptFailed -Succeeded $?
+     }
++    "decide" {
++        Require-PhaseId
++        $ScriptParams = @{
++            ProjectRoot = $ProjectRoot
++            PhaseId = $PhaseId
++            Decision = $Decision
++        }
++        if (-not [string]::IsNullOrWhiteSpace($AuditPath)) { $ScriptParams.AuditPath = $AuditPath }
++        if (-not [string]::IsNullOrWhiteSpace($Reason)) { $ScriptParams.Reason = $Reason }
++        if (-not [string]::IsNullOrWhiteSpace($NextSafeAction)) { $ScriptParams.NextSafeAction = $NextSafeAction }
++        if ($Force) { $ScriptParams.Force = $true }
++        $global:LASTEXITCODE = 0
++        & (Join-Path $PSScriptRoot "decide-phase.ps1") @ScriptParams
++        Exit-IfScriptFailed -Succeeded $?
++    }
+     "resume" {
+         $LoopDir = Join-Path $ProjectRoot ".ai-loop"
+         $StatusPath = Join-Path $LoopDir "status.json"
+diff --git a/loop-standard/scripts/install-global.ps1 b/loop-standard/scripts/install-global.ps1
+index 27cbe1e..dc9b813 100644
+--- a/loop-standard/scripts/install-global.ps1
++++ b/loop-standard/scripts/install-global.ps1
+@@ -116,7 +116,7 @@ if ($CreateShim) {
+ [CmdletBinding()]
+ param(
+     [Parameter(Mandatory = `$true, Position = 0)]
+-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
++    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+     [string]`$Command,
+ 
+     [Parameter(Position = 1)]
+diff --git a/loop-standard/scripts/validate-loop.ps1 b/loop-standard/scripts/validate-loop.ps1
+index 1a6d796..5728876 100644
+--- a/loop-standard/scripts/validate-loop.ps1
++++ b/loop-standard/scripts/validate-loop.ps1
+@@ -282,6 +282,25 @@ if ($null -ne $Status) {
+                 Add-Problem "missing validate-phase-gates.ps1"
+             }
+         }
++        if ($PhaseStatus -eq "rework" -or $PhaseStatus -eq "blocked") {
++            $ExpectedDecision = if ($PhaseStatus -eq "rework") { "REWORK" } else { "BLOCKED" }
++            $DecisionFileName = if ($PhaseStatus -eq "rework") { "rework.txt" } else { "blocked.txt" }
++            $AuditResult = Join-Path $LoopDir "audits\$PhaseId-audit.md"
++            $DecisionFile = Join-Path $RunDir $DecisionFileName
++            $AuditResultCheck = Test-NonEmptyFile -Path $AuditResult
++            if ($AuditResultCheck -ne "ok") {
++                Add-Problem "phase $PhaseId missing $ExpectedDecision audit result: $AuditResultCheck"
++            } else {
++                $AuditText = Get-Content -LiteralPath $AuditResult -Raw
++                if ($AuditText -notmatch "(?m)^\s*Decision:\s*$ExpectedDecision\s*$") {
++                    Add-Problem "phase $PhaseId $PhaseStatus without $ExpectedDecision audit decision"
++                }
++            }
++            $DecisionCheck = Test-NonEmptyFile -Path $DecisionFile
++            if ($DecisionCheck -ne "ok") {
++                Add-Problem "phase $PhaseId missing $DecisionFileName`: $DecisionCheck"
++            }
++        }
+         if (($TerminalStatuses -notcontains $PhaseStatus) -and ($null -ne $Status.current_phase) -and ([string]$Status.current_phase.phase_id -ne $PhaseId)) {
+             Add-Problem "non-terminal phase is not current_phase: $PhaseId status=$PhaseStatus"
+         }
+diff --git a/plugins/codex-loop-harness/skills/loop-auditor/SKILL.md b/plugins/codex-loop-harness/skills/loop-auditor/SKILL.md
+index 774babb..931f592 100644
+--- a/plugins/codex-loop-harness/skills/loop-auditor/SKILL.md
++++ b/plugins/codex-loop-harness/skills/loop-auditor/SKILL.md
+@@ -34,3 +34,13 @@ Read the audit input and inspect:
+ 
+ Do not accept based on the Worker report alone.
+ 
++## Recording The Decision
++
++After writing `.ai-loop/audits/<phase-id>-audit.md`:
++
++- For `ACCEPTED`, use `ai-loop accept`.
++- For `REWORK` or `BLOCKED`, use `ai-loop decide -Decision REWORK` or
++  `ai-loop decide -Decision BLOCKED` with a concise `-Reason`.
++
++This keeps non-accepted outcomes in `status.json`, `phase_meta.json`,
++`rework.txt` or `blocked.txt`, and the event log.
+diff --git a/plugins/codex-loop-harness/skills/loop-recovery/SKILL.md b/plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
+index 109cae5..aa2be97 100644
+--- a/plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
++++ b/plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
+@@ -30,3 +30,7 @@ Then identify:
+ - files to inspect before edits
+ 
+ If current state cannot be reconstructed from files, mark the loop `BLOCKED`.
++
++For a durable non-accepted outcome, write an audit file with `Decision: REWORK`
++or `Decision: BLOCKED`, then record it with `ai-loop decide`. Do not leave
++rework or blocked decisions only in prose.
+

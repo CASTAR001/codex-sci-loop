@@ -76,6 +76,13 @@ properties, unsupported old config schemas, future config schemas,
 config/manifest mismatches, and status schema mismatches.
 `Test-SchemaVersioning.ps1` covers these cases, and `Test-Phase005.ps1`
 aggregates the current full non-global verification matrix.
+Root phase-006 added durable non-accepted phase decisions. `ai-loop -Command
+decide` now records `REWORK` and `BLOCKED` audit outcomes into `status.json`,
+`phase_meta.json`, `rework.txt` or `blocked.txt`, and the event log.
+`validate-loop.ps1` now requires matching audit decisions and decision files for
+terminal `rework` and `blocked` states. `Test-PhaseDecisions.ps1` covers
+REWORK, BLOCKED, resume reconstruction, loop validation, and decision/audit
+mismatch rejection.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -84,9 +91,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is deeper recovery/state transition automation, or
-deciding whether start-time Markdown ledger rows should become idempotent like
-collect-time evidence rows.
+The next best optimization is stricter state transition logs, explicit migration
+commands for old `.ai-loop` projects, or deciding whether start-time Markdown
+ledger rows should become idempotent like collect-time evidence rows.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

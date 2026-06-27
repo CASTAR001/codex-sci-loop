@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-006",
+    "title":  "Add rework and blocked phase decisions",
+    "objective":  "Add gate-aware REWORK and BLOCKED phase decision handling plus recovery tests so non-accepted audit outcomes become durable state.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-006",
+    "audit_input":  ".ai-loop/audits/phase-006-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-006-audit.md",
+    "base_commit":  "8cfeae1b9389a2de363e880b4c1930973b05e0ba",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase006.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-006/phase_requirements.json",
+    "started_at":  "2026-06-27T15:42:09.6438982Z",
+    "evidence_collected_at":  "2026-06-27T16:02:10.1750885Z",
+    "audit_prepared_at":  "2026-06-27T16:02:38.7649016Z",
+    "accepted_at":  "2026-06-27T16:03:00.8403296Z"
+}
