@@ -1,4 +1,122 @@
-{
-  "schema_version": "1.0",
-  "artifacts": []
+﻿{
+    "schema_version":  "1.0",
+    "artifacts":  [
+                      {
+                          "artifact_id":  "ART-phase-002-prompt.md",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/prompt.md",
+                          "sha256":  "589FF88C121CB433C04A0422C9FDB2B4A3BC2E483682A11BC543AF26870E6EA4",
+                          "size_bytes":  1301,
+                          "modified_utc":  "2026-06-27T09:11:17.8562167Z",
+                          "produced_by":  "start-phase.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4118815Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-phase_requirements.json",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/phase_requirements.json",
+                          "sha256":  "A4D3CA50DCD2FBD42AF5CBA0CCAA70F759A80603582C268264575B03C1257BB4",
+                          "size_bytes":  986,
+                          "modified_utc":  "2026-06-27T09:11:17.8476067Z",
+                          "produced_by":  "start-phase.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4165609Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-report.md",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/report.md",
+                          "sha256":  "D111D3ABAF93572D8B267C525EF00C4C75287665D2DF7C3B18E6411F18FCEFC8",
+                          "size_bytes":  1017,
+                          "modified_utc":  "2026-06-27T09:12:28.1132662Z",
+                          "produced_by":  "Worker",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4200214Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-status_after.txt",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/status_after.txt",
+                          "sha256":  "FDD11C4D908A847BF7650D78BE6ABF6D7F375331E7D447EC1947A06489E78774",
+                          "size_bytes":  188,
+                          "modified_utc":  "2026-06-27T09:12:53.7783183Z",
+                          "produced_by":  "collect-evidence.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4235728Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-diff.patch",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/diff.patch",
+                          "sha256":  "04770DB6A0AB28ACAFFB33EDBFBF4892F2B75CB865B03B6E301DDC0113CF3CC8",
+                          "size_bytes":  7919,
+                          "modified_utc":  "2026-06-27T09:12:53.8788003Z",
+                          "produced_by":  "collect-evidence.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4278597Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-verify.log",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/verify.log",
+                          "sha256":  "1A065E2BF3D4A9109E7366C4B8BC95141D7C9FA9F7507B1A26EFC5A7525CD765",
+                          "size_bytes":  332,
+                          "modified_utc":  "2026-06-27T09:12:53.5657505Z",
+                          "produced_by":  "collect-evidence.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4314985Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-changed_files.txt",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/changed_files.txt",
+                          "sha256":  "6D7BA295BB403FC01F6F5001DAD2C65B234D45250D934173CC1C4CEFB2E96F51",
+                          "size_bytes":  224,
+                          "modified_utc":  "2026-06-27T09:12:53.9895057Z",
+                          "produced_by":  "collect-evidence.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4345465Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-changed_business_files.txt",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/changed_business_files.txt",
+                          "sha256":  "6D7BA295BB403FC01F6F5001DAD2C65B234D45250D934173CC1C4CEFB2E96F51",
+                          "size_bytes":  224,
+                          "modified_utc":  "2026-06-27T09:12:54.0073585Z",
+                          "produced_by":  "collect-evidence.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4381178Z",
+                          "notes":  "ok"
+                      },
+                      {
+                          "artifact_id":  "ART-phase-002-changed_evidence_files.txt",
+                          "phase":  "phase-002",
+                          "type":  "phase-evidence",
+                          "path":  ".ai-loop/runs/phase-002/changed_evidence_files.txt",
+                          "sha256":  "F01A374E9C81E3DB89B3A42940C4D6A5447684986A1296E42BF13F196EED6295",
+                          "size_bytes":  5,
+                          "modified_utc":  "2026-06-27T09:12:54.0233564Z",
+                          "produced_by":  "collect-evidence.ps1",
+                          "status":  "recorded",
+                          "recorded_at":  "2026-06-27T09:12:54.4489169Z",
+                          "notes":  "ok"
+                      }
+                  ]
 }

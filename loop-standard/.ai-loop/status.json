@@ -1,14 +1,67 @@
-{
-  "schema_version": "1.0",
-  "project_name": "",
-  "initialized_at": "",
-  "supervisor": "Codex",
-  "worker": "Worker Agent",
-  "current_phase": null,
-  "phases": [],
-  "last_decision": null,
-  "notes": [
-    "This file is the durable state record for the loop.",
-    "Do not infer current phase status from chat history."
-  ]
+﻿{
+    "schema_version":  "1.0",
+    "project_name":  "",
+    "initialized_at":  "",
+    "supervisor":  "Codex",
+    "worker":  "Worker Agent",
+    "current_phase":  {
+                          "phase_id":  "phase-002",
+                          "title":  "Expose validate target status in unified command",
+                          "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
+                          "status":  "accepted",
+                          "run_dir":  ".ai-loop/runs/phase-002",
+                          "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-002-audit.md",
+                          "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+                          "task_kind":  "fullstack",
+                          "skill_profile":  "none",
+                          "claim_ids":  [
+
+                                        ],
+                          "required_skills":  [
+
+                                              ],
+                          "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
+                          "started_at":  "2026-06-27T09:11:17.8594490Z",
+                          "evidence_collected_at":  "2026-06-27T09:12:54.0367846Z",
+                          "audit_prepared_at":  "2026-06-27T09:13:23.9802169Z",
+                          "accepted_at":  "2026-06-27T09:14:59.0355884Z"
+                      },
+    "phases":  [
+                   {
+                       "phase_id":  "phase-002",
+                       "title":  "Expose validate target status in unified command",
+                       "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-002",
+                       "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-002-audit.md",
+                       "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
+                       "started_at":  "2026-06-27T09:11:17.8594490Z",
+                       "evidence_collected_at":  "2026-06-27T09:12:54.0367846Z",
+                       "audit_prepared_at":  "2026-06-27T09:13:23.9802169Z",
+                       "accepted_at":  "2026-06-27T09:14:59.0355884Z"
+                   }
+               ],
+    "last_decision":  {
+                          "phase_id":  "phase-002",
+                          "decision":  "ACCEPTED",
+                          "audit":  ".ai-loop/audits/phase-002-audit.md",
+                          "decided_at":  "2026-06-27T09:14:59.0355884Z"
+                      },
+    "notes":  [
+                  "This file is the durable state record for the loop.",
+                  "Do not infer current phase status from chat history."
+              ]
 }

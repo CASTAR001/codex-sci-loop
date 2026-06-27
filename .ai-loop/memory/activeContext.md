@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-External Worker invocation hardening and dogfood MVP validation.
+Self-loop optimization of the loop harness MVP.
 
 ## Current Objective
 
@@ -46,6 +46,11 @@ Worker call, and `invoke-worker` refuses to run unless preflight is safe or the
 user has explicitly approved the external service invocation. `-Yolo` is
 recorded but does not require a separate confirmation.
 
+Self-loop phase-002 ran against `loop-standard/.ai-loop` and was accepted. It
+fixed a real dogfood friction point: the unified `ai-loop validate` command now
+accepts `-TargetStatus`, so accepted-state gate validation no longer requires
+calling `validate-phase-gates.ps1` directly.
+
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
 Keep reusable framework code under `loop-standard/` and pilot fixture work under
@@ -53,9 +58,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-Validate plugin discovery inside an actual Codex plugin install path, or run a
-dogfood phase-002 using `worker-preflight` and `invoke-worker` after explicit
-external-service approval. Before further harness changes, review:
+The next best optimization is to make changed-file classification project-root
+aware, because phase-002 showed that `loop-standard/.ai-loop/*` evidence files
+can be listed as business files when the project root is `loop-standard`.
+Before further harness changes, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -72,3 +78,5 @@ external-service approval. Before further harness changes, review:
   broader skill trigger expansion?
 - Should external Worker invocation records become required phase evidence in
   `phase_requirements.json` for phases that use an external Worker?
+- Should root `.ai-loop/` be given a minimal `status.json`/`loop.config.json`
+  without overwriting its memory, so the repository root itself can run phases?

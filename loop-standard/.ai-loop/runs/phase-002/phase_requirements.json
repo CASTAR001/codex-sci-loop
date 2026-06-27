@@ -1,0 +1,25 @@
+﻿{
+    "phase_id":  "phase-002",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "evidence_required":  [
+                              ".ai-loop/runs/phase-002/prompt.md",
+                              ".ai-loop/runs/phase-002/report.md",
+                              ".ai-loop/runs/phase-002/status_after.txt",
+                              ".ai-loop/runs/phase-002/diff.patch",
+                              ".ai-loop/runs/phase-002/verify.log",
+                              ".ai-loop/runs/phase-002/changed_files.txt",
+                              ".ai-loop/runs/phase-002/changed_business_files.txt",
+                              ".ai-loop/runs/phase-002/changed_evidence_files.txt"
+                          ],
+    "required_skills":  [
+
+                        ],
+    "required_skill_artifacts":  [
+
+                                 ],
+    "generated_at":  "2026-06-27T09:11:17.8214753Z"
+}

@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-External Worker invocation hardening is implemented; dogfood phase-001 has been
-accepted.
+External Worker invocation hardening is implemented; dogfood phase-001 and
+self-loop phase-002 have both been accepted.
 
 ## Last Verified State
 
@@ -25,6 +25,10 @@ Kimi Code is represented as a thin Worker profile, not as a hard-coded route.
 `-Yolo` is allowed without a separate stop, but external service invocation,
 sensitive prompt content, and long-term memory/governance upgrades still require
 explicit user confirmation.
+
+Self-loop phase-002 used `loop-standard/.ai-loop` as the project control plane
+and accepted a narrow improvement: `ai-loop validate` now supports
+`-TargetStatus`, including `accepted`, through the unified entrypoint.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -74,6 +78,7 @@ integrity source for required phase evidence.
 ## Next Safe Action
 
 For plugin stability, run a separate install/discovery smoke test; source-level
-`doctor` is not enough to claim Codex plugin runtime stability. After that, run
-dogfood phase-002 through `worker-preflight` and `invoke-worker` to validate the
-new external Worker path.
+`doctor` is not enough to claim Codex plugin runtime stability. The next
+self-loop candidate is changed-file classification: when project root is
+`loop-standard`, `.ai-loop/*` evidence changes currently appear in
+`changed_business_files.txt`.

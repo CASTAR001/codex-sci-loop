@@ -77,12 +77,18 @@
 - Recorded the knowledge-placement rule: durable harness principles go to
   long-term memory, project-local proposals go to evolution files, and reusable
   procedures/tool practices should be distilled into skills.
+- Committed the external Worker preflight layer as
+  `c5dfc69 Add external worker invocation preflight`.
+- Ran a self-loop optimization phase under `loop-standard/.ai-loop`:
+  phase-002 exposed `-TargetStatus` on the unified `ai-loop validate` command,
+  collected evidence, passed gates, wrote an ACCEPTED audit, and accepted the
+  phase.
 
 ## In Progress
 
-- Validate plugin discovery inside an actual Codex plugin install path, then
-  decide whether external Worker invocation records should become required
-  phase evidence for Worker-invoked phases.
+- Improve changed-file classification so `.ai-loop/*` evidence files are not
+  treated as business files when the selected project root is a subdirectory
+  such as `loop-standard`.
 
 ## Pending
 
@@ -95,6 +101,8 @@
   claiming plugin-form stability.
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
+- Decide whether to add minimal root `.ai-loop/status.json` and
+  `.ai-loop/loop.config.json` without overwriting existing root memory.
 
 ## Last Updated
 

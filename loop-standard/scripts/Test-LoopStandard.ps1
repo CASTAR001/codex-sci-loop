@@ -229,6 +229,16 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
     }
 }
 
+$AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
+if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
+    $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
+    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "worker-preflight", "invoke-worker")) {
+        if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
+        }
+    }
+}
+
 foreach ($WrapperName in @("Initialize-AiLoop.ps1", "Start-LoopPhase.ps1", "Collect-LoopEvidence.ps1", "Prepare-LoopAuditPackage.ps1", "Accept-LoopPhase.ps1")) {
     $WrapperPath = Join-Path $KitRoot (Join-Path "scripts" $WrapperName)
     if (Test-Path -LiteralPath $WrapperPath -PathType Leaf) {

@@ -1,0 +1,6 @@
+﻿loop-standard/.ai-loop/evidence/artifact-index.md
+loop-standard/.ai-loop/evidence/evidence-ledger.md
+loop-standard/.ai-loop/status.json
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+

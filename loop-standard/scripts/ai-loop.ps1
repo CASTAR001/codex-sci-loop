@@ -31,6 +31,8 @@ param(
     [switch]$Force,
     [string]$OverrideReason = "",
     [switch]$CreateAgentsBootstrap,
+    [ValidateSet("started", "evidence_collected", "audit_ready", "accepted")]
+    [string]$TargetStatus = "audit_ready",
     [string]$WorkerProfile = "kimi-code",
     [string]$PromptPath = "",
     [string]$WorkerStateRoot = "",
@@ -188,6 +190,7 @@ switch ($Command) {
         $ScriptParams = @{
             ProjectRoot = $ProjectRoot
             PhaseId = $PhaseId
+            TargetStatus = $TargetStatus
         }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "validate-phase-gates.ps1") @ScriptParams

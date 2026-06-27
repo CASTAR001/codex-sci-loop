@@ -1,0 +1,144 @@
+﻿diff --git a/loop-standard/.ai-loop/evidence/artifact-index.md b/loop-standard/.ai-loop/evidence/artifact-index.md
+index e1c31d9..57bed73 100644
+--- a/loop-standard/.ai-loop/evidence/artifact-index.md
++++ b/loop-standard/.ai-loop/evidence/artifact-index.md
+@@ -6,3 +6,5 @@ machine-readable integrity record is `artifact-manifest.json`.
+ | Artifact ID | Phase | Type | Path | Owner | Status | Notes |
+ | --- | --- | --- | --- | --- | --- | --- |
+ | ART-BOOTSTRAP-001 | harness | ledger | .ai-loop/evidence/evidence-ledger.md | Supervisor | active | Evidence ledger initialized. |
++| ART-phase-002-001 | phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Supervisor | active | Worker prompt for phase. |
++| ART-phase-002-002 | phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Supervisor | active | Gate requirements for phase. |
+diff --git a/loop-standard/.ai-loop/evidence/evidence-ledger.md b/loop-standard/.ai-loop/evidence/evidence-ledger.md
+index 1c76584..8015a9a 100644
+--- a/loop-standard/.ai-loop/evidence/evidence-ledger.md
++++ b/loop-standard/.ai-loop/evidence/evidence-ledger.md
+@@ -6,3 +6,5 @@ This compatibility copy mirrors the canonical template evidence ledger.
+ | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+ | EVD-BOOTSTRAP-001 | harness | CLAIM-BOOTSTRAP | bootstrap | .ai-loop/evidence/evidence-ledger.md | Supervisor | Supervisor | recorded | Ledger initialized for evidence-gated loop work. |
+ 
++| EVD-phase-002-001 | phase-002 | CLAIM-phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-002-002 | phase-002 | CLAIM-phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+diff --git a/loop-standard/.ai-loop/status.json b/loop-standard/.ai-loop/status.json
+index 7e9070b..e8d144f 100644
+--- a/loop-standard/.ai-loop/status.json
++++ b/loop-standard/.ai-loop/status.json
+@@ -1,14 +1,62 @@
+-{
+-  "schema_version": "1.0",
+-  "project_name": "",
+-  "initialized_at": "",
+-  "supervisor": "Codex",
+-  "worker": "Worker Agent",
+-  "current_phase": null,
+-  "phases": [],
+-  "last_decision": null,
+-  "notes": [
+-    "This file is the durable state record for the loop.",
+-    "Do not infer current phase status from chat history."
+-  ]
+-}
++﻿{
++    "schema_version":  "1.0",
++    "project_name":  "",
++    "initialized_at":  "",
++    "supervisor":  "Codex",
++    "worker":  "Worker Agent",
++    "current_phase":  {
++                          "phase_id":  "phase-002",
++                          "title":  "Expose validate target status in unified command",
++                          "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
++                          "status":  "started",
++                          "run_dir":  ".ai-loop/runs/phase-002",
++                          "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
++                          "audit_result":  ".ai-loop/audits/phase-002-audit.md",
++                          "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
++                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                          "task_kind":  "fullstack",
++                          "skill_profile":  "none",
++                          "claim_ids":  [
++
++                                        ],
++                          "required_skills":  [
++
++                                              ],
++                          "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
++                          "started_at":  "2026-06-27T09:11:17.8594490Z",
++                          "evidence_collected_at":  null,
++                          "audit_prepared_at":  null,
++                          "accepted_at":  null
++                      },
++    "phases":  [
++                   {
++                       "phase_id":  "phase-002",
++                       "title":  "Expose validate target status in unified command",
++                       "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
++                       "status":  "started",
++                       "run_dir":  ".ai-loop/runs/phase-002",
++                       "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-002-audit.md",
++                       "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
++                       "started_at":  "2026-06-27T09:11:17.8594490Z",
++                       "evidence_collected_at":  null,
++                       "audit_prepared_at":  null,
++                       "accepted_at":  null
++                   }
++               ],
++    "last_decision":  null,
++    "notes":  [
++                  "This file is the durable state record for the loop.",
++                  "Do not infer current phase status from chat history."
++              ]
++}
+diff --git a/loop-standard/scripts/Test-LoopStandard.ps1 b/loop-standard/scripts/Test-LoopStandard.ps1
+index 48070e4..9e0d66a 100644
+--- a/loop-standard/scripts/Test-LoopStandard.ps1
++++ b/loop-standard/scripts/Test-LoopStandard.ps1
+@@ -229,6 +229,16 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
+     }
+ }
+ 
++$AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
++if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
++    $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
++    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "worker-preflight", "invoke-worker")) {
++        if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
++            Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
++        }
++    }
++}
++
+ foreach ($WrapperName in @("Initialize-AiLoop.ps1", "Start-LoopPhase.ps1", "Collect-LoopEvidence.ps1", "Prepare-LoopAuditPackage.ps1", "Accept-LoopPhase.ps1")) {
+     $WrapperPath = Join-Path $KitRoot (Join-Path "scripts" $WrapperName)
+     if (Test-Path -LiteralPath $WrapperPath -PathType Leaf) {
+diff --git a/loop-standard/scripts/ai-loop.ps1 b/loop-standard/scripts/ai-loop.ps1
+index 35b111f..cfeb30a 100644
+--- a/loop-standard/scripts/ai-loop.ps1
++++ b/loop-standard/scripts/ai-loop.ps1
+@@ -31,6 +31,8 @@ param(
+     [switch]$Force,
+     [string]$OverrideReason = "",
+     [switch]$CreateAgentsBootstrap,
++    [ValidateSet("started", "evidence_collected", "audit_ready", "accepted")]
++    [string]$TargetStatus = "audit_ready",
+     [string]$WorkerProfile = "kimi-code",
+     [string]$PromptPath = "",
+     [string]$WorkerStateRoot = "",
+@@ -188,6 +190,7 @@ switch ($Command) {
+         $ScriptParams = @{
+             ProjectRoot = $ProjectRoot
+             PhaseId = $PhaseId
++            TargetStatus = $TargetStatus
+         }
+         $global:LASTEXITCODE = 0
+         & (Join-Path $PSScriptRoot "validate-phase-gates.ps1") @ScriptParams
+

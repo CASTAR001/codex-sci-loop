@@ -1,0 +1,7 @@
+﻿ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/status.json
+ M scripts/Test-LoopStandard.ps1
+ M scripts/ai-loop.ps1
+?? .ai-loop/runs/
+
