@@ -46,10 +46,11 @@ Worker call, and `invoke-worker` refuses to run unless preflight is safe or the
 user has explicitly approved the external service invocation. `-Yolo` is
 recorded but does not require a separate confirmation.
 
-Self-loop phase-002 ran against `loop-standard/.ai-loop` and was accepted. It
-fixed a real dogfood friction point: the unified `ai-loop validate` command now
-accepts `-TargetStatus`, so accepted-state gate validation no longer requires
-calling `validate-phase-gates.ps1` directly.
+Self-loop phases now run against `loop-standard/.ai-loop` and are accepted
+through evidence gates. Phase-002 exposed `-TargetStatus` on the unified
+`ai-loop validate` command. Phase-003 fixed changed-file classification so
+`.ai-loop/*` evidence files are no longer listed as business files when the
+project root is a subdirectory inside a larger git repository.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -58,10 +59,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is to make changed-file classification project-root
-aware, because phase-002 showed that `loop-standard/.ai-loop/*` evidence files
-can be listed as business files when the project root is `loop-standard`.
-Before further harness changes, review:
+The next best optimization is either to make the root `.ai-loop/` directly
+runnable without overwriting existing memory, or to validate plugin discovery
+inside an actual Codex plugin install path. Before further harness changes,
+review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`

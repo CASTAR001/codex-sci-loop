@@ -83,12 +83,16 @@
   phase-002 exposed `-TargetStatus` on the unified `ai-loop validate` command,
   collected evidence, passed gates, wrote an ACCEPTED audit, and accepted the
   phase.
+- Ran self-loop phase-003 under `loop-standard/.ai-loop`: normalized git changed
+  paths relative to `ProjectRoot` before classification, so `.ai-loop/*`
+  evidence files are separated from business files in subdirectory project
+  roots.
 
 ## In Progress
 
-- Improve changed-file classification so `.ai-loop/*` evidence files are not
-  treated as business files when the selected project root is a subdirectory
-  such as `loop-standard`.
+- Decide whether to make root `.ai-loop/` directly runnable without overwriting
+  existing memory, or validate plugin discovery inside an actual Codex plugin
+  install path.
 
 ## Pending
 

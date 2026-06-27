@@ -1,0 +1,296 @@
+﻿diff --git a/loop-standard/.ai-loop/evidence/artifact-index.md b/loop-standard/.ai-loop/evidence/artifact-index.md
+index a6b0e61..d759645 100644
+--- a/loop-standard/.ai-loop/evidence/artifact-index.md
++++ b/loop-standard/.ai-loop/evidence/artifact-index.md
+@@ -6,14 +6,16 @@ machine-readable integrity record is `artifact-manifest.json`.
+ | Artifact ID | Phase | Type | Path | Owner | Status | Notes |
+ | --- | --- | --- | --- | --- | --- | --- |
+ | ART-BOOTSTRAP-001 | harness | ledger | .ai-loop/evidence/evidence-ledger.md | Supervisor | active | Evidence ledger initialized. |
+-| ART-phase-002-001 | phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Supervisor | active | Worker prompt for phase. |
+-| ART-phase-002-002 | phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Supervisor | active | Gate requirements for phase. |
+-| ART-phase-002-prompt.md | phase-002 | phase-evidence | .ai-loop/runs/phase-002/prompt.md | start-phase.ps1 | recorded | sha256=589FF88C121C; size=1301; status=recorded |
+-| ART-phase-002-phase_requirements.json | phase-002 | phase-evidence | .ai-loop/runs/phase-002/phase_requirements.json | start-phase.ps1 | recorded | sha256=A4D3CA50DCD2; size=986; status=recorded |
+-| ART-phase-002-report.md | phase-002 | phase-evidence | .ai-loop/runs/phase-002/report.md | Worker | recorded | sha256=D111D3ABAF93; size=1017; status=recorded |
+-| ART-phase-002-status_after.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/status_after.txt | collect-evidence.ps1 | recorded | sha256=FDD11C4D908A; size=188; status=recorded |
+-| ART-phase-002-diff.patch | phase-002 | phase-evidence | .ai-loop/runs/phase-002/diff.patch | collect-evidence.ps1 | recorded | sha256=04770DB6A0AB; size=7919; status=recorded |
+-| ART-phase-002-verify.log | phase-002 | phase-evidence | .ai-loop/runs/phase-002/verify.log | collect-evidence.ps1 | recorded | sha256=1A065E2BF3D4; size=332; status=recorded |
+-| ART-phase-002-changed_files.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/changed_files.txt | collect-evidence.ps1 | recorded | sha256=6D7BA295BB40; size=224; status=recorded |
+-| ART-phase-002-changed_business_files.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=6D7BA295BB40; size=224; status=recorded |
+-| ART-phase-002-changed_evidence_files.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=F01A374E9C81; size=5; status=recorded |
++| ART-phase-002-001 | phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Supervisor | active | Worker prompt for phase. |
++| ART-phase-002-002 | phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Supervisor | active | Gate requirements for phase. |
++| ART-phase-002-prompt.md | phase-002 | phase-evidence | .ai-loop/runs/phase-002/prompt.md | start-phase.ps1 | recorded | sha256=589FF88C121C; size=1301; status=recorded |
++| ART-phase-002-phase_requirements.json | phase-002 | phase-evidence | .ai-loop/runs/phase-002/phase_requirements.json | start-phase.ps1 | recorded | sha256=A4D3CA50DCD2; size=986; status=recorded |
++| ART-phase-002-report.md | phase-002 | phase-evidence | .ai-loop/runs/phase-002/report.md | Worker | recorded | sha256=D111D3ABAF93; size=1017; status=recorded |
++| ART-phase-002-status_after.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/status_after.txt | collect-evidence.ps1 | recorded | sha256=FDD11C4D908A; size=188; status=recorded |
++| ART-phase-002-diff.patch | phase-002 | phase-evidence | .ai-loop/runs/phase-002/diff.patch | collect-evidence.ps1 | recorded | sha256=04770DB6A0AB; size=7919; status=recorded |
++| ART-phase-002-verify.log | phase-002 | phase-evidence | .ai-loop/runs/phase-002/verify.log | collect-evidence.ps1 | recorded | sha256=1A065E2BF3D4; size=332; status=recorded |
++| ART-phase-002-changed_files.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/changed_files.txt | collect-evidence.ps1 | recorded | sha256=6D7BA295BB40; size=224; status=recorded |
++| ART-phase-002-changed_business_files.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=6D7BA295BB40; size=224; status=recorded |
++| ART-phase-002-changed_evidence_files.txt | phase-002 | phase-evidence | .ai-loop/runs/phase-002/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=F01A374E9C81; size=5; status=recorded |
++| ART-phase-003-001 | phase-003 | prompt | .ai-loop/runs/phase-003/prompt.md | Supervisor | active | Worker prompt for phase. |
++| ART-phase-003-002 | phase-003 | requirements | .ai-loop/runs/phase-003/phase_requirements.json | Supervisor | active | Gate requirements for phase. |
+diff --git a/loop-standard/.ai-loop/evidence/evidence-ledger.md b/loop-standard/.ai-loop/evidence/evidence-ledger.md
+index 27e09f6..ba08222 100644
+--- a/loop-standard/.ai-loop/evidence/evidence-ledger.md
++++ b/loop-standard/.ai-loop/evidence/evidence-ledger.md
+@@ -6,12 +6,14 @@ This compatibility copy mirrors the canonical template evidence ledger.
+ | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+ | EVD-BOOTSTRAP-001 | harness | CLAIM-BOOTSTRAP | bootstrap | .ai-loop/evidence/evidence-ledger.md | Supervisor | Supervisor | recorded | Ledger initialized for evidence-gated loop work. |
+ 
+-| EVD-phase-002-001 | phase-002 | CLAIM-phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+-| EVD-phase-002-002 | phase-002 | CLAIM-phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+-| EVD-phase-002-003 | phase-002 | CLAIM-phase-002 | worker-report | .ai-loop/runs/phase-002/report.md | Worker | pending | recorded | Worker report captured. |
+-| EVD-phase-002-004 | phase-002 | CLAIM-phase-002 | status | .ai-loop/runs/phase-002/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+-| EVD-phase-002-005 | phase-002 | CLAIM-phase-002 | diff | .ai-loop/runs/phase-002/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+-| EVD-phase-002-006 | phase-002 | CLAIM-phase-002 | verification-log | .ai-loop/runs/phase-002/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+-| EVD-phase-002-007 | phase-002 | CLAIM-phase-002 | changed-files | .ai-loop/runs/phase-002/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+-| EVD-phase-002-008 | phase-002 | CLAIM-phase-002 | business-files | .ai-loop/runs/phase-002/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+-| EVD-phase-002-009 | phase-002 | CLAIM-phase-002 | evidence-files | .ai-loop/runs/phase-002/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-002-001 | phase-002 | CLAIM-phase-002 | prompt | .ai-loop/runs/phase-002/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-002-002 | phase-002 | CLAIM-phase-002 | requirements | .ai-loop/runs/phase-002/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
++| EVD-phase-002-003 | phase-002 | CLAIM-phase-002 | worker-report | .ai-loop/runs/phase-002/report.md | Worker | pending | recorded | Worker report captured. |
++| EVD-phase-002-004 | phase-002 | CLAIM-phase-002 | status | .ai-loop/runs/phase-002/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
++| EVD-phase-002-005 | phase-002 | CLAIM-phase-002 | diff | .ai-loop/runs/phase-002/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
++| EVD-phase-002-006 | phase-002 | CLAIM-phase-002 | verification-log | .ai-loop/runs/phase-002/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
++| EVD-phase-002-007 | phase-002 | CLAIM-phase-002 | changed-files | .ai-loop/runs/phase-002/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
++| EVD-phase-002-008 | phase-002 | CLAIM-phase-002 | business-files | .ai-loop/runs/phase-002/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
++| EVD-phase-002-009 | phase-002 | CLAIM-phase-002 | evidence-files | .ai-loop/runs/phase-002/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
++| EVD-phase-003-001 | phase-003 | CLAIM-phase-003 | prompt | .ai-loop/runs/phase-003/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
++| EVD-phase-003-002 | phase-003 | CLAIM-phase-003 | requirements | .ai-loop/runs/phase-003/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+diff --git a/loop-standard/.ai-loop/status.json b/loop-standard/.ai-loop/status.json
+index 6a12e9c..4666d45 100644
+--- a/loop-standard/.ai-loop/status.json
++++ b/loop-standard/.ai-loop/status.json
+@@ -1,67 +1,91 @@
+-﻿{
+-    "schema_version":  "1.0",
+-    "project_name":  "",
+-    "initialized_at":  "",
+-    "supervisor":  "Codex",
+-    "worker":  "Worker Agent",
+-    "current_phase":  {
+-                          "phase_id":  "phase-002",
+-                          "title":  "Expose validate target status in unified command",
+-                          "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
+-                          "status":  "accepted",
+-                          "run_dir":  ".ai-loop/runs/phase-002",
+-                          "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
+-                          "audit_result":  ".ai-loop/audits/phase-002-audit.md",
+-                          "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
+-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+-                          "task_kind":  "fullstack",
+-                          "skill_profile":  "none",
+-                          "claim_ids":  [
+-
+-                                        ],
+-                          "required_skills":  [
+-
+-                                              ],
+-                          "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
+-                          "started_at":  "2026-06-27T09:11:17.8594490Z",
+-                          "evidence_collected_at":  "2026-06-27T09:12:54.0367846Z",
+-                          "audit_prepared_at":  "2026-06-27T09:13:23.9802169Z",
+-                          "accepted_at":  "2026-06-27T09:14:59.0355884Z"
+-                      },
+-    "phases":  [
+-                   {
+-                       "phase_id":  "phase-002",
+-                       "title":  "Expose validate target status in unified command",
+-                       "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
+-                       "status":  "accepted",
+-                       "run_dir":  ".ai-loop/runs/phase-002",
+-                       "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
+-                       "audit_result":  ".ai-loop/audits/phase-002-audit.md",
+-                       "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
+-                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+-                       "task_kind":  "fullstack",
+-                       "skill_profile":  "none",
+-                       "claim_ids":  [
+-
+-                                     ],
+-                       "required_skills":  [
+-
+-                                           ],
+-                       "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
+-                       "started_at":  "2026-06-27T09:11:17.8594490Z",
+-                       "evidence_collected_at":  "2026-06-27T09:12:54.0367846Z",
+-                       "audit_prepared_at":  "2026-06-27T09:13:23.9802169Z",
+-                       "accepted_at":  "2026-06-27T09:14:59.0355884Z"
+-                   }
+-               ],
+-    "last_decision":  {
+-                          "phase_id":  "phase-002",
+-                          "decision":  "ACCEPTED",
+-                          "audit":  ".ai-loop/audits/phase-002-audit.md",
+-                          "decided_at":  "2026-06-27T09:14:59.0355884Z"
+-                      },
+-    "notes":  [
+-                  "This file is the durable state record for the loop.",
+-                  "Do not infer current phase status from chat history."
+-              ]
+-}
++﻿{
++    "schema_version":  "1.0",
++    "project_name":  "",
++    "initialized_at":  "",
++    "supervisor":  "Codex",
++    "worker":  "Worker Agent",
++    "current_phase":  {
++                          "phase_id":  "phase-003",
++                          "title":  "Normalize changed file classification",
++                          "objective":  "Make collect-evidence classify changed files relative to ProjectRoot so .ai-loop evidence files are not reported as business files when ProjectRoot is a subdirectory inside a larger git repository.",
++                          "status":  "started",
++                          "run_dir":  ".ai-loop/runs/phase-003",
++                          "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
++                          "audit_result":  ".ai-loop/audits/phase-003-audit.md",
++                          "base_commit":  "229c5e93e9ca9c6b52c91698c1ca7345915f121a",
++                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                          "task_kind":  "fullstack",
++                          "skill_profile":  "none",
++                          "claim_ids":  [
++
++                                        ],
++                          "required_skills":  [
++
++                                              ],
++                          "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
++                          "started_at":  "2026-06-27T09:23:48.2532422Z",
++                          "evidence_collected_at":  null,
++                          "audit_prepared_at":  null,
++                          "accepted_at":  null
++                      },
++    "phases":  [
++                   {
++                       "phase_id":  "phase-002",
++                       "title":  "Expose validate target status in unified command",
++                       "objective":  "Allow ai-loop validate to pass TargetStatus through to validate-phase-gates so accepted-state gate checks do not require calling the lower-level script directly.",
++                       "status":  "accepted",
++                       "run_dir":  ".ai-loop/runs/phase-002",
++                       "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-002-audit.md",
++                       "base_commit":  "c5dfc6961dc01699fa8482d37710ff750865c44d",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
++                       "started_at":  "2026-06-27T09:11:17.8594490Z",
++                       "evidence_collected_at":  "2026-06-27T09:12:54.0367846Z",
++                       "audit_prepared_at":  "2026-06-27T09:13:23.9802169Z",
++                       "accepted_at":  "2026-06-27T09:14:59.0355884Z"
++                   },
++                   {
++                       "phase_id":  "phase-003",
++                       "title":  "Normalize changed file classification",
++                       "objective":  "Make collect-evidence classify changed files relative to ProjectRoot so .ai-loop evidence files are not reported as business files when ProjectRoot is a subdirectory inside a larger git repository.",
++                       "status":  "started",
++                       "run_dir":  ".ai-loop/runs/phase-003",
++                       "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
++                       "audit_result":  ".ai-loop/audits/phase-003-audit.md",
++                       "base_commit":  "229c5e93e9ca9c6b52c91698c1ca7345915f121a",
++                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
++                       "task_kind":  "fullstack",
++                       "skill_profile":  "none",
++                       "claim_ids":  [
++
++                                     ],
++                       "required_skills":  [
++
++                                           ],
++                       "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
++                       "started_at":  "2026-06-27T09:23:48.2532422Z",
++                       "evidence_collected_at":  null,
++                       "audit_prepared_at":  null,
++                       "accepted_at":  null
++                   }
++               ],
++    "last_decision":  {
++                          "phase_id":  "phase-002",
++                          "decision":  "ACCEPTED",
++                          "audit":  ".ai-loop/audits/phase-002-audit.md",
++                          "decided_at":  "2026-06-27T09:14:59.0355884Z"
++                      },
++    "notes":  [
++                  "This file is the durable state record for the loop.",
++                  "Do not infer current phase status from chat history."
++              ]
++}
+diff --git a/loop-standard/scripts/Test-LoopStandard.ps1 b/loop-standard/scripts/Test-LoopStandard.ps1
+index 9e0d66a..f6f49d6 100644
+--- a/loop-standard/scripts/Test-LoopStandard.ps1
++++ b/loop-standard/scripts/Test-LoopStandard.ps1
+@@ -239,6 +239,16 @@ if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
+     }
+ }
+ 
++$CollectEvidenceScriptPath = Join-Path $KitRoot "scripts\collect-evidence.ps1"
++if (Test-Path -LiteralPath $CollectEvidenceScriptPath -PathType Leaf) {
++    $CollectEvidenceText = Get-Content -LiteralPath $CollectEvidenceScriptPath -Raw
++    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "rev-parse --show-prefix", "changed_business_files.txt", "changed_evidence_files.txt")) {
++        if ($CollectEvidenceText -notmatch [regex]::Escape($Needle)) {
++            Add-Problem "collect-evidence.ps1 missing expected classification text: $Needle"
++        }
++    }
++}
++
+ foreach ($WrapperName in @("Initialize-AiLoop.ps1", "Start-LoopPhase.ps1", "Collect-LoopEvidence.ps1", "Prepare-LoopAuditPackage.ps1", "Accept-LoopPhase.ps1")) {
+     $WrapperPath = Join-Path $KitRoot (Join-Path "scripts" $WrapperName)
+     if (Test-Path -LiteralPath $WrapperPath -PathType Leaf) {
+diff --git a/loop-standard/scripts/collect-evidence.ps1 b/loop-standard/scripts/collect-evidence.ps1
+index 7931c1d..f641904 100644
+--- a/loop-standard/scripts/collect-evidence.ps1
++++ b/loop-standard/scripts/collect-evidence.ps1
+@@ -142,6 +142,26 @@ function Get-ShortHash {
+     return $Hash.Substring(0, 12)
+ }
+ 
++function ConvertTo-ProjectRelativeGitPath {
++    param(
++        [Parameter(Mandatory = $true)][string]$Path,
++        [AllowNull()][string]$Prefix
++    )
++    $NormalizedPath = ($Path -replace "\\", "/").Trim()
++    $PrefixValue = if ($null -eq $Prefix) { "" } else { $Prefix }
++    $NormalizedPrefix = ($PrefixValue -replace "\\", "/").Trim()
++    if ([string]::IsNullOrWhiteSpace($NormalizedPrefix)) {
++        return $NormalizedPath
++    }
++    if (-not $NormalizedPrefix.EndsWith("/")) {
++        $NormalizedPrefix = "$NormalizedPrefix/"
++    }
++    if ($NormalizedPath.StartsWith($NormalizedPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
++        return $NormalizedPath.Substring($NormalizedPrefix.Length)
++    }
++    return $NormalizedPath
++}
++
+ $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
+ $ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
+ $LoopDir = Join-Path $ProjectRoot ".ai-loop"
+@@ -198,6 +218,8 @@ $ChangedEvidenceFilesPath = Join-Path $RunDir "changed_evidence_files.txt"
+ if ($null -ne $Git) {
+     $Inside = & git @ProjectGitArgs rev-parse --is-inside-work-tree 2>$null
+     if ($LASTEXITCODE -eq 0 -and $Inside -eq "true") {
++        $GitPrefixOutput = & git @ProjectGitArgs rev-parse --show-prefix 2>$null
++        $GitPrefix = if ($LASTEXITCODE -eq 0) { ($GitPrefixOutput | Out-String).Trim() } else { "" }
+         (& git @ProjectGitArgs status --short 2>&1 | Out-String) | Set-Content -LiteralPath $StatusAfterPath -Encoding utf8
+         $BaseCommit = (Get-Content -LiteralPath (Join-Path $RunDir "base_commit.txt") -Raw).Trim()
+         if ($BaseCommit -notmatch "^MISSING:" -and -not [string]::IsNullOrWhiteSpace($BaseCommit)) {
+@@ -211,6 +233,10 @@ if ($null -ne $Git) {
+                 ForEach-Object { if ($_ -match "^\s*\S+\s+(.+)$") { $Matches[1] } } |
+                 Sort-Object -Unique)
+         }
++        $ChangedFiles = @($ChangedFiles |
++            ForEach-Object { ConvertTo-ProjectRelativeGitPath -Path $_ -Prefix $GitPrefix } |
++            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
++            Sort-Object -Unique)
+         ($ChangedFiles | Out-String) | Set-Content -LiteralPath $ChangedFilesPath -Encoding utf8
+         ($ChangedFiles | Where-Object { $_ -notlike ".ai-loop/*" -and $_ -ne ".ai-loop/" } | Out-String) |
+             Set-Content -LiteralPath $ChangedBusinessFilesPath -Encoding utf8
+

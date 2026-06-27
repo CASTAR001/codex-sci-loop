@@ -3,7 +3,7 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001 and
-self-loop phase-002 have both been accepted.
+self-loop phases 002-003 have been accepted.
 
 ## Last Verified State
 
@@ -29,6 +29,8 @@ explicit user confirmation.
 Self-loop phase-002 used `loop-standard/.ai-loop` as the project control plane
 and accepted a narrow improvement: `ai-loop validate` now supports
 `-TargetStatus`, including `accepted`, through the unified entrypoint.
+Self-loop phase-003 accepted changed-file classification normalization: git
+paths are made relative to `ProjectRoot` before business/evidence splitting.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -79,6 +81,5 @@ integrity source for required phase evidence.
 
 For plugin stability, run a separate install/discovery smoke test; source-level
 `doctor` is not enough to claim Codex plugin runtime stability. The next
-self-loop candidate is changed-file classification: when project root is
-`loop-standard`, `.ai-loop/*` evidence changes currently appear in
-`changed_business_files.txt`.
+self-loop candidate is either root `.ai-loop` runnability without overwriting
+memory, or plugin discovery validation in an actual Codex plugin install path.

@@ -1,0 +1,3 @@
+﻿scripts/collect-evidence.ps1
+scripts/Test-LoopStandard.ps1
+

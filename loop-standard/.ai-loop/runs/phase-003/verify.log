@@ -1,0 +1,10 @@
+﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+started_at: 2026-06-27T09:25:49.7295900Z
+finished_at: 2026-06-27T09:25:50.9849475Z
+exit_code: 0
+
+output:
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 84
+

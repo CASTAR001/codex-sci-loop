@@ -1,0 +1,4 @@
+﻿.ai-loop/evidence/artifact-index.md
+.ai-loop/evidence/evidence-ledger.md
+.ai-loop/status.json
+

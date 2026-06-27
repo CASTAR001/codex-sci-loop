@@ -142,6 +142,26 @@ function Get-ShortHash {
     return $Hash.Substring(0, 12)
 }
 
+function ConvertTo-ProjectRelativeGitPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [AllowNull()][string]$Prefix
+    )
+    $NormalizedPath = ($Path -replace "\\", "/").Trim()
+    $PrefixValue = if ($null -eq $Prefix) { "" } else { $Prefix }
+    $NormalizedPrefix = ($PrefixValue -replace "\\", "/").Trim()
+    if ([string]::IsNullOrWhiteSpace($NormalizedPrefix)) {
+        return $NormalizedPath
+    }
+    if (-not $NormalizedPrefix.EndsWith("/")) {
+        $NormalizedPrefix = "$NormalizedPrefix/"
+    }
+    if ($NormalizedPath.StartsWith($NormalizedPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $NormalizedPath.Substring($NormalizedPrefix.Length)
+    }
+    return $NormalizedPath
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
@@ -198,6 +218,8 @@ $ChangedEvidenceFilesPath = Join-Path $RunDir "changed_evidence_files.txt"
 if ($null -ne $Git) {
     $Inside = & git @ProjectGitArgs rev-parse --is-inside-work-tree 2>$null
     if ($LASTEXITCODE -eq 0 -and $Inside -eq "true") {
+        $GitPrefixOutput = & git @ProjectGitArgs rev-parse --show-prefix 2>$null
+        $GitPrefix = if ($LASTEXITCODE -eq 0) { ($GitPrefixOutput | Out-String).Trim() } else { "" }
         (& git @ProjectGitArgs status --short 2>&1 | Out-String) | Set-Content -LiteralPath $StatusAfterPath -Encoding utf8
         $BaseCommit = (Get-Content -LiteralPath (Join-Path $RunDir "base_commit.txt") -Raw).Trim()
         if ($BaseCommit -notmatch "^MISSING:" -and -not [string]::IsNullOrWhiteSpace($BaseCommit)) {
@@ -211,6 +233,10 @@ if ($null -ne $Git) {
                 ForEach-Object { if ($_ -match "^\s*\S+\s+(.+)$") { $Matches[1] } } |
                 Sort-Object -Unique)
         }
+        $ChangedFiles = @($ChangedFiles |
+            ForEach-Object { ConvertTo-ProjectRelativeGitPath -Path $_ -Prefix $GitPrefix } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            Sort-Object -Unique)
         ($ChangedFiles | Out-String) | Set-Content -LiteralPath $ChangedFilesPath -Encoding utf8
         ($ChangedFiles | Where-Object { $_ -notlike ".ai-loop/*" -and $_ -ne ".ai-loop/" } | Out-String) |
             Set-Content -LiteralPath $ChangedBusinessFilesPath -Encoding utf8

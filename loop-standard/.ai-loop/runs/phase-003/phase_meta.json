@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-003",
+    "title":  "Normalize changed file classification",
+    "objective":  "Make collect-evidence classify changed files relative to ProjectRoot so .ai-loop evidence files are not reported as business files when ProjectRoot is a subdirectory inside a larger git repository.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-003",
+    "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-003-audit.md",
+    "base_commit":  "229c5e93e9ca9c6b52c91698c1ca7345915f121a",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
+    "started_at":  "2026-06-27T09:23:48.2532422Z",
+    "evidence_collected_at":  "2026-06-27T09:25:51.6181744Z",
+    "audit_prepared_at":  "2026-06-27T09:26:40.0555418Z",
+    "accepted_at":  "2026-06-27T09:27:35.4162429Z"
+}
