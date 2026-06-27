@@ -1,0 +1,67 @@
+﻿{
+    "schema_version":  "1.1",
+    "project_name":  "loop",
+    "initialized_at":  "2026-06-27T09:38:23.4132839Z",
+    "supervisor":  "Codex",
+    "worker":  "Worker Agent",
+    "current_phase":  {
+                          "phase_id":  "phase-001",
+                          "title":  "Make root control plane runnable",
+                          "objective":  "Make the repository root .ai-loop usable with ai-loop start, collect, validate, audit-pack, and accept without overwriting existing memory.",
+                          "status":  "accepted",
+                          "run_dir":  ".ai-loop/runs/phase-001",
+                          "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+                          "base_commit":  "5c7b61ca23d5a2fdabd8f188e155fd2d971b6d68",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+                          "task_kind":  "fullstack",
+                          "skill_profile":  "none",
+                          "claim_ids":  [
+
+                                        ],
+                          "required_skills":  [
+
+                                              ],
+                          "requirements":  ".ai-loop/runs/phase-001/phase_requirements.json",
+                          "started_at":  "2026-06-27T09:40:41.5965531Z",
+                          "evidence_collected_at":  "2026-06-27T09:50:30.6735413Z",
+                          "audit_prepared_at":  "2026-06-27T09:50:46.8023228Z",
+                          "accepted_at":  "2026-06-27T09:51:40.5128214Z"
+                      },
+    "phases":  [
+                   {
+                       "phase_id":  "phase-001",
+                       "title":  "Make root control plane runnable",
+                       "objective":  "Make the repository root .ai-loop usable with ai-loop start, collect, validate, audit-pack, and accept without overwriting existing memory.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-001",
+                       "audit_input":  ".ai-loop/audits/phase-001-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-001-audit.md",
+                       "base_commit":  "5c7b61ca23d5a2fdabd8f188e155fd2d971b6d68",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-001/phase_requirements.json",
+                       "started_at":  "2026-06-27T09:40:41.5965531Z",
+                       "evidence_collected_at":  "2026-06-27T09:50:30.6735413Z",
+                       "audit_prepared_at":  "2026-06-27T09:50:46.8023228Z",
+                       "accepted_at":  "2026-06-27T09:51:40.5128214Z"
+                   }
+               ],
+    "last_decision":  {
+                          "phase_id":  "phase-001",
+                          "decision":  "ACCEPTED",
+                          "audit":  ".ai-loop/audits/phase-001-audit.md",
+                          "decided_at":  "2026-06-27T09:51:40.5128214Z"
+                      },
+    "notes":  [
+                  "This file is durable loop state.",
+                  "Do not infer phase status from chat history."
+              ]
+}

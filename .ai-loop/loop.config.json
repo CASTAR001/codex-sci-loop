@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.2",
+  "loop_name": "supervisor-worker-loop",
+  "supervisor": "Codex",
+  "worker": "Worker Agent",
+  "run_directory": ".ai-loop/runs",
+  "audit_directory": ".ai-loop/audits",
+  "phase_start_files": [
+    "base_commit.txt",
+    "status_before.txt",
+    "phase_meta.json",
+    "prompt.md"
+  ],
+  "phase_evidence_required": [
+    "prompt.md",
+    "report.md",
+    "status_after.txt",
+    "diff.patch",
+    "verify.log",
+    "changed_files.txt",
+    "changed_business_files.txt",
+    "changed_evidence_files.txt",
+    "phase_requirements.json"
+  ],
+  "evidence_ledgers": [
+    ".ai-loop/evidence/evidence-ledger.md",
+    ".ai-loop/evidence/artifact-manifest.json",
+    ".ai-loop/evidence/artifact-index.md",
+    ".ai-loop/evidence/command-log.md",
+    ".ai-loop/evidence/test-log.md",
+    ".ai-loop/evidence/provenance-map.md"
+  ],
+  "skill_ledgers": [
+    ".ai-loop/skills/skill-trigger-matrix.md",
+    ".ai-loop/skills/skill-usage-ledger.md",
+    ".ai-loop/skills/skill-artifact-map.md",
+    ".ai-loop/skills/skill-source-map.md"
+  ],
+  "skill_profiles": {
+    "research-core": [
+      "research-task-tree",
+      "invariant-contract",
+      "deterministic-verification",
+      "skill-compliance-audit"
+    ],
+    "physics-sim": [
+      "research-task-tree",
+      "invariant-contract",
+      "bounded-experiment-loop",
+      "deterministic-verification",
+      "independent-crosscheck",
+      "result-provenance-audit",
+      "skill-compliance-audit"
+    ],
+    "manuscript": [
+      "research-task-tree",
+      "deterministic-verification",
+      "result-provenance-audit",
+      "manuscript-consistency-audit",
+      "skill-compliance-audit"
+    ],
+    "full-research": [
+      "research-task-tree",
+      "invariant-contract",
+      "bounded-experiment-loop",
+      "deterministic-verification",
+      "independent-crosscheck",
+      "result-provenance-audit",
+      "manuscript-consistency-audit",
+      "skill-compliance-audit"
+    ]
+  },
+  "evolution_file": ".ai-loop/evolution/project-loop-evolution.md",
+  "worker_profiles": {
+    "kimi-code": {
+      "profile_file": "loop-standard/worker-profiles/kimi-code.json",
+      "external_service": true,
+      "default_state_root": ".ai-loop/runtime/kimi-code",
+      "yolo_requires_separate_confirmation": false,
+      "external_service_requires_confirmation": true,
+      "sensitive_prompt_requires_confirmation": true,
+      "memory_upgrade_requires_confirmation": true
+    }
+  },
+  "task_kind_defaults": {
+    "generic": [],
+    "fullstack": [],
+    "physics-research": [
+      "invariant-contract",
+      "deterministic-verification"
+    ],
+    "research-writing": [
+      "manuscript-consistency-audit",
+      "deterministic-verification"
+    ],
+    "data-analysis": [
+      "invariant-contract",
+      "deterministic-verification",
+      "result-provenance-audit"
+    ]
+  },
+  "audit_input_pattern": ".ai-loop/audits/<phase-id>-audit-input.md",
+  "audit_result_pattern": ".ai-loop/audits/<phase-id>-audit.md",
+  "decisions": [
+    "ACCEPTED",
+    "REWORK",
+    "BLOCKED"
+  ],
+  "rules": {
+    "chat_history_is_not_source_of_truth": true,
+    "worker_can_only_execute_current_phase": true,
+    "supervisor_must_inspect_diff_verify_status_and_source": true,
+    "missing_evidence_blocks_progress": true,
+    "required_skill_artifacts_block_progress": true,
+    "force_accept_requires_override_reason": true
+  }
+}

@@ -46,11 +46,12 @@ Worker call, and `invoke-worker` refuses to run unless preflight is safe or the
 user has explicitly approved the external service invocation. `-Yolo` is
 recorded but does not require a separate confirmation.
 
-Self-loop phases now run against `loop-standard/.ai-loop` and are accepted
-through evidence gates. Phase-002 exposed `-TargetStatus` on the unified
-`ai-loop validate` command. Phase-003 fixed changed-file classification so
-`.ai-loop/*` evidence files are no longer listed as business files when the
-project root is a subdirectory inside a larger git repository.
+Self-loop phases now run against both `loop-standard/.ai-loop` and the root
+`.ai-loop`. Phase-002 exposed `-TargetStatus` on the unified `ai-loop validate`
+command. Phase-003 fixed changed-file classification so `.ai-loop/*` evidence
+files are no longer listed as business files when the project root is a
+subdirectory inside a larger git repository. Root phase-001 made the repository
+root control plane directly runnable without overwriting existing memory.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -59,10 +60,8 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is either to make the root `.ai-loop/` directly
-runnable without overwriting existing memory, or to validate plugin discovery
-inside an actual Codex plugin install path. Before further harness changes,
-review:
+The next best optimization is to validate plugin discovery inside an actual
+Codex plugin install path. Before further harness changes, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -79,5 +78,5 @@ review:
   broader skill trigger expansion?
 - Should external Worker invocation records become required phase evidence in
   `phase_requirements.json` for phases that use an external Worker?
-- Should root `.ai-loop/` be given a minimal `status.json`/`loop.config.json`
-  without overwriting its memory, so the repository root itself can run phases?
+- Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`
+  as well as `collect-evidence.ps1`?

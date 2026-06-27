@@ -87,12 +87,17 @@
   paths relative to `ProjectRoot` before classification, so `.ai-loop/*`
   evidence files are separated from business files in subdirectory project
   roots.
+- Ran root self-loop phase-001 under the repository root `.ai-loop`: added
+  non-destructive initialization for existing control planes, made optional
+  `.agents/skills` creation recoverable, added root runtime state/templates,
+  included untracked files in changed-file evidence, made collect-time Markdown
+  evidence rows idempotent per phase, validated gates, prepared an audit pack,
+  wrote `Decision: ACCEPTED`, and accepted the phase.
 
 ## In Progress
 
-- Decide whether to make root `.ai-loop/` directly runnable without overwriting
-  existing memory, or validate plugin discovery inside an actual Codex plugin
-  install path.
+- Validate plugin discovery inside an actual Codex plugin install path before
+  claiming plugin-form stability.
 
 ## Pending
 
@@ -105,8 +110,8 @@
   claiming plugin-form stability.
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
-- Decide whether to add minimal root `.ai-loop/status.json` and
-  `.ai-loop/loop.config.json` without overwriting existing root memory.
+- Decide whether start-time Markdown ledger rows should be made idempotent like
+  collect-time evidence rows.
 
 ## Last Updated
 

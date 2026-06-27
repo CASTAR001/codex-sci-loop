@@ -1,0 +1,16 @@
+﻿ M loop-standard/scripts/ai-loop.ps1
+ M loop-standard/scripts/init-loop.ps1
+?? .ai-loop/audits/
+?? .ai-loop/loop.config.json
+?? .ai-loop/runs/
+?? .ai-loop/status.json
+?? .ai-loop/templates/audit-input.md
+?? .ai-loop/templates/audit.md
+?? .ai-loop/templates/phase-plan.md
+?? .ai-loop/templates/prompt.md
+?? .ai-loop/templates/report.md
+?? loop-standard/templates/.ai-loop/templates/audit-input.md
+?? loop-standard/templates/.ai-loop/templates/audit.md
+?? loop-standard/templates/.ai-loop/templates/phase-plan.md
+?? loop-standard/templates/.ai-loop/templates/prompt.md
+?? loop-standard/templates/.ai-loop/templates/report.md

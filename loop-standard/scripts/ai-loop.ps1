@@ -118,7 +118,12 @@ switch ($Command) {
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "init-loop.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
-        New-Item -ItemType Directory -Force -Path (Join-Path $ProjectRoot ".agents\skills") | Out-Null
+        $AgentSkillsDir = Join-Path $ProjectRoot ".agents\skills"
+        try {
+            New-Item -ItemType Directory -Force -Path $AgentSkillsDir | Out-Null
+        } catch {
+            Write-Warning "Could not initialize optional agent skill directory: $AgentSkillsDir. Reason: $($_.Exception.Message)"
+        }
         if ($CreateAgentsBootstrap) {
             $AgentsPath = Join-Path $ProjectRoot "AGENTS.md"
             if ((Test-Path -LiteralPath $AgentsPath) -and -not $Force) {
@@ -141,7 +146,7 @@ switch ($Command) {
                 Write-Output "Created AGENTS.md bootstrap: $AgentsPath"
             }
         }
-        Write-Output "Initialized agent skill directory: $(Join-Path $ProjectRoot ".agents\skills")"
+        Write-Output "Initialized agent skill directory if writable: $AgentSkillsDir"
     }
     "start" {
         Require-PhaseId

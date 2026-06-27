@@ -40,6 +40,17 @@ function Add-MarkdownRow {
     Add-Content -LiteralPath $Path -Encoding utf8 -Value ("| " + ($Escaped -join " | ") + " |")
 }
 
+function Remove-MarkdownRowsForPhase {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Phase
+    )
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return }
+    $Lines = @(Get-Content -LiteralPath $Path)
+    $Filtered = @($Lines | Where-Object { $_ -notlike "*| $Phase |*" })
+    $Filtered | Set-Content -LiteralPath $Path -Encoding utf8
+}
+
 function Get-VerifyExitCode {
     param([Parameter(Mandatory = $true)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) { return "" }
@@ -162,6 +173,16 @@ function ConvertTo-ProjectRelativeGitPath {
     return $NormalizedPath
 }
 
+function ConvertFrom-GitStatusLine {
+    param([Parameter(Mandatory = $true)][string]$Line)
+    if ($Line.Length -lt 4) { return "" }
+    $Path = $Line.Substring(3).Trim()
+    if ($Path -match " -> ") {
+        $Path = ($Path -split " -> ")[-1].Trim()
+    }
+    return $Path.Trim('"')
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $ProjectGitArgs = @("-c", "safe.directory=$($ProjectRoot.Replace('\', '/'))", "-c", "core.excludesFile=", "-c", "core.autocrlf=false", "-C", $ProjectRoot)
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
@@ -224,13 +245,18 @@ if ($null -ne $Git) {
         $BaseCommit = (Get-Content -LiteralPath (Join-Path $RunDir "base_commit.txt") -Raw).Trim()
         if ($BaseCommit -notmatch "^MISSING:" -and -not [string]::IsNullOrWhiteSpace($BaseCommit)) {
             (& git @ProjectGitArgs diff --binary $BaseCommit -- . 2>&1 | Out-String) | Set-Content -LiteralPath $DiffPath -Encoding utf8
-            $ChangedFiles = @(& git @ProjectGitArgs diff --name-only $BaseCommit -- . 2>&1 |
+            $DiffChangedFiles = @(& git @ProjectGitArgs diff --name-only $BaseCommit -- . 2>&1 |
                 Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
                 Sort-Object -Unique)
+            $StatusChangedFiles = @(& git @ProjectGitArgs status --porcelain --untracked-files=all -- . 2>&1 |
+                ForEach-Object { ConvertFrom-GitStatusLine -Line $_ } |
+                Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+                Sort-Object -Unique)
+            $ChangedFiles = @($DiffChangedFiles + $StatusChangedFiles | Sort-Object -Unique)
         } else {
             (& git @ProjectGitArgs diff --binary -- . 2>&1 | Out-String) | Set-Content -LiteralPath $DiffPath -Encoding utf8
-            $ChangedFiles = @(& git @ProjectGitArgs status --short 2>&1 |
-                ForEach-Object { if ($_ -match "^\s*\S+\s+(.+)$") { $Matches[1] } } |
+            $ChangedFiles = @(& git @ProjectGitArgs status --porcelain --untracked-files=all -- . 2>&1 |
+                ForEach-Object { ConvertFrom-GitStatusLine -Line $_ } |
                 Sort-Object -Unique)
         }
         $ChangedFiles = @($ChangedFiles |
@@ -285,7 +311,12 @@ $CommandLog = Join-Path $EvidenceDir "command-log.md"
 $TestLog = Join-Path $EvidenceDir "test-log.md"
 $ProvenanceMap = Join-Path $EvidenceDir "provenance-map.md"
 $RelativeRunDir = ".ai-loop/runs/$PhaseId"
+foreach ($LedgerPath in @($EvidenceLedger, $ArtifactIndex, $CommandLog, $TestLog, $ProvenanceMap)) {
+    Remove-MarkdownRowsForPhase -Path $LedgerPath -Phase $PhaseId
+}
 $EvidenceRows = @(
+    @("EVD-$PhaseId-001", $PhaseId, "CLAIM-$PhaseId", "prompt", "$RelativeRunDir/prompt.md", "Codex Supervisor", "pending", "recorded", "Worker prompt generated."),
+    @("EVD-$PhaseId-002", $PhaseId, "CLAIM-$PhaseId", "requirements", "$RelativeRunDir/phase_requirements.json", "Codex Supervisor", "pending", "recorded", "Phase requirements generated."),
     @("EVD-$PhaseId-003", $PhaseId, "CLAIM-$PhaseId", "worker-report", "$RelativeRunDir/report.md", "Worker", "pending", "recorded", "Worker report captured."),
     @("EVD-$PhaseId-004", $PhaseId, "CLAIM-$PhaseId", "status", "$RelativeRunDir/status_after.txt", "collect-evidence.ps1", "pending", "recorded", "Repository status captured after Worker execution."),
     @("EVD-$PhaseId-005", $PhaseId, "CLAIM-$PhaseId", "diff", "$RelativeRunDir/diff.patch", "collect-evidence.ps1", "pending", "recorded", "Diff captured."),

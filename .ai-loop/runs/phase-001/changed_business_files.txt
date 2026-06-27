@@ -1,0 +1,10 @@
+﻿loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/collect-evidence.ps1
+loop-standard/scripts/init-loop.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/templates/.ai-loop/templates/audit.md
+loop-standard/templates/.ai-loop/templates/audit-input.md
+loop-standard/templates/.ai-loop/templates/phase-plan.md
+loop-standard/templates/.ai-loop/templates/prompt.md
+loop-standard/templates/.ai-loop/templates/report.md
+

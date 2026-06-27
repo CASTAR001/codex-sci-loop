@@ -242,7 +242,7 @@ if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
 $CollectEvidenceScriptPath = Join-Path $KitRoot "scripts\collect-evidence.ps1"
 if (Test-Path -LiteralPath $CollectEvidenceScriptPath -PathType Leaf) {
     $CollectEvidenceText = Get-Content -LiteralPath $CollectEvidenceScriptPath -Raw
-    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "rev-parse --show-prefix", "changed_business_files.txt", "changed_evidence_files.txt")) {
+    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "ConvertFrom-GitStatusLine", "Remove-MarkdownRowsForPhase", "rev-parse --show-prefix", "status --porcelain", "changed_business_files.txt", "changed_evidence_files.txt")) {
         if ($CollectEvidenceText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "collect-evidence.ps1 missing expected classification text: $Needle"
         }
