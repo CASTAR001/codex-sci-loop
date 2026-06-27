@@ -42,8 +42,9 @@ Governance directories:
 
 ## Current Phase
 
-Current phase: evidence ledger, skill trigger matrix, and phase gate automation
-bootstrap.
+Current phase: 1.0 hardening of the reusable loop harness.
 
-The next systems after this phase are richer recovery enforcement, global
-entrypoint hardening, and broader state-machine validation.
+The control plane now includes evidence integrity, skill gates, Worker
+preflight, plugin smoke tests, loop-wide validation, negative validation
+fixtures, and schema/migration versioning. Remaining non-global work focuses on
+deeper recovery automation, state transition coverage, and packaging polish.

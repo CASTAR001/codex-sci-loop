@@ -113,6 +113,13 @@
   `Set-Content -Value`, captures non-fatal verification stderr into
   `verify.log`, and `Test-CollectLedgerIdempotence.ps1` proves repeated collect
   refreshes do not duplicate ledger rows.
+- Ran root self-loop phase-005 under the repository root `.ai-loop`: added
+  schema manifests and migration logs to root `.ai-loop`,
+  `loop-standard/templates/.ai-loop`, and `loop-standard/.ai-loop`; extended
+  `validate-loop.ps1` and `ai-loop doctor` with schema checks; added
+  `Test-SchemaVersioning.ps1` for missing schema, old/future config schemas,
+  config/manifest mismatch, missing schema property, and status schema mismatch;
+  and added `Test-Phase005.ps1` as the current non-global verification matrix.
 
 ## In Progress
 
@@ -132,10 +139,10 @@
   external-service invocation is explicitly approved for that phase.
 - Decide whether start-time Markdown ledger rows should be made idempotent like
   collect-time evidence rows.
-- Add schema/migration versioning for `.ai-loop` templates and installed
-  projects.
 - Make start-time Markdown ledger rows idempotent like collect-time evidence
   rows, or explicitly document why start rows are append-only.
+- Decide whether explicit in-place migration commands are needed for old
+  `.ai-loop` projects before 1.0, or whether detect-and-block is sufficient.
 
 ## Last Updated
 

@@ -68,6 +68,14 @@ prove repeated collect refreshes do not duplicate evidence/command/test/
 provenance ledger rows. `Test-Phase004.ps1` now runs the main self-check,
 plugin install smoke test, negative fixtures, collect idempotence, and root
 loop validation.
+Root phase-005 added schema/migration versioning for `.ai-loop`: schema
+manifests and migration logs now exist in the root control plane,
+`loop-standard/templates/.ai-loop/`, and `loop-standard/.ai-loop/`.
+`validate-loop.ps1` now blocks missing schema manifests, missing required schema
+properties, unsupported old config schemas, future config schemas,
+config/manifest mismatches, and status schema mismatches.
+`Test-SchemaVersioning.ps1` covers these cases, and `Test-Phase005.ps1`
+aggregates the current full non-global verification matrix.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -76,9 +84,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is schema/migration versioning for `.ai-loop`
-templates and installed projects, or making start-time Markdown ledger rows
-idempotent like collect-time evidence rows.
+The next best optimization is deeper recovery/state transition automation, or
+deciding whether start-time Markdown ledger rows should become idempotent like
+collect-time evidence rows.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
@@ -101,5 +109,5 @@ approval. Before further harness changes, review:
   `phase_requirements.json` for phases that use an external Worker?
 - Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`
   as well as `collect-evidence.ps1`?
-- Should `validate-loop.ps1` also verify schema version compatibility once a
-  migration file exists?
+- Should a future phase implement explicit in-place migration commands for old
+  `.ai-loop` projects, or keep first 1.0 migration handling as detect-and-block?

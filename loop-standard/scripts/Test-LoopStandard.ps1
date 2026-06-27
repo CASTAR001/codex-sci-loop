@@ -36,6 +36,8 @@ $RequiredPaths = @(
     "templates\.ai-loop\.gitignore",
     "templates\.ai-loop\loop.config.json",
     "templates\.ai-loop\status.json",
+    "templates\.ai-loop\schema\schema-version.json",
+    "templates\.ai-loop\schema\migration-log.md",
     "templates\.ai-loop\runs\README.md",
     "templates\.ai-loop\audits\README.md",
     "templates\.ai-loop\evidence\evidence-ledger.md",
@@ -60,6 +62,8 @@ $RequiredPaths = @(
     ".ai-loop\.gitignore",
     ".ai-loop\loop.config.json",
     ".ai-loop\status.json",
+    ".ai-loop\schema\schema-version.json",
+    ".ai-loop\schema\migration-log.md",
     ".ai-loop\evidence\README.md",
     ".ai-loop\evidence\evidence-ledger.md",
     ".ai-loop\evidence\artifact-manifest.json",
@@ -97,6 +101,8 @@ $RequiredPaths = @(
     "scripts\Test-ValidateLoopFailures.ps1",
     "scripts\Test-CollectLedgerIdempotence.ps1",
     "scripts\Test-Phase004.ps1",
+    "scripts\Test-SchemaVersioning.ps1",
+    "scripts\Test-Phase005.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -122,7 +128,7 @@ foreach ($RelativePath in $RequiredPaths) {
     Test-RequiredPath -RelativePath $RelativePath
 }
 
-foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.json", ".ai-loop\evidence\artifact-manifest.json", "templates\.ai-loop\loop.config.json", "templates\.ai-loop\status.json", "templates\.ai-loop\evidence\artifact-manifest.json")) {
+foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.json", ".ai-loop\evidence\artifact-manifest.json", ".ai-loop\schema\schema-version.json", "templates\.ai-loop\loop.config.json", "templates\.ai-loop\status.json", "templates\.ai-loop\evidence\artifact-manifest.json", "templates\.ai-loop\schema\schema-version.json")) {
     $JsonPath = Join-Path $KitRoot $JsonRelativePath
     if (Test-Path -LiteralPath $JsonPath) {
         try {
@@ -183,6 +189,16 @@ foreach ($SkillFile in @(
 $ConfigPath = Join-Path $KitRoot ".ai-loop\loop.config.json"
 if (Test-Path -LiteralPath $ConfigPath) {
     $Config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+    $SchemaPath = Join-Path $KitRoot ".ai-loop\schema\schema-version.json"
+    if (Test-Path -LiteralPath $SchemaPath) {
+        $Schema = Get-Content -LiteralPath $SchemaPath -Raw | ConvertFrom-Json
+        if ($Config.schema_version -ne $Schema.schema_version) {
+            Add-Problem "loop.config.json schema_version must match schema-version.json."
+        }
+        if ($Schema.schema_name -ne "ai-loop-control-plane") {
+            Add-Problem "schema-version.json has unexpected schema_name: $($Schema.schema_name)"
+        }
+    }
     $RequiredEvidence = @("prompt.md", "report.md", "diff.patch", "verify.log", "phase_requirements.json")
     foreach ($EvidenceName in $RequiredEvidence) {
         if ($Config.phase_evidence_required -notcontains $EvidenceName) {

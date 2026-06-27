@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-005",
+    "title":  "Add control-plane schema versioning",
+    "objective":  "Add lightweight schema manifest and migration validation so initialized projects can be checked for supported .ai-loop schema versions.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-005",
+    "audit_input":  ".ai-loop/audits/phase-005-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-005-audit.md",
+    "base_commit":  "3c5af024fccff5e24e9f70ce94ed15d720d45935",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase005.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-005/phase_requirements.json",
+    "started_at":  "2026-06-27T15:15:57.3723765Z",
+    "evidence_collected_at":  "2026-06-27T15:37:07.9737210Z",
+    "audit_prepared_at":  "2026-06-27T15:38:00.3762102Z",
+    "accepted_at":  "2026-06-27T15:38:14.0507180Z"
+}

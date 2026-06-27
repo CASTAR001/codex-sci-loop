@@ -3,15 +3,15 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-004 have
-been accepted. Root phase-004 added negative fixture coverage for loop-wide
-state validation.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-005 have
+been accepted. Root phase-005 added schema/migration versioning for project
+control planes.
 
 ## Last Verified State
 
 `loop-standard/` exists with scripts, docs, prompts, templates, pilot fixture,
 and e2e validation. `pilot-project/` is a root-tracked fixture, not a nested git
-repository. The latest self-check reports 75 required paths.
+repository. The latest self-check reports 95 required paths.
 
 Dogfood setup succeeded: the temporary project has its own git repo, `.ai-loop/`
 control plane, project-local `AGENTS.md`, `.agents/skills/` junctions for all 8
@@ -59,6 +59,13 @@ collect idempotence, and root loop validation. The same phase fixed
 `collect-evidence.ps1` so ledger row refreshes do not fail on same-file
 read/write streams and non-fatal verification stderr is captured as log evidence
 instead of aborting collection.
+Root self-loop phase-005 added `.ai-loop/schema/schema-version.json` and
+`.ai-loop/schema/migration-log.md` to root, template, and compatibility control
+planes. `validate-loop.ps1` now checks schema manifests, required schema
+properties, config schema compatibility, future schemas, config/manifest
+mismatches, and status schema compatibility. `Test-SchemaVersioning.ps1` covers
+valid init plus six blocking schema cases, and `Test-Phase005.ps1` aggregates
+the current non-global verification matrix.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -71,9 +78,10 @@ files include `.ai-loop/evidence/*`, `.ai-loop/skills/*`,
 `.ai-loop/evolution/project-loop-evolution.md`.
 
 Reusable control-plane templates under `loop-standard/templates/.ai-loop/` now
-include evidence ledgers, skill ledgers, the skill source map, and the
-project-local evolution file. `loop-standard/scripts/ai-loop.ps1` is the
-recommended user-facing command. `install-global.ps1` can create
+include evidence ledgers, skill ledgers, the skill source map, schema manifests,
+the migration log, and the project-local evolution file.
+`loop-standard/scripts/ai-loop.ps1` is the recommended user-facing command.
+`install-global.ps1` can create
 `<InstallRoot>/bin/ai-loop.ps1`, copy `loop-standard/`, and optionally copy
 `plugins/codex-loop-harness/`. The plugin scaffold stores no project-local
 `.ai-loop` state.
@@ -108,8 +116,9 @@ integrity source for required phase evidence.
 ## Next Safe Action
 
 Repo-local plugin install/discovery smoke testing and validate-loop negative
-fixture testing are now in place. The remaining plugin-form stability step is a
-live global Codex plugin install/discovery test, which must wait for explicit
+fixture testing are now in place, and schema/migration compatibility is
+detectable through `validate-loop`. The remaining plugin-form stability step is
+a live global Codex plugin install/discovery test, which must wait for explicit
 user approval because it modifies real Codex/plugin configuration. Good
-non-global next candidates are schema/migration versioning for `.ai-loop`
-templates/installed projects or start-phase ledger idempotence.
+non-global next candidates are deeper recovery/state transition automation,
+explicit migration commands for old projects, or start-phase ledger idempotence.

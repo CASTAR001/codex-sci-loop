@@ -216,6 +216,12 @@ Use loop-wide validation when recovering or checking the whole control plane:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
 ```
 
+`.ai-loop/schema/schema-version.json` records the current control-plane schema,
+minimum supported version, latest version, and `status.json` state-file schema.
+`validate-loop` blocks missing schema manifests, unsupported old versions,
+future versions, and config/status schema mismatches. Human-readable migration
+notes live in `.ai-loop/schema/migration-log.md`.
+
 ## What Has Been Verified
 
 Recent checks passed:
@@ -226,8 +232,8 @@ Recent checks passed:
   marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
   wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
 - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
-  structure, `status.json`, phase references, accepted audits, and
-  recovery-critical files.
+  structure, `status.json`, phase references, accepted audits,
+  recovery-critical files, and schema versions.
 - `ai-loop.ps1 doctor`.
 - Plugin wrapper `doctor`.
 - Temporary project behavior:

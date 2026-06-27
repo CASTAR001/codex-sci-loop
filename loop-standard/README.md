@@ -159,6 +159,15 @@ audit. `.ai-loop/evidence/artifact-manifest.json` is machine-readable and
 records SHA256, file size, modified time, phase, and path. `validate` blocks
 required evidence that is missing, empty, unregistered, or hash-mismatched.
 
+## Schema And Migration Versioning
+
+Initialized projects include `.ai-loop/schema/schema-version.json` and
+`.ai-loop/schema/migration-log.md`. The schema manifest records the current
+control-plane schema, minimum supported schema, latest schema, and the
+`status.json` state-file schema. `validate-loop` blocks missing schema files,
+unsupported old projects, future schema versions, and config/status schema
+mismatches so upgrades are explicit rather than guessed from chat history.
+
 ## Quick Start In A Project
 
 From this kit directory:

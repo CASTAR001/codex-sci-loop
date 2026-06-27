@@ -195,6 +195,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
 ```
 
+`.ai-loop/schema/schema-version.json` 记录当前 control-plane schema、支持的
+最小版本、最新版本和 `status.json` 状态文件格式版本。
+`validate-loop` 会阻断缺失 schema manifest、过旧版本、未来版本和
+config/status schema 不匹配的项目。人类可读的迁移记录保存在
+`.ai-loop/schema/migration-log.md`。
+
 只有 Codex 写出包含 `Decision: ACCEPTED` 的 audit 后，才接受阶段：
 
 ```powershell
@@ -259,7 +265,7 @@ Codex 不能只根据 worker report 接受阶段。
   install root、local marketplace、plugin manifest、plugin skills、shim
   `doctor` 和 plugin wrapper `doctor`。
 - `ai-loop.ps1 -Command validate-loop`：检查整个 `.ai-loop` 控制面结构、
-  `status.json`、phase 引用、accepted audit 和恢复关键文件。
+  `status.json`、phase 引用、accepted audit、恢复关键文件和 schema 版本。
 - `ai-loop.ps1 doctor`。
 - 插件 wrapper `doctor`。
 - 临时项目行为测试：

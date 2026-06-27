@@ -1,0 +1,13 @@
+﻿loop-standard/.ai-loop/schema/migration-log.md
+loop-standard/.ai-loop/schema/schema-version.json
+loop-standard/README.md
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase005.ps1
+loop-standard/scripts/Test-SchemaVersioning.ps1
+loop-standard/scripts/validate-loop.ps1
+loop-standard/templates/.ai-loop/schema/migration-log.md
+loop-standard/templates/.ai-loop/schema/schema-version.json
+README.md
+README_EN.md
+

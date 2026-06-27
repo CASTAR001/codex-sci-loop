@@ -1,0 +1,36 @@
+{
+  "schema_name": "ai-loop-control-plane",
+  "schema_version": "1.2",
+  "latest_schema_version": "1.2",
+  "min_supported_schema_version": "1.2",
+  "status_schema_version": "1.1",
+  "migration_log": ".ai-loop/schema/migration-log.md",
+  "compatibility_policy": {
+    "missing_schema_manifest": "blocked",
+    "config_older_than_min_supported": "blocked",
+    "config_newer_than_latest": "blocked",
+    "config_manifest_mismatch": "blocked",
+    "status_schema_mismatch": "blocked"
+  },
+  "required_directories": [
+    ".ai-loop/runs",
+    ".ai-loop/audits",
+    ".ai-loop/evidence",
+    ".ai-loop/memory",
+    ".ai-loop/gates",
+    ".ai-loop/roles",
+    ".ai-loop/skills",
+    ".ai-loop/events",
+    ".ai-loop/prompts",
+    ".ai-loop/templates",
+    ".ai-loop/workers",
+    ".ai-loop/schema"
+  ],
+  "required_files": [
+    ".ai-loop/README.md",
+    ".ai-loop/loop.config.json",
+    ".ai-loop/status.json",
+    ".ai-loop/schema/schema-version.json",
+    ".ai-loop/schema/migration-log.md"
+  ]
+}

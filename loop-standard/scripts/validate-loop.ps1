@@ -45,11 +45,38 @@ function Test-RequiredFile {
     }
 }
 
+function Get-ObjectStringProperty {
+    param(
+        [AllowNull()]$Object,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+    if ($null -eq $Object -or $null -eq $Object.PSObject.Properties[$Name]) {
+        return ""
+    }
+    return [string]$Object.$Name
+}
+
+function Compare-SchemaVersion {
+    param(
+        [Parameter(Mandatory = $true)][string]$Left,
+        [Parameter(Mandatory = $true)][string]$Right
+    )
+    try {
+        $LeftVersion = [version]$Left
+        $RightVersion = [version]$Right
+    } catch {
+        Add-Problem "invalid schema version string: '$Left' or '$Right'"
+        return 0
+    }
+    return $LeftVersion.CompareTo($RightVersion)
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $Problems = New-Object System.Collections.Generic.List[string]
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
 $StatusPath = Join-Path $LoopDir "status.json"
 $ConfigPath = Join-Path $LoopDir "loop.config.json"
+$SchemaPath = Join-Path $LoopDir "schema\schema-version.json"
 $ValidStatuses = @("started", "evidence_collected", "audit_ready", "accepted", "rework", "blocked", "blocked_missing_evidence")
 $TerminalStatuses = @("accepted", "rework", "blocked")
 
@@ -57,7 +84,7 @@ if (-not (Test-Path -LiteralPath $LoopDir -PathType Container)) {
     Add-Problem "missing .ai-loop directory"
 }
 
-foreach ($Directory in @("runs", "audits", "evidence", "memory", "gates", "roles", "skills", "events", "prompts", "templates", "workers")) {
+foreach ($Directory in @("runs", "audits", "evidence", "memory", "gates", "roles", "skills", "events", "prompts", "templates", "workers", "schema")) {
     $DirectoryPath = Join-Path $LoopDir $Directory
     if (-not (Test-Path -LiteralPath $DirectoryPath -PathType Container)) {
         Add-Problem "missing .ai-loop/$Directory directory"
@@ -77,7 +104,9 @@ foreach ($RelativePath in @(
     ".ai-loop/evidence/evidence-ledger.md",
     ".ai-loop/skills/skill-trigger-matrix.md",
     ".ai-loop/skills/skill-source-map.md",
-    ".ai-loop/events/event-log.ndjson"
+    ".ai-loop/events/event-log.ndjson",
+    ".ai-loop/schema/schema-version.json",
+    ".ai-loop/schema/migration-log.md"
 )) {
     Test-RequiredFile -Root $ProjectRoot -RelativePath $RelativePath
 }
@@ -85,6 +114,7 @@ foreach ($RelativePath in @(
 $Status = Read-JsonOrProblem -Path $StatusPath
 $Config = Read-JsonOrProblem -Path $ConfigPath
 $Manifest = Read-JsonOrProblem -Path (Join-Path $LoopDir "evidence\artifact-manifest.json")
+$Schema = Read-JsonOrProblem -Path $SchemaPath
 
 if ($null -ne $Config) {
     foreach ($Decision in @("ACCEPTED", "REWORK", "BLOCKED")) {
@@ -95,6 +125,51 @@ if ($null -ne $Config) {
     foreach ($Ledger in @(".ai-loop/evidence/artifact-manifest.json", ".ai-loop/evidence/evidence-ledger.md", ".ai-loop/skills/skill-usage-ledger.md")) {
         if (($Config.evidence_ledgers -notcontains $Ledger) -and ($Config.skill_ledgers -notcontains $Ledger)) {
             Add-Problem "loop.config.json missing ledger reference: $Ledger"
+        }
+    }
+}
+
+if ($null -ne $Schema) {
+    foreach ($PropertyName in @("schema_name", "schema_version", "latest_schema_version", "min_supported_schema_version", "status_schema_version", "migration_log")) {
+        if ([string]::IsNullOrWhiteSpace((Get-ObjectStringProperty -Object $Schema -Name $PropertyName))) {
+            Add-Problem "schema-version.json missing required property: $PropertyName"
+        }
+    }
+    if ($null -ne $Schema.PSObject.Properties["required_directories"]) {
+        foreach ($RequiredDirectory in @($Schema.required_directories)) {
+            $DirectoryPath = Join-Path $ProjectRoot ([string]$RequiredDirectory -replace "/", "\")
+            if (-not (Test-Path -LiteralPath $DirectoryPath -PathType Container)) {
+                Add-Problem "schema required directory missing: $RequiredDirectory"
+            }
+        }
+    }
+    if ($null -ne $Schema.PSObject.Properties["required_files"]) {
+        foreach ($RequiredFile in @($Schema.required_files)) {
+            Test-RequiredFile -Root $ProjectRoot -RelativePath ([string]$RequiredFile)
+        }
+    }
+    $SchemaVersion = Get-ObjectStringProperty -Object $Schema -Name "schema_version"
+    $LatestSchemaVersion = Get-ObjectStringProperty -Object $Schema -Name "latest_schema_version"
+    $MinSupportedSchemaVersion = Get-ObjectStringProperty -Object $Schema -Name "min_supported_schema_version"
+    $StatusSchemaVersion = Get-ObjectStringProperty -Object $Schema -Name "status_schema_version"
+    $ConfigSchemaVersion = Get-ObjectStringProperty -Object $Config -Name "schema_version"
+    if ($null -ne $Config -and -not [string]::IsNullOrWhiteSpace($ConfigSchemaVersion)) {
+        if (-not [string]::IsNullOrWhiteSpace($SchemaVersion) -and $ConfigSchemaVersion -ne $SchemaVersion) {
+            Add-Problem "loop.config.json schema_version differs from schema manifest: config=$ConfigSchemaVersion manifest=$SchemaVersion"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($MinSupportedSchemaVersion) -and (Compare-SchemaVersion -Left $ConfigSchemaVersion -Right $MinSupportedSchemaVersion) -lt 0) {
+            Add-Problem "loop.config.json schema_version is older than min supported: $ConfigSchemaVersion < $MinSupportedSchemaVersion"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($LatestSchemaVersion) -and (Compare-SchemaVersion -Left $ConfigSchemaVersion -Right $LatestSchemaVersion) -gt 0) {
+            Add-Problem "loop.config.json schema_version is newer than latest supported: $ConfigSchemaVersion > $LatestSchemaVersion"
+        }
+    } elseif ($null -ne $Config) {
+        Add-Problem "loop.config.json missing schema_version"
+    }
+    if ($null -ne $Status -and -not [string]::IsNullOrWhiteSpace($StatusSchemaVersion)) {
+        $StatusVersion = Get-ObjectStringProperty -Object $Status -Name "schema_version"
+        if ($StatusVersion -ne $StatusSchemaVersion) {
+            Add-Problem "status.json schema_version differs from schema manifest: status=$StatusVersion manifest=$StatusSchemaVersion"
         }
     }
 }

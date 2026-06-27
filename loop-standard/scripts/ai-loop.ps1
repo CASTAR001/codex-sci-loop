@@ -443,6 +443,11 @@ switch ($Command) {
         if (-not (Test-Path -LiteralPath $TemplateManifest -PathType Leaf)) { throw "Template artifact manifest missing: $TemplateManifest" }
         $TemplateManifestJson = Get-Content -LiteralPath $TemplateManifest -Raw | ConvertFrom-Json
         if ($null -eq $TemplateManifestJson.PSObject.Properties["artifacts"]) { throw "Template artifact manifest missing artifacts array." }
+        $TemplateSchema = Join-Path $TemplateDir "schema\schema-version.json"
+        if (-not (Test-Path -LiteralPath $TemplateSchema -PathType Leaf)) { throw "Template schema manifest missing: $TemplateSchema" }
+        $TemplateSchemaJson = Get-Content -LiteralPath $TemplateSchema -Raw | ConvertFrom-Json
+        if ($TemplateSchemaJson.schema_name -ne "ai-loop-control-plane") { throw "Unexpected template schema name: $($TemplateSchemaJson.schema_name)" }
+        if ($TemplateSchemaJson.schema_version -ne $TemplateSchemaJson.latest_schema_version) { throw "Template schema latest version mismatch." }
         foreach ($WorkerPath in @(
             (Join-Path $KitRoot "worker-profiles\kimi-code.json"),
             (Join-Path $KitRoot "worker-profiles\kimi-code.md"),
@@ -481,6 +486,7 @@ switch ($Command) {
         Write-Output "Plugin manifest JSON: OK"
         Write-Output "Plugin skill frontmatter: OK"
         Write-Output "Template artifact manifest: OK"
+        Write-Output "Template schema manifest: OK"
         Write-Output "External Worker harness: OK"
         Write-Output "Doctor: OK"
     }
