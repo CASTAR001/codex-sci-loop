@@ -16,6 +16,7 @@ plugin wrapper is used directly, set `LOOP_STANDARD_ROOT` to the installed
 Run or emulate:
 
 ```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command validate-loop -ProjectRoot <project-root>
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command resume -ProjectRoot <project-root>
 ```
 

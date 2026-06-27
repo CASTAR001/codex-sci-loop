@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-003",
+    "title":  "Add loop-wide state validation",
+    "objective":  "Add a loop-wide validation command that checks .ai-loop control-plane structure, status consistency, phase references, accepted audits, and recovery-critical files before broader 1.0 hardening.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-003",
+    "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-003-audit.md",
+    "base_commit":  "2eff996a7d467845966ef64d8da3dd30b8f244aa",
+    "verify_command":  "\u0026 \u0027.\\loop-standard\\scripts\\Test-LoopStandard.ps1\u0027 -AllowPilotProject; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\Test-PluginInstall.ps1\u0027; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\validate-loop.ps1\u0027 -ProjectRoot .; if (-not $?) { exit 1 }; exit 0",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
+    "started_at":  "2026-06-27T14:29:26.3090120Z",
+    "evidence_collected_at":  "2026-06-27T14:39:40.3461844Z",
+    "audit_prepared_at":  "2026-06-27T14:40:29.1660636Z",
+    "accepted_at":  "2026-06-27T14:40:59.6887437Z"
+}

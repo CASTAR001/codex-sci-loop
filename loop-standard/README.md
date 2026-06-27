@@ -146,6 +146,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate-phase
   -TargetStatus audit_ready
 ```
 
+Validate the whole `.ai-loop` control plane during recovery or preflight:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command validate-loop `
+  -ProjectRoot "C:\path\to\project"
+```
+
 Evidence integrity uses a dual-track model. Markdown ledgers are for human
 audit. `.ai-loop/evidence/artifact-manifest.json` is machine-readable and
 records SHA256, file size, modified time, phase, and path. `validate` blocks

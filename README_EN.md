@@ -204,6 +204,18 @@ If evidence is missing, verification fails, skill artifacts are missing, or a
 required skill link is unavailable, the phase must be `BLOCKED` or `REWORK`
 unless the Supervisor uses a recorded force override.
 
+Use phase validation before acceptance:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate -ProjectRoot E:\some-project -PhaseId phase-001
+```
+
+Use loop-wide validation when recovering or checking the whole control plane:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
+```
+
 ## What Has Been Verified
 
 Recent checks passed:
@@ -213,6 +225,9 @@ Recent checks passed:
 - `Test-PluginInstall.ps1`, which verifies a temporary install root, local
   marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
   wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
+- `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
+  structure, `status.json`, phase references, accepted audits, and
+  recovery-critical files.
 - `ai-loop.ps1 doctor`.
 - Plugin wrapper `doctor`.
 - Temporary project behavior:

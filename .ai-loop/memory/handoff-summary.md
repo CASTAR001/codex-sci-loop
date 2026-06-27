@@ -5,7 +5,8 @@
 External Worker invocation hardening is implemented; dogfood phase-001,
 loop-standard self-loop phases 002-003, and root self-loop phase-001 have been
 accepted. Root self-loop phase-002 has a repo-local plugin install/discovery
-smoke test ready for acceptance.
+smoke test accepted. Root self-loop phase-003 added loop-wide state validation
+and is ready for final acceptance.
 
 ## Last Verified State
 
@@ -44,6 +45,11 @@ local marketplace, `Test-PluginInstall.ps1` validates the installed
 `codex-loop-harness` manifest, four plugin skills, shim `doctor`, and plugin
 wrapper `doctor`, and plugin skill docs no longer hardcode the development repo
 script path.
+Root self-loop phase-003 added `validate-loop.ps1` and exposed it through
+`ai-loop -Command validate-loop`. It checks `.ai-loop` structure, recovery
+critical files, `status.json`, duplicate phase IDs, current phase consistency,
+accepted audit decisions, accepted phase `accepted.txt`, and accepted phase
+gates.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -95,5 +101,6 @@ integrity source for required phase evidence.
 Repo-local plugin install/discovery smoke testing is now in place. The remaining
 plugin-form stability step is a live global Codex plugin install/discovery test,
 which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. A good non-global next candidate is stronger state
-and recovery hardening.
+Codex/plugin configuration. Good non-global next candidates are fixture-level
+failure tests for `validate-loop.ps1`, schema/migration versioning, or
+start-phase ledger idempotence.

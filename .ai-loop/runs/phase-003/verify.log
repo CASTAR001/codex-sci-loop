@@ -1,0 +1,17 @@
+﻿verify_command: & '.\loop-standard\scripts\Test-LoopStandard.ps1' -AllowPilotProject; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\Test-PluginInstall.ps1'; if (-not $?) { exit 1 }; & '.\loop-standard\scripts\validate-loop.ps1' -ProjectRoot .; if (-not $?) { exit 1 }; exit 0
+started_at: 2026-06-27T14:39:35.2741571Z
+finished_at: 2026-06-27T14:39:39.7763115Z
+exit_code: 0
+
+output:
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 86
+Plugin install smoke test: OK
+Install root: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install
+Marketplace: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install\.agents\plugins\marketplace.json
+Plugin: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install\plugins\codex-loop-harness
+Shim: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install\bin\ai-loop.ps1
+Loop validation: OK
+Project root: E:\codexfiles\loop
+

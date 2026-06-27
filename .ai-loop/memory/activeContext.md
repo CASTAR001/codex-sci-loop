@@ -54,6 +54,10 @@ subdirectory inside a larger git repository. Root phase-001 made the repository
 root control plane directly runnable without overwriting existing memory. Root
 phase-002 added a repository-local Codex plugin install/discovery smoke test
 using a temporary install root and local marketplace file.
+Root phase-003 added loop-wide state validation through `validate-loop.ps1` and
+`ai-loop -Command validate-loop`, covering control-plane structure,
+`status.json` consistency, phase references, accepted audits, accepted phase
+gates, and recovery-critical files.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -62,9 +66,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is either real global Codex plugin installation
-validation with explicit user approval, or state/recovery hardening inside the
-already runnable root `.ai-loop`. Before further harness changes, review:
+The next best optimization is schema/migration versioning or deeper
+state/recovery transition tests inside the already runnable root `.ai-loop`.
+Real global Codex plugin installation validation still requires explicit user
+approval. Before further harness changes, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -85,3 +90,6 @@ already runnable root `.ai-loop`. Before further harness changes, review:
   `phase_requirements.json` for phases that use an external Worker?
 - Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`
   as well as `collect-evidence.ps1`?
+- Should `validate-loop.ps1` grow fixture tests for duplicate phases, broken
+  current phase references, missing accepted audits, and stale artifact
+  manifests?

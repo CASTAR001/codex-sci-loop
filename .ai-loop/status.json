@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-002",
-                          "title":  "Smoke test Codex plugin install layout",
-                          "objective":  "Validate codex-loop-harness plugin packaging, temporary installation layout, manifest discovery, plugin skills, and installed shim without modifying real global Codex configuration.",
+                          "phase_id":  "phase-003",
+                          "title":  "Add loop-wide state validation",
+                          "objective":  "Add a loop-wide validation command that checks .ai-loop control-plane structure, status consistency, phase references, accepted audits, and recovery-critical files before broader 1.0 hardening.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-002",
-                          "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-002-audit.md",
-                          "base_commit":  "0ce094172686aba396a3041fa658507fccc193f4",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+                          "run_dir":  ".ai-loop/runs/phase-003",
+                          "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-003-audit.md",
+                          "base_commit":  "2eff996a7d467845966ef64d8da3dd30b8f244aa",
+                          "verify_command":  "\u0026 \u0027.\\loop-standard\\scripts\\Test-LoopStandard.ps1\u0027 -AllowPilotProject; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\Test-PluginInstall.ps1\u0027; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\validate-loop.ps1\u0027 -ProjectRoot .; if (-not $?) { exit 1 }; exit 0",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "claim_ids":  [
@@ -22,11 +22,11 @@
                           "required_skills":  [
 
                                               ],
-                          "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
-                          "started_at":  "2026-06-27T10:03:50.7359506Z",
-                          "evidence_collected_at":  "2026-06-27T10:18:49.5551209Z",
-                          "audit_prepared_at":  "2026-06-27T10:19:08.8737634Z",
-                          "accepted_at":  "2026-06-27T10:19:58.9435005Z"
+                          "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
+                          "started_at":  "2026-06-27T14:29:26.3090120Z",
+                          "evidence_collected_at":  "2026-06-27T14:39:40.3461844Z",
+                          "audit_prepared_at":  "2026-06-27T14:40:29.1660636Z",
+                          "accepted_at":  "2026-06-27T14:40:59.6887437Z"
                       },
     "phases":  [
                    {
@@ -76,13 +76,37 @@
                        "evidence_collected_at":  "2026-06-27T10:18:49.5551209Z",
                        "audit_prepared_at":  "2026-06-27T10:19:08.8737634Z",
                        "accepted_at":  "2026-06-27T10:19:58.9435005Z"
+                   },
+                   {
+                       "phase_id":  "phase-003",
+                       "title":  "Add loop-wide state validation",
+                       "objective":  "Add a loop-wide validation command that checks .ai-loop control-plane structure, status consistency, phase references, accepted audits, and recovery-critical files before broader 1.0 hardening.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-003",
+                       "audit_input":  ".ai-loop/audits/phase-003-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-003-audit.md",
+                       "base_commit":  "2eff996a7d467845966ef64d8da3dd30b8f244aa",
+                       "verify_command":  "\u0026 \u0027.\\loop-standard\\scripts\\Test-LoopStandard.ps1\u0027 -AllowPilotProject; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\Test-PluginInstall.ps1\u0027; if (-not $?) { exit 1 }; \u0026 \u0027.\\loop-standard\\scripts\\validate-loop.ps1\u0027 -ProjectRoot .; if (-not $?) { exit 1 }; exit 0",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-003/phase_requirements.json",
+                       "started_at":  "2026-06-27T14:29:26.3090120Z",
+                       "evidence_collected_at":  "2026-06-27T14:39:40.3461844Z",
+                       "audit_prepared_at":  "2026-06-27T14:40:29.1660636Z",
+                       "accepted_at":  "2026-06-27T14:40:59.6887437Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-002",
+                          "phase_id":  "phase-003",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-002-audit.md",
-                          "decided_at":  "2026-06-27T10:19:58.9435005Z"
+                          "audit":  ".ai-loop/audits/phase-003-audit.md",
+                          "decided_at":  "2026-06-27T14:40:59.6887437Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

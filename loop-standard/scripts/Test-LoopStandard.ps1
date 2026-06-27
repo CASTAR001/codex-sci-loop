@@ -93,6 +93,7 @@ $RequiredPaths = @(
     "scripts\prepare-audit-pack.ps1",
     "scripts\accept-phase.ps1",
     "scripts\validate-phase-gates.ps1",
+    "scripts\validate-loop.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -223,7 +224,7 @@ if (Test-Path -LiteralPath $PluginScriptsDir -PathType Container) {
 $InstallScriptPath = Join-Path $KitRoot "scripts\install-global.ps1"
 if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
     $InstallText = Get-Content -LiteralPath $InstallScriptPath -Raw
-    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1")) {
+    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "validate-loop", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1")) {
         if ($InstallText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "install-global.ps1 missing expected interface text: $Needle"
         }
@@ -233,7 +234,7 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
 $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
 if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
-    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "worker-preflight", "invoke-worker")) {
+    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "worker-preflight", "invoke-worker")) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
         }

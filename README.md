@@ -189,6 +189,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate -ProjectRoot E:\some-project -PhaseId phase-001
 ```
 
+也可以检查整个 `.ai-loop` 控制面的恢复和状态一致性：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
+```
+
 只有 Codex 写出包含 `Decision: ACCEPTED` 的 audit 后，才接受阶段：
 
 ```powershell
@@ -252,6 +258,8 @@ Codex 不能只根据 worker report 接受阶段。
 - `Test-PluginInstall.ps1`：在 `.tmp-ai-loop-plugin-smoke/` 中验证临时
   install root、local marketplace、plugin manifest、plugin skills、shim
   `doctor` 和 plugin wrapper `doctor`。
+- `ai-loop.ps1 -Command validate-loop`：检查整个 `.ai-loop` 控制面结构、
+  `status.json`、phase 引用、accepted audit 和恢复关键文件。
 - `ai-loop.ps1 doctor`。
 - 插件 wrapper `doctor`。
 - 临时项目行为测试：

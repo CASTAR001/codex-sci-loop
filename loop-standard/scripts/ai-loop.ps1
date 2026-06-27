@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -199,6 +199,14 @@ switch ($Command) {
         }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "validate-phase-gates.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "validate-loop" {
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+        }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "validate-loop.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "accept" {

@@ -99,12 +99,15 @@
   marketplace file, installed plugin manifest, plugin skills, shim `doctor`,
   plugin wrapper `doctor`, and removed development-only absolute paths from
   plugin workflow skills.
+- Ran root self-loop phase-003 under the repository root `.ai-loop`: added
+  `validate-loop.ps1`, exposed it as `ai-loop -Command validate-loop`, included
+  it in generated install shims, documented it, updated plugin recovery
+  guidance, and verified it against the root control plane.
 
 ## In Progress
 
-- Decide whether to run a live global Codex plugin install/discovery test, which
-  requires explicit user approval because it modifies real Codex/plugin
-  configuration.
+- Continue state/recovery hardening toward 1.0 without modifying real global
+  Codex configuration.
 
 ## Pending
 
@@ -120,6 +123,11 @@
   external-service invocation is explicitly approved for that phase.
 - Decide whether start-time Markdown ledger rows should be made idempotent like
   collect-time evidence rows.
+- Add fixture-level tests for `validate-loop.ps1` failure modes: duplicate
+  phases, broken current phase references, missing accepted audits, illegal
+  statuses, and stale accepted gates.
+- Add schema/migration versioning for `.ai-loop` templates and installed
+  projects.
 
 ## Last Updated
 
