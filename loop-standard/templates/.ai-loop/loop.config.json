@@ -71,6 +71,17 @@
     ]
   },
   "evolution_file": ".ai-loop/evolution/project-loop-evolution.md",
+  "worker_profiles": {
+    "kimi-code": {
+      "profile_file": "loop-standard/worker-profiles/kimi-code.json",
+      "external_service": true,
+      "default_state_root": ".ai-loop/runtime/kimi-code",
+      "yolo_requires_separate_confirmation": false,
+      "external_service_requires_confirmation": true,
+      "sensitive_prompt_requires_confirmation": true,
+      "memory_upgrade_requires_confirmation": true
+    }
+  },
   "task_kind_defaults": {
     "generic": [],
     "fullstack": [],

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "accept", "resume", "link-skills", "doctor")]
+    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -30,7 +30,14 @@ param(
     [string]$CommitMessage = "",
     [switch]$Force,
     [string]$OverrideReason = "",
-    [switch]$CreateAgentsBootstrap
+    [switch]$CreateAgentsBootstrap,
+    [string]$WorkerProfile = "kimi-code",
+    [string]$PromptPath = "",
+    [string]$WorkerStateRoot = "",
+    [switch]$AllowExternalService,
+    [switch]$AllowSensitivePrompt,
+    [switch]$Yolo,
+    [switch]$DryRun
 )
 
 Set-StrictMode -Version Latest
@@ -369,6 +376,39 @@ switch ($Command) {
         & (Join-Path $PSScriptRoot "link-skills.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
+    "worker-preflight" {
+        Require-PhaseId
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            PhaseId = $PhaseId
+            WorkerProfile = $WorkerProfile
+        }
+        if (-not [string]::IsNullOrWhiteSpace($PromptPath)) { $ScriptParams.PromptPath = $PromptPath }
+        if (-not [string]::IsNullOrWhiteSpace($WorkerStateRoot)) { $ScriptParams.WorkerStateRoot = $WorkerStateRoot }
+        if ($AllowExternalService) { $ScriptParams.AllowExternalService = $true }
+        if ($AllowSensitivePrompt) { $ScriptParams.AllowSensitivePrompt = $true }
+        if ($Yolo) { $ScriptParams.Yolo = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "preflight-worker.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "invoke-worker" {
+        Require-PhaseId
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            PhaseId = $PhaseId
+            WorkerProfile = $WorkerProfile
+        }
+        if (-not [string]::IsNullOrWhiteSpace($PromptPath)) { $ScriptParams.PromptPath = $PromptPath }
+        if (-not [string]::IsNullOrWhiteSpace($WorkerStateRoot)) { $ScriptParams.WorkerStateRoot = $WorkerStateRoot }
+        if ($AllowExternalService) { $ScriptParams.AllowExternalService = $true }
+        if ($AllowSensitivePrompt) { $ScriptParams.AllowSensitivePrompt = $true }
+        if ($Yolo) { $ScriptParams.Yolo = $true }
+        if ($DryRun) { $ScriptParams.DryRun = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "invoke-worker.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
     "doctor" {
         $TemplateDir = Join-Path $KitRoot "templates\.ai-loop"
         $InstallRoot = Split-Path -Parent $KitRoot
@@ -387,6 +427,18 @@ switch ($Command) {
         if (-not (Test-Path -LiteralPath $TemplateManifest -PathType Leaf)) { throw "Template artifact manifest missing: $TemplateManifest" }
         $TemplateManifestJson = Get-Content -LiteralPath $TemplateManifest -Raw | ConvertFrom-Json
         if ($null -eq $TemplateManifestJson.PSObject.Properties["artifacts"]) { throw "Template artifact manifest missing artifacts array." }
+        foreach ($WorkerPath in @(
+            (Join-Path $KitRoot "worker-profiles\kimi-code.json"),
+            (Join-Path $KitRoot "worker-profiles\kimi-code.md"),
+            (Join-Path $PSScriptRoot "preflight-worker.ps1"),
+            (Join-Path $PSScriptRoot "invoke-worker.ps1")
+        )) {
+            if (-not (Test-Path -LiteralPath $WorkerPath -PathType Leaf)) {
+                throw "External Worker harness file missing: $WorkerPath"
+            }
+        }
+        $WorkerProfileJson = Get-Content -LiteralPath (Join-Path $KitRoot "worker-profiles\kimi-code.json") -Raw | ConvertFrom-Json
+        if ($WorkerProfileJson.profile -ne "kimi-code") { throw "Unexpected Worker profile name: $($WorkerProfileJson.profile)" }
         if (-not (Test-Path -LiteralPath $PluginManifest -PathType Leaf)) { throw "Plugin manifest missing: $PluginManifest" }
         $Plugin = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
         if ($Plugin.name -ne "codex-loop-harness") { throw "Unexpected plugin name: $($Plugin.name)" }
@@ -413,6 +465,7 @@ switch ($Command) {
         Write-Output "Plugin manifest JSON: OK"
         Write-Output "Plugin skill frontmatter: OK"
         Write-Output "Template artifact manifest: OK"
+        Write-Output "External Worker harness: OK"
         Write-Output "Doctor: OK"
     }
 }

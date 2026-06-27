@@ -22,3 +22,5 @@
 | D018 | 2026-06-25 | Make `ai-loop resume` summarize state and return BLOCKED when required state cannot be reconstructed | Recovery must be file-based and must not continue from chat memory alone | Active |
 | D019 | 2026-06-25 | Use Markdown plus JSON for artifact integrity | Keep evidence human-auditable while giving gates a stable machine-readable manifest | Active |
 | D020 | 2026-06-25 | Require manifest hash matches for phase required evidence before audit/accept | Detect stale, missing, or tampered evidence instead of trusting file presence alone | Active |
+| D021 | 2026-06-27 | Classify reusable loop lessons before writing them to memory, evolution, or skills | Prevent the MVP harness from polluting project-local evolution files while still preserving durable governance and reusable procedures | Active |
+| D022 | 2026-06-27 | Distill mature project evolution patterns into skills and leave evolution files as project-local proposal surfaces | Keep self-evolution local and lightweight while promoting stable repeated practices into reusable agent capabilities | Active |

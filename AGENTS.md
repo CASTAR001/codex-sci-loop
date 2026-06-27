@@ -18,9 +18,9 @@ After meaningful work, update:
 
 Governance files are read-only by default. Do not modify `.ai-loop/memory/`,
 `.ai-loop/roles/`, `.ai-loop/gates/`, `.ai-loop/events/`, `.ai-loop/evidence/`,
-`.ai-loop/skills/`, `.ai-loop/evolution/`, `.ai-loop/prompts/`, or
-`.ai-loop/templates/` unless the user explicitly declares a harness maintenance
-phase.
+`.ai-loop/skills/`, `.ai-loop/evolution/`, `.ai-loop/prompts/`,
+`.ai-loop/templates/`, or `.ai-loop/workers/` unless the user explicitly
+declares a harness maintenance phase.
 
 Do not accept work from prose alone. Inspect evidence, diffs, verification logs,
 status, changed files, and relevant source.

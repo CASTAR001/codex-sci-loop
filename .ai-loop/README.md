@@ -38,6 +38,7 @@ Governance directories:
 - `.ai-loop/evolution/`
 - `.ai-loop/prompts/`
 - `.ai-loop/templates/`
+- `.ai-loop/workers/`
 
 ## Current Phase
 

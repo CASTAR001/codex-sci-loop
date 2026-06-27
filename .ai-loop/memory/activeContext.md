@@ -2,8 +2,7 @@
 
 ## Current Phase
 
-Artifact hashing and evidence ledger automation implemented on top of the
-global-callable harness.
+External Worker invocation hardening and dogfood MVP validation.
 
 ## Current Objective
 
@@ -37,6 +36,16 @@ wrappers, and recovery summary are now in place. Required phase evidence must be
 present, non-empty, recorded in `.ai-loop/evidence/artifact-manifest.json`, and
 hash-matched before validation passes.
 
+The dogfood project initialized successfully, linked all 8 research workflow
+skills via `.agents/skills/`, generated a phase-001 Worker prompt, collected
+evidence, and accepted phase-001 after the user ran Kimi Code externally.
+
+The harness now includes a Worker-agnostic external invocation layer:
+`worker-preflight` records safety and feasibility evidence before any external
+Worker call, and `invoke-worker` refuses to run unless preflight is safe or the
+user has explicitly approved the external service invocation. `-Yolo` is
+recorded but does not require a separate confirmation.
+
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
 Keep reusable framework code under `loop-standard/` and pilot fixture work under
@@ -44,8 +53,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-Proceed to deeper state-machine enforcement, skill artifact manifest coverage,
-or global install promotion only after reviewing:
+Validate plugin discovery inside an actual Codex plugin install path, or run a
+dogfood phase-002 using `worker-preflight` and `invoke-worker` after explicit
+external-service approval. Before further harness changes, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -60,3 +70,5 @@ or global install promotion only after reviewing:
 - What final global install root should be used outside temporary tests?
 - Should required skill artifacts become mandatory manifest entries before
   broader skill trigger expansion?
+- Should external Worker invocation records become required phase evidence in
+  `phase_requirements.json` for phases that use an external Worker?

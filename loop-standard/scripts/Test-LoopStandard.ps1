@@ -33,6 +33,7 @@ $RequiredPaths = @(
     "PHASE_B_PLAN.md",
     "templates\README.md",
     "templates\.ai-loop\README.md",
+    "templates\.ai-loop\.gitignore",
     "templates\.ai-loop\loop.config.json",
     "templates\.ai-loop\status.json",
     "templates\.ai-loop\runs\README.md",
@@ -48,12 +49,15 @@ $RequiredPaths = @(
     "templates\.ai-loop\skills\skill-artifact-map.md",
     "templates\.ai-loop\skills\skill-source-map.md",
     "templates\.ai-loop\evolution\project-loop-evolution.md",
+    "templates\.ai-loop\workers\README.md",
     "docs\README.md",
     "docs\OPERATOR_RUNBOOK.md",
     "docs\GLOBAL_INSTALL_PLAN.md",
     "docs\CONTROL_PLANE_BUILD_PLAN.md",
     "docs\AGENTS_VS_AI_LOOP_BOUNDARY.md",
+    "docs\EXTERNAL_WORKER_PROTOCOL.md",
     ".ai-loop\README.md",
+    ".ai-loop\.gitignore",
     ".ai-loop\loop.config.json",
     ".ai-loop\status.json",
     ".ai-loop\evidence\README.md",
@@ -68,6 +72,7 @@ $RequiredPaths = @(
     ".ai-loop\skills\skill-artifact-map.md",
     ".ai-loop\skills\skill-source-map.md",
     ".ai-loop\evolution\project-loop-evolution.md",
+    ".ai-loop\workers\README.md",
     ".ai-loop\audits\README.md",
     ".ai-loop\logs\README.md",
     ".ai-loop\templates\phase-plan.md",
@@ -81,6 +86,8 @@ $RequiredPaths = @(
     "scripts\ai-loop.ps1",
     "scripts\init-loop.ps1",
     "scripts\link-skills.ps1",
+    "scripts\preflight-worker.ps1",
+    "scripts\invoke-worker.ps1",
     "scripts\start-phase.ps1",
     "scripts\collect-evidence.ps1",
     "scripts\prepare-audit-pack.ps1",
@@ -94,6 +101,8 @@ $RequiredPaths = @(
     "scripts\Prepare-LoopAuditPackage.ps1",
     "scripts\Accept-LoopPhase.ps1",
     "scripts\Test-LoopStandard.ps1",
+    "worker-profiles\kimi-code.json",
+    "worker-profiles\kimi-code.md",
     "..\README.md",
     "..\README_EN.md",
     "..\plugins\codex-loop-harness\.codex-plugin\plugin.json",
@@ -131,6 +140,23 @@ if (Test-Path -LiteralPath $PluginJsonPath) {
         }
     } catch {
         Add-Problem "Invalid plugin JSON: $($_.Exception.Message)"
+    }
+}
+
+$WorkerProfilePath = Join-Path $KitRoot "worker-profiles\kimi-code.json"
+if (Test-Path -LiteralPath $WorkerProfilePath) {
+    try {
+        $WorkerProfile = Get-Content -LiteralPath $WorkerProfilePath -Raw | ConvertFrom-Json
+        if ($WorkerProfile.profile -ne "kimi-code") {
+            Add-Problem "Worker profile has unexpected name: $($WorkerProfile.profile)"
+        }
+        foreach ($Field in @("command", "prompt_argument", "default_state_root", "state_env_var")) {
+            if ([string]::IsNullOrWhiteSpace([string]$WorkerProfile.$Field)) {
+                Add-Problem "Worker profile missing required field: $Field"
+            }
+        }
+    } catch {
+        Add-Problem "Invalid Worker profile JSON: $($_.Exception.Message)"
     }
 }
 

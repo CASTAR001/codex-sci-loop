@@ -60,10 +60,29 @@
 - `prepare-audit-pack.ps1` now includes an Artifact Integrity Summary.
 - Verified hash mismatch, missing manifest row, missing file, empty file, and
   missing manifest all block validation.
+- Created ignored dogfood project `.tmp-ai-loop-dogfood/` with an independent
+  git repo, initialized `.ai-loop/`, linked all 8 research workflow skills as
+  project-local junctions, started phase-001, and generated a Kimi Worker
+  prompt.
+- Verified the dogfood failure path: Kimi CLI is configured, but executing it
+  from this Codex environment is blocked by sandbox/policy; Codex did not
+  perform the Worker business edit, collected evidence, prepared an audit pack,
+  and recorded `BLOCKED`.
+- Completed the dogfood success path after the user ran Kimi externally:
+  evidence collection, artifact integrity, phase gates, audit pack, Codex audit,
+  and `accept` all succeeded for `.tmp-ai-loop-dogfood` phase-001.
+- Added a Worker-agnostic external invocation layer with `worker-preflight`,
+  `invoke-worker`, Kimi Code as a thin profile, project-local runtime state
+  under `.ai-loop/runtime/`, and docs/templates for external Worker policy.
+- Recorded the knowledge-placement rule: durable harness principles go to
+  long-term memory, project-local proposals go to evolution files, and reusable
+  procedures/tool practices should be distilled into skills.
 
 ## In Progress
 
-- Deeper state-machine enforcement and broader evidence-ledger automation.
+- Validate plugin discovery inside an actual Codex plugin install path, then
+  decide whether external Worker invocation records should become required
+  phase evidence for Worker-invoked phases.
 
 ## Pending
 
@@ -72,7 +91,11 @@
 - Add stricter state transition logs and recovery paths.
 - Decide whether skill artifacts should become required manifest entries in the
   next evidence hardening phase.
+- Validate plugin discovery inside an actual Codex plugin install path before
+  claiming plugin-form stability.
+- Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
+  external-service invocation is explicitly approved for that phase.
 
 ## Last Updated
 
-2026-06-25
+2026-06-27

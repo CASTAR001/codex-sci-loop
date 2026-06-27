@@ -43,10 +43,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 do
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 init "C:\path\to\project"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 link-skills "C:\path\to\project" -SkillProfile full-research
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 start "C:\path\to\project" phase-001 -TaskKind physics-research -SkillProfile physics-sim
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 worker-preflight "C:\path\to\project" phase-001 -WorkerProfile kimi-code -Yolo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 invoke-worker "C:\path\to\project" phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
 ```
 
 The lower-level scripts remain available for compatibility, but new workflows
 should call `ai-loop.ps1`.
+
+External Worker invocation is Worker-agnostic. `worker-preflight` records the
+prompt hash, state directory, external service status, yolo mode, and approval
+requirements. `invoke-worker` refuses to run unless preflight returns
+`SAFE_TO_INVOKE`. The first thin Worker profile is `worker-profiles/kimi-code`.
 
 To install a temporary global layout with a shim:
 

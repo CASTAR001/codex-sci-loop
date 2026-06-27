@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "profile": "kimi-code",
+  "display_name": "Kimi Code",
+  "external_service": true,
+  "command": "kimi.cmd",
+  "prompt_argument": "-p",
+  "skills_dir_argument": "--skills-dir",
+  "yolo_argument": "-y",
+  "supports_yolo": true,
+  "supports_skills_dir": true,
+  "state_env_var": "KIMI_CODE_HOME",
+  "default_state_root": ".ai-loop/runtime/kimi-code",
+  "notes": [
+    "Kimi Code supports --skills-dir for project-local skills.",
+    "Kimi Code supports -y / --yolo; this harness records yolo usage but does not require a separate confirmation for it.",
+    "KIMI_CODE_HOME can keep Kimi runtime state out of the user home directory."
+  ]
+}
