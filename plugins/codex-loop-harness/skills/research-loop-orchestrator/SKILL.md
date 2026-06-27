@@ -27,11 +27,10 @@ tasks.
 Before a research phase starts, ensure the selected profile is linked:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 link-skills <project-root> -SkillProfile physics-sim
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command link-skills -ProjectRoot <project-root> -SkillProfile physics-sim
 ```
 
 Then start the phase with the matching `-TaskKind` and `-SkillProfile`.
 
 If a required scientific claim lacks its skill artifact, the phase must be
 `BLOCKED` or `REWORK`, not `ACCEPTED`.
-

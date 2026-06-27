@@ -1,0 +1,10 @@
+﻿loop-standard/README.md
+loop-standard/scripts/install-global.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-PluginInstall.ps1
+plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
+plugins/codex-loop-harness/skills/loop-supervisor/SKILL.md
+plugins/codex-loop-harness/skills/research-loop-orchestrator/SKILL.md
+README.md
+README_EN.md
+

@@ -51,7 +51,9 @@ Self-loop phases now run against both `loop-standard/.ai-loop` and the root
 command. Phase-003 fixed changed-file classification so `.ai-loop/*` evidence
 files are no longer listed as business files when the project root is a
 subdirectory inside a larger git repository. Root phase-001 made the repository
-root control plane directly runnable without overwriting existing memory.
+root control plane directly runnable without overwriting existing memory. Root
+phase-002 added a repository-local Codex plugin install/discovery smoke test
+using a temporary install root and local marketplace file.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -60,8 +62,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is to validate plugin discovery inside an actual
-Codex plugin install path. Before further harness changes, review:
+The next best optimization is either real global Codex plugin installation
+validation with explicit user approval, or state/recovery hardening inside the
+already runnable root `.ai-loop`. Before further harness changes, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -74,6 +77,8 @@ Codex plugin install path. Before further harness changes, review:
 ## Open Questions
 
 - What final global install root should be used outside temporary tests?
+- Should real Codex global plugin configuration be modified for a live install
+  test, and what path should be used?
 - Should required skill artifacts become mandatory manifest entries before
   broader skill trigger expansion?
 - Should external Worker invocation records become required phase evidence in

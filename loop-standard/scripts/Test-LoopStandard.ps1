@@ -95,6 +95,7 @@ $RequiredPaths = @(
     "scripts\validate-phase-gates.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
+    "scripts\Test-PluginInstall.ps1",
     "scripts\Initialize-AiLoop.ps1",
     "scripts\Start-LoopPhase.ps1",
     "scripts\Collect-LoopEvidence.ps1",
@@ -222,7 +223,7 @@ if (Test-Path -LiteralPath $PluginScriptsDir -PathType Container) {
 $InstallScriptPath = Join-Path $KitRoot "scripts\install-global.ps1"
 if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
     $InstallText = Get-Content -LiteralPath $InstallScriptPath -Raw
-    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "ShimPath", "ai-loop.ps1")) {
+    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1")) {
         if ($InstallText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "install-global.ps1 missing expected interface text: $Needle"
         }

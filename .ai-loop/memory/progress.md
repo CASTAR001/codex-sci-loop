@@ -93,11 +93,18 @@
   included untracked files in changed-file evidence, made collect-time Markdown
   evidence rows idempotent per phase, validated gates, prepared an audit pack,
   wrote `Decision: ACCEPTED`, and accepted the phase.
+- Ran root self-loop phase-002 under the repository root `.ai-loop`: added
+  `Test-PluginInstall.ps1`, extended `install-global.ps1` with
+  `-CreateMarketplace`, validated a temporary install root with a local Codex
+  marketplace file, installed plugin manifest, plugin skills, shim `doctor`,
+  plugin wrapper `doctor`, and removed development-only absolute paths from
+  plugin workflow skills.
 
 ## In Progress
 
-- Validate plugin discovery inside an actual Codex plugin install path before
-  claiming plugin-form stability.
+- Decide whether to run a live global Codex plugin install/discovery test, which
+  requires explicit user approval because it modifies real Codex/plugin
+  configuration.
 
 ## Pending
 
@@ -106,8 +113,9 @@
 - Add stricter state transition logs and recovery paths.
 - Decide whether skill artifacts should become required manifest entries in the
   next evidence hardening phase.
-- Validate plugin discovery inside an actual Codex plugin install path before
-  claiming plugin-form stability.
+- Validate plugin discovery in real global Codex configuration after explicit
+  approval, if plugin-form stability must be claimed beyond repo-local smoke
+  tests.
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
 - Decide whether start-time Markdown ledger rows should be made idempotent like

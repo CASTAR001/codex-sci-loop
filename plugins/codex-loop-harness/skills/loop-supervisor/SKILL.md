@@ -20,22 +20,29 @@ Before planning or editing, read:
 
 ## Workflow
 
+Use one of these entrypoints:
+
+- Preferred installed shim: `<install-root>\bin\ai-loop.ps1`
+- Plugin wrapper: `<plugin-root>\scripts\ai-loop.ps1`
+- Development fallback: set `LOOP_STANDARD_ROOT` to the installed
+  `loop-standard` directory before running the plugin wrapper.
+
 1. If `.ai-loop/status.json` is missing, run:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 init <project-root>
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command init -ProjectRoot <project-root>
    ```
 
 2. For research projects, link skills before starting:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 link-skills <project-root> -SkillProfile full-research
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command link-skills -ProjectRoot <project-root> -SkillProfile full-research
    ```
 
 3. Start one bounded phase:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 start <project-root> <phase-id> -TaskKind fullstack
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command start -ProjectRoot <project-root> -PhaseId <phase-id> -TaskKind fullstack
    ```
 
 4. Do not let the Worker define the overall route or approve the phase.
@@ -43,7 +50,7 @@ Before planning or editing, read:
 5. Before invoking an external Worker service, run preflight:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 worker-preflight <project-root> <phase-id> -WorkerProfile kimi-code -Yolo
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command worker-preflight -ProjectRoot <project-root> -PhaseId <phase-id> -WorkerProfile kimi-code -Yolo
    ```
 
    If the decision is `NEEDS_USER_APPROVAL`, stop and ask before passing project
@@ -55,7 +62,7 @@ Before planning or editing, read:
    ad hoc command:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 invoke-worker <project-root> <phase-id> -WorkerProfile kimi-code -AllowExternalService -Yolo
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command invoke-worker -ProjectRoot <project-root> -PhaseId <phase-id> -WorkerProfile kimi-code -AllowExternalService -Yolo
    ```
 
    Treat Kimi Code as a thin Worker profile. Do not make the harness route

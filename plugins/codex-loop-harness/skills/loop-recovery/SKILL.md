@@ -9,10 +9,14 @@ Use this skill when recovering a project loop from files.
 
 ## Recovery Order
 
+Use the installed shim `<install-root>\bin\ai-loop.ps1` when available. If the
+plugin wrapper is used directly, set `LOOP_STANDARD_ROOT` to the installed
+`loop-standard` directory when automatic discovery fails.
+
 Run or emulate:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 resume <project-root>
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command resume -ProjectRoot <project-root>
 ```
 
 Then identify:
@@ -25,4 +29,3 @@ Then identify:
 - files to inspect before edits
 
 If current state cannot be reconstructed from files, mark the loop `BLOCKED`.
-

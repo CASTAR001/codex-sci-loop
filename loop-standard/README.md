@@ -62,6 +62,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-global
   -InstallRoot "C:\path\to\loop-install" `
   -InstallPlugin `
   -CreateShim `
+  -CreateMarketplace `
   -SkillLibraryRoot "E:\codexfiles\test\.agents\skills" `
   -Force
 ```
@@ -70,6 +71,16 @@ Then call:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\path\to\loop-install\bin\ai-loop.ps1" -Command doctor
+```
+
+`-CreateMarketplace` creates a local Codex marketplace file at
+`<install-root>\.agents\plugins\marketplace.json` for discovery smoke tests. It
+does not modify real global Codex configuration or run `codex plugin add`.
+
+Run the plugin install/discovery smoke test from this repository:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-PluginInstall.ps1
 ```
 
 ## Required Phase Evidence

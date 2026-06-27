@@ -5,6 +5,8 @@ param(
     [string]$SkillLibraryRoot = "E:\codexfiles\test\.agents\skills",
     [switch]$InstallPlugin,
     [switch]$CreateShim,
+    [switch]$CreateMarketplace,
+    [string]$MarketplaceName = "loop-harness-local",
     [switch]$Force
 )
 
@@ -47,6 +49,14 @@ function Copy-CleanDirectory {
     Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
 }
 
+function Write-JsonFile {
+    param(
+        [Parameter(Mandatory = $true)]$Value,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+    $Value | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $Path -Encoding utf8
+}
+
 $KitRoot = Split-Path -Parent $PSScriptRoot
 $RepoRoot = Split-Path -Parent $KitRoot
 $InstallRoot = Resolve-TargetRoot
@@ -55,6 +65,8 @@ $PluginSource = Join-Path $RepoRoot "plugins\codex-loop-harness"
 $PluginDestination = Join-Path $InstallRoot "plugins\codex-loop-harness"
 $BinDir = Join-Path $InstallRoot "bin"
 $ShimPath = Join-Path $BinDir "ai-loop.ps1"
+$MarketplaceDir = Join-Path $InstallRoot ".agents\plugins"
+$MarketplacePath = Join-Path $MarketplaceDir "marketplace.json"
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
@@ -62,6 +74,37 @@ Copy-CleanDirectory -Source $KitRoot -Destination $LoopStandardDestination -Allo
 
 if ($InstallPlugin) {
     Copy-CleanDirectory -Source $PluginSource -Destination $PluginDestination -AllowReplace ([bool]$Force)
+}
+
+if ($CreateMarketplace) {
+    if (-not $InstallPlugin) {
+        throw "-CreateMarketplace requires -InstallPlugin."
+    }
+    New-Item -ItemType Directory -Force -Path $MarketplaceDir | Out-Null
+    if ((Test-Path -LiteralPath $MarketplacePath -PathType Leaf) -and -not $Force) {
+        throw "Marketplace already exists: $MarketplacePath. Use -Force to replace it."
+    }
+    $Marketplace = [ordered]@{
+        name = $MarketplaceName
+        interface = [ordered]@{
+            displayName = "Loop Harness Local"
+        }
+        plugins = @(
+            [ordered]@{
+                name = "codex-loop-harness"
+                source = [ordered]@{
+                    source = "local"
+                    path = "./plugins/codex-loop-harness"
+                }
+                policy = [ordered]@{
+                    installation = "AVAILABLE"
+                    authentication = "ON_INSTALL"
+                }
+                category = "Productivity"
+            }
+        )
+    }
+    Write-JsonFile -Value $Marketplace -Path $MarketplacePath
 }
 
 if ($CreateShim) {
@@ -73,7 +116,7 @@ if ($CreateShim) {
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = `$true, Position = 0)]
-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "accept", "resume", "link-skills", "doctor")]
+    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "accept", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]`$Command,
 
     [Parameter(Position = 1)]
@@ -110,6 +153,11 @@ $DoctorScript = Join-Path $LoopStandardDestination "scripts\ai-loop.ps1"
 Write-Output "Installed loop-standard to $LoopStandardDestination"
 if ($InstallPlugin) {
     Write-Output "Installed plugin to $PluginDestination"
+}
+if ($CreateMarketplace) {
+    Write-Output "Created local marketplace: $MarketplacePath"
+    Write-Output "Optional Codex marketplace add command:"
+    Write-Output "codex plugin marketplace add `"$InstallRoot`""
 }
 if ($CreateShim) {
     Write-Output "Created shim: $ShimPath"

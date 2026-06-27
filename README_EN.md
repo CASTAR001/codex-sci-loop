@@ -210,6 +210,9 @@ Recent checks passed:
 
 - PowerShell parse check for scripts.
 - `Test-LoopStandard.ps1 -AllowPilotProject`.
+- `Test-PluginInstall.ps1`, which verifies a temporary install root, local
+  marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
+  wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
 - `ai-loop.ps1 doctor`.
 - Plugin wrapper `doctor`.
 - Temporary project behavior:
@@ -237,11 +240,12 @@ Implemented:
 - unified `ai-loop.ps1` wrapper
 - skill linking and skill source map
 - Codex plugin scaffold
+- repo-local plugin install/discovery smoke test
 
 Still planned:
 
-- global install or PATH shim for `ai-loop.ps1`
-- plugin installation validation
+- real Codex global plugin install/discovery validation, after explicit user
+  approval
 - stronger recovery automation
 - broader state machine checks
 - evidence ledger automation improvements

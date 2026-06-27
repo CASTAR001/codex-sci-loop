@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-002",
+    "title":  "Smoke test Codex plugin install layout",
+    "objective":  "Validate codex-loop-harness plugin packaging, temporary installation layout, manifest discovery, plugin skills, and installed shim without modifying real global Codex configuration.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-002",
+    "audit_input":  ".ai-loop/audits/phase-002-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-002-audit.md",
+    "base_commit":  "0ce094172686aba396a3041fa658507fccc193f4",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-002/phase_requirements.json",
+    "started_at":  "2026-06-27T10:03:50.7359506Z",
+    "evidence_collected_at":  "2026-06-27T10:18:49.5551209Z",
+    "audit_prepared_at":  "2026-06-27T10:19:08.8737634Z",
+    "accepted_at":  "2026-06-27T10:19:58.9435005Z"
+}
