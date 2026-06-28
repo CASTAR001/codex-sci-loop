@@ -150,6 +150,12 @@
   `artifact-manifest.json`, added `Test-SkillArtifactManifest.ps1` for
   recorded, tampered, and missing skill artifact cases, and added
   `Test-Phase010.ps1` as the current non-global verification matrix.
+- Ran root self-loop phase-011 under the repository root `.ai-loop`: added
+  `test-temp-root.ps1` and `Test-TempIsolation.ps1`, updated fixture tests to
+  use per-run `.tmp-ai-loop-*/run-<prefix>-<pid>-<guid>` directories, preserved
+  explicit `Test-PluginInstall.ps1 -InstallRoot` behavior, and verified
+  concurrent plugin install smoke tests no longer contend over one fixed temp
+  root.
 
 ## In Progress
 
@@ -170,8 +176,8 @@
   collect-time evidence rows.
 - Make start-time Markdown ledger rows idempotent like collect-time evidence
   rows, or explicitly document why start rows are append-only.
-- Isolate fixed temporary test directories or add per-run suffixes so accidental
-  concurrent smoke tests cannot contend over the same `.tmp-ai-loop-*` path.
+- Add a temp-fixture prune command if ignored `.tmp-ai-loop-*` accumulation
+  becomes noisy during repeated local dogfooding.
 - Decide whether future schema upgrades require deep semantic migration
   transforms beyond phase-007's top-level JSON merge and template repair.
 - Use the state transition log to improve `resume` with richer recovery

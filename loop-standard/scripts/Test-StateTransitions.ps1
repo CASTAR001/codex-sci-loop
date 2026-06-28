@@ -61,7 +61,8 @@ $KitRoot = Split-Path -Parent $PSScriptRoot
 $RepoRoot = Split-Path -Parent $KitRoot
 $AiLoopScript = Join-Path $PSScriptRoot "ai-loop.ps1"
 $ValidateLoopScript = Join-Path $PSScriptRoot "validate-loop.ps1"
-$TempRoot = Join-Path $RepoRoot ".tmp-ai-loop-state-transitions"
+. (Join-Path $PSScriptRoot "test-temp-root.ps1")
+$TempRoot = New-LoopTestTempRoot -RepoRoot $RepoRoot -Name "state-transitions"
 $ProjectRoot = Join-Path $TempRoot "project"
 $Problems = New-Object System.Collections.Generic.List[string]
 

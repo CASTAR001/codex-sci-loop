@@ -277,6 +277,9 @@ Recent checks passed:
 - `Test-PluginInstall.ps1`, which verifies a temporary install root, local
   marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
   wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
+- `Test-TempIsolation.ps1`, which starts two plugin install smoke tests in
+  parallel and verifies that they use distinct per-run install roots instead of
+  contending over one fixed `.tmp-ai-loop-*` directory.
 - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
   structure, `status.json`, phase references, accepted/rework/blocked audits,
   recovery-critical files, and schema versions.

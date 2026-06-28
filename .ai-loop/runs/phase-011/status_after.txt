@@ -1,0 +1,31 @@
+﻿ M .ai-loop/events/state-transitions.ndjson
+ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/artifact-manifest.json
+ M .ai-loop/evidence/command-log.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/evidence/provenance-map.md
+ M .ai-loop/evidence/test-log.md
+ M .ai-loop/memory/activeContext.md
+ M .ai-loop/memory/handoff-summary.md
+ M .ai-loop/memory/progress.md
+ M .ai-loop/status.json
+ M README.md
+ M README_EN.md
+ M loop-standard/README.md
+ M loop-standard/scripts/Test-CollectLedgerIdempotence.ps1
+ M loop-standard/scripts/Test-LoopStandard.ps1
+ M loop-standard/scripts/Test-MigrateLoop.ps1
+ M loop-standard/scripts/Test-PhaseDecisions.ps1
+ M loop-standard/scripts/Test-PluginInstall.ps1
+ M loop-standard/scripts/Test-ReworkScaffold.ps1
+ M loop-standard/scripts/Test-SchemaVersioning.ps1
+ M loop-standard/scripts/Test-SkillArtifactManifest.ps1
+ M loop-standard/scripts/Test-StateTransitions.ps1
+ M loop-standard/scripts/Test-ValidateLoopFailures.ps1
+?? .ai-loop/audits/phase-011-audit-input.md
+?? .ai-loop/audits/phase-011-audit.md
+?? .ai-loop/runs/phase-011/
+?? loop-standard/scripts/Test-Phase011.ps1
+?? loop-standard/scripts/Test-TempIsolation.ps1
+?? loop-standard/scripts/test-temp-root.ps1
+

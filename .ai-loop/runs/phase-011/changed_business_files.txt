@@ -1,0 +1,17 @@
+﻿loop-standard/README.md
+loop-standard/scripts/Test-CollectLedgerIdempotence.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-MigrateLoop.ps1
+loop-standard/scripts/Test-Phase011.ps1
+loop-standard/scripts/Test-PhaseDecisions.ps1
+loop-standard/scripts/Test-PluginInstall.ps1
+loop-standard/scripts/Test-ReworkScaffold.ps1
+loop-standard/scripts/Test-SchemaVersioning.ps1
+loop-standard/scripts/Test-SkillArtifactManifest.ps1
+loop-standard/scripts/Test-StateTransitions.ps1
+loop-standard/scripts/Test-TempIsolation.ps1
+loop-standard/scripts/test-temp-root.ps1
+loop-standard/scripts/Test-ValidateLoopFailures.ps1
+README.md
+README_EN.md
+

@@ -1,0 +1,25 @@
+﻿{
+    "phase_id":  "phase-011",
+    "title":  "Isolate test temp directories",
+    "objective":  "Make PowerShell smoke and fixture tests use per-run temporary directories so concurrent or interrupted runs do not contend over fixed .tmp-ai-loop-* paths.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-011",
+    "audit_input":  ".ai-loop/audits/phase-011-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-011-audit.md",
+    "base_commit":  "5a0fd809f039a7c5e3135be58c3d544839c30198",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase011.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-011/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T06:53:33.3389439Z",
+    "evidence_collected_at":  "2026-06-28T07:21:35.2979224Z",
+    "audit_prepared_at":  "2026-06-28T07:21:48.7074955Z",
+    "accepted_at":  "2026-06-28T07:22:38.3495902Z"
+}

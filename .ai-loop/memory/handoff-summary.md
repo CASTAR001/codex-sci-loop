@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-010 have
-been accepted. Root phase-010 added required skill artifact hashing.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-011 have
+been accepted. Root phase-011 added per-run test temp isolation.
 
 ## Last Verified State
 
@@ -102,6 +102,11 @@ artifact index and machine artifact manifest during collection. The new
 `Test-SkillArtifactManifest.ps1` fixture proves recorded skill artifacts pass,
 post-collection mutations fail with hash mismatch, and missing required skill
 artifacts are still visible in the manifest as missing evidence.
+Root self-loop phase-011 added `test-temp-root.ps1` and
+`Test-TempIsolation.ps1`. Fixture and smoke tests now keep the ignored
+`.tmp-ai-loop-*` parent naming convention but create per-run children with
+timestamp or external prefix plus PID and GUID. The temp isolation test runs two
+plugin install smoke tests concurrently and verifies distinct install roots.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -158,6 +163,7 @@ append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
 in place. The remaining plugin-form stability step is a live global Codex
 plugin install/discovery test, which must wait for explicit user approval
 because it modifies real Codex/plugin configuration. Good non-global next
-candidates are isolating fixed temporary test directories, start-phase ledger
-idempotence, richer recovery based on the transition log, or structured audit
-finding extraction for rework scaffolding.
+candidates are start-phase ledger idempotence, richer recovery based on the
+transition log, structured audit finding extraction for rework scaffolding, or
+a temp-fixture prune command if local dogfooding leaves too many ignored temp
+directories.

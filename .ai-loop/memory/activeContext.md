@@ -108,6 +108,10 @@ now records declared required skill artifacts as `skill-artifact` entries in
 the artifact index and artifact manifest. Validation has fixture coverage for
 recorded, tampered, and missing skill artifacts through
 `Test-SkillArtifactManifest.ps1` and `Test-Phase010.ps1`.
+Root phase-011 added per-run test temp isolation. Fixture and smoke tests now
+use `test-temp-root.ps1` to create ignored `.tmp-ai-loop-*` parent directories
+with unique `run-<prefix>-<pid>-<guid>` children, and `Test-TempIsolation.ps1`
+proves concurrent plugin install smoke tests use distinct install roots.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -116,10 +120,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is isolating fixed temporary test directories to
-avoid accidental concurrent smoke-test contention, start-time Markdown ledger
-idempotence, richer recovery automation using the state transition log, or
-structured audit finding extraction for rework scaffolding.
+The next best optimization is start-time Markdown ledger idempotence, richer
+recovery automation using the state transition log, structured audit finding
+extraction for rework scaffolding, or a temp-fixture prune command if ignored
+test directories become noisy.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

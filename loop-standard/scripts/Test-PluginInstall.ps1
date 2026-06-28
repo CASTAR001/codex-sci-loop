@@ -48,12 +48,15 @@ function Assert-UnderRoot {
 
 $KitRoot = Split-Path -Parent $PSScriptRoot
 $RepoRoot = Split-Path -Parent $KitRoot
+. (Join-Path $PSScriptRoot "test-temp-root.ps1")
 $Problems = New-Object System.Collections.Generic.List[string]
 
 if ([string]::IsNullOrWhiteSpace($InstallRoot)) {
-    $InstallRoot = Join-Path $RepoRoot ".tmp-ai-loop-plugin-smoke\install"
+    $TempRoot = New-LoopTestTempRoot -RepoRoot $RepoRoot -Name "plugin-smoke"
+    $InstallRoot = Join-Path $TempRoot "install"
+} else {
+    $TempRoot = Split-Path -Parent $InstallRoot
 }
-$TempRoot = Split-Path -Parent $InstallRoot
 Assert-UnderRoot -Root $RepoRoot -Path $TempRoot
 
 if ((Test-Path -LiteralPath $TempRoot) -and -not $KeepTemp) {

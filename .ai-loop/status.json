@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-010",
-                          "title":  "Hash required skill artifacts",
-                          "objective":  "Record required skill artifacts into the artifact manifest during evidence collection and validate their hashes when present, with fixture coverage for missing and stale skill artifacts.",
+                          "phase_id":  "phase-011",
+                          "title":  "Isolate test temp directories",
+                          "objective":  "Make PowerShell smoke and fixture tests use per-run temporary directories so concurrent or interrupted runs do not contend over fixed .tmp-ai-loop-* paths.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-010",
-                          "audit_input":  ".ai-loop/audits/phase-010-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-010-audit.md",
-                          "base_commit":  "952b010b27c8d85d5884c35e3da35aac5f5613f9",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase010.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-011",
+                          "audit_input":  ".ai-loop/audits/phase-011-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-011-audit.md",
+                          "base_commit":  "5a0fd809f039a7c5e3135be58c3d544839c30198",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase011.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "claim_ids":  [
@@ -22,12 +22,12 @@
                           "required_skills":  [
 
                                               ],
-                          "requirements":  ".ai-loop/runs/phase-010/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-011/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T04:50:40.4145017Z",
-                          "evidence_collected_at":  "2026-06-28T05:11:24.3628138Z",
-                          "audit_prepared_at":  "2026-06-28T05:11:55.0838408Z",
-                          "accepted_at":  "2026-06-28T05:13:11.7180629Z"
+                          "started_at":  "2026-06-28T06:53:33.3389439Z",
+                          "evidence_collected_at":  "2026-06-28T07:21:35.2979224Z",
+                          "audit_prepared_at":  "2026-06-28T07:21:48.7074955Z",
+                          "accepted_at":  "2026-06-28T07:22:38.3495902Z"
                       },
     "phases":  [
                    {
@@ -272,13 +272,38 @@
                        "evidence_collected_at":  "2026-06-28T05:11:24.3628138Z",
                        "audit_prepared_at":  "2026-06-28T05:11:55.0838408Z",
                        "accepted_at":  "2026-06-28T05:13:11.7180629Z"
+                   },
+                   {
+                       "phase_id":  "phase-011",
+                       "title":  "Isolate test temp directories",
+                       "objective":  "Make PowerShell smoke and fixture tests use per-run temporary directories so concurrent or interrupted runs do not contend over fixed .tmp-ai-loop-* paths.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-011",
+                       "audit_input":  ".ai-loop/audits/phase-011-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-011-audit.md",
+                       "base_commit":  "5a0fd809f039a7c5e3135be58c3d544839c30198",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase011.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-011/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T06:53:33.3389439Z",
+                       "evidence_collected_at":  "2026-06-28T07:21:35.2979224Z",
+                       "audit_prepared_at":  "2026-06-28T07:21:48.7074955Z",
+                       "accepted_at":  "2026-06-28T07:22:38.3495902Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-010",
+                          "phase_id":  "phase-011",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-010-audit.md",
-                          "decided_at":  "2026-06-28T05:13:11.7180629Z"
+                          "audit":  ".ai-loop/audits/phase-011-audit.md",
+                          "decided_at":  "2026-06-28T07:22:38.3495902Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

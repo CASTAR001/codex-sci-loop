@@ -162,6 +162,12 @@ Required skill artifacts use the `skill-artifact` type. `validate` blocks them
 when they are missing, empty, contain a `MISSING:` placeholder, or no longer
 match the recorded SHA256.
 
+Test fixtures use ignored `.tmp-ai-loop-*` parent directories, but default test
+runs create unique `run-<timestamp>-<pid>-<id>` children. This keeps smoke and
+fixture tests from deleting or sharing the same install root when two test
+matrices run concurrently. Pass each test's `-KeepTemp` switch when you need to
+inspect the generated fixture directory after a run.
+
 ## Schema And Migration Versioning
 
 Initialized projects include `.ai-loop/schema/schema-version.json` and
