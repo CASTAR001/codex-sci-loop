@@ -20,6 +20,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Co
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command resume -ProjectRoot <project-root>
 ```
 
+Use `resume -Json` when another script, plugin, or hook needs to consume the
+recovery state without the human-readable memory file dump:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command resume -ProjectRoot <project-root> -Json
+```
+
 Then identify:
 
 - current phase

@@ -129,6 +129,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase014.ps1",
     "scripts\Test-AuditFindingExtraction.ps1",
     "scripts\Test-Phase015.ps1",
+    "scripts\Test-ResumeJson.ps1",
+    "scripts\Test-Phase016.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -362,7 +364,7 @@ if (Test-Path -LiteralPath $StartPhaseScriptPath -PathType Leaf) {
 $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
 if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
-    foreach ($Needle in @("Read-StateTransitions", "Latest transition:", "Transition consistency:", "Next safe command:")) {
+    foreach ($Needle in @("Read-StateTransitions", "Latest transition:", "Transition consistency:", "Next safe command:", "schema_version", "recovery_decision", "next_safe_command")) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected resume diagnostic text: $Needle"
         }

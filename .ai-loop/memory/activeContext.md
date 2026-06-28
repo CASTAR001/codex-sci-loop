@@ -137,6 +137,11 @@ bounded follow-up scope, and `validate-loop.ps1` requires findings JSON for
 terminal non-accepted phases. `Test-AuditFindingExtraction.ps1` covers
 extraction, durable decision state, structured rework scaffolding, and missing
 findings validation.
+Root phase-016 added machine-readable recovery output. `ai-loop resume -Json`
+now emits a single JSON object for normal, BLOCKED, and missing-status recovery
+states, while default `resume` remains human-readable and still expands the
+memory/handoff files. `Test-ResumeJson.ps1` covers text compatibility, started
+JSON, transition/status mismatch JSON, and missing status JSON.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -145,8 +150,8 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is optional machine-readable resume output, or a
-temp-fixture prune command if ignored test directories become noisy.
+The next best optimization is a temp-fixture prune command if ignored test
+directories become noisy, or deeper migration/schema polish.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

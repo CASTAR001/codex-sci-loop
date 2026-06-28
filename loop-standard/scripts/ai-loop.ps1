@@ -45,6 +45,7 @@ param(
     [switch]$AllowSensitivePrompt,
     [switch]$Yolo,
     [switch]$RequireExternalWorkerEvidence,
+    [switch]$Json,
     [switch]$DryRun
 )
 
@@ -333,29 +334,88 @@ switch ($Command) {
         $StatusPath = Join-Path $LoopDir "status.json"
         $Blocked = $false
         $Status = $null
-        Write-Output "# AI Loop Resume Summary"
-        Write-Output ""
-        Write-Output "Project root: $ProjectRoot"
+        if (-not $Json) {
+            Write-Output "# AI Loop Resume Summary"
+            Write-Output ""
+            Write-Output "Project root: $ProjectRoot"
+        }
         if (-not (Test-Path -LiteralPath $StatusPath -PathType Leaf)) {
-            Write-Output "Recovery decision: BLOCKED"
-            Write-Output "Reason: missing .ai-loop/status.json"
+            if ($Json) {
+                [pscustomobject][ordered]@{
+                    schema_version = "1.0"
+                    project_root = $ProjectRoot
+                    status_path = ".ai-loop/status.json"
+                    current_phase = $null
+                    recovery_decision = "BLOCKED"
+                    blocked = $true
+                    reason = "missing .ai-loop/status.json"
+                    generated_at = (Get-Date).ToUniversalTime().ToString("o")
+                } | ConvertTo-Json -Depth 30
+            } else {
+                Write-Output "Recovery decision: BLOCKED"
+                Write-Output "Reason: missing .ai-loop/status.json"
+            }
             exit 2
         }
         try {
             $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
         } catch {
-            Write-Output "Recovery decision: BLOCKED"
-            Write-Output "Reason: invalid .ai-loop/status.json :: $($_.Exception.Message)"
+            if ($Json) {
+                [pscustomobject][ordered]@{
+                    schema_version = "1.0"
+                    project_root = $ProjectRoot
+                    status_path = ".ai-loop/status.json"
+                    current_phase = $null
+                    recovery_decision = "BLOCKED"
+                    blocked = $true
+                    reason = "invalid .ai-loop/status.json :: $($_.Exception.Message)"
+                    generated_at = (Get-Date).ToUniversalTime().ToString("o")
+                } | ConvertTo-Json -Depth 30
+            } else {
+                Write-Output "Recovery decision: BLOCKED"
+                Write-Output "Reason: invalid .ai-loop/status.json :: $($_.Exception.Message)"
+            }
             exit 2
         }
         $CurrentPhase = $Status.current_phase
         if ($null -eq $CurrentPhase) {
-            Write-Output "Current phase: none"
-            Write-Output "Phase status: initialized"
-            Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
-            Write-Output "Missing evidence: n/a"
-            Write-Output "Required skills: none"
-            Write-Output "Next safe action: start a bounded phase with ai-loop start."
+            $ResumeObject = [pscustomobject][ordered]@{
+                schema_version = "1.0"
+                project_root = $ProjectRoot
+                status_path = ".ai-loop/status.json"
+                current_phase = $null
+                phase_status = "initialized"
+                last_decision = $Status.last_decision
+                required_skills = @()
+                missing_evidence = @()
+                artifact_manifest = [ordered]@{
+                    status = "not checked"
+                    integrity_problem_count = 0
+                }
+                transitions = [ordered]@{
+                    latest = $null
+                    recent = @()
+                    consistency = "not checked"
+                    problems = @()
+                }
+                next_safe_action = "start a bounded phase with ai-loop start."
+                next_safe_command = (Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command "start" -PhaseId "<phase-id>")
+                recovery_decision = "RESUMABLE"
+                blocked = $false
+                generated_at = (Get-Date).ToUniversalTime().ToString("o")
+            }
+            if ($Json) {
+                $ResumeObject | ConvertTo-Json -Depth 30
+            } else {
+                Write-Output "Current phase: none"
+                Write-Output "Phase status: initialized"
+                Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
+                Write-Output "Missing evidence: n/a"
+                Write-Output "Required skills: none"
+                Write-Output "Next safe action: $($ResumeObject.next_safe_action)"
+                Write-Output "Next safe command: $($ResumeObject.next_safe_command)"
+                Write-Output "Recovery decision: RESUMABLE"
+            }
         } else {
             $PhaseId = $CurrentPhase.phase_id
             $PhaseStatus = if ($null -ne $CurrentPhase.status) { $CurrentPhase.status } elseif ($null -ne $CurrentPhase.phase_status) { $CurrentPhase.phase_status } else { "unknown" }
@@ -486,55 +546,91 @@ switch ($Command) {
             if ($TransitionProblems.Count -gt 0) {
                 $Blocked = $true
             }
-            Write-Output "Current phase: $PhaseId"
-            Write-Output "Phase status: $PhaseStatus"
-            Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
-            Write-Output "Required skills: $(if ($RequiredSkills.Count -gt 0) { $RequiredSkills -join ', ' } else { 'none' })"
-            Write-Output "Artifact manifest: $ArtifactManifestStatus"
-            Write-Output "Artifact integrity problems: $ArtifactIntegrityProblemCount"
-            Write-Output "Latest transition: $LatestTransitionSummary"
-            Write-Output "Transition consistency: $TransitionConsistency"
-            Write-Output "Recent transitions:"
-            if ($RecentTransitionSummaries.Count -eq 0) {
-                Write-Output "- none"
-            } else {
-                foreach ($Item in $RecentTransitionSummaries) { Write-Output "- $Item" }
+            $RecoveryDecision = if ($Blocked) { "BLOCKED" } else { "RESUMABLE" }
+            $ResumeObject = [pscustomobject][ordered]@{
+                schema_version = "1.0"
+                project_root = $ProjectRoot
+                status_path = ".ai-loop/status.json"
+                current_phase = [ordered]@{
+                    phase_id = $PhaseId
+                    status = $PhaseStatus
+                    run_dir = ".ai-loop/runs/$PhaseId"
+                    phase_meta = ".ai-loop/runs/$PhaseId/phase_meta.json"
+                    requirements = ".ai-loop/runs/$PhaseId/phase_requirements.json"
+                }
+                phase_status = $PhaseStatus
+                last_decision = $Status.last_decision
+                required_skills = @($RequiredSkills)
+                required_evidence = @($RequiredEvidencePaths)
+                missing_evidence = @($MissingEvidence)
+                artifact_manifest = [ordered]@{
+                    status = $ArtifactManifestStatus
+                    path = ".ai-loop/evidence/artifact-manifest.json"
+                    integrity_problem_count = $ArtifactIntegrityProblemCount
+                }
+                transitions = [ordered]@{
+                    latest = $LatestTransitionSummary
+                    recent = @($RecentTransitionSummaries)
+                    consistency = $TransitionConsistency
+                    problems = @($TransitionProblems)
+                }
+                next_safe_action = $NextSafeAction
+                next_safe_command = $NextSafeCommand
+                recovery_decision = $RecoveryDecision
+                blocked = [bool]$Blocked
+                generated_at = (Get-Date).ToUniversalTime().ToString("o")
             }
-            Write-Output "Transition problems:"
-            if ($TransitionProblems.Count -eq 0) {
-                Write-Output "- none"
+            if ($Json) {
+                $ResumeObject | ConvertTo-Json -Depth 30
             } else {
-                foreach ($Item in $TransitionProblems) { Write-Output "- $Item" }
-            }
-            Write-Output "Missing evidence:"
-            if ($MissingEvidence.Count -eq 0) {
-                Write-Output "- none"
-            } else {
-                foreach ($Item in $MissingEvidence) { Write-Output "- $Item" }
-            }
-            Write-Output "Next safe action: $NextSafeAction"
-            Write-Output "Next safe command: $NextSafeCommand"
-            if ($Blocked) {
-                Write-Output "Recovery decision: BLOCKED"
-            } else {
-                Write-Output "Recovery decision: RESUMABLE"
+                Write-Output "Current phase: $PhaseId"
+                Write-Output "Phase status: $PhaseStatus"
+                Write-Output "Last decision: $($Status.last_decision | ConvertTo-Json -Depth 10 -Compress)"
+                Write-Output "Required skills: $(if ($RequiredSkills.Count -gt 0) { $RequiredSkills -join ', ' } else { 'none' })"
+                Write-Output "Artifact manifest: $ArtifactManifestStatus"
+                Write-Output "Artifact integrity problems: $ArtifactIntegrityProblemCount"
+                Write-Output "Latest transition: $LatestTransitionSummary"
+                Write-Output "Transition consistency: $TransitionConsistency"
+                Write-Output "Recent transitions:"
+                if ($RecentTransitionSummaries.Count -eq 0) {
+                    Write-Output "- none"
+                } else {
+                    foreach ($Item in $RecentTransitionSummaries) { Write-Output "- $Item" }
+                }
+                Write-Output "Transition problems:"
+                if ($TransitionProblems.Count -eq 0) {
+                    Write-Output "- none"
+                } else {
+                    foreach ($Item in $TransitionProblems) { Write-Output "- $Item" }
+                }
+                Write-Output "Missing evidence:"
+                if ($MissingEvidence.Count -eq 0) {
+                    Write-Output "- none"
+                } else {
+                    foreach ($Item in $MissingEvidence) { Write-Output "- $Item" }
+                }
+                Write-Output "Next safe action: $NextSafeAction"
+                Write-Output "Next safe command: $NextSafeCommand"
+                Write-Output "Recovery decision: $RecoveryDecision"
             }
         }
-        foreach ($Path in @(
-            "memory\handoff-summary.md",
-            "memory\activeContext.md",
-            "memory\constraint-ledger.md",
-            "evidence\evidence-ledger.md",
-            "skills\skill-source-map.md",
-            "status.json"
-        )) {
-            $FullPath = Join-Path $LoopDir $Path
-            Write-Output ""
-            Write-Output "===== .ai-loop/$($Path -replace '\\','/') ====="
-            if (Test-Path -LiteralPath $FullPath -PathType Leaf) {
-                Get-Content -LiteralPath $FullPath -Raw
-            } else {
-                Write-Output "MISSING: $FullPath"
+        if (-not $Json) {
+            foreach ($Path in @(
+                "memory\handoff-summary.md",
+                "memory\activeContext.md",
+                "memory\constraint-ledger.md",
+                "evidence\evidence-ledger.md",
+                "skills\skill-source-map.md",
+                "status.json"
+            )) {
+                $FullPath = Join-Path $LoopDir $Path
+                Write-Output ""
+                Write-Output "===== .ai-loop/$($Path -replace '\\','/') ====="
+                if (Test-Path -LiteralPath $FullPath -PathType Leaf) {
+                    Get-Content -LiteralPath $FullPath -Raw
+                } else {
+                    Write-Output "MISSING: $FullPath"
+                }
             }
         }
         if ($Blocked) { exit 2 }

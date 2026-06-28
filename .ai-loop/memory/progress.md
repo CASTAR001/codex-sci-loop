@@ -181,6 +181,12 @@
   findings JSON for terminal `rework` and `blocked` phases; and
   `Test-AuditFindingExtraction.ps1` covers extraction, durable decision state,
   structured rework scaffolding, and missing findings validation.
+- Ran root self-loop phase-016 under the repository root `.ai-loop`: added
+  machine-readable `ai-loop resume -Json` output for scripts, plugins, and
+  hooks; preserved the default human-readable resume output; included current
+  phase, missing evidence, artifact manifest status, transition diagnostics,
+  next safe action, next safe command, blocked flag, and recovery decision in
+  the JSON; and added `Test-ResumeJson.ps1` plus `Test-Phase016.ps1`.
 
 ## In Progress
 
@@ -203,7 +209,8 @@
   transforms beyond phase-007's top-level JSON merge and template repair.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Add optional machine-readable resume output.
+- Add a temp-fixture prune command if ignored `.tmp-ai-loop-*` accumulation
+  becomes noisy during repeated local dogfooding.
 
 ## Last Updated
 

@@ -258,6 +258,16 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 consistency、缺失证据、下一步安全动作和可复制的下一步命令。若 transition log
 与 `status.json` 不一致，会输出 `Recovery decision: BLOCKED`。
 
+脚本、插件或 hook 需要消费恢复状态时，可以使用机器可读输出：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project -Json
+```
+
+`-Json` 只输出 JSON，不附加 memory/handoff 文件正文。字段包括
+`current_phase`、`missing_evidence`、`artifact_manifest`、`transitions`、
+`next_safe_action`、`next_safe_command` 和 `recovery_decision`。
+
 如果结论是 `REWORK`，可以让 Supervisor 把返工结论脚手架成一个新的有界阶段：
 
 ```powershell

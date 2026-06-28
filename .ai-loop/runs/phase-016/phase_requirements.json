@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-016",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "evidence_required":  [
+                              ".ai-loop/runs/phase-016/prompt.md",
+                              ".ai-loop/runs/phase-016/report.md",
+                              ".ai-loop/runs/phase-016/status_after.txt",
+                              ".ai-loop/runs/phase-016/diff.patch",
+                              ".ai-loop/runs/phase-016/verify.log",
+                              ".ai-loop/runs/phase-016/changed_files.txt",
+                              ".ai-loop/runs/phase-016/changed_business_files.txt",
+                              ".ai-loop/runs/phase-016/changed_evidence_files.txt"
+                          ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "required_skills":  [
+
+                        ],
+    "required_skill_artifacts":  [
+
+                                 ],
+    "generated_at":  "2026-06-28T14:11:04.1053378Z"
+}

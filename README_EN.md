@@ -182,6 +182,17 @@ transitions, transition consistency, missing evidence, the next safe action,
 and a copyable next safe command. If the transition log disagrees with
 `status.json`, it reports `Recovery decision: BLOCKED`.
 
+Scripts, plugins, and hooks can request machine-readable recovery state:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project -Json
+```
+
+`-Json` emits only JSON and does not append memory or handoff file bodies. The
+object includes `current_phase`, `missing_evidence`, `artifact_manifest`,
+`transitions`, `next_safe_action`, `next_safe_command`, and
+`recovery_decision`.
+
 When the decision is `REWORK`, the Supervisor can scaffold a bounded follow-up
 phase from the durable audit result:
 

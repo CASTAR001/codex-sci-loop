@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-015",
-                          "title":  "Extract structured audit findings",
-                          "objective":  "Add machine-readable audit finding extraction so REWORK scaffolding can use structured findings while preserving compatibility with existing audit prose.",
+                          "phase_id":  "phase-016",
+                          "title":  "Add machine-readable resume output",
+                          "objective":  "Add ai-loop resume -Json so recovery state can be consumed by scripts, plugins, and hooks while preserving the default human-readable output.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-015",
-                          "audit_input":  ".ai-loop/audits/phase-015-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-015-audit.md",
-                          "base_commit":  "083387970854304d197bedc4f48a5a1f3f218150",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase015.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-016",
+                          "audit_input":  ".ai-loop/audits/phase-016-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-016-audit.md",
+                          "base_commit":  "946438933f2af7883d558bdfe01732cb9a938dca",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase016.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "worker_profile":  "",
@@ -27,12 +27,12 @@
                           "required_worker_evidence":  [
 
                                                        ],
-                          "requirements":  ".ai-loop/runs/phase-015/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-016/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T13:27:24.4274651Z",
-                          "evidence_collected_at":  "2026-06-28T14:05:55.0022975Z",
-                          "audit_prepared_at":  "2026-06-28T14:06:22.7645871Z",
-                          "accepted_at":  "2026-06-28T14:07:00.8295056Z"
+                          "started_at":  "2026-06-28T14:11:04.1348019Z",
+                          "evidence_collected_at":  "2026-06-28T14:34:58.5076838Z",
+                          "audit_prepared_at":  "2026-06-28T14:35:46.6706321Z",
+                          "accepted_at":  "2026-06-28T14:36:11.2630592Z"
                       },
     "phases":  [
                    {
@@ -407,13 +407,43 @@
                        "evidence_collected_at":  "2026-06-28T14:05:55.0022975Z",
                        "audit_prepared_at":  "2026-06-28T14:06:22.7645871Z",
                        "accepted_at":  "2026-06-28T14:07:00.8295056Z"
+                   },
+                   {
+                       "phase_id":  "phase-016",
+                       "title":  "Add machine-readable resume output",
+                       "objective":  "Add ai-loop resume -Json so recovery state can be consumed by scripts, plugins, and hooks while preserving the default human-readable output.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-016",
+                       "audit_input":  ".ai-loop/audits/phase-016-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-016-audit.md",
+                       "base_commit":  "946438933f2af7883d558bdfe01732cb9a938dca",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase016.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-016/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T14:11:04.1348019Z",
+                       "evidence_collected_at":  "2026-06-28T14:34:58.5076838Z",
+                       "audit_prepared_at":  "2026-06-28T14:35:46.6706321Z",
+                       "accepted_at":  "2026-06-28T14:36:11.2630592Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-015",
+                          "phase_id":  "phase-016",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-015-audit.md",
-                          "decided_at":  "2026-06-28T14:07:00.8295056Z"
+                          "audit":  ".ai-loop/audits/phase-016-audit.md",
+                          "decided_at":  "2026-06-28T14:36:11.2630592Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

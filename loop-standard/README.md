@@ -303,6 +303,20 @@ consistency, missing evidence, next safe action, and a copyable next safe
 command. A transition/status mismatch is reported as `Recovery decision:
 BLOCKED`.
 
+For scripts, plugins, or hooks, add `-Json` to emit only machine-readable
+recovery state:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command resume `
+  -ProjectRoot "C:\path\to\project" `
+  -Json
+```
+
+The JSON includes current phase, required skills, missing evidence, artifact
+manifest status, transition consistency, next safe action, next safe command,
+and recovery decision.
+
 For `REWORK`, scaffold a bounded follow-up phase from the durable decision:
 
 ```powershell

@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-015 have
-been accepted. Root phase-015 added structured audit finding extraction.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-016 have
+been accepted. Root phase-016 added machine-readable resume output.
 
 ## Last Verified State
 
@@ -134,6 +134,11 @@ now writes `.ai-loop/audits/<phase>-findings.json` for durable `REWORK` and
 finding IDs, required fixes, evidence, and file scope in follow-up prompts, and
 `validate-loop` blocks terminal non-accepted phases when findings JSON is
 missing or inconsistent.
+Root self-loop phase-016 added `ai-loop resume -Json`. JSON resume output is a
+single parseable object for normal, BLOCKED, and missing-status cases and
+contains current phase, missing evidence, artifact manifest state, transition
+diagnostics, next safe action, next safe command, blocked flag, and recovery
+decision. Default text resume still expands memory/handoff files for humans.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -188,9 +193,9 @@ Repo-local plugin install/discovery smoke testing, validate-loop negative
 fixtures, schema compatibility checks, explicit non-destructive migration,
 append-only state transition logs, durable REWORK/BLOCKED outcomes, and
 external Worker evidence requirements, and structured audit finding extraction
-are now in place. The remaining
+and machine-readable resume output are now in place. The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are optional
-machine-readable resume output or a temp-fixture prune command if local
-dogfooding leaves too many ignored temp directories.
+Codex/plugin configuration. Good non-global next candidates are a temp-fixture
+prune command if local dogfooding leaves too many ignored temp directories, or
+deeper migration/schema polish.
