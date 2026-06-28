@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-008 have
-been accepted. Root phase-008 added append-only phase state transition logging.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-009 have
+been accepted. Root phase-009 added bounded REWORK follow-up scaffolding.
 
 ## Last Verified State
 
@@ -90,6 +90,12 @@ checks that phases declaring `transition_log` have a latest transition matching
 their current status. `Test-StateTransitions.ps1` proves a normal lifecycle and
 tampered latest-transition rejection. `Test-Phase008.ps1` is now the current
 non-global verification matrix.
+Root self-loop phase-009 added `scaffold-rework-phase.ps1` and exposed it as
+`ai-loop -Command scaffold-rework`. A durable source phase in `rework` status
+can now create a bounded follow-up phase whose prompt scope is derived from the
+source audit and `rework.txt`; the command writes `rework_source.json`, updates
+status, and refuses BLOCKED/non-REWORK sources. `Test-ReworkScaffold.ps1`
+proves REWORK scaffold creation and BLOCKED refusal.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -145,6 +151,6 @@ append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
 in place. The remaining plugin-form stability step is a live global Codex
 plugin install/discovery test, which must wait for explicit user approval
 because it modifies real Codex/plugin configuration. Good non-global next
-candidates are optional rework phase scaffolding, skill artifact manifest
-integration, start-phase ledger idempotence, or richer recovery based on the
-transition log.
+candidates are skill artifact manifest integration, start-phase ledger
+idempotence, richer recovery based on the transition log, or structured audit
+finding extraction for rework scaffolding.

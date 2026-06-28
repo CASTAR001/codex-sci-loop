@@ -34,3 +34,13 @@ If current state cannot be reconstructed from files, mark the loop `BLOCKED`.
 For a durable non-accepted outcome, write an audit file with `Decision: REWORK`
 or `Decision: BLOCKED`, then record it with `ai-loop decide`. Do not leave
 rework or blocked decisions only in prose.
+
+If the current durable state is `rework`, use `scaffold-rework` to create the
+next bounded phase from the audit and `rework.txt`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command scaffold-rework -ProjectRoot <project-root> -PhaseId <source-phase-id> -ReworkPhaseId <new-phase-id>
+```
+
+Do not manually broaden scope during recovery; the new phase must inherit its
+boundary from the recorded audit evidence.

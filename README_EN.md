@@ -164,6 +164,19 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `blocked.txt`, and appends `.ai-loop/events/event-log.ndjson`. Later `resume`
 uses those files to report the next safe action.
 
+When the decision is `REWORK`, the Supervisor can scaffold a bounded follow-up
+phase from the durable audit result:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command scaffold-rework -ProjectRoot E:\some-project -PhaseId phase-001 -ReworkPhaseId phase-002
+```
+
+`scaffold-rework` only accepts a durable `REWORK` source phase. It reads
+`.ai-loop/audits/<source>-audit.md` and `.ai-loop/runs/<source>/rework.txt`,
+then generates the new phase prompt, requirements, `rework_source.json`, and
+state records. The Worker executes only the new bounded phase and must not
+reinterpret the global route or broaden audit scope.
+
 ## Research Skill Profiles
 
 The first version assumes the shared skill library is:

@@ -265,6 +265,20 @@ The decision command writes `rework.txt` or `blocked.txt`, updates
 `status.json` and `phase_meta.json`, appends an event-log row, and lets
 `resume` reconstruct the next safe action from files.
 
+For `REWORK`, scaffold a bounded follow-up phase from the durable decision:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command scaffold-rework `
+  -ProjectRoot "C:\path\to\project" `
+  -PhaseId "phase-001" `
+  -ReworkPhaseId "phase-002"
+```
+
+`scaffold-rework` refuses non-REWORK source phases. It uses the source audit and
+`rework.txt` as fixed scope inputs, creates the follow-up phase prompt and
+requirements, and writes `.ai-loop/runs/<rework-phase>/rework_source.json`.
+
 ## Next Phase
 
 Phase B should create `pilot-project/`, initialize `.ai-loop` inside it, run one

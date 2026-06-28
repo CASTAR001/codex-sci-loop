@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -9,6 +9,7 @@ param(
 
     [Parameter(Position = 2)]
     [string]$PhaseId = "",
+    [string]$ReworkPhaseId = "",
 
     [string]$Title = "",
     [string]$Objective = "",
@@ -248,6 +249,29 @@ switch ($Command) {
         if ($Force) { $ScriptParams.Force = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "decide-phase.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "scaffold-rework" {
+        Require-PhaseId
+        if ([string]::IsNullOrWhiteSpace($ReworkPhaseId)) {
+            throw "ReworkPhaseId is required for scaffold-rework."
+        }
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            SourcePhaseId = $PhaseId
+            ReworkPhaseId = $ReworkPhaseId
+        }
+        if (-not [string]::IsNullOrWhiteSpace($Title)) { $ScriptParams.Title = $Title }
+        if (-not [string]::IsNullOrWhiteSpace($Objective)) { $ScriptParams.Objective = $Objective }
+        if (-not [string]::IsNullOrWhiteSpace($VerifyCommand)) { $ScriptParams.VerifyCommand = $VerifyCommand }
+        if ($Scope.Count -gt 0) { $ScriptParams.Scope = $Scope }
+        if ($PSBoundParameters.ContainsKey("TaskKind")) { $ScriptParams.TaskKind = $TaskKind }
+        if ($PSBoundParameters.ContainsKey("SkillProfile") -or $PSBoundParameters.ContainsKey("Profile")) { $ScriptParams.SkillProfile = $SkillProfile }
+        if ($RequiredSkills.Count -gt 0) { $ScriptParams.RequiredSkills = $RequiredSkills }
+        if ($ClaimIds.Count -gt 0) { $ScriptParams.ClaimIds = $ClaimIds }
+        if ($Force) { $ScriptParams.Force = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "scaffold-rework-phase.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "resume" {

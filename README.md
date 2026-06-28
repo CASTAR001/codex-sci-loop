@@ -234,6 +234,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `blocked.txt`，并追加 `.ai-loop/events/event-log.ndjson`。之后 `resume`
 会基于这些文件给出下一步安全动作。
 
+如果结论是 `REWORK`，可以让 Supervisor 把返工结论脚手架成一个新的有界阶段：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command scaffold-rework -ProjectRoot E:\some-project -PhaseId phase-001 -ReworkPhaseId phase-002
+```
+
+`scaffold-rework` 只接受 durable `REWORK` 源阶段。它会读取
+`.ai-loop/audits/<source>-audit.md` 和 `.ai-loop/runs/<source>/rework.txt`，
+生成新阶段的 prompt、requirements、`rework_source.json` 和状态记录。Worker
+只能执行新阶段，不得重新解释总路线或扩大 audit scope。
+
 ## 科研 Skill Profiles
 
 第一版默认共享 skill 库来源是：

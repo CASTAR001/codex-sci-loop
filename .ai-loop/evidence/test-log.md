@@ -15,3 +15,4 @@ support a phase decision.
 | TEST-phase-006-VERIFY | phase-006 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase006.ps1 | .ai-loop/runs/phase-006/verify.log | 0 | passed | Primary phase verification. |
 | TEST-phase-007-VERIFY | phase-007 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase007.ps1 | .ai-loop/runs/phase-007/verify.log | 0 | passed | Primary phase verification. |
 | TEST-phase-008-VERIFY | phase-008 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase008.ps1 | .ai-loop/runs/phase-008/verify.log | 0 | passed | Primary phase verification. |
+| TEST-phase-009-VERIFY | phase-009 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase009.ps1 | .ai-loop/runs/phase-009/verify.log | 0 | passed | Primary phase verification. |

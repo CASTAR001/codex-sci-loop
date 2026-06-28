@@ -98,6 +98,11 @@ schema `1.3` makes that log part of the control plane. `validate-loop.ps1`
 parses the transition log and, for phases declaring `transition_log`, verifies
 that the latest transition status matches `status.json`. `Test-StateTransitions.ps1`
 covers a normal lifecycle plus tampered latest-transition rejection.
+Root phase-009 added bounded `REWORK` follow-up scaffolding. `ai-loop -Command
+scaffold-rework` now turns a durable `REWORK` decision into a new bounded phase
+using the source audit and `rework.txt` as fixed scope inputs, writes
+`rework_source.json`, and refuses non-REWORK sources. `Test-ReworkScaffold.ps1`
+covers REWORK scaffold creation and BLOCKED refusal.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -106,9 +111,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is optional rework phase scaffolding, skill artifact
-manifest integration, start-time Markdown ledger idempotence, or deeper recovery
-automation using the state transition log.
+The next best optimization is skill artifact manifest integration, start-time
+Markdown ledger idempotence, richer recovery automation using the state
+transition log, or structured audit finding extraction for rework scaffolding.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

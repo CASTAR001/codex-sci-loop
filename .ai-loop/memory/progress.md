@@ -138,6 +138,12 @@
   scripts to `record-state-transition.ps1`, bumped the control-plane schema to
   `1.3`, extended `validate-loop.ps1` to reject latest-transition/status
   mismatches, and added `Test-StateTransitions.ps1` plus `Test-Phase008.ps1`.
+- Ran root self-loop phase-009 under the repository root `.ai-loop`: added
+  `scaffold-rework-phase.ps1` and `ai-loop -Command scaffold-rework` so durable
+  `REWORK` decisions can be converted into bounded follow-up phases using the
+  source audit and `rework.txt` as fixed scope inputs, added
+  `Test-ReworkScaffold.ps1`, and documented the workflow in README files and
+  plugin skills.
 
 ## In Progress
 
@@ -160,12 +166,12 @@
   collect-time evidence rows.
 - Make start-time Markdown ledger rows idempotent like collect-time evidence
   rows, or explicitly document why start rows are append-only.
-- Decide whether `REWORK` should optionally scaffold a follow-up phase from the
-  audit findings.
 - Decide whether future schema upgrades require deep semantic migration
   transforms beyond phase-007's top-level JSON merge and template repair.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
+- Add structured audit finding extraction for richer rework scaffolds if audit
+  files gain a formal schema.
 
 ## Last Updated
 

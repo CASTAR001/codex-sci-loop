@@ -1,0 +1,25 @@
+﻿{
+    "phase_id":  "phase-009",
+    "title":  "Add REWORK follow-up scaffolding",
+    "objective":  "Add a gate-aware command that converts a durable REWORK decision into a bounded follow-up phase prompt and requirements without letting the Worker redefine scope.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-009",
+    "audit_input":  ".ai-loop/audits/phase-009-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-009-audit.md",
+    "base_commit":  "1fafdc3ceaa8a24d507fa579b19d4778f4a5338f",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase009.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-009/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T04:22:57.8367676Z",
+    "evidence_collected_at":  "2026-06-28T04:44:58.2002124Z",
+    "audit_prepared_at":  "2026-06-28T04:45:09.0159885Z",
+    "accepted_at":  "2026-06-28T04:45:50.1736160Z"
+}

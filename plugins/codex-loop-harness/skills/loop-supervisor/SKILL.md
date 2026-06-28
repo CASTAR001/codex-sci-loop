@@ -68,6 +68,16 @@ Use one of these entrypoints:
    Treat Kimi Code as a thin Worker profile. Do not make the harness route
    depend on Kimi specifically.
 
+7. If the audit decision is `REWORK`, first record the durable decision with
+   `ai-loop decide`, then scaffold a bounded follow-up phase:
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command scaffold-rework -ProjectRoot <project-root> -PhaseId <source-phase-id> -ReworkPhaseId <new-phase-id>
+   ```
+
+   The follow-up Worker prompt must stay within the source audit and
+   `rework.txt` scope. Do not let the Worker redefine the route.
+
 ## Knowledge Placement
 
 Before preserving lessons learned from a loop, classify them:
