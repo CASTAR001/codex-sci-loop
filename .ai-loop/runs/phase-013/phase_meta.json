@@ -1,0 +1,25 @@
+﻿{
+    "phase_id":  "phase-013",
+    "title":  "Enhance resume diagnostics",
+    "objective":  "Use the state transition log in ai-loop resume to report latest transition, transition consistency, status-specific safe command, and stale-state diagnostics with fixture coverage.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-013",
+    "audit_input":  ".ai-loop/audits/phase-013-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-013-audit.md",
+    "base_commit":  "2dff04f855a92a37391d471ca8298c414a589a29",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase013.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-013/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T08:02:59.8342885Z",
+    "evidence_collected_at":  "2026-06-28T08:27:44.7272300Z",
+    "audit_prepared_at":  "2026-06-28T08:28:13.3283887Z",
+    "accepted_at":  "2026-06-28T08:28:43.8586930Z"
+}

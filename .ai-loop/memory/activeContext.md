@@ -117,6 +117,11 @@ same phase now refreshes prompt, requirements, metadata, `status.json.phases`,
 and start-time Markdown ledger rows instead of duplicating phase records or
 ledger entries. `Test-StartPhaseIdempotence.ps1` covers status replacement,
 prompt refresh, evidence/artifact/skill ledger row counts, and loop validation.
+Root phase-013 enhanced recovery diagnostics. `ai-loop resume` now reads
+`state-transitions.ndjson`, reports latest transition, recent transitions,
+transition consistency, transition problems, missing evidence, next safe action,
+and a copyable next safe command. Transition/status mismatch is reported as
+`Recovery decision: BLOCKED` and covered by `Test-ResumeDiagnostics.ps1`.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -125,10 +130,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is richer recovery automation using the state
-transition log, structured audit finding extraction for rework scaffolding,
-external Worker invocation evidence requirements, or a temp-fixture prune
-command if ignored test directories become noisy.
+The next best optimization is structured audit finding extraction for rework
+scaffolding, external Worker invocation evidence requirements, optional
+machine-readable resume output, or a temp-fixture prune command if ignored test
+directories become noisy.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

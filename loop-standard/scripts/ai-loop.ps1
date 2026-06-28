@@ -103,6 +103,42 @@ function ConvertTo-NormalizedArtifactPath {
     return ($Path -replace "\\", "/").Trim()
 }
 
+function Read-StateTransitions {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $Records = New-Object System.Collections.Generic.List[object]
+    $Problems = New-Object System.Collections.Generic.List[string]
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return [pscustomobject]@{ Records = @(); Problems = @("missing transition log") }
+    }
+    $LineNumber = 0
+    foreach ($Line in Get-Content -LiteralPath $Path) {
+        $LineNumber++
+        if ([string]::IsNullOrWhiteSpace($Line)) { continue }
+        try {
+            $Records.Add(($Line | ConvertFrom-Json))
+        } catch {
+            $Problems.Add("invalid transition log JSON at line $LineNumber")
+        }
+    }
+    return [pscustomobject]@{
+        Records = @($Records.ToArray())
+        Problems = @($Problems.ToArray())
+    }
+}
+
+function Format-AiLoopCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][string]$Command,
+        [string]$PhaseId = ""
+    )
+    $Parts = @("ai-loop", "-Command", $Command, "-ProjectRoot", "`"$ProjectRoot`"")
+    if (-not [string]::IsNullOrWhiteSpace($PhaseId)) {
+        $Parts += @("-PhaseId", $PhaseId)
+    }
+    return ($Parts -join " ")
+}
+
 function Exit-IfScriptFailed {
     param([Parameter(Mandatory = $true)][bool]$Succeeded)
     if (-not $Succeeded) {
@@ -308,8 +344,13 @@ switch ($Command) {
             $RunDir = Join-Path $LoopDir (Join-Path "runs" $PhaseId)
             $RequirementsPath = Join-Path $RunDir "phase_requirements.json"
             $ArtifactManifestPath = Join-Path $LoopDir "evidence\artifact-manifest.json"
+            $TransitionLogPath = Join-Path $LoopDir "events\state-transitions.ndjson"
             $ArtifactManifestStatus = "missing"
             $ArtifactIntegrityProblemCount = 0
+            $TransitionConsistency = "not checked"
+            $LatestTransitionSummary = "none"
+            $RecentTransitionSummaries = New-Object System.Collections.Generic.List[string]
+            $TransitionProblems = New-Object System.Collections.Generic.List[string]
             $RequiredSkills = @()
             $MissingEvidence = New-Object System.Collections.Generic.List[string]
             $RequiredEvidencePaths = New-Object System.Collections.Generic.List[string]
@@ -376,6 +417,28 @@ switch ($Command) {
             } else {
                 $ArtifactIntegrityProblemCount = @($RequiredEvidencePaths).Count
             }
+            $TransitionRead = Read-StateTransitions -Path $TransitionLogPath
+            foreach ($Problem in @($TransitionRead.Problems)) {
+                $TransitionProblems.Add($Problem)
+            }
+            $PhaseTransitions = @($TransitionRead.Records | Where-Object { $_.phase_id -eq $PhaseId })
+            $LatestTransition = @($PhaseTransitions | Select-Object -Last 1)
+            if ($LatestTransition.Count -gt 0) {
+                $Latest = $LatestTransition[0]
+                $LatestTransitionSummary = "$($Latest.ts) $($Latest.from_status) -> $($Latest.to_status) by $($Latest.actor) ($($Latest.action))"
+                if ([string]$Latest.to_status -eq [string]$PhaseStatus) {
+                    $TransitionConsistency = "OK"
+                } else {
+                    $TransitionConsistency = "MISMATCH latest=$($Latest.to_status) status=$PhaseStatus"
+                    $TransitionProblems.Add("latest transition status does not match status.json")
+                }
+            } elseif ($TransitionRead.Problems.Count -eq 0) {
+                $TransitionConsistency = "MISSING phase transition"
+                $TransitionProblems.Add("no transition entries for current phase")
+            }
+            foreach ($Transition in @($PhaseTransitions | Select-Object -Last 5)) {
+                $RecentTransitionSummaries.Add("$($Transition.ts) $($Transition.from_status) -> $($Transition.to_status) [$($Transition.actor)]")
+            }
             $NextSafeAction = switch ($PhaseStatus) {
                 "started" { "Give the Worker the phase prompt, then collect evidence after execution." }
                 "phase_started" { "Give the Worker the phase prompt, then collect evidence after execution." }
@@ -386,10 +449,23 @@ switch ($Command) {
                 "blocked" { "Resolve the blocker before starting or accepting another phase." }
                 default { "Run ai-loop validate; if state cannot be reconstructed, mark BLOCKED." }
             }
+            $NextSafeCommand = switch ($PhaseStatus) {
+                "started" { Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command "collect" -PhaseId $PhaseId }
+                "phase_started" { Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command "collect" -PhaseId $PhaseId }
+                "evidence_collected" { Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command "audit-pack" -PhaseId $PhaseId }
+                "audit_ready" { "Write .ai-loop/audits/$PhaseId-audit.md, then run $(Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command 'accept' -PhaseId $PhaseId) or ai-loop -Command decide ..." }
+                "accepted" { "Start the next bounded phase with ai-loop -Command start -ProjectRoot `"$ProjectRoot`" -PhaseId <next-phase> ..." }
+                "rework" { "Run ai-loop -Command scaffold-rework -ProjectRoot `"$ProjectRoot`" -PhaseId $PhaseId -ReworkPhaseId <next-phase>" }
+                "blocked" { "Inspect .ai-loop/runs/$PhaseId/blocked.txt and resolve the blocker before continuing." }
+                default { Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command "validate" -PhaseId $PhaseId }
+            }
             if ($MissingEvidence.Count -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
                 $Blocked = $true
             }
             if ($ArtifactIntegrityProblemCount -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
+                $Blocked = $true
+            }
+            if ($TransitionProblems.Count -gt 0) {
                 $Blocked = $true
             }
             Write-Output "Current phase: $PhaseId"
@@ -398,6 +474,20 @@ switch ($Command) {
             Write-Output "Required skills: $(if ($RequiredSkills.Count -gt 0) { $RequiredSkills -join ', ' } else { 'none' })"
             Write-Output "Artifact manifest: $ArtifactManifestStatus"
             Write-Output "Artifact integrity problems: $ArtifactIntegrityProblemCount"
+            Write-Output "Latest transition: $LatestTransitionSummary"
+            Write-Output "Transition consistency: $TransitionConsistency"
+            Write-Output "Recent transitions:"
+            if ($RecentTransitionSummaries.Count -eq 0) {
+                Write-Output "- none"
+            } else {
+                foreach ($Item in $RecentTransitionSummaries) { Write-Output "- $Item" }
+            }
+            Write-Output "Transition problems:"
+            if ($TransitionProblems.Count -eq 0) {
+                Write-Output "- none"
+            } else {
+                foreach ($Item in $TransitionProblems) { Write-Output "- $Item" }
+            }
             Write-Output "Missing evidence:"
             if ($MissingEvidence.Count -eq 0) {
                 Write-Output "- none"
@@ -405,6 +495,7 @@ switch ($Command) {
                 foreach ($Item in $MissingEvidence) { Write-Output "- $Item" }
             }
             Write-Output "Next safe action: $NextSafeAction"
+            Write-Output "Next safe command: $NextSafeCommand"
             if ($Blocked) {
                 Write-Output "Recovery decision: BLOCKED"
             } else {

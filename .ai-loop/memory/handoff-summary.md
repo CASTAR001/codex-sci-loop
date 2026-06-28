@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-012 have
-been accepted. Root phase-012 added start-time idempotence.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-013 have
+been accepted. Root phase-013 enhanced recovery diagnostics.
 
 ## Last Verified State
 
@@ -113,6 +113,12 @@ intentional same-phase restarts. It refreshes prompt, requirements, metadata,
 instead of appending duplicate phase or ledger entries. `Test-StartPhaseIdempotence.ps1`
 proves status replacement, prompt refresh, ledger row counts, and loop-wide
 validation after forced restart.
+Root self-loop phase-013 enhanced `ai-loop resume`. It now reads
+`.ai-loop/events/state-transitions.ndjson`, reports latest transition, recent
+transitions, transition consistency, transition problems, missing evidence, next
+safe action, and a copyable next safe command. Transition/status mismatch is
+reported as `Recovery decision: BLOCKED`. `Test-ResumeDiagnostics.ps1` covers a
+normal started-phase resume and a tampered mismatch.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -169,7 +175,7 @@ append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
 in place. The remaining plugin-form stability step is a live global Codex
 plugin install/discovery test, which must wait for explicit user approval
 because it modifies real Codex/plugin configuration. Good non-global next
-candidates are richer recovery based on the transition log, structured audit
-finding extraction for rework scaffolding, external Worker invocation evidence
-requirements, or a temp-fixture prune command if local dogfooding leaves too
+candidates are structured audit finding extraction for rework scaffolding,
+external Worker invocation evidence requirements, optional machine-readable
+resume output, or a temp-fixture prune command if local dogfooding leaves too
 many ignored temp directories.

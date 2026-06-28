@@ -161,6 +161,11 @@
   `status.json.phases`, and start-time Markdown ledger rows instead of
   duplicating status or ledger entries; added `Test-StartPhaseIdempotence.ps1`
   and `Test-Phase012.ps1`.
+- Ran root self-loop phase-013 under the repository root `.ai-loop`: enhanced
+  `ai-loop resume` with transition-log diagnostics, latest/recent transition
+  reporting, transition consistency checks, next safe command output, and
+  BLOCKED recovery on transition/status mismatch; added
+  `Test-ResumeDiagnostics.ps1` and `Test-Phase013.ps1`.
 
 ## In Progress
 

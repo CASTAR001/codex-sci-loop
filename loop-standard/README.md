@@ -280,6 +280,19 @@ The decision command writes `rework.txt` or `blocked.txt`, updates
 `status.json` and `phase_meta.json`, appends an event-log row, and lets
 `resume` reconstruct the next safe action from files.
 
+Use `resume` after interruption or when entering a project in a new session:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command resume `
+  -ProjectRoot "C:\path\to\project"
+```
+
+The resume summary includes latest transition, recent transitions, transition
+consistency, missing evidence, next safe action, and a copyable next safe
+command. A transition/status mismatch is reported as `Recovery decision:
+BLOCKED`.
+
 For `REWORK`, scaffold a bounded follow-up phase from the durable decision:
 
 ```powershell

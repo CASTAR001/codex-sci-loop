@@ -169,6 +169,18 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `blocked.txt`, and appends `.ai-loop/events/event-log.ndjson`. Later `resume`
 uses those files to report the next safe action.
 
+After interruption or in a new session, run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project
+```
+
+`resume` reads `status.json`, required evidence, the artifact manifest, and
+`state-transitions.ndjson`. It reports the latest transition, recent
+transitions, transition consistency, missing evidence, the next safe action,
+and a copyable next safe command. If the transition log disagrees with
+`status.json`, it reports `Recovery decision: BLOCKED`.
+
 When the decision is `REWORK`, the Supervisor can scaffold a bounded follow-up
 phase from the durable audit result:
 

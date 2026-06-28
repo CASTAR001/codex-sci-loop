@@ -122,6 +122,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase011.ps1",
     "scripts\Test-StartPhaseIdempotence.ps1",
     "scripts\Test-Phase012.ps1",
+    "scripts\Test-ResumeDiagnostics.ps1",
+    "scripts\Test-Phase013.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -338,6 +340,16 @@ if (Test-Path -LiteralPath $StartPhaseScriptPath -PathType Leaf) {
     foreach ($Needle in @("Remove-MarkdownRowsForPhase", "ExistingPhases", "SkillUsageLedger")) {
         if ($StartPhaseText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "start-phase.ps1 missing expected idempotence text: $Needle"
+        }
+    }
+}
+
+$AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
+if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
+    $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
+    foreach ($Needle in @("Read-StateTransitions", "Latest transition:", "Transition consistency:", "Next safe command:")) {
+        if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "ai-loop.ps1 missing expected resume diagnostic text: $Needle"
         }
     }
 }

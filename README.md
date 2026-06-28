@@ -239,6 +239,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `blocked.txt`，并追加 `.ai-loop/events/event-log.ndjson`。之后 `resume`
 会基于这些文件给出下一步安全动作。
 
+中断或换会话后，可以运行：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project
+```
+
+`resume` 会读取 `status.json`、required evidence、artifact manifest 和
+`state-transitions.ndjson`，报告最新状态转移、最近状态转移、transition
+consistency、缺失证据、下一步安全动作和可复制的下一步命令。若 transition log
+与 `status.json` 不一致，会输出 `Recovery decision: BLOCKED`。
+
 如果结论是 `REWORK`，可以让 Supervisor 把返工结论脚手架成一个新的有界阶段：
 
 ```powershell
