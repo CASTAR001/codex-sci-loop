@@ -139,6 +139,11 @@ single parseable object for normal, BLOCKED, and missing-status cases and
 contains current phase, missing evidence, artifact manifest state, transition
 diagnostics, next safe action, next safe command, blocked flag, and recovery
 decision. Default text resume still expands memory/handoff files for humans.
+Root self-loop phase-017 added `ai-loop -Command prune-temp` and
+`prune-temp-fixtures.ps1`. The command is dry-run by default, requires `-Force`
+for deletion, only prunes old `run-*` children under `.tmp-ai-loop-*` parents,
+keeps the latest runs per parent, skips reparse-point directories, and is
+covered by `Test-PruneTempFixtures.ps1` plus `Test-Phase017.ps1`.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -191,11 +196,11 @@ artifacts.
 
 Repo-local plugin install/discovery smoke testing, validate-loop negative
 fixtures, schema compatibility checks, explicit non-destructive migration,
-append-only state transition logs, durable REWORK/BLOCKED outcomes, and
-external Worker evidence requirements, and structured audit finding extraction
-and machine-readable resume output are now in place. The remaining
+append-only state transition logs, durable REWORK/BLOCKED outcomes, external
+Worker evidence requirements, structured audit finding extraction,
+machine-readable resume output, and safe temp fixture pruning are now in place.
+The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are a temp-fixture
-prune command if local dogfooding leaves too many ignored temp directories, or
-deeper migration/schema polish.
+Codex/plugin configuration. Good non-global next candidates are deeper
+migration/schema polish or structured JSON output for maintenance commands.

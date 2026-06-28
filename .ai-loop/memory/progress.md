@@ -187,6 +187,13 @@
   phase, missing evidence, artifact manifest status, transition diagnostics,
   next safe action, next safe command, blocked flag, and recovery decision in
   the JSON; and added `Test-ResumeJson.ps1` plus `Test-Phase016.ps1`.
+- Ran root self-loop phase-017 under the repository root `.ai-loop`: added
+  `prune-temp-fixtures.ps1` and `ai-loop -Command prune-temp` for safe
+  dry-run-first cleanup of ignored `.tmp-ai-loop-*` fixture run directories;
+  deletion requires `-Force`, only `run-*` children under `.tmp-ai-loop-*`
+  parents are candidates, newest runs are retained, reparse-point directories
+  are skipped, and `Test-PruneTempFixtures.ps1` plus `Test-Phase017.ps1`
+  cover dry-run, deletion, namespace protection, and idempotence.
 
 ## In Progress
 
@@ -203,14 +210,12 @@
   tests.
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
-- Add a temp-fixture prune command if ignored `.tmp-ai-loop-*` accumulation
-  becomes noisy during repeated local dogfooding.
 - Decide whether future schema upgrades require deep semantic migration
   transforms beyond phase-007's top-level JSON merge and template repair.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Add a temp-fixture prune command if ignored `.tmp-ai-loop-*` accumulation
-  becomes noisy during repeated local dogfooding.
+- Consider structured JSON output for `prune-temp` if future dashboards, hooks,
+  or CI cleanup jobs need machine-readable cleanup candidates.
 
 ## Last Updated
 

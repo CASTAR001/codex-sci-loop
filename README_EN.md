@@ -193,6 +193,17 @@ object includes `current_phase`, `missing_evidence`, `artifact_manifest`,
 `transitions`, `next_safe_action`, `next_safe_command`, and
 `recovery_decision`.
 
+When tests or dogfood runs leave many ignored `.tmp-ai-loop-*` directories,
+inspect prune candidates with the default dry-run mode:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command prune-temp -ProjectRoot E:\some-project -MinAgeHours 24 -KeepLatest 2
+```
+
+`prune-temp` only considers `run-*` children under `.tmp-ai-loop-*` parents.
+It does not delete anything unless `-Force` is explicit, and it does not prune
+ordinary project folders or folders outside the harness temp namespace.
+
 When the decision is `REWORK`, the Supervisor can scaffold a bounded follow-up
 phase from the durable audit result:
 
@@ -319,6 +330,9 @@ Recent checks passed:
 - `Test-TempIsolation.ps1`, which starts two plugin install smoke tests in
   parallel and verifies that they use distinct per-run install roots instead of
   contending over one fixed `.tmp-ai-loop-*` directory.
+- `Test-PruneTempFixtures.ps1`, which verifies `prune-temp` dry-run behavior,
+  latest-run retention, forced old-run deletion, namespace protection, and
+  idempotence.
 - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
   structure, `status.json`, phase references, accepted/rework/blocked audits,
   recovery-critical files, and schema versions.

@@ -142,6 +142,13 @@ now emits a single JSON object for normal, BLOCKED, and missing-status recovery
 states, while default `resume` remains human-readable and still expands the
 memory/handoff files. `Test-ResumeJson.ps1` covers text compatibility, started
 JSON, transition/status mismatch JSON, and missing status JSON.
+Root phase-017 added safe temp fixture pruning. `ai-loop -Command prune-temp`
+and `prune-temp-fixtures.ps1` now provide dry-run-first cleanup for ignored
+`.tmp-ai-loop-*` fixture run directories. Deletion requires `-Force`, candidates
+are limited to `run-*` children under `.tmp-ai-loop-*` parents, latest runs are
+retained, reparse-point directories are skipped, and
+`Test-PruneTempFixtures.ps1` covers dry-run, forced cleanup, namespace
+protection, and idempotence.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -150,8 +157,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is a temp-fixture prune command if ignored test
-directories become noisy, or deeper migration/schema polish.
+The next best optimization is deeper migration/schema polish, or structured
+JSON output for maintenance commands such as `prune-temp` if hooks or CI need
+machine-readable operational summaries.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

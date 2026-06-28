@@ -317,6 +317,29 @@ The JSON includes current phase, required skills, missing evidence, artifact
 manifest status, transition consistency, next safe action, next safe command,
 and recovery decision.
 
+Prune ignored test fixture runs after heavy dogfood or smoke testing:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command prune-temp `
+  -ProjectRoot "C:\path\to\project" `
+  -MinAgeHours 24 `
+  -KeepLatest 2
+```
+
+`prune-temp` is dry-run by default. It only considers `run-*` child directories
+under `.tmp-ai-loop-*` parents, keeps the newest runs per parent, and requires
+`-Force` before deletion:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command prune-temp `
+  -ProjectRoot "C:\path\to\project" `
+  -MinAgeHours 24 `
+  -KeepLatest 2 `
+  -Force
+```
+
 For `REWORK`, scaffold a bounded follow-up phase from the durable decision:
 
 ```powershell

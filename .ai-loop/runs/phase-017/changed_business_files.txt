@@ -1,0 +1,9 @@
+﻿loop-standard/README.md
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/prune-temp-fixtures.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase017.ps1
+loop-standard/scripts/Test-PruneTempFixtures.ps1
+README.md
+README_EN.md
+

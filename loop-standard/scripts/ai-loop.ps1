@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "prune-temp", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -46,7 +46,11 @@ param(
     [switch]$Yolo,
     [switch]$RequireExternalWorkerEvidence,
     [switch]$Json,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [ValidateRange(0, 87600)]
+    [int]$MinAgeHours = 24,
+    [ValidateRange(0, 10000)]
+    [int]$KeepLatest = 2
 )
 
 Set-StrictMode -Version Latest
@@ -678,6 +682,18 @@ switch ($Command) {
         if ($DryRun) { $ScriptParams.DryRun = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "invoke-worker.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "prune-temp" {
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            MinAgeHours = $MinAgeHours
+            KeepLatest = $KeepLatest
+        }
+        if ($Force) { $ScriptParams.Force = $true }
+        if ($DryRun) { $ScriptParams.DryRun = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "prune-temp-fixtures.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "doctor" {
