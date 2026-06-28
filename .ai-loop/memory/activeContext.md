@@ -103,6 +103,11 @@ scaffold-rework` now turns a durable `REWORK` decision into a new bounded phase
 using the source audit and `rework.txt` as fixed scope inputs, writes
 `rework_source.json`, and refuses non-REWORK sources. `Test-ReworkScaffold.ps1`
 covers REWORK scaffold creation and BLOCKED refusal.
+Root phase-010 added required skill artifact hashing. `collect-evidence.ps1`
+now records declared required skill artifacts as `skill-artifact` entries in
+the artifact index and artifact manifest. Validation has fixture coverage for
+recorded, tampered, and missing skill artifacts through
+`Test-SkillArtifactManifest.ps1` and `Test-Phase010.ps1`.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -111,9 +116,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is skill artifact manifest integration, start-time
-Markdown ledger idempotence, richer recovery automation using the state
-transition log, or structured audit finding extraction for rework scaffolding.
+The next best optimization is isolating fixed temporary test directories to
+avoid accidental concurrent smoke-test contention, start-time Markdown ledger
+idempotence, richer recovery automation using the state transition log, or
+structured audit finding extraction for rework scaffolding.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
@@ -130,8 +136,6 @@ approval. Before further harness changes, review:
 - What final global install root should be used outside temporary tests?
 - Should real Codex global plugin configuration be modified for a live install
   test, and what path should be used?
-- Should required skill artifacts become mandatory manifest entries before
-  broader skill trigger expansion?
 - Should external Worker invocation records become required phase evidence in
   `phase_requirements.json` for phases that use an external Worker?
 - Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`

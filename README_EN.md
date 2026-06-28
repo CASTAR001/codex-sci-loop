@@ -224,7 +224,10 @@ Evidence integrity uses a dual-track model:
 - Markdown ledgers are for human audit.
 - `.ai-loop/evidence/artifact-manifest.json` is machine-readable and records SHA256, size, mtime, phase, and path.
 
-`validate` blocks required evidence that is missing, empty, unregistered, or hash-mismatched.
+`collect` records both required evidence and required skill artifacts for the
+current phase in the artifact manifest. Required skill artifacts use the
+`skill-artifact` type. `validate` blocks them when they are missing, empty,
+contain a `MISSING:` placeholder, or no longer match the recorded SHA256.
 
 If evidence is missing, verification fails, skill artifacts are missing, or a
 required skill link is unavailable, the phase must be `BLOCKED` or `REWORK`

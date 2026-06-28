@@ -1,0 +1,25 @@
+﻿{
+    "phase_id":  "phase-010",
+    "title":  "Hash required skill artifacts",
+    "objective":  "Record required skill artifacts into the artifact manifest during evidence collection and validate their hashes when present, with fixture coverage for missing and stale skill artifacts.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-010",
+    "audit_input":  ".ai-loop/audits/phase-010-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-010-audit.md",
+    "base_commit":  "952b010b27c8d85d5884c35e3da35aac5f5613f9",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase010.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-010/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T04:50:40.4145017Z",
+    "evidence_collected_at":  "2026-06-28T05:11:24.3628138Z",
+    "audit_prepared_at":  "2026-06-28T05:11:55.0838408Z",
+    "accepted_at":  "2026-06-28T05:13:11.7180629Z"
+}

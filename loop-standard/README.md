@@ -156,8 +156,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
 
 Evidence integrity uses a dual-track model. Markdown ledgers are for human
 audit. `.ai-loop/evidence/artifact-manifest.json` is machine-readable and
-records SHA256, file size, modified time, phase, and path. `validate` blocks
-required evidence that is missing, empty, unregistered, or hash-mismatched.
+records SHA256, file size, modified time, phase, and path. `collect` records
+both required evidence and required skill artifacts for the current phase.
+Required skill artifacts use the `skill-artifact` type. `validate` blocks them
+when they are missing, empty, contain a `MISSING:` placeholder, or no longer
+match the recorded SHA256.
 
 ## Schema And Migration Versioning
 

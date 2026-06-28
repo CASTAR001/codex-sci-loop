@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-009 have
-been accepted. Root phase-009 added bounded REWORK follow-up scaffolding.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-010 have
+been accepted. Root phase-010 added required skill artifact hashing.
 
 ## Last Verified State
 
@@ -96,6 +96,12 @@ can now create a bounded follow-up phase whose prompt scope is derived from the
 source audit and `rework.txt`; the command writes `rework_source.json`, updates
 status, and refuses BLOCKED/non-REWORK sources. `Test-ReworkScaffold.ps1`
 proves REWORK scaffold creation and BLOCKED refusal.
+Root self-loop phase-010 added required skill artifact hashing. Declared
+required skill artifacts are now written as `skill-artifact` rows in the human
+artifact index and machine artifact manifest during collection. The new
+`Test-SkillArtifactManifest.ps1` fixture proves recorded skill artifacts pass,
+post-collection mutations fail with hash mismatch, and missing required skill
+artifacts are still visible in the manifest as missing evidence.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -118,7 +124,8 @@ the migration log, and the project-local evolution file.
 
 Evidence now uses a dual-track model: Markdown ledgers are the human-readable
 surface, while `.ai-loop/evidence/artifact-manifest.json` is the gate-validated
-integrity source for required phase evidence.
+integrity source for required phase evidence and declared required skill
+artifacts.
 
 ## Must Preserve
 
@@ -151,6 +158,6 @@ append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
 in place. The remaining plugin-form stability step is a live global Codex
 plugin install/discovery test, which must wait for explicit user approval
 because it modifies real Codex/plugin configuration. Good non-global next
-candidates are skill artifact manifest integration, start-phase ledger
+candidates are isolating fixed temporary test directories, start-phase ledger
 idempotence, richer recovery based on the transition log, or structured audit
 finding extraction for rework scaffolding.

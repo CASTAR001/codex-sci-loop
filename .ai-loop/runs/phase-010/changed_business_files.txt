@@ -1,0 +1,8 @@
+﻿loop-standard/README.md
+loop-standard/scripts/collect-evidence.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase010.ps1
+loop-standard/scripts/Test-SkillArtifactManifest.ps1
+README.md
+README_EN.md
+

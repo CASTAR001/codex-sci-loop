@@ -153,6 +153,11 @@ function Get-ShortHash {
     return $Hash.Substring(0, 12)
 }
 
+function ConvertTo-ArtifactIdPart {
+    param([Parameter(Mandatory = $true)][string]$Value)
+    return (($Value -replace "[^A-Za-z0-9._-]", "-") -replace "-+", "-").Trim("-")
+}
+
 function ConvertTo-ProjectRelativeGitPath {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -330,6 +335,15 @@ $CommandLog = Join-Path $EvidenceDir "command-log.md"
 $TestLog = Join-Path $EvidenceDir "test-log.md"
 $ProvenanceMap = Join-Path $EvidenceDir "provenance-map.md"
 $RelativeRunDir = ".ai-loop/runs/$PhaseId"
+$RequirementsPath = Join-Path $RunDir "phase_requirements.json"
+$Requirements = $null
+if (Test-Path -LiteralPath $RequirementsPath -PathType Leaf) {
+    try {
+        $Requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
+    } catch {
+        $Requirements = $null
+    }
+}
 foreach ($LedgerPath in @($EvidenceLedger, $ArtifactIndex, $CommandLog, $TestLog, $ProvenanceMap)) {
     Remove-MarkdownRowsForPhase -Path $LedgerPath -Phase $PhaseId
 }
@@ -354,6 +368,20 @@ if (Test-Path -LiteralPath $ArtifactIndex) {
         $Record = New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-$Name" -Type "phase-evidence" -RelativePath $ArtifactPath -ProducedBy $Producer
         $Notes = "sha256=$(Get-ShortHash -Hash $Record.sha256); size=$($Record.size_bytes); status=$($Record.status)"
         Add-MarkdownRow -Path $ArtifactIndex -Columns @("ART-$PhaseId-$Name", $PhaseId, "phase-evidence", $ArtifactPath, $Producer, $Record.status, $Notes)
+    }
+    if ($null -ne $Requirements -and $null -ne $Requirements.PSObject.Properties["required_skill_artifacts"]) {
+        foreach ($Requirement in @($Requirements.required_skill_artifacts)) {
+            $Skill = [string]$Requirement.skill
+            if ([string]::IsNullOrWhiteSpace($Skill)) { continue }
+            foreach ($Artifact in @($Requirement.artifacts)) {
+                $ArtifactPath = ConvertTo-RelativeArtifactPath -Path ([string]$Artifact)
+                if ([string]::IsNullOrWhiteSpace($ArtifactPath)) { continue }
+                $ArtifactId = "ART-$PhaseId-skill-$(ConvertTo-ArtifactIdPart -Value $Skill)-$(ConvertTo-ArtifactIdPart -Value $ArtifactPath)"
+                $Record = New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId $ArtifactId -Type "skill-artifact" -RelativePath $ArtifactPath -ProducedBy $Skill
+                $Notes = "sha256=$(Get-ShortHash -Hash $Record.sha256); size=$($Record.size_bytes); status=$($Record.status)"
+                Add-MarkdownRow -Path $ArtifactIndex -Columns @($ArtifactId, $PhaseId, "skill-artifact", $ArtifactPath, $Skill, $Record.status, $Notes)
+            }
+        }
     }
 }
 if (Test-Path -LiteralPath $CommandLog) {
@@ -381,6 +409,18 @@ $ManifestRecords = @(
     New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_business_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_business_files.txt" -ProducedBy "collect-evidence.ps1"
     New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_evidence_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_evidence_files.txt" -ProducedBy "collect-evidence.ps1"
 )
+if ($null -ne $Requirements -and $null -ne $Requirements.PSObject.Properties["required_skill_artifacts"]) {
+    foreach ($Requirement in @($Requirements.required_skill_artifacts)) {
+        $Skill = [string]$Requirement.skill
+        if ([string]::IsNullOrWhiteSpace($Skill)) { continue }
+        foreach ($Artifact in @($Requirement.artifacts)) {
+            $ArtifactPath = ConvertTo-RelativeArtifactPath -Path ([string]$Artifact)
+            if ([string]::IsNullOrWhiteSpace($ArtifactPath)) { continue }
+            $ArtifactId = "ART-$PhaseId-skill-$(ConvertTo-ArtifactIdPart -Value $Skill)-$(ConvertTo-ArtifactIdPart -Value $ArtifactPath)"
+            $ManifestRecords += New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId $ArtifactId -Type "skill-artifact" -RelativePath $ArtifactPath -ProducedBy $Skill
+        }
+    }
+}
 Write-ArtifactManifest -Path $ArtifactManifest -Records $ManifestRecords
 
 Write-Output "Collected evidence for $PhaseId in $RunDir"

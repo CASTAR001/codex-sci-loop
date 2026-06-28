@@ -115,6 +115,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase008.ps1",
     "scripts\Test-ReworkScaffold.ps1",
     "scripts\Test-Phase009.ps1",
+    "scripts\Test-SkillArtifactManifest.ps1",
+    "scripts\Test-Phase010.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -315,7 +317,7 @@ if (Test-Path -LiteralPath $DecideScriptPath -PathType Leaf) {
 $CollectEvidenceScriptPath = Join-Path $KitRoot "scripts\collect-evidence.ps1"
 if (Test-Path -LiteralPath $CollectEvidenceScriptPath -PathType Leaf) {
     $CollectEvidenceText = Get-Content -LiteralPath $CollectEvidenceScriptPath -Raw
-    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "ConvertFrom-GitStatusLine", "Remove-MarkdownRowsForPhase", "PreviousErrorActionPreference", "rev-parse --show-prefix", "status --porcelain", "changed_business_files.txt", "changed_evidence_files.txt")) {
+    foreach ($Needle in @("ConvertTo-ProjectRelativeGitPath", "ConvertFrom-GitStatusLine", "Remove-MarkdownRowsForPhase", "PreviousErrorActionPreference", "rev-parse --show-prefix", "status --porcelain", "changed_business_files.txt", "changed_evidence_files.txt", "skill-artifact", "required_skill_artifacts")) {
         if ($CollectEvidenceText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "collect-evidence.ps1 missing expected classification text: $Needle"
         }

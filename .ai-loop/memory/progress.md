@@ -144,6 +144,12 @@
   source audit and `rework.txt` as fixed scope inputs, added
   `Test-ReworkScaffold.ps1`, and documented the workflow in README files and
   plugin skills.
+- Ran root self-loop phase-010 under the repository root `.ai-loop`: extended
+  `collect-evidence.ps1` to record declared required skill artifacts as
+  `skill-artifact` rows in both `artifact-index.md` and
+  `artifact-manifest.json`, added `Test-SkillArtifactManifest.ps1` for
+  recorded, tampered, and missing skill artifact cases, and added
+  `Test-Phase010.ps1` as the current non-global verification matrix.
 
 ## In Progress
 
@@ -155,8 +161,6 @@
 - Expand skill trigger matrix for full-stack and physics workflows.
 - Use append-only state transition logs for richer recovery paths beyond durable
   non-accepted decisions.
-- Decide whether skill artifacts should become required manifest entries in the
-  next evidence hardening phase.
 - Validate plugin discovery in real global Codex configuration after explicit
   approval, if plugin-form stability must be claimed beyond repo-local smoke
   tests.
@@ -166,6 +170,8 @@
   collect-time evidence rows.
 - Make start-time Markdown ledger rows idempotent like collect-time evidence
   rows, or explicitly document why start rows are append-only.
+- Isolate fixed temporary test directories or add per-run suffixes so accidental
+  concurrent smoke tests cannot contend over the same `.tmp-ai-loop-*` path.
 - Decide whether future schema upgrades require deep semantic migration
   transforms beyond phase-007's top-level JSON merge and template repair.
 - Use the state transition log to improve `resume` with richer recovery
