@@ -3,9 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-014 have
-been accepted. Root phase-014 added explicit external Worker evidence
-requirements.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-015 have
+been accepted. Root phase-015 added structured audit finding extraction.
 
 ## Last Verified State
 
@@ -129,6 +128,12 @@ and `artifact-manifest.json`; `prepare-audit-pack.ps1` lists the Worker
 evidence requirements and now preserves Markdown code fences in gate output.
 `Test-ExternalWorkerEvidence.ps1` proves missing Worker evidence blocks and
 complete local evidence passes without calling an external Worker service.
+Root self-loop phase-015 added structured audit finding extraction. `decide`
+now writes `.ai-loop/audits/<phase>-findings.json` for durable `REWORK` and
+`BLOCKED` decisions, `scaffold-rework` uses that JSON to preserve bounded
+finding IDs, required fixes, evidence, and file scope in follow-up prompts, and
+`validate-loop` blocks terminal non-accepted phases when findings JSON is
+missing or inconsistent.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -182,10 +187,10 @@ artifacts.
 Repo-local plugin install/discovery smoke testing, validate-loop negative
 fixtures, schema compatibility checks, explicit non-destructive migration,
 append-only state transition logs, durable REWORK/BLOCKED outcomes, and
-external Worker evidence requirements are now in place. The remaining
+external Worker evidence requirements, and structured audit finding extraction
+are now in place. The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are structured
-audit finding extraction for rework scaffolding, optional machine-readable
-resume output, or a temp-fixture prune command if local dogfooding leaves too
-many ignored temp directories.
+Codex/plugin configuration. Good non-global next candidates are optional
+machine-readable resume output or a temp-fixture prune command if local
+dogfooding leaves too many ignored temp directories.

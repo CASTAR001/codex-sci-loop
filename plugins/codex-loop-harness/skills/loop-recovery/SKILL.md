@@ -36,11 +36,15 @@ or `Decision: BLOCKED`, then record it with `ai-loop decide`. Do not leave
 rework or blocked decisions only in prose.
 
 If the current durable state is `rework`, use `scaffold-rework` to create the
-next bounded phase from the audit and `rework.txt`:
+next bounded phase from the audit, findings JSON, and `rework.txt`:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command scaffold-rework -ProjectRoot <project-root> -PhaseId <source-phase-id> -ReworkPhaseId <new-phase-id>
 ```
+
+The source phase should have `.ai-loop/audits/<phase>-findings.json`. If it is
+missing, rerun `ai-loop decide` after ensuring the audit contains a matching
+`Decision:` line.
 
 Do not manually broaden scope during recovery; the new phase must inherit its
 boundary from the recorded audit evidence.

@@ -63,6 +63,7 @@ $StatusPath = Join-Path $LoopDir "status.json"
 $SourceRunDir = Join-Path $LoopDir (Join-Path "runs" $SourcePhaseId)
 $SourceMetaPath = Join-Path $SourceRunDir "phase_meta.json"
 $SourceAuditPath = Join-Path $LoopDir (Join-Path "audits" "$SourcePhaseId-audit.md")
+$SourceFindingsPath = Join-Path $LoopDir (Join-Path "audits" "$SourcePhaseId-findings.json")
 $SourceDecisionPath = Join-Path $SourceRunDir "rework.txt"
 
 foreach ($RequiredPath in @($StatusPath, $SourceMetaPath, $SourceAuditPath)) {
@@ -97,15 +98,55 @@ $AuditLines = @(Get-NonEmptyLines -Text $AuditText | Where-Object {
 $DecisionLines = @(Get-NonEmptyLines -Text $DecisionText | Where-Object {
     $_ -match "^(reason|next_safe_action):"
 })
+$StructuredFindings = @()
+if (Test-Path -LiteralPath $SourceFindingsPath -PathType Leaf) {
+    try {
+        $FindingsDoc = Get-Content -LiteralPath $SourceFindingsPath -Raw | ConvertFrom-Json
+        if ([string]$FindingsDoc.phase_id -eq $SourcePhaseId) {
+            $StructuredFindings = @($FindingsDoc.findings)
+        }
+    } catch {
+        throw "Invalid audit findings JSON: $SourceFindingsPath :: $($_.Exception.Message)"
+    }
+}
 $DerivedScope = New-Object System.Collections.Generic.List[string]
 $DerivedScope.Add("REWORK follow-up for source phase `$SourcePhaseId`.")
 $DerivedScope.Add("Use `.ai-loop/audits/$SourcePhaseId-audit.md` and `.ai-loop/runs/$SourcePhaseId/rework.txt` as fixed scope inputs.")
+if (Test-Path -LiteralPath $SourceFindingsPath -PathType Leaf) {
+    $DerivedScope.Add("Use `.ai-loop/audits/$SourcePhaseId-findings.json` as the structured audit findings source.")
+}
 $DerivedScope.Add("Do not broaden beyond the audit findings unless the Supervisor starts a separate phase.")
 foreach ($Line in $DecisionLines) {
     $DerivedScope.Add("Source decision: $Line")
 }
-foreach ($Line in $AuditLines) {
-    $DerivedScope.Add("Audit finding: $Line")
+if ($StructuredFindings.Count -gt 0) {
+    foreach ($Finding in $StructuredFindings) {
+        $FindingId = [string]$Finding.finding_id
+        $Summary = [string]$Finding.summary
+        if (-not [string]::IsNullOrWhiteSpace($Summary)) {
+            $DerivedScope.Add("Structured audit finding ${FindingId}: $Summary")
+        }
+        if (-not [string]::IsNullOrWhiteSpace([string]$Finding.severity)) {
+            $DerivedScope.Add("Finding ${FindingId} severity: $($Finding.severity)")
+        }
+        if (-not [string]::IsNullOrWhiteSpace([string]$Finding.required_fix)) {
+            $DerivedScope.Add("Required fix for ${FindingId}: $($Finding.required_fix)")
+        }
+        foreach ($File in @($Finding.files)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$File)) {
+                $DerivedScope.Add("Finding ${FindingId} file: $File")
+            }
+        }
+        foreach ($Evidence in @($Finding.evidence)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$Evidence)) {
+                $DerivedScope.Add("Finding ${FindingId} evidence: $Evidence")
+            }
+        }
+    }
+} else {
+    foreach ($Line in $AuditLines) {
+        $DerivedScope.Add("Audit finding: $Line")
+    }
 }
 foreach ($Line in $Scope) {
     if (-not [string]::IsNullOrWhiteSpace($Line)) {
@@ -152,9 +193,12 @@ $ReworkSource = [ordered]@{
     source_phase_id = $SourcePhaseId
     source_status = "rework"
     source_audit = ".ai-loop/audits/$SourcePhaseId-audit.md"
+    source_findings = if (Test-Path -LiteralPath $SourceFindingsPath -PathType Leaf) { ".ai-loop/audits/$SourcePhaseId-findings.json" } else { "" }
     source_decision_file = ".ai-loop/runs/$SourcePhaseId/rework.txt"
     scaffolded_phase_id = $ReworkPhaseId
     scaffolded_at = (Get-Date).ToUniversalTime().ToString("o")
+    structured_findings_count = $StructuredFindings.Count
+    structured_findings = @($StructuredFindings)
     scope = @($DerivedScope)
 }
 Write-JsonFile -Value ([pscustomobject]$ReworkSource) -Path (Join-Path $ReworkRunDir "rework_source.json")

@@ -70,6 +70,11 @@ or:
 
 ```text
 Decision: REWORK
+Finding: The implementation changed files outside the phase scope.
+Severity: high
+Required fix: Start a bounded rework phase that touches only the audited files.
+Evidence: .ai-loop/runs/<phase>/diff.patch
+Files: src/example.txt
 ```
 
 or:

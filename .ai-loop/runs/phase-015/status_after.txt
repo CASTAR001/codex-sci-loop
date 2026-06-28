@@ -1,0 +1,31 @@
+﻿ M .ai-loop/events/state-transitions.ndjson
+ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/artifact-manifest.json
+ M .ai-loop/evidence/command-log.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/evidence/provenance-map.md
+ M .ai-loop/evidence/test-log.md
+ M .ai-loop/memory/activeContext.md
+ M .ai-loop/memory/handoff-summary.md
+ M .ai-loop/memory/progress.md
+ M .ai-loop/skills/skill-usage-ledger.md
+ M .ai-loop/status.json
+ M README.md
+ M README_EN.md
+ M loop-standard/README.md
+ M loop-standard/docs/OPERATOR_RUNBOOK.md
+ M loop-standard/scripts/Test-LoopStandard.ps1
+ M loop-standard/scripts/ai-loop.ps1
+ M loop-standard/scripts/decide-phase.ps1
+ M loop-standard/scripts/scaffold-rework-phase.ps1
+ M loop-standard/scripts/validate-loop.ps1
+ M plugins/codex-loop-harness/skills/loop-auditor/SKILL.md
+ M plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
+ M plugins/codex-loop-harness/skills/loop-supervisor/SKILL.md
+?? .ai-loop/audits/phase-015-audit-input.md
+?? .ai-loop/audits/phase-015-audit.md
+?? .ai-loop/runs/phase-015/
+?? loop-standard/scripts/Test-AuditFindingExtraction.ps1
+?? loop-standard/scripts/Test-Phase015.ps1
+?? loop-standard/scripts/extract-audit-findings.ps1
+

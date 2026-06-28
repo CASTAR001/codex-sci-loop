@@ -285,9 +285,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
   -Reason "Required evidence is missing."
 ```
 
-The decision command writes `rework.txt` or `blocked.txt`, updates
-`status.json` and `phase_meta.json`, appends an event-log row, and lets
-`resume` reconstruct the next safe action from files.
+The decision command writes `rework.txt` or `blocked.txt`, generates
+`.ai-loop/audits/<phase>-findings.json`, updates `status.json` and
+`phase_meta.json`, appends an event-log row, and lets `resume` reconstruct the
+next safe action from files.
 
 Use `resume` after interruption or when entering a project in a new session:
 
@@ -312,9 +313,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
   -ReworkPhaseId "phase-002"
 ```
 
-`scaffold-rework` refuses non-REWORK source phases. It uses the source audit and
-`rework.txt` as fixed scope inputs, creates the follow-up phase prompt and
-requirements, and writes `.ai-loop/runs/<rework-phase>/rework_source.json`.
+`scaffold-rework` refuses non-REWORK source phases. It uses the source audit,
+structured findings JSON, and `rework.txt` as fixed scope inputs, creates the
+follow-up phase prompt and requirements, and writes
+`.ai-loop/runs/<rework-phase>/rework_source.json`. Audit authors can write
+`Finding:`, `Severity:`, `Required fix:`, `Evidence:`, and `Files:` lines; the
+extractor records them as machine-readable rework scope.
 
 ## Next Phase
 

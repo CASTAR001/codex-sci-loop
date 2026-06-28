@@ -243,8 +243,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 ```
 
 `decide` 会写入 `.ai-loop/status.json`、`phase_meta.json`、`rework.txt` 或
-`blocked.txt`，并追加 `.ai-loop/events/event-log.ndjson`。之后 `resume`
-会基于这些文件给出下一步安全动作。
+`blocked.txt`，生成 `.ai-loop/audits/<phase>-findings.json`，并追加
+`.ai-loop/events/event-log.ndjson`。之后 `resume` 会基于这些文件给出下一步
+安全动作。
 
 中断或换会话后，可以运行：
 
@@ -264,9 +265,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 ```
 
 `scaffold-rework` 只接受 durable `REWORK` 源阶段。它会读取
-`.ai-loop/audits/<source>-audit.md` 和 `.ai-loop/runs/<source>/rework.txt`，
-生成新阶段的 prompt、requirements、`rework_source.json` 和状态记录。Worker
-只能执行新阶段，不得重新解释总路线或扩大 audit scope。
+`.ai-loop/audits/<source>-audit.md`、`.ai-loop/audits/<source>-findings.json`
+和 `.ai-loop/runs/<source>/rework.txt`，生成新阶段的 prompt、requirements、
+`rework_source.json` 和状态记录。Worker 只能执行新阶段，不得重新解释总路线
+或扩大 audit scope。审计文件中可以写 `Finding:`、`Severity:`、
+`Required fix:`、`Evidence:`、`Files:`，这些会被抽取到 findings JSON。
 
 ## 科研 Skill Profiles
 

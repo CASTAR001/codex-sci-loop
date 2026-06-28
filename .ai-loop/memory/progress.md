@@ -173,6 +173,14 @@
   ledger additional required evidence, added audit-pack Worker evidence
   summaries, fixed audit-pack Markdown code fences, and added
   `Test-ExternalWorkerEvidence.ps1` plus `Test-Phase014.ps1`.
+- Ran root self-loop phase-015 under the repository root `.ai-loop`: added
+  structured audit finding extraction through `extract-audit-findings.ps1` and
+  `ai-loop -Command extract-audit-findings`; `decide-phase.ps1` now writes
+  `.ai-loop/audits/<phase>-findings.json`; `scaffold-rework-phase.ps1` uses
+  structured findings for bounded follow-up scope; `validate-loop.ps1` requires
+  findings JSON for terminal `rework` and `blocked` phases; and
+  `Test-AuditFindingExtraction.ps1` covers extraction, durable decision state,
+  structured rework scaffolding, and missing findings validation.
 
 ## In Progress
 
@@ -195,8 +203,7 @@
   transforms beyond phase-007's top-level JSON merge and template repair.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Add structured audit finding extraction for richer rework scaffolds if audit
-  files gain a formal schema.
+- Add optional machine-readable resume output.
 
 ## Last Updated
 

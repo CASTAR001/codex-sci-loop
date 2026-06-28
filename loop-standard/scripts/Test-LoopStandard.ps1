@@ -94,6 +94,7 @@ $RequiredPaths = @(
     "scripts\preflight-worker.ps1",
     "scripts\invoke-worker.ps1",
     "scripts\record-state-transition.ps1",
+    "scripts\extract-audit-findings.ps1",
     "scripts\scaffold-rework-phase.ps1",
     "scripts\start-phase.ps1",
     "scripts\collect-evidence.ps1",
@@ -124,6 +125,10 @@ $RequiredPaths = @(
     "scripts\Test-Phase012.ps1",
     "scripts\Test-ResumeDiagnostics.ps1",
     "scripts\Test-Phase013.ps1",
+    "scripts\Test-ExternalWorkerEvidence.ps1",
+    "scripts\Test-Phase014.ps1",
+    "scripts\Test-AuditFindingExtraction.ps1",
+    "scripts\Test-Phase015.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -274,7 +279,7 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
 $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
 if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
-    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "scaffold-rework-phase.ps1", "worker-preflight", "invoke-worker")) {
+    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "extract-audit-findings.ps1", "scaffold-rework-phase.ps1", "worker-preflight", "invoke-worker")) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
         }
@@ -304,7 +309,7 @@ if (Test-Path -LiteralPath $MigrateScriptPath -PathType Leaf) {
 $ScaffoldReworkScriptPath = Join-Path $KitRoot "scripts\scaffold-rework-phase.ps1"
 if (Test-Path -LiteralPath $ScaffoldReworkScriptPath -PathType Leaf) {
     $ScaffoldReworkText = Get-Content -LiteralPath $ScaffoldReworkScriptPath -Raw
-    foreach ($Needle in @("Decision: REWORK", "rework_source.json", "scaffolded_phase_id", "Do not broaden beyond the audit findings")) {
+    foreach ($Needle in @("Decision: REWORK", "rework_source.json", "scaffolded_phase_id", "Do not broaden beyond the audit findings", "structured_findings")) {
         if ($ScaffoldReworkText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "scaffold-rework-phase.ps1 missing expected rework text: $Needle"
         }
@@ -314,9 +319,19 @@ if (Test-Path -LiteralPath $ScaffoldReworkScriptPath -PathType Leaf) {
 $DecideScriptPath = Join-Path $KitRoot "scripts\decide-phase.ps1"
 if (Test-Path -LiteralPath $DecideScriptPath -PathType Leaf) {
     $DecideText = Get-Content -LiteralPath $DecideScriptPath -Raw
-    foreach ($Needle in @("REWORK", "BLOCKED", "phase_decision", "rework.txt", "blocked.txt", "last_decision")) {
+    foreach ($Needle in @("REWORK", "BLOCKED", "phase_decision", "rework.txt", "blocked.txt", "last_decision", "audit_findings")) {
         if ($DecideText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "decide-phase.ps1 missing expected decision text: $Needle"
+        }
+    }
+}
+
+$ExtractFindingsScriptPath = Join-Path $KitRoot "scripts\extract-audit-findings.ps1"
+if (Test-Path -LiteralPath $ExtractFindingsScriptPath -PathType Leaf) {
+    $ExtractFindingsText = Get-Content -LiteralPath $ExtractFindingsScriptPath -Raw
+    foreach ($Needle in @("Finding:", "finding_id", "finding_count", "findings_path")) {
+        if ($ExtractFindingsText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "extract-audit-findings.ps1 missing expected extraction text: $Needle"
         }
     }
 }

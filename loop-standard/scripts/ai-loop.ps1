@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -292,6 +292,17 @@ switch ($Command) {
         if ($Force) { $ScriptParams.Force = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "decide-phase.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "extract-audit-findings" {
+        Require-PhaseId
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            PhaseId = $PhaseId
+        }
+        if (-not [string]::IsNullOrWhiteSpace($AuditPath)) { $ScriptParams.AuditPath = $AuditPath }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "extract-audit-findings.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "scaffold-rework" {

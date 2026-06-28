@@ -43,4 +43,7 @@ After writing `.ai-loop/audits/<phase-id>-audit.md`:
   `ai-loop decide -Decision BLOCKED` with a concise `-Reason`.
 
 This keeps non-accepted outcomes in `status.json`, `phase_meta.json`,
-`rework.txt` or `blocked.txt`, and the event log.
+`rework.txt` or `blocked.txt`, `.ai-loop/audits/<phase>-findings.json`, and the
+event log. When writing a `REWORK` audit, prefer structured lines such as
+`Finding:`, `Severity:`, `Required fix:`, `Evidence:`, and `Files:` so the
+follow-up phase can be scaffolded from bounded machine-readable findings.

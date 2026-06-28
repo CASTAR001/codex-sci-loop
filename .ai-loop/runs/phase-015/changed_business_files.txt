@@ -1,0 +1,16 @@
+﻿loop-standard/docs/OPERATOR_RUNBOOK.md
+loop-standard/README.md
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/decide-phase.ps1
+loop-standard/scripts/extract-audit-findings.ps1
+loop-standard/scripts/scaffold-rework-phase.ps1
+loop-standard/scripts/Test-AuditFindingExtraction.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase015.ps1
+loop-standard/scripts/validate-loop.ps1
+plugins/codex-loop-harness/skills/loop-auditor/SKILL.md
+plugins/codex-loop-harness/skills/loop-recovery/SKILL.md
+plugins/codex-loop-harness/skills/loop-supervisor/SKILL.md
+README.md
+README_EN.md
+

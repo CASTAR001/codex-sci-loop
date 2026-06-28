@@ -5,29 +5,34 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-014",
-                          "title":  "Require external Worker evidence",
-                          "objective":  "Make phases that declare external Worker usage require local preflight and invocation evidence in phase requirements, artifact manifest, gates, and audit input without calling external services.",
+                          "phase_id":  "phase-015",
+                          "title":  "Extract structured audit findings",
+                          "objective":  "Add machine-readable audit finding extraction so REWORK scaffolding can use structured findings while preserving compatibility with existing audit prose.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-014",
-                          "audit_input":  ".ai-loop/audits/phase-014-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-014-audit.md",
-                          "base_commit":  "b84486a70291cef8a075e6bbe334a9c9ec979b9c",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase014.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-015",
+                          "audit_input":  ".ai-loop/audits/phase-015-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-015-audit.md",
+                          "base_commit":  "083387970854304d197bedc4f48a5a1f3f218150",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase015.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
+                          "worker_profile":  "",
+                          "require_external_worker_evidence":  false,
                           "claim_ids":  [
 
                                         ],
                           "required_skills":  [
 
                                               ],
-                          "requirements":  ".ai-loop/runs/phase-014/phase_requirements.json",
+                          "required_worker_evidence":  [
+
+                                                       ],
+                          "requirements":  ".ai-loop/runs/phase-015/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T08:38:13.3732415Z",
-                          "evidence_collected_at":  "2026-06-28T09:12:24.9384640Z",
-                          "audit_prepared_at":  "2026-06-28T09:12:38.9099779Z",
-                          "accepted_at":  "2026-06-28T09:12:59.0920237Z"
+                          "started_at":  "2026-06-28T13:27:24.4274651Z",
+                          "evidence_collected_at":  "2026-06-28T14:05:55.0022975Z",
+                          "audit_prepared_at":  "2026-06-28T14:06:22.7645871Z",
+                          "accepted_at":  "2026-06-28T14:07:00.8295056Z"
                       },
     "phases":  [
                    {
@@ -372,13 +377,43 @@
                        "evidence_collected_at":  "2026-06-28T09:12:24.9384640Z",
                        "audit_prepared_at":  "2026-06-28T09:12:38.9099779Z",
                        "accepted_at":  "2026-06-28T09:12:59.0920237Z"
+                   },
+                   {
+                       "phase_id":  "phase-015",
+                       "title":  "Extract structured audit findings",
+                       "objective":  "Add machine-readable audit finding extraction so REWORK scaffolding can use structured findings while preserving compatibility with existing audit prose.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-015",
+                       "audit_input":  ".ai-loop/audits/phase-015-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-015-audit.md",
+                       "base_commit":  "083387970854304d197bedc4f48a5a1f3f218150",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase015.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-015/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T13:27:24.4274651Z",
+                       "evidence_collected_at":  "2026-06-28T14:05:55.0022975Z",
+                       "audit_prepared_at":  "2026-06-28T14:06:22.7645871Z",
+                       "accepted_at":  "2026-06-28T14:07:00.8295056Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-014",
+                          "phase_id":  "phase-015",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-014-audit.md",
-                          "decided_at":  "2026-06-28T09:12:59.0920237Z"
+                          "audit":  ".ai-loop/audits/phase-015-audit.md",
+                          "decided_at":  "2026-06-28T14:07:00.8295056Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

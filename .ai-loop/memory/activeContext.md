@@ -130,6 +130,13 @@ Worker preflight and invocation records to `phase_requirements.json`,
 preflight/invocation evidence blocks validation and complete local evidence
 validates without calling an external Worker service. `prepare-audit-pack.ps1`
 also now emits valid Markdown code fences for phase gate output.
+Root phase-015 added structured audit finding extraction. `decide-phase.ps1`
+now generates `.ai-loop/audits/<phase>-findings.json` for durable `REWORK` and
+`BLOCKED` decisions, `scaffold-rework-phase.ps1` uses structured findings for
+bounded follow-up scope, and `validate-loop.ps1` requires findings JSON for
+terminal non-accepted phases. `Test-AuditFindingExtraction.ps1` covers
+extraction, durable decision state, structured rework scaffolding, and missing
+findings validation.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -138,9 +145,8 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is structured audit finding extraction for rework
-scaffolding, optional machine-readable resume output, or a temp-fixture prune
-command if ignored test directories become noisy.
+The next best optimization is optional machine-readable resume output, or a
+temp-fixture prune command if ignored test directories become noisy.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

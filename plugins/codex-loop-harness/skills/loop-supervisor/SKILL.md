@@ -75,8 +75,9 @@ Use one of these entrypoints:
    powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command scaffold-rework -ProjectRoot <project-root> -PhaseId <source-phase-id> -ReworkPhaseId <new-phase-id>
    ```
 
-   The follow-up Worker prompt must stay within the source audit and
-   `rework.txt` scope. Do not let the Worker redefine the route.
+   The follow-up Worker prompt must stay within the source audit,
+   `.ai-loop/audits/<source>-findings.json`, and `rework.txt` scope. Do not let
+   the Worker redefine the route.
 
 ## Knowledge Placement
 

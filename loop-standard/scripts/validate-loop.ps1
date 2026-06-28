@@ -324,6 +324,7 @@ if ($null -ne $Status) {
             $ExpectedDecision = if ($PhaseStatus -eq "rework") { "REWORK" } else { "BLOCKED" }
             $DecisionFileName = if ($PhaseStatus -eq "rework") { "rework.txt" } else { "blocked.txt" }
             $AuditResult = Join-Path $LoopDir "audits\$PhaseId-audit.md"
+            $AuditFindings = Join-Path $LoopDir "audits\$PhaseId-findings.json"
             $DecisionFile = Join-Path $RunDir $DecisionFileName
             $AuditResultCheck = Test-NonEmptyFile -Path $AuditResult
             if ($AuditResultCheck -ne "ok") {
@@ -337,6 +338,23 @@ if ($null -ne $Status) {
             $DecisionCheck = Test-NonEmptyFile -Path $DecisionFile
             if ($DecisionCheck -ne "ok") {
                 Add-Problem "phase $PhaseId missing $DecisionFileName`: $DecisionCheck"
+            }
+            $FindingsCheck = Test-NonEmptyFile -Path $AuditFindings
+            if ($FindingsCheck -ne "ok") {
+                Add-Problem "phase $PhaseId missing audit findings JSON: $FindingsCheck"
+            } else {
+                $Findings = Read-JsonOrProblem -Path $AuditFindings
+                if ($null -ne $Findings) {
+                    if ([string]$Findings.phase_id -ne $PhaseId) {
+                        Add-Problem "phase $PhaseId audit findings have wrong phase_id: $($Findings.phase_id)"
+                    }
+                    if ([string]$Findings.decision -ne $ExpectedDecision) {
+                        Add-Problem "phase $PhaseId audit findings have wrong decision: $($Findings.decision)"
+                    }
+                    if ($null -eq $Findings.PSObject.Properties["findings"]) {
+                        Add-Problem "phase $PhaseId audit findings JSON missing findings array"
+                    }
+                }
             }
         }
         if (($TerminalStatuses -notcontains $PhaseStatus) -and ($null -ne $Status.current_phase) -and ([string]$Status.current_phase.phase_id -ne $PhaseId)) {

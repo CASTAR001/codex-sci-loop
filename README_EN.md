@@ -166,8 +166,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 ```
 
 `decide` writes `.ai-loop/status.json`, `phase_meta.json`, `rework.txt` or
-`blocked.txt`, and appends `.ai-loop/events/event-log.ndjson`. Later `resume`
-uses those files to report the next safe action.
+`blocked.txt`, generates `.ai-loop/audits/<phase>-findings.json`, and appends
+`.ai-loop/events/event-log.ndjson`. Later `resume` uses those files to report
+the next safe action.
 
 After interruption or in a new session, run:
 
@@ -189,10 +190,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 ```
 
 `scaffold-rework` only accepts a durable `REWORK` source phase. It reads
-`.ai-loop/audits/<source>-audit.md` and `.ai-loop/runs/<source>/rework.txt`,
-then generates the new phase prompt, requirements, `rework_source.json`, and
-state records. The Worker executes only the new bounded phase and must not
-reinterpret the global route or broaden audit scope.
+`.ai-loop/audits/<source>-audit.md`,
+`.ai-loop/audits/<source>-findings.json`, and
+`.ai-loop/runs/<source>/rework.txt`, then generates the new phase prompt,
+requirements, `rework_source.json`, and state records. Audit files can include
+`Finding:`, `Severity:`, `Required fix:`, `Evidence:`, and `Files:` lines; these
+are extracted into findings JSON. The Worker executes only the new bounded
+phase and must not reinterpret the global route or broaden audit scope.
 
 ## Research Skill Profiles
 
