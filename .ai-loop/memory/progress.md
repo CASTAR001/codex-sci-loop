@@ -202,6 +202,13 @@
   `-Force` is explicit. `Test-MigrateDryRun.ps1` and `Test-Phase018.ps1`
   cover JSON planning, text planning, no-write behavior, real migration after
   planning, and future-schema blocking.
+- Ran root self-loop phase-019 under the repository root `.ai-loop`: added
+  `prune-temp -Json` and `prune-temp -Force -Json` so cleanup candidates and
+  deletion results can be consumed by scripts, hooks, CI, and plugins. JSON
+  output includes mode, retention settings, cutoff, candidates, deleted rows,
+  skipped paths, and counts, while existing text output remains covered.
+  `Test-PruneTempJson.ps1` and `Test-Phase019.ps1` cover parseable dry-run and
+  force JSON output without mixed human-readable text.
 
 ## In Progress
 
@@ -223,8 +230,8 @@
   migration model.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Consider structured JSON output for `prune-temp` if future dashboards, hooks,
-  or CI cleanup jobs need machine-readable cleanup candidates.
+- Add a 1.0 readiness audit/checklist command that maps the project goal to
+  current evidence and reports remaining gaps without modifying global config.
 
 ## Last Updated
 

@@ -694,6 +694,7 @@ switch ($Command) {
         }
         if ($Force) { $ScriptParams.Force = $true }
         if ($DryRun) { $ScriptParams.DryRun = $true }
+        if ($Json) { $ScriptParams.Json = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "prune-temp-fixtures.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?

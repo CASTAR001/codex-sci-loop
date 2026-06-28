@@ -136,6 +136,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase017.ps1",
     "scripts\Test-MigrateDryRun.ps1",
     "scripts\Test-Phase018.ps1",
+    "scripts\Test-PruneTempJson.ps1",
+    "scripts\Test-Phase019.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",

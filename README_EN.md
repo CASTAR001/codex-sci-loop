@@ -203,6 +203,16 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `prune-temp` only considers `run-*` children under `.tmp-ai-loop-*` parents.
 It does not delete anything unless `-Force` is explicit, and it does not prune
 ordinary project folders or folders outside the harness temp namespace.
+Scripts, hooks, CI, and plugins can request machine-readable cleanup state with
+`-Json`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command prune-temp -ProjectRoot E:\some-project -MinAgeHours 24 -KeepLatest 2 -Json
+```
+
+The JSON includes `mode`, `candidate_count`, `deleted_count`, `candidates`,
+`deleted`, `skipped`, and `generated_at`. `-Force -Json` still performs the
+deletion and records deleted run directories in `deleted`.
 
 When the decision is `REWORK`, the Supervisor can scaffold a bounded follow-up
 phase from the durable audit result:
@@ -349,6 +359,8 @@ Recent checks passed:
 - `Test-PruneTempFixtures.ps1`, which verifies `prune-temp` dry-run behavior,
   latest-run retention, forced old-run deletion, namespace protection, and
   idempotence.
+- `Test-PruneTempJson.ps1`, which verifies parseable `prune-temp -Json` and
+  `-Force -Json` output without mixed human-readable text.
 - `Test-MigrateDryRun.ps1`, which verifies `migrate -DryRun` and
   `-DryRun -Json` planning, no-write behavior, future-schema blocking, and
   real migration after planning.

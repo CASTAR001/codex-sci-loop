@@ -362,6 +362,20 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
   -Force
 ```
 
+Add `-Json` when automation needs a machine-readable summary:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command prune-temp `
+  -ProjectRoot "C:\path\to\project" `
+  -MinAgeHours 24 `
+  -KeepLatest 2 `
+  -Json
+```
+
+The JSON includes the cleanup mode, candidate count, deleted count, candidate
+rows, deleted rows, skipped reparse-point paths, and generation timestamp.
+
 For `REWORK`, scaffold a bounded follow-up phase from the durable decision:
 
 ```powershell

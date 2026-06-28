@@ -156,6 +156,11 @@ Dry-run performs compatibility checks but does not write migration records,
 modify JSON, copy template files, or append event logs. `Test-MigrateDryRun.ps1`
 covers parseable JSON plans, human-readable plans, no-write behavior, real
 migration after planning, and future schema blocking.
+Root phase-019 added machine-readable temp cleanup output. `ai-loop -Command
+prune-temp -Json` now emits parseable cleanup summaries for dry-run and forced
+delete modes, including candidates, deleted rows, skipped paths, counts,
+retention settings, cutoff, and generated timestamp. Existing text output is
+preserved, and `Test-PruneTempJson.ps1` covers JSON purity and delete results.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -164,10 +169,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is either structured JSON output for maintenance
-commands such as `prune-temp`, or deeper semantic migration steps for future
-schema versions that require more than template repair and top-level JSON
-merging.
+The next best optimization is a 1.0 readiness audit/checklist command, or
+deeper semantic migration steps for future schema versions that require more
+than template repair and top-level JSON merging.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
