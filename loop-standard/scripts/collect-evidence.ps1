@@ -358,6 +358,29 @@ $EvidenceRows = @(
     @("EVD-$PhaseId-008", $PhaseId, "CLAIM-$PhaseId", "business-files", "$RelativeRunDir/changed_business_files.txt", "collect-evidence.ps1", "pending", "recorded", "Changed business files captured."),
     @("EVD-$PhaseId-009", $PhaseId, "CLAIM-$PhaseId", "evidence-files", "$RelativeRunDir/changed_evidence_files.txt", "collect-evidence.ps1", "pending", "recorded", "Changed evidence files captured.")
 )
+$KnownEvidencePaths = New-Object System.Collections.Generic.List[string]
+foreach ($Row in $EvidenceRows) {
+    $KnownEvidencePaths.Add((ConvertTo-RelativeArtifactPath -Path ([string]$Row[4])))
+}
+$AdditionalRequiredEvidencePaths = New-Object System.Collections.Generic.List[string]
+if ($null -ne $Requirements -and $null -ne $Requirements.PSObject.Properties["evidence_required"]) {
+    foreach ($RequiredPath in @($Requirements.evidence_required)) {
+        $ArtifactPath = ConvertTo-RelativeArtifactPath -Path ([string]$RequiredPath)
+        if ([string]::IsNullOrWhiteSpace($ArtifactPath)) { continue }
+        if ($KnownEvidencePaths -contains $ArtifactPath) { continue }
+        $KnownEvidencePaths.Add($ArtifactPath)
+        $AdditionalRequiredEvidencePaths.Add($ArtifactPath)
+        $EvidenceType = if ($ArtifactPath -like "*external-worker-*") { "external-worker-evidence" } else { "required-evidence" }
+        $Producer = if ($ArtifactPath -like "*external-worker-preflight*") {
+            "preflight-worker.ps1"
+        } elseif ($ArtifactPath -like "*external-worker-invocation*") {
+            "invoke-worker.ps1"
+        } else {
+            "phase requirements"
+        }
+        $EvidenceRows += ,@("EVD-$PhaseId-REQ-$($AdditionalRequiredEvidencePaths.Count)", $PhaseId, "CLAIM-$PhaseId", $EvidenceType, $ArtifactPath, $Producer, "pending", "recorded", "Additional required evidence from phase_requirements.json.")
+    }
+}
 if (Test-Path -LiteralPath $EvidenceLedger) {
     foreach ($Row in $EvidenceRows) { Add-MarkdownRow -Path $EvidenceLedger -Columns $Row }
 }
@@ -368,6 +391,20 @@ if (Test-Path -LiteralPath $ArtifactIndex) {
         $Record = New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-$Name" -Type "phase-evidence" -RelativePath $ArtifactPath -ProducedBy $Producer
         $Notes = "sha256=$(Get-ShortHash -Hash $Record.sha256); size=$($Record.size_bytes); status=$($Record.status)"
         Add-MarkdownRow -Path $ArtifactIndex -Columns @("ART-$PhaseId-$Name", $PhaseId, "phase-evidence", $ArtifactPath, $Producer, $Record.status, $Notes)
+    }
+    foreach ($ArtifactPath in @($AdditionalRequiredEvidencePaths)) {
+        $Producer = if ($ArtifactPath -like "*external-worker-preflight*") {
+            "preflight-worker.ps1"
+        } elseif ($ArtifactPath -like "*external-worker-invocation*") {
+            "invoke-worker.ps1"
+        } else {
+            "phase requirements"
+        }
+        $ArtifactType = if ($ArtifactPath -like "*external-worker-*") { "external-worker-evidence" } else { "phase-evidence" }
+        $ArtifactId = "ART-$PhaseId-required-$(ConvertTo-ArtifactIdPart -Value $ArtifactPath)"
+        $Record = New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId $ArtifactId -Type $ArtifactType -RelativePath $ArtifactPath -ProducedBy $Producer
+        $Notes = "sha256=$(Get-ShortHash -Hash $Record.sha256); size=$($Record.size_bytes); status=$($Record.status)"
+        Add-MarkdownRow -Path $ArtifactIndex -Columns @($ArtifactId, $PhaseId, $ArtifactType, $ArtifactPath, $Producer, $Record.status, $Notes)
     }
     if ($null -ne $Requirements -and $null -ne $Requirements.PSObject.Properties["required_skill_artifacts"]) {
         foreach ($Requirement in @($Requirements.required_skill_artifacts)) {
@@ -409,6 +446,18 @@ $ManifestRecords = @(
     New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_business_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_business_files.txt" -ProducedBy "collect-evidence.ps1"
     New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId "ART-$PhaseId-changed_evidence_files.txt" -Type "phase-evidence" -RelativePath "$RelativeRunDir/changed_evidence_files.txt" -ProducedBy "collect-evidence.ps1"
 )
+foreach ($ArtifactPath in @($AdditionalRequiredEvidencePaths)) {
+    $Producer = if ($ArtifactPath -like "*external-worker-preflight*") {
+        "preflight-worker.ps1"
+    } elseif ($ArtifactPath -like "*external-worker-invocation*") {
+        "invoke-worker.ps1"
+    } else {
+        "phase requirements"
+    }
+    $ArtifactType = if ($ArtifactPath -like "*external-worker-*") { "external-worker-evidence" } else { "phase-evidence" }
+    $ArtifactId = "ART-$PhaseId-required-$(ConvertTo-ArtifactIdPart -Value $ArtifactPath)"
+    $ManifestRecords += New-ArtifactRecord -ProjectRoot $ProjectRoot -Phase $PhaseId -ArtifactId $ArtifactId -Type $ArtifactType -RelativePath $ArtifactPath -ProducedBy $Producer
+}
 if ($null -ne $Requirements -and $null -ne $Requirements.PSObject.Properties["required_skill_artifacts"]) {
     foreach ($Requirement in @($Requirements.required_skill_artifacts)) {
         $Skill = [string]$Requirement.skill

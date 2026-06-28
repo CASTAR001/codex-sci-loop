@@ -159,12 +159,18 @@ $RequiredArtifactPaths = @(
     ".ai-loop/runs/$PhaseId/changed_evidence_files.txt",
     ".ai-loop/runs/$PhaseId/phase_requirements.json"
 )
+$WorkerEvidenceText = "None declared."
 $RequirementsPath = Join-Path $RunDir "phase_requirements.json"
 if (Test-Path -LiteralPath $RequirementsPath -PathType Leaf) {
     try {
         $Requirements = Get-Content -LiteralPath $RequirementsPath -Raw | ConvertFrom-Json
         if ($null -ne $Requirements.PSObject.Properties["evidence_required"]) {
             $RequiredArtifactPaths = @($Requirements.evidence_required) + @(".ai-loop/runs/$PhaseId/phase_requirements.json")
+        }
+        if ($null -ne $Requirements.PSObject.Properties["required_worker_evidence"] -and @($Requirements.required_worker_evidence).Count -gt 0) {
+            $WorkerEvidenceText = (@($Requirements.required_worker_evidence) | ForEach-Object {
+                "- $($_.path) [$($_.kind)] required=$($_.required); produced_by=$($_.produced_by)"
+            }) -join [Environment]::NewLine
         }
     } catch {
         $Problems.Add("phase_requirements.json cannot be parsed for artifact integrity summary: $($_.Exception.Message)")
@@ -272,15 +278,19 @@ $ChangedEvidenceFilesText
 
 $($ArtifactSummary.text)
 
+## External Worker Evidence Requirements
+
+$WorkerEvidenceText
+
 ## Missing Or Invalid Evidence
 
 $ProblemText
 
 ## Phase Gate Validation
 
-```text
+``````text
 $GateText
-```
+``````
 
 ## Audit Instructions
 

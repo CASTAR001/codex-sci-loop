@@ -13,6 +13,8 @@ param(
     [ValidateSet("research-task-tree", "invariant-contract", "bounded-experiment-loop", "deterministic-verification", "independent-crosscheck", "result-provenance-audit", "manuscript-consistency-audit", "skill-compliance-audit")]
     [string[]]$RequiredSkills = @(),
     [string[]]$ClaimIds = @(),
+    [string]$WorkerProfile = "",
+    [switch]$RequireExternalWorkerEvidence,
     [switch]$Force
 )
 
@@ -185,13 +187,53 @@ $EvidenceRequired = @(
     ".ai-loop/runs/$PhaseId/changed_business_files.txt",
     ".ai-loop/runs/$PhaseId/changed_evidence_files.txt"
 )
+$WorkerEvidenceRequirements = @()
+if ($RequireExternalWorkerEvidence) {
+    if ([string]::IsNullOrWhiteSpace($WorkerProfile)) {
+        $WorkerProfile = "external-worker"
+    }
+    $WorkerEvidenceRequirements = @(
+        [pscustomobject]@{
+            kind = "preflight-json"
+            path = ".ai-loop/runs/$PhaseId/external-worker-preflight.json"
+            required = $true
+            produced_by = "preflight-worker.ps1"
+            notes = "Safety and feasibility decision before invoking Worker profile '$WorkerProfile'."
+        },
+        [pscustomobject]@{
+            kind = "preflight-markdown"
+            path = ".ai-loop/runs/$PhaseId/external-worker-preflight.md"
+            required = $true
+            produced_by = "preflight-worker.ps1"
+            notes = "Human-readable external Worker preflight review."
+        },
+        [pscustomobject]@{
+            kind = "invocation-json"
+            path = ".ai-loop/runs/$PhaseId/external-worker-invocation.json"
+            required = $true
+            produced_by = "invoke-worker.ps1"
+            notes = "Structured external Worker invocation result."
+        },
+        [pscustomobject]@{
+            kind = "invocation-log"
+            path = ".ai-loop/runs/$PhaseId/external-worker-invocation.log"
+            required = $true
+            produced_by = "invoke-worker.ps1"
+            notes = "External Worker invocation command log and output."
+        }
+    )
+    $EvidenceRequired = @($EvidenceRequired + (@($WorkerEvidenceRequirements) | ForEach-Object { $_.path }) | Select-Object -Unique)
+}
 
 $Requirements = [ordered]@{
     phase_id = $PhaseId
     task_kind = $TaskKind
     skill_profile = $SkillProfile
+    worker_profile = $WorkerProfile
+    require_external_worker_evidence = [bool]$RequireExternalWorkerEvidence
     claim_ids = @($ClaimIds)
     evidence_required = @($EvidenceRequired)
+    required_worker_evidence = @($WorkerEvidenceRequirements)
     required_skills = @($AllRequiredSkills)
     required_skill_artifacts = @($SkillRequirements)
     generated_at = (Get-Date).ToUniversalTime().ToString("o")
@@ -207,6 +249,13 @@ $SkillText = if ($SkillRequirements.Count -gt 0) {
     }) -join [Environment]::NewLine
 } else {
     "- None required by task kind. If you introduce correctness-sensitive, scientific, numerical, provenance, or manuscript claims, report the trigger and required skill artifacts."
+}
+$WorkerEvidenceText = if ($RequireExternalWorkerEvidence) {
+    (@($WorkerEvidenceRequirements) | ForEach-Object {
+        "- $($_.path): $($_.kind), produced by $($_.produced_by)"
+    }) -join [Environment]::NewLine
+} else {
+    "- None required. If you invoke an external Worker, stop and ask the Supervisor to start or update the phase with external Worker evidence requirements."
 }
 $Prompt = @"
 # Worker Prompt: $PhaseId
@@ -250,6 +299,10 @@ $VerifyText
 
 $SkillText
 
+## Required External Worker Evidence
+
+$WorkerEvidenceText
+
 Codex will audit the report, diff, verify log, status files, and relevant source
 files before deciding `ACCEPTED`, `REWORK`, or `BLOCKED`.
 "@
@@ -268,8 +321,11 @@ $PhaseMeta = [ordered]@{
     verify_command = $VerifyCommand
     task_kind = $TaskKind
     skill_profile = $SkillProfile
+    worker_profile = $WorkerProfile
+    require_external_worker_evidence = [bool]$RequireExternalWorkerEvidence
     claim_ids = @($ClaimIds)
     required_skills = @($AllRequiredSkills)
+    required_worker_evidence = @($WorkerEvidenceRequirements)
     requirements = ".ai-loop/runs/$PhaseId/phase_requirements.json"
     transition_log = ".ai-loop/events/state-transitions.ndjson"
     started_at = (Get-Date).ToUniversalTime().ToString("o")

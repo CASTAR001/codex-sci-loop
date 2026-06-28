@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-013",
-                          "title":  "Enhance resume diagnostics",
-                          "objective":  "Use the state transition log in ai-loop resume to report latest transition, transition consistency, status-specific safe command, and stale-state diagnostics with fixture coverage.",
+                          "phase_id":  "phase-014",
+                          "title":  "Require external Worker evidence",
+                          "objective":  "Make phases that declare external Worker usage require local preflight and invocation evidence in phase requirements, artifact manifest, gates, and audit input without calling external services.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-013",
-                          "audit_input":  ".ai-loop/audits/phase-013-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-013-audit.md",
-                          "base_commit":  "2dff04f855a92a37391d471ca8298c414a589a29",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase013.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-014",
+                          "audit_input":  ".ai-loop/audits/phase-014-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-014-audit.md",
+                          "base_commit":  "b84486a70291cef8a075e6bbe334a9c9ec979b9c",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase014.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "claim_ids":  [
@@ -22,12 +22,12 @@
                           "required_skills":  [
 
                                               ],
-                          "requirements":  ".ai-loop/runs/phase-013/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-014/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T08:02:59.8342885Z",
-                          "evidence_collected_at":  "2026-06-28T08:27:44.7272300Z",
-                          "audit_prepared_at":  "2026-06-28T08:28:13.3283887Z",
-                          "accepted_at":  "2026-06-28T08:28:43.8586930Z"
+                          "started_at":  "2026-06-28T08:38:13.3732415Z",
+                          "evidence_collected_at":  "2026-06-28T09:12:24.9384640Z",
+                          "audit_prepared_at":  "2026-06-28T09:12:38.9099779Z",
+                          "accepted_at":  "2026-06-28T09:12:59.0920237Z"
                       },
     "phases":  [
                    {
@@ -347,13 +347,38 @@
                        "evidence_collected_at":  "2026-06-28T08:27:44.7272300Z",
                        "audit_prepared_at":  "2026-06-28T08:28:13.3283887Z",
                        "accepted_at":  "2026-06-28T08:28:43.8586930Z"
+                   },
+                   {
+                       "phase_id":  "phase-014",
+                       "title":  "Require external Worker evidence",
+                       "objective":  "Make phases that declare external Worker usage require local preflight and invocation evidence in phase requirements, artifact manifest, gates, and audit input without calling external services.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-014",
+                       "audit_input":  ".ai-loop/audits/phase-014-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-014-audit.md",
+                       "base_commit":  "b84486a70291cef8a075e6bbe334a9c9ec979b9c",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase014.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-014/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T08:38:13.3732415Z",
+                       "evidence_collected_at":  "2026-06-28T09:12:24.9384640Z",
+                       "audit_prepared_at":  "2026-06-28T09:12:38.9099779Z",
+                       "accepted_at":  "2026-06-28T09:12:59.0920237Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-013",
+                          "phase_id":  "phase-014",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-013-audit.md",
-                          "decided_at":  "2026-06-28T08:28:43.8586930Z"
+                          "audit":  ".ai-loop/audits/phase-014-audit.md",
+                          "decided_at":  "2026-06-28T09:12:59.0920237Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

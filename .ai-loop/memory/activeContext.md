@@ -122,6 +122,14 @@ Root phase-013 enhanced recovery diagnostics. `ai-loop resume` now reads
 transition consistency, transition problems, missing evidence, next safe action,
 and a copyable next safe command. Transition/status mismatch is reported as
 `Recovery decision: BLOCKED` and covered by `Test-ResumeDiagnostics.ps1`.
+Root phase-014 added explicit external Worker evidence requirements. Phases
+started with `-RequireExternalWorkerEvidence -WorkerProfile <profile>` now add
+Worker preflight and invocation records to `phase_requirements.json`,
+`evidence_required`, audit input, Markdown ledgers, and
+`artifact-manifest.json`. `Test-ExternalWorkerEvidence.ps1` proves missing
+preflight/invocation evidence blocks validation and complete local evidence
+validates without calling an external Worker service. `prepare-audit-pack.ps1`
+also now emits valid Markdown code fences for phase gate output.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -131,9 +139,8 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 ## Next Safe Action
 
 The next best optimization is structured audit finding extraction for rework
-scaffolding, external Worker invocation evidence requirements, optional
-machine-readable resume output, or a temp-fixture prune command if ignored test
-directories become noisy.
+scaffolding, optional machine-readable resume output, or a temp-fixture prune
+command if ignored test directories become noisy.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
@@ -150,7 +157,5 @@ approval. Before further harness changes, review:
 - What final global install root should be used outside temporary tests?
 - Should real Codex global plugin configuration be modified for a live install
   test, and what path should be used?
-- Should external Worker invocation records become required phase evidence in
-  `phase_requirements.json` for phases that use an external Worker?
 - Should `migrate` eventually support deep semantic transforms for future schema
   versions instead of only top-level JSON merge plus template repair?

@@ -3,8 +3,9 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-013 have
-been accepted. Root phase-013 enhanced recovery diagnostics.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-014 have
+been accepted. Root phase-014 added explicit external Worker evidence
+requirements.
 
 ## Last Verified State
 
@@ -119,6 +120,15 @@ transitions, transition consistency, transition problems, missing evidence, next
 safe action, and a copyable next safe command. Transition/status mismatch is
 reported as `Recovery decision: BLOCKED`. `Test-ResumeDiagnostics.ps1` covers a
 normal started-phase resume and a tampered mismatch.
+Root self-loop phase-014 added `-RequireExternalWorkerEvidence` to phase start.
+When a Supervisor declares external Worker use, `phase_requirements.json`
+requires `external-worker-preflight.json/.md` and
+`external-worker-invocation.json/.log`. `collect-evidence.ps1` records those
+additional required evidence files in Markdown ledgers, `artifact-index.md`,
+and `artifact-manifest.json`; `prepare-audit-pack.ps1` lists the Worker
+evidence requirements and now preserves Markdown code fences in gate output.
+`Test-ExternalWorkerEvidence.ps1` proves missing Worker evidence blocks and
+complete local evidence passes without calling an external Worker service.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -171,11 +181,11 @@ artifacts.
 
 Repo-local plugin install/discovery smoke testing, validate-loop negative
 fixtures, schema compatibility checks, explicit non-destructive migration,
-append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
-in place. The remaining plugin-form stability step is a live global Codex
-plugin install/discovery test, which must wait for explicit user approval
-because it modifies real Codex/plugin configuration. Good non-global next
-candidates are structured audit finding extraction for rework scaffolding,
-external Worker invocation evidence requirements, optional machine-readable
+append-only state transition logs, durable REWORK/BLOCKED outcomes, and
+external Worker evidence requirements are now in place. The remaining
+plugin-form stability step is a live global Codex plugin install/discovery
+test, which must wait for explicit user approval because it modifies real
+Codex/plugin configuration. Good non-global next candidates are structured
+audit finding extraction for rework scaffolding, optional machine-readable
 resume output, or a temp-fixture prune command if local dogfooding leaves too
 many ignored temp directories.

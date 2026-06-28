@@ -250,6 +250,13 @@ If evidence is missing, verification fails, skill artifacts are missing, or a
 required skill link is unavailable, the phase must be `BLOCKED` or `REWORK`
 unless the Supervisor uses a recorded force override.
 
+When a phase will use an external Worker, start it with
+`-RequireExternalWorkerEvidence -WorkerProfile <profile>`. This adds
+`external-worker-preflight.json/.md` and
+`external-worker-invocation.json/.log` to `phase_requirements.json`, the
+artifact manifest, validate gates, and the audit pack. Ordinary phases do not
+require these files by default.
+
 Use phase validation before acceptance:
 
 ```powershell

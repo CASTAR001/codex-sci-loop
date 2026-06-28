@@ -54,6 +54,12 @@ External Worker invocation is Worker-agnostic. `worker-preflight` records the
 prompt hash, state directory, external service status, yolo mode, and approval
 requirements. `invoke-worker` refuses to run unless preflight returns
 `SAFE_TO_INVOKE`. The first thin Worker profile is `worker-profiles/kimi-code`.
+When a phase is expected to use an external Worker, start it with
+`-RequireExternalWorkerEvidence -WorkerProfile <profile>`. The phase then
+requires `external-worker-preflight.json/.md` and
+`external-worker-invocation.json/.log`; collect records them as
+`external-worker-evidence`, and validate/audit block if they are missing or
+stale.
 
 To install a temporary global layout with a shim:
 
@@ -161,6 +167,9 @@ both required evidence and required skill artifacts for the current phase.
 Required skill artifacts use the `skill-artifact` type. `validate` blocks them
 when they are missing, empty, contain a `MISSING:` placeholder, or no longer
 match the recorded SHA256.
+
+If `phase_requirements.json` declares required external Worker evidence,
+`collect` also records the preflight and invocation artifacts in the manifest.
 
 Test fixtures use ignored `.tmp-ai-loop-*` parent directories, but default test
 runs create unique `run-<timestamp>-<pid>-<id>` children. This keeps smoke and

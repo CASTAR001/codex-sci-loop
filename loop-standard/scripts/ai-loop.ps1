@@ -44,6 +44,7 @@ param(
     [switch]$AllowExternalService,
     [switch]$AllowSensitivePrompt,
     [switch]$Yolo,
+    [switch]$RequireExternalWorkerEvidence,
     [switch]$DryRun
 )
 
@@ -210,6 +211,12 @@ switch ($Command) {
         if ($Scope.Count -gt 0) { $ScriptParams.Scope = $Scope }
         if ($RequiredSkills.Count -gt 0) { $ScriptParams.RequiredSkills = $RequiredSkills }
         if ($ClaimIds.Count -gt 0) { $ScriptParams.ClaimIds = $ClaimIds }
+        if ($RequireExternalWorkerEvidence) {
+            $ScriptParams.RequireExternalWorkerEvidence = $true
+            $ScriptParams.WorkerProfile = $WorkerProfile
+        } elseif ($PSBoundParameters.ContainsKey("WorkerProfile")) {
+            $ScriptParams.WorkerProfile = $WorkerProfile
+        }
         if ($Force) { $ScriptParams.Force = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "start-phase.ps1") @ScriptParams

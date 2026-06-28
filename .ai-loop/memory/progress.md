@@ -166,6 +166,13 @@
   reporting, transition consistency checks, next safe command output, and
   BLOCKED recovery on transition/status mismatch; added
   `Test-ResumeDiagnostics.ps1` and `Test-Phase013.ps1`.
+- Ran root self-loop phase-014 under the repository root `.ai-loop`: added
+  `-RequireExternalWorkerEvidence` for phases that declare external Worker
+  usage, recorded required Worker preflight/invocation artifacts in
+  `phase_requirements.json`, extended `collect-evidence.ps1` to hash and
+  ledger additional required evidence, added audit-pack Worker evidence
+  summaries, fixed audit-pack Markdown code fences, and added
+  `Test-ExternalWorkerEvidence.ps1` plus `Test-Phase014.ps1`.
 
 ## In Progress
 

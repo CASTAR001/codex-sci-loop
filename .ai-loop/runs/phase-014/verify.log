@@ -1,0 +1,129 @@
+﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase014.ps1
+started_at: 2026-06-28T09:08:53.0351743Z
+finished_at: 2026-06-28T09:12:24.1604443Z
+exit_code: 0
+
+output:
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 116
+Running: .\loop-standard\scripts\Test-ExternalWorkerEvidence.ps1 
+powershell.exe : warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+At E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1:223 char:23
++ ...   $Output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Comm ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: unable...rmission denied:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+External Worker evidence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-external-worker-evidence\run-20260628090854627-30284-c2750285
+Cases checked: missing external Worker evidence blocks; complete local evidence validates and appears in manifest/audit pack
+Running: .\loop-standard\scripts\Test-Phase013.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 116
+Running: .\loop-standard\scripts\Test-ResumeDiagnostics.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Resume diagnostics test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-resume-diagnostics\run-20260628090904607-25680-3f7c87fa
+Cases checked: started phase resume, transition/status mismatch BLOCKED
+Running: .\loop-standard\scripts\Test-Phase012.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 116
+Running: .\loop-standard\scripts\Test-StartPhaseIdempotence.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Start phase idempotence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-start-idempotence\run-20260628090908808-30284-fc5c8699
+Cases checked: forced restart refreshes status, prompt, evidence rows, artifact rows, and skill usage rows
+Running: .\loop-standard\scripts\Test-Phase011.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 116
+Running: .\loop-standard\scripts\Test-TempIsolation.ps1 
+Temp isolation test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-temp-isolation\run-20260628090913535-24072-e9d26869
+Parallel install roots: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628090914012-29884-45875f3c\install; E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628090914015-9340-81752a16\install
+Running: .\loop-standard\scripts\Test-Phase010.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 116
+Running: .\loop-standard\scripts\Test-PluginInstall.ps1 
+Plugin install smoke test: OK
+Install root: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628090918062-24196-a685d5df\install
+Marketplace: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628090918062-24196-a685d5df\install\.agents\plugins\marketplace.json
+Plugin: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628090918062-24196-a685d5df\install\plugins\codex-loop-harness
+Shim: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628090918062-24196-a685d5df\install\bin\ai-loop.ps1
+Running: .\loop-standard\scripts\Test-ValidateLoopFailures.ps1 
+Validate-loop failure fixtures: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-validate-loop-failures\run-20260628090920893-12268-d1c49aae
+Cases checked: 7
+Running: .\loop-standard\scripts\Test-CollectLedgerIdempotence.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Collect ledger idempotence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-collect-idempotence\run-20260628091033184-28948-b5e77a5b
+Running: .\loop-standard\scripts\Test-SchemaVersioning.ps1 
+Schema versioning test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-schema-versioning\run-20260628091039260-24800-ffc22d42
+Cases checked: 7
+Running: .\loop-standard\scripts\Test-MigrateLoop.ps1 
+Migrate loop test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-migrate\run-20260628091044129-24556-98b24639
+Cases checked: old-project, future-project, empty-project
+Running: .\loop-standard\scripts\Test-PhaseDecisions.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Phase decision test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-phase-decisions\run-20260628091048390-24928-6751db6a
+Cases checked: REWORK, BLOCKED, decision mismatch
+Running: .\loop-standard\scripts\Test-StateTransitions.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+State transition test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-state-transitions\run-20260628091106448-30708-fb5f36c1
+Cases checked: normal lifecycle, tampered latest transition
+Running: .\loop-standard\scripts\Test-ReworkScaffold.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+Rework scaffold test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-rework-scaffold\run-20260628091115289-21416-e5c50e97
+Cases checked: REWORK scaffold, BLOCKED refusal
+Running: .\loop-standard\scripts\Test-SkillArtifactManifest.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+Skill artifact manifest test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-skill-artifact-manifest\run-20260628091128718-29228-f9b03432
+Cases checked: recorded skill artifact, tampered hash, missing artifact
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-010 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-011 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-012 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-013 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-014 verification: OK
+

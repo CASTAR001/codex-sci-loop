@@ -189,6 +189,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `-Yolo` 会被记录，但不需要单独停下来确认。外部服务调用、敏感 prompt、长期记忆
 或治理规则升级，仍然需要明确确认。
 
+如果某个阶段会使用外部 Worker，Supervisor 应在 `start` 时加上
+`-RequireExternalWorkerEvidence -WorkerProfile <profile>`。这样
+`external-worker-preflight.json/.md` 和
+`external-worker-invocation.json/.log` 会进入 `phase_requirements.json`、
+artifact manifest、validate gate 和 audit pack；缺失或 hash 不匹配会阻断
+audit/accept。默认普通阶段不要求这些文件。
+
 验收前先运行 gate：
 
 ```powershell
@@ -307,6 +314,10 @@ Codex 不能只根据 worker report 接受阶段。
 artifact manifest。required skill artifacts 使用 `skill-artifact` 类型记录；如果文件
 缺失、为空、包含 `MISSING:` 占位符，或登记后的 SHA256 与当前文件不一致，`validate`
 都会阻断。
+
+当阶段声明 `-RequireExternalWorkerEvidence` 时，外部 Worker preflight 与
+invocation 记录也会作为 `external-worker-evidence` 类型进入 manifest。Codex 审计
+必须检查这些本地文件，不能仅凭 Worker prose 接受阶段。
 
 如果证据缺失、验证失败、skill artifact 缺失、required skill 链接不可用，
 阶段必须是 `BLOCKED` 或 `REWORK`。只有 Supervisor 记录明确 override reason
