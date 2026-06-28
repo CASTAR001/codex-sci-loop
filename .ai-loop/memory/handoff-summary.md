@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-007 have
-been accepted. Root phase-007 added non-destructive `.ai-loop` migration.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-008 have
+been accepted. Root phase-008 added append-only phase state transition logging.
 
 ## Last Verified State
 
@@ -82,6 +82,14 @@ event. `Test-MigrateLoop.ps1` proves old-project repair, project memory
 preservation, missing-template restoration, future-schema blocking, and missing
 `.ai-loop` rejection. `Test-Phase007.ps1` is the current non-global verification
 matrix.
+Root self-loop phase-008 added `.ai-loop/events/state-transitions.ndjson`,
+`record-state-transition.ps1`, and schema `1.3`. Canonical scripts now record
+phase status transitions for start, collect, audit-pack, accept, and
+REWORK/BLOCKED decisions. `validate-loop.ps1` validates transition log JSON and
+checks that phases declaring `transition_log` have a latest transition matching
+their current status. `Test-StateTransitions.ps1` proves a normal lifecycle and
+tampered latest-transition rejection. `Test-Phase008.ps1` is now the current
+non-global verification matrix.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -132,10 +140,11 @@ integrity source for required phase evidence.
 ## Next Safe Action
 
 Repo-local plugin install/discovery smoke testing, validate-loop negative
-fixtures, schema compatibility checks, explicit non-destructive migration, and
-durable REWORK/BLOCKED outcomes are now in place. The remaining plugin-form
-stability step is a live global Codex plugin install/discovery test, which must
-wait for explicit user approval because it modifies real Codex/plugin
-configuration. Good non-global next candidates are stricter state transition
-logs, optional rework phase scaffolding, skill artifact manifest integration, or
-start-phase ledger idempotence.
+fixtures, schema compatibility checks, explicit non-destructive migration,
+append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
+in place. The remaining plugin-form stability step is a live global Codex
+plugin install/discovery test, which must wait for explicit user approval
+because it modifies real Codex/plugin configuration. Good non-global next
+candidates are optional rework phase scaffolding, skill artifact manifest
+integration, start-phase ledger idempotence, or richer recovery based on the
+transition log.

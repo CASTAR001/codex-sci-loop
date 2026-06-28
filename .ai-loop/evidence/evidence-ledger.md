@@ -70,3 +70,12 @@ command, log, test output, provenance record, or source inspection record.
 | EVD-phase-007-007 | phase-007 | CLAIM-phase-007 | changed-files | .ai-loop/runs/phase-007/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
 | EVD-phase-007-008 | phase-007 | CLAIM-phase-007 | business-files | .ai-loop/runs/phase-007/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
 | EVD-phase-007-009 | phase-007 | CLAIM-phase-007 | evidence-files | .ai-loop/runs/phase-007/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |
+| EVD-phase-008-001 | phase-008 | CLAIM-phase-008 | prompt | .ai-loop/runs/phase-008/prompt.md | Codex Supervisor | pending | recorded | Worker prompt generated. |
+| EVD-phase-008-002 | phase-008 | CLAIM-phase-008 | requirements | .ai-loop/runs/phase-008/phase_requirements.json | Codex Supervisor | pending | recorded | Phase requirements generated. |
+| EVD-phase-008-003 | phase-008 | CLAIM-phase-008 | worker-report | .ai-loop/runs/phase-008/report.md | Worker | pending | recorded | Worker report captured. |
+| EVD-phase-008-004 | phase-008 | CLAIM-phase-008 | status | .ai-loop/runs/phase-008/status_after.txt | collect-evidence.ps1 | pending | recorded | Repository status captured after Worker execution. |
+| EVD-phase-008-005 | phase-008 | CLAIM-phase-008 | diff | .ai-loop/runs/phase-008/diff.patch | collect-evidence.ps1 | pending | recorded | Diff captured. |
+| EVD-phase-008-006 | phase-008 | CLAIM-phase-008 | verification-log | .ai-loop/runs/phase-008/verify.log | collect-evidence.ps1 | pending | recorded | Verification log captured. |
+| EVD-phase-008-007 | phase-008 | CLAIM-phase-008 | changed-files | .ai-loop/runs/phase-008/changed_files.txt | collect-evidence.ps1 | pending | recorded | Changed files captured. |
+| EVD-phase-008-008 | phase-008 | CLAIM-phase-008 | business-files | .ai-loop/runs/phase-008/changed_business_files.txt | collect-evidence.ps1 | pending | recorded | Changed business files captured. |
+| EVD-phase-008-009 | phase-008 | CLAIM-phase-008 | evidence-files | .ai-loop/runs/phase-008/changed_evidence_files.txt | collect-evidence.ps1 | pending | recorded | Changed evidence files captured. |

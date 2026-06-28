@@ -93,6 +93,7 @@ $RequiredPaths = @(
     "scripts\link-skills.ps1",
     "scripts\preflight-worker.ps1",
     "scripts\invoke-worker.ps1",
+    "scripts\record-state-transition.ps1",
     "scripts\start-phase.ps1",
     "scripts\collect-evidence.ps1",
     "scripts\prepare-audit-pack.ps1",
@@ -108,7 +109,9 @@ $RequiredPaths = @(
     "scripts\Test-MigrateLoop.ps1",
     "scripts\Test-PhaseDecisions.ps1",
     "scripts\Test-Phase006.ps1",
+    "scripts\Test-StateTransitions.ps1",
     "scripts\Test-Phase007.ps1",
+    "scripts\Test-Phase008.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -262,6 +265,16 @@ if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "worker-preflight", "invoke-worker")) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
+        }
+    }
+}
+
+$RecordTransitionScriptPath = Join-Path $KitRoot "scripts\record-state-transition.ps1"
+if (Test-Path -LiteralPath $RecordTransitionScriptPath -PathType Leaf) {
+    $RecordTransitionText = Get-Content -LiteralPath $RecordTransitionScriptPath -Raw
+    foreach ($Needle in @("state-transitions.ndjson", "from_status", "to_status", "phase_id")) {
+        if ($RecordTransitionText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "record-state-transition.ps1 missing expected transition text: $Needle"
         }
     }
 }

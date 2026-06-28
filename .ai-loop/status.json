@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-007",
-                          "title":  "Add non-destructive loop migration",
-                          "objective":  "Add a migrate command that upgrades existing .ai-loop projects to the current schema without overwriting project memory or evidence, with fixture tests proving before/after validation.",
+                          "phase_id":  "phase-008",
+                          "title":  "Add append-only state transition log",
+                          "objective":  "Record phase state transitions in a durable append-only log whenever canonical scripts change phase status, and validate transition-log consistency in recovery tests.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-007",
-                          "audit_input":  ".ai-loop/audits/phase-007-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-007-audit.md",
-                          "base_commit":  "922bbaf9636385c6ff86df434fe5934852074d55",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase007.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-008",
+                          "audit_input":  ".ai-loop/audits/phase-008-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-008-audit.md",
+                          "base_commit":  "6edea268f74194d79dd425c8bea65e8003e44876",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase008.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "claim_ids":  [
@@ -22,11 +22,12 @@
                           "required_skills":  [
 
                                               ],
-                          "requirements":  ".ai-loop/runs/phase-007/phase_requirements.json",
-                          "started_at":  "2026-06-28T01:49:08.0801684Z",
-                          "evidence_collected_at":  "2026-06-28T03:53:07.0668834Z",
-                          "audit_prepared_at":  "2026-06-28T03:53:52.2444053Z",
-                          "accepted_at":  "2026-06-28T03:54:02.6236223Z"
+                          "requirements":  ".ai-loop/runs/phase-008/phase_requirements.json",
+                          "started_at":  "2026-06-28T03:57:58.2128617Z",
+                          "evidence_collected_at":  "2026-06-28T04:16:59.0932995Z",
+                          "audit_prepared_at":  "2026-06-28T04:17:22.8228561Z",
+                          "accepted_at":  "2026-06-28T04:17:54.8354396Z",
+                          "transition_log":  ".ai-loop/events/state-transitions.ndjson"
                       },
     "phases":  [
                    {
@@ -196,13 +197,38 @@
                        "evidence_collected_at":  "2026-06-28T03:53:07.0668834Z",
                        "audit_prepared_at":  "2026-06-28T03:53:52.2444053Z",
                        "accepted_at":  "2026-06-28T03:54:02.6236223Z"
+                   },
+                   {
+                       "phase_id":  "phase-008",
+                       "title":  "Add append-only state transition log",
+                       "objective":  "Record phase state transitions in a durable append-only log whenever canonical scripts change phase status, and validate transition-log consistency in recovery tests.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-008",
+                       "audit_input":  ".ai-loop/audits/phase-008-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-008-audit.md",
+                       "base_commit":  "6edea268f74194d79dd425c8bea65e8003e44876",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase008.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-008/phase_requirements.json",
+                       "started_at":  "2026-06-28T03:57:58.2128617Z",
+                       "evidence_collected_at":  "2026-06-28T04:16:59.0932995Z",
+                       "audit_prepared_at":  "2026-06-28T04:17:22.8228561Z",
+                       "accepted_at":  "2026-06-28T04:17:54.8354396Z",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-007",
+                          "phase_id":  "phase-008",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-007-audit.md",
-                          "decided_at":  "2026-06-28T03:54:02.6236223Z"
+                          "audit":  ".ai-loop/audits/phase-008-audit.md",
+                          "decided_at":  "2026-06-28T04:17:54.8354396Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

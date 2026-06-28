@@ -92,6 +92,12 @@ records and backups under `.ai-loop/schema/migration-records/`, appends
 project memory preservation, missing-template restoration, future-schema
 blocking, and missing `.ai-loop` rejection. `Test-Phase007.ps1` is the current
 non-global verification matrix.
+Root phase-008 added append-only state transition logging. Canonical scripts now
+append phase status changes to `.ai-loop/events/state-transitions.ndjson`, and
+schema `1.3` makes that log part of the control plane. `validate-loop.ps1`
+parses the transition log and, for phases declaring `transition_log`, verifies
+that the latest transition status matches `status.json`. `Test-StateTransitions.ps1`
+covers a normal lifecycle plus tampered latest-transition rejection.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -100,10 +106,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is stricter state transition logs, optional rework
-phase scaffolding, skill artifact manifest integration, or deciding whether
-start-time Markdown ledger rows should become idempotent like collect-time
-evidence rows.
+The next best optimization is optional rework phase scaffolding, skill artifact
+manifest integration, start-time Markdown ledger idempotence, or deeper recovery
+automation using the state transition log.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

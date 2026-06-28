@@ -182,6 +182,10 @@ and appends `.ai-loop/schema/migration-log.md`. It preserves project memory,
 evidence ledgers, and business files. A future schema version is blocked unless
 the Supervisor explicitly passes `-Force`.
 
+State changes are recorded in `.ai-loop/events/state-transitions.ndjson`. For
+new phases that declare `transition_log`, `validate-loop` checks that the latest
+transition entry matches the phase status in `status.json`.
+
 ## Quick Start In A Project
 
 From this kit directory:

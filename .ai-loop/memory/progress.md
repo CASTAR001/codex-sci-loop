@@ -132,6 +132,12 @@
   `Test-MigrateLoop.ps1` covering old-project repair, project memory
   preservation, future-schema blocking, and missing `.ai-loop` rejection, and
   added `Test-Phase007.ps1` as the current non-global verification matrix.
+- Ran root self-loop phase-008 under the repository root `.ai-loop`: added
+  append-only state transition logging through
+  `.ai-loop/events/state-transitions.ndjson`, wired canonical status-changing
+  scripts to `record-state-transition.ps1`, bumped the control-plane schema to
+  `1.3`, extended `validate-loop.ps1` to reject latest-transition/status
+  mismatches, and added `Test-StateTransitions.ps1` plus `Test-Phase008.ps1`.
 
 ## In Progress
 
@@ -141,7 +147,7 @@
 
 - Choose final non-temporary global install root.
 - Expand skill trigger matrix for full-stack and physics workflows.
-- Add stricter state transition logs and recovery paths beyond durable
+- Use append-only state transition logs for richer recovery paths beyond durable
   non-accepted decisions.
 - Decide whether skill artifacts should become required manifest entries in the
   next evidence hardening phase.
@@ -158,6 +164,8 @@
   audit findings.
 - Decide whether future schema upgrades require deep semantic migration
   transforms beyond phase-007's top-level JSON merge and template repair.
+- Use the state transition log to improve `resume` with richer recovery
+  explanations and stale-state diagnosis.
 
 ## Last Updated
 

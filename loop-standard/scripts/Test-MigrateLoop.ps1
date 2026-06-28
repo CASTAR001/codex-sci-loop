@@ -142,7 +142,7 @@ if ($MigrateResult.ExitCode -ne 0) {
         if ([string]$Record.from_schema_version -ne "1.1") {
             Add-Problem "old-project migration record has wrong from_schema_version: $($Record.from_schema_version)"
         }
-        if ([string]$Record.to_schema_version -ne "1.2") {
+        if ([string]$Record.to_schema_version -ne "1.3") {
             Add-Problem "old-project migration record has wrong to_schema_version: $($Record.to_schema_version)"
         }
         if (@($Record.actions).Count -eq 0) {

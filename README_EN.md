@@ -248,6 +248,9 @@ minimum supported version, latest version, and `status.json` state-file schema.
 `validate-loop` blocks missing schema manifests, unsupported old versions,
 future versions, and config/status schema mismatches. Human-readable migration
 notes live in `.ai-loop/schema/migration-log.md`.
+State changes are also appended to `.ai-loop/events/state-transitions.ndjson`.
+Once a phase declares `transition_log`, `validate-loop` checks that the latest
+transition for that phase matches the current status in `status.json`.
 
 ## What Has Been Verified
 

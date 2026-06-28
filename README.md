@@ -212,6 +212,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `validate-loop` 会阻断缺失 schema manifest、过旧版本、未来版本和
 config/status schema 不匹配的项目。人类可读的迁移记录保存在
 `.ai-loop/schema/migration-log.md`。
+状态变化还会追加记录到 `.ai-loop/events/state-transitions.ndjson`。
+新 phase 一旦声明 `transition_log`，`validate-loop` 会检查该 phase 的最后一条
+状态转移是否与 `status.json` 当前状态一致。
 
 只有 Codex 写出包含 `Decision: ACCEPTED` 的 audit 后，才接受阶段：
 

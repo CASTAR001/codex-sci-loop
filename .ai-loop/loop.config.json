@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "loop_name": "supervisor-worker-loop",
   "supervisor": "Codex",
   "worker": "Worker Agent",
@@ -71,6 +71,7 @@
     ]
   },
   "evolution_file": ".ai-loop/evolution/project-loop-evolution.md",
+  "state_transition_log": ".ai-loop/events/state-transitions.ndjson",
   "worker_profiles": {
     "kimi-code": {
       "profile_file": "loop-standard/worker-profiles/kimi-code.json",

@@ -102,6 +102,7 @@ if ($Force) {
 }
 
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
+$PreviousStatusForTransition = [string]$Meta.status
 if ($Meta.status -notin @("audit_ready", "accepted") -and -not $Force) {
     throw "Cannot accept phase from status '$($Meta.status)'. Expected audit_ready."
 }
@@ -142,6 +143,7 @@ $AcceptedAt = (Get-Date).ToUniversalTime().ToString("o")
 Set-JsonProperty -Object $Meta -Name "status" -Value "accepted"
 Set-JsonProperty -Object $Meta -Name "accepted_at" -Value $AcceptedAt
 Set-JsonProperty -Object $Meta -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
+Set-JsonProperty -Object $Meta -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
 Write-JsonFile -Value $Meta -Path $MetaPath
 
 if (Test-Path -LiteralPath $StatusPath) {
@@ -155,15 +157,26 @@ if (Test-Path -LiteralPath $StatusPath) {
     if ($null -ne $Status.current_phase -and $Status.current_phase.phase_id -eq $PhaseId) {
         Set-JsonProperty -Object $Status.current_phase -Name "status" -Value "accepted"
         Set-JsonProperty -Object $Status.current_phase -Name "accepted_at" -Value $AcceptedAt
+        Set-JsonProperty -Object $Status.current_phase -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
     }
     for ($Index = 0; $Index -lt @($Status.phases).Count; $Index++) {
         if ($Status.phases[$Index].phase_id -eq $PhaseId) {
             Set-JsonProperty -Object $Status.phases[$Index] -Name "status" -Value "accepted"
             Set-JsonProperty -Object $Status.phases[$Index] -Name "accepted_at" -Value $AcceptedAt
             Set-JsonProperty -Object $Status.phases[$Index] -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
+            Set-JsonProperty -Object $Status.phases[$Index] -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
         }
     }
     Write-JsonFile -Value $Status -Path $StatusPath
 }
+& (Join-Path $PSScriptRoot "record-state-transition.ps1") `
+    -ProjectRoot $ProjectRoot `
+    -PhaseId $PhaseId `
+    -FromStatus $PreviousStatusForTransition `
+    -ToStatus "accepted" `
+    -Actor "accept-phase.ps1" `
+    -Action "accept" `
+    -Reason "Accepted phase after audit." `
+    -Paths @(".ai-loop/status.json", ".ai-loop/runs/$PhaseId/phase_meta.json", ".ai-loop/runs/$PhaseId/accepted.txt", ".ai-loop/events/state-transitions.ndjson")
 
 Write-Output "Accepted phase $PhaseId"

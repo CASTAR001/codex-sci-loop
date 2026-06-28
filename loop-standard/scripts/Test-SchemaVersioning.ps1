@@ -119,8 +119,8 @@ Expect-Failure -Name "future-config-schema" -ProjectRoot $FutureConfigRoot -Expe
 $MismatchRoot = New-CaseRoot -Name "manifest-config-mismatch"
 $MismatchSchemaPath = Join-Path $MismatchRoot ".ai-loop\schema\schema-version.json"
 $MismatchSchema = Get-Content -LiteralPath $MismatchSchemaPath -Raw | ConvertFrom-Json
-$MismatchSchema.schema_version = "1.3"
-$MismatchSchema.latest_schema_version = "1.3"
+$MismatchSchema.schema_version = "1.4"
+$MismatchSchema.latest_schema_version = "1.4"
 Save-Json -Object $MismatchSchema -Path $MismatchSchemaPath
 Expect-Failure -Name "manifest-config-mismatch" -ProjectRoot $MismatchRoot -ExpectedText "schema_version differs from schema manifest"
 

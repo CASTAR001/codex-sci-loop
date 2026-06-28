@@ -72,6 +72,7 @@ if ($AuditText -notmatch "(?m)^\s*Decision:\s*$Decision\s*$") {
 }
 
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
+$PreviousStatusForTransition = [string]$Meta.status
 if ($Meta.status -notin @("evidence_collected", "audit_ready", "rework", "blocked", "blocked_missing_evidence") -and -not $Force) {
     throw "Cannot record $Decision from status '$($Meta.status)'. Expected evidence_collected, audit_ready, rework, blocked, or blocked_missing_evidence."
 }
@@ -102,6 +103,7 @@ Set-JsonProperty -Object $Meta -Name "decision" -Value $Decision
 Set-JsonProperty -Object $Meta -Name "decision_reason" -Value $Reason
 Set-JsonProperty -Object $Meta -Name "next_safe_action" -Value $Action
 Set-JsonProperty -Object $Meta -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
+Set-JsonProperty -Object $Meta -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
 Write-JsonFile -Value $Meta -Path $MetaPath
 
 if (Test-Path -LiteralPath $StatusPath -PathType Leaf) {
@@ -121,6 +123,7 @@ if (Test-Path -LiteralPath $StatusPath -PathType Leaf) {
         Set-JsonProperty -Object $Status.current_phase -Name "decision_reason" -Value $Reason
         Set-JsonProperty -Object $Status.current_phase -Name "next_safe_action" -Value $Action
         Set-JsonProperty -Object $Status.current_phase -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
+        Set-JsonProperty -Object $Status.current_phase -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
     }
     for ($Index = 0; $Index -lt @($Status.phases).Count; $Index++) {
         if ($Status.phases[$Index].phase_id -eq $PhaseId) {
@@ -130,6 +133,7 @@ if (Test-Path -LiteralPath $StatusPath -PathType Leaf) {
             Set-JsonProperty -Object $Status.phases[$Index] -Name "decision_reason" -Value $Reason
             Set-JsonProperty -Object $Status.phases[$Index] -Name "next_safe_action" -Value $Action
             Set-JsonProperty -Object $Status.phases[$Index] -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
+            Set-JsonProperty -Object $Status.phases[$Index] -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
         }
     }
     Write-JsonFile -Value $Status -Path $StatusPath
@@ -147,5 +151,14 @@ Add-EventLogEntry -LoopDir $LoopDir -Event ([ordered]@{
     evidence = @(".ai-loop/audits/$PhaseId-audit.md", ".ai-loop/runs/$PhaseId/$DecisionFileName")
     paths = @(".ai-loop/status.json", ".ai-loop/runs/$PhaseId/phase_meta.json", ".ai-loop/events/event-log.ndjson")
 })
+& (Join-Path $PSScriptRoot "record-state-transition.ps1") `
+    -ProjectRoot $ProjectRoot `
+    -PhaseId $PhaseId `
+    -FromStatus $PreviousStatusForTransition `
+    -ToStatus $DecisionLower `
+    -Actor "decide-phase.ps1" `
+    -Action "decide" `
+    -Reason $Reason `
+    -Paths @(".ai-loop/status.json", ".ai-loop/runs/$PhaseId/phase_meta.json", ".ai-loop/runs/$PhaseId/$DecisionFileName", ".ai-loop/events/state-transitions.ndjson")
 
 Write-Output "Recorded $Decision for phase $PhaseId"

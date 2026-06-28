@@ -77,6 +77,7 @@ $LoopDir = Join-Path $ProjectRoot ".ai-loop"
 $StatusPath = Join-Path $LoopDir "status.json"
 $ConfigPath = Join-Path $LoopDir "loop.config.json"
 $SchemaPath = Join-Path $LoopDir "schema\schema-version.json"
+$TransitionLogPath = Join-Path $LoopDir "events\state-transitions.ndjson"
 $ValidStatuses = @("started", "evidence_collected", "audit_ready", "accepted", "rework", "blocked", "blocked_missing_evidence")
 $TerminalStatuses = @("accepted", "rework", "blocked")
 
@@ -115,6 +116,29 @@ $Status = Read-JsonOrProblem -Path $StatusPath
 $Config = Read-JsonOrProblem -Path $ConfigPath
 $Manifest = Read-JsonOrProblem -Path (Join-Path $LoopDir "evidence\artifact-manifest.json")
 $Schema = Read-JsonOrProblem -Path $SchemaPath
+$TransitionRows = @()
+
+if (Test-Path -LiteralPath $TransitionLogPath -PathType Leaf) {
+    $LineNumber = 0
+    foreach ($Line in @(Get-Content -LiteralPath $TransitionLogPath)) {
+        $LineNumber++
+        if ([string]::IsNullOrWhiteSpace($Line)) { continue }
+        try {
+            $Entry = $Line | ConvertFrom-Json
+            foreach ($PropertyName in @("ts", "phase_id", "from_status", "to_status", "actor", "action", "paths")) {
+                if ($null -eq $Entry.PSObject.Properties[$PropertyName]) {
+                    Add-Problem "state-transitions.ndjson line $LineNumber missing required property: $PropertyName"
+                }
+            }
+            $TransitionRows += [pscustomobject]@{
+                line_number = $LineNumber
+                entry = $Entry
+            }
+        } catch {
+            Add-Problem "invalid state-transitions.ndjson line $LineNumber - $($_.Exception.Message)"
+        }
+    }
+}
 
 if ($null -ne $Config) {
     foreach ($Decision in @("ACCEPTED", "REWORK", "BLOCKED")) {
@@ -233,6 +257,20 @@ if ($null -ne $Status) {
             }
             if ([string]$Meta.status -ne $PhaseStatus) {
                 Add-Problem "phase $PhaseId metadata status differs from status.json"
+            }
+            if ($null -ne $Meta.PSObject.Properties["transition_log"]) {
+                if ([string]$Meta.transition_log -ne ".ai-loop/events/state-transitions.ndjson") {
+                    Add-Problem "phase $PhaseId transition_log has unexpected path: $($Meta.transition_log)"
+                }
+                $PhaseTransitions = @($TransitionRows | Where-Object { [string]$_.entry.phase_id -eq $PhaseId })
+                if ($PhaseTransitions.Count -eq 0) {
+                    Add-Problem "phase $PhaseId has transition_log but no state transition entries"
+                } else {
+                    $LatestTransition = $PhaseTransitions | Sort-Object line_number | Select-Object -Last 1
+                    if ([string]$LatestTransition.entry.to_status -ne $PhaseStatus) {
+                        Add-Problem "phase $PhaseId transition log latest status differs from status.json: transition=$($LatestTransition.entry.to_status) status=$PhaseStatus"
+                    }
+                }
             }
         }
         foreach ($RequiredRunFile in @("base_commit.txt", "status_before.txt", "phase_meta.json", "phase_requirements.json", "prompt.md")) {

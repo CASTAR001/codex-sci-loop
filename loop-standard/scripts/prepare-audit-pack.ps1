@@ -311,20 +311,23 @@ or:
 $AuditInput | Set-Content -LiteralPath $AuditInputPath -Encoding utf8
 
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
-Set-JsonProperty -Object $Meta -Name "status" -Value $(if ($Problems.Count -eq 0) { "audit_ready" } else { "blocked_missing_evidence" })
+$PreviousStatusForTransition = [string]$Meta.status
+$PhaseStatus = if ($Problems.Count -eq 0) { "audit_ready" } else { "blocked_missing_evidence" }
+Set-JsonProperty -Object $Meta -Name "status" -Value $PhaseStatus
 Set-JsonProperty -Object $Meta -Name "audit_input" -Value ".ai-loop/audits/$PhaseId-audit-input.md"
 Set-JsonProperty -Object $Meta -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
 Set-JsonProperty -Object $Meta -Name "audit_prepared_at" -Value (Get-Date).ToUniversalTime().ToString("o")
+Set-JsonProperty -Object $Meta -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
 Write-JsonFile -Value $Meta -Path $MetaPath
 
 if (Test-Path -LiteralPath $StatusPath) {
     $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
-    $PhaseStatus = if ($Problems.Count -eq 0) { "audit_ready" } else { "blocked_missing_evidence" }
     if ($null -ne $Status.current_phase -and $Status.current_phase.phase_id -eq $PhaseId) {
         Set-JsonProperty -Object $Status.current_phase -Name "status" -Value $PhaseStatus
         Set-JsonProperty -Object $Status.current_phase -Name "audit_input" -Value ".ai-loop/audits/$PhaseId-audit-input.md"
         Set-JsonProperty -Object $Status.current_phase -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
         Set-JsonProperty -Object $Status.current_phase -Name "audit_prepared_at" -Value $Meta.audit_prepared_at
+        Set-JsonProperty -Object $Status.current_phase -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
     }
     for ($Index = 0; $Index -lt @($Status.phases).Count; $Index++) {
         if ($Status.phases[$Index].phase_id -eq $PhaseId) {
@@ -332,10 +335,20 @@ if (Test-Path -LiteralPath $StatusPath) {
             Set-JsonProperty -Object $Status.phases[$Index] -Name "audit_input" -Value ".ai-loop/audits/$PhaseId-audit-input.md"
             Set-JsonProperty -Object $Status.phases[$Index] -Name "audit_result" -Value ".ai-loop/audits/$PhaseId-audit.md"
             Set-JsonProperty -Object $Status.phases[$Index] -Name "audit_prepared_at" -Value $Meta.audit_prepared_at
+            Set-JsonProperty -Object $Status.phases[$Index] -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
         }
     }
     Write-JsonFile -Value $Status -Path $StatusPath
 }
+& (Join-Path $PSScriptRoot "record-state-transition.ps1") `
+    -ProjectRoot $ProjectRoot `
+    -PhaseId $PhaseId `
+    -FromStatus $PreviousStatusForTransition `
+    -ToStatus $PhaseStatus `
+    -Actor "prepare-audit-pack.ps1" `
+    -Action "audit-pack" `
+    -Reason "Prepared audit input." `
+    -Paths @(".ai-loop/status.json", ".ai-loop/runs/$PhaseId/phase_meta.json", ".ai-loop/audits/$PhaseId-audit-input.md", ".ai-loop/events/state-transitions.ndjson")
 
 Write-Output "Prepared audit input: $AuditInputPath"
 if ($Problems.Count -gt 0) {

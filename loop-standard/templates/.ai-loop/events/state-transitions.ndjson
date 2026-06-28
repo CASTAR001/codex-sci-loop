@@ -1,0 +1,1 @@
+{"schema_version":"1.0","ts":"2026-06-28T00:00:00Z","phase_id":"bootstrap","from_status":"none","to_status":"initialized","actor":"template","action":"bootstrap","reason":"Initialize state transition log.","paths":[".ai-loop/events/state-transitions.ndjson"]}

@@ -25,6 +25,8 @@ line.
 - `gate_check`: phase gate validation result.
 - `override`: Supervisor override of a blocking gate, with reason.
 - `evolution_proposal`: project-local loop improvement proposal.
+- `state_transition`: phase status transition recorded in
+  `.ai-loop/events/state-transitions.ndjson`.
 
 ## Optional Fields
 

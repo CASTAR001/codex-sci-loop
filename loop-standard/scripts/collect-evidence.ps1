@@ -202,6 +202,7 @@ if (-not [string]::IsNullOrWhiteSpace($ReportPath)) {
 }
 
 $Meta = Get-Content -LiteralPath $MetaPath -Raw | ConvertFrom-Json
+$PreviousStatusForTransition = [string]$Meta.status
 if ($Meta.status -eq "accepted" -and -not $Force) {
     throw "Cannot collect evidence for accepted phase $PhaseId."
 }
@@ -291,6 +292,7 @@ if ($null -ne $Git) {
 
 Set-JsonProperty -Object $Meta -Name "status" -Value "evidence_collected"
 Set-JsonProperty -Object $Meta -Name "evidence_collected_at" -Value (Get-Date).ToUniversalTime().ToString("o")
+Set-JsonProperty -Object $Meta -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
 Write-JsonFile -Value $Meta -Path $MetaPath
 
 if (Test-Path -LiteralPath $StatusPath) {
@@ -298,15 +300,26 @@ if (Test-Path -LiteralPath $StatusPath) {
     if ($null -ne $Status.current_phase -and $Status.current_phase.phase_id -eq $PhaseId) {
         Set-JsonProperty -Object $Status.current_phase -Name "status" -Value "evidence_collected"
         Set-JsonProperty -Object $Status.current_phase -Name "evidence_collected_at" -Value $Meta.evidence_collected_at
+        Set-JsonProperty -Object $Status.current_phase -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
     }
     for ($Index = 0; $Index -lt @($Status.phases).Count; $Index++) {
         if ($Status.phases[$Index].phase_id -eq $PhaseId) {
             Set-JsonProperty -Object $Status.phases[$Index] -Name "status" -Value "evidence_collected"
             Set-JsonProperty -Object $Status.phases[$Index] -Name "evidence_collected_at" -Value $Meta.evidence_collected_at
+            Set-JsonProperty -Object $Status.phases[$Index] -Name "transition_log" -Value ".ai-loop/events/state-transitions.ndjson"
         }
     }
     Write-JsonFile -Value $Status -Path $StatusPath
 }
+& (Join-Path $PSScriptRoot "record-state-transition.ps1") `
+    -ProjectRoot $ProjectRoot `
+    -PhaseId $PhaseId `
+    -FromStatus $PreviousStatusForTransition `
+    -ToStatus "evidence_collected" `
+    -Actor "collect-evidence.ps1" `
+    -Action "collect" `
+    -Reason "Collected phase evidence." `
+    -Paths @(".ai-loop/status.json", ".ai-loop/runs/$PhaseId/phase_meta.json", ".ai-loop/events/state-transitions.ndjson")
 
 $EvidenceDir = Join-Path $LoopDir "evidence"
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null

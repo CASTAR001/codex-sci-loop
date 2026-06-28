@@ -118,6 +118,7 @@ if (-not (Test-Path -LiteralPath $StatusPath)) {
 }
 
 $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
+$PreviousStatusForTransition = if ($null -ne $Status.current_phase) { [string]$Status.current_phase.status } else { "none" }
 if ($null -ne $Status.current_phase -and -not $Force) {
     $CurrentStatus = $Status.current_phase.status
     $CurrentPhaseId = $Status.current_phase.phase_id
@@ -259,6 +260,7 @@ $PhaseMeta = [ordered]@{
     claim_ids = @($ClaimIds)
     required_skills = @($AllRequiredSkills)
     requirements = ".ai-loop/runs/$PhaseId/phase_requirements.json"
+    transition_log = ".ai-loop/events/state-transitions.ndjson"
     started_at = (Get-Date).ToUniversalTime().ToString("o")
     evidence_collected_at = $null
     audit_prepared_at = $null
@@ -269,6 +271,15 @@ Write-JsonFile -Value ([pscustomobject]$PhaseMeta) -Path (Join-Path $RunDir "pha
 $Status.current_phase = $PhaseMeta
 $Status.phases = @($Status.phases) + @([pscustomobject]$PhaseMeta)
 Write-JsonFile -Value $Status -Path $StatusPath
+& (Join-Path $PSScriptRoot "record-state-transition.ps1") `
+    -ProjectRoot $ProjectRoot `
+    -PhaseId $PhaseId `
+    -FromStatus $PreviousStatusForTransition `
+    -ToStatus "started" `
+    -Actor "start-phase.ps1" `
+    -Action "start" `
+    -Reason "Started phase." `
+    -Paths @(".ai-loop/status.json", ".ai-loop/runs/$PhaseId/phase_meta.json", ".ai-loop/events/state-transitions.ndjson")
 
 $EvidenceDir = Join-Path $LoopDir "evidence"
 $SkillsDir = Join-Path $LoopDir "skills"

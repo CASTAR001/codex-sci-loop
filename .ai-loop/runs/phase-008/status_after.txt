@@ -1,0 +1,40 @@
+﻿ M .ai-loop/events/event-schema.md
+ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/artifact-manifest.json
+ M .ai-loop/evidence/command-log.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/evidence/provenance-map.md
+ M .ai-loop/evidence/test-log.md
+ M .ai-loop/loop.config.json
+ M .ai-loop/memory/activeContext.md
+ M .ai-loop/memory/handoff-summary.md
+ M .ai-loop/memory/progress.md
+ M .ai-loop/schema/schema-version.json
+ M .ai-loop/status.json
+ M README.md
+ M README_EN.md
+ M loop-standard/.ai-loop/loop.config.json
+ M loop-standard/.ai-loop/schema/schema-version.json
+ M loop-standard/README.md
+ M loop-standard/scripts/Test-LoopStandard.ps1
+ M loop-standard/scripts/Test-MigrateLoop.ps1
+ M loop-standard/scripts/Test-SchemaVersioning.ps1
+ M loop-standard/scripts/accept-phase.ps1
+ M loop-standard/scripts/collect-evidence.ps1
+ M loop-standard/scripts/decide-phase.ps1
+ M loop-standard/scripts/prepare-audit-pack.ps1
+ M loop-standard/scripts/start-phase.ps1
+ M loop-standard/scripts/validate-loop.ps1
+ M loop-standard/templates/.ai-loop/events/event-schema.md
+ M loop-standard/templates/.ai-loop/loop.config.json
+ M loop-standard/templates/.ai-loop/schema/schema-version.json
+?? .ai-loop/audits/phase-008-audit-input.md
+?? .ai-loop/audits/phase-008-audit.md
+?? .ai-loop/events/state-transitions.ndjson
+?? .ai-loop/runs/phase-008/
+?? loop-standard/.ai-loop/events/
+?? loop-standard/scripts/Test-Phase008.ps1
+?? loop-standard/scripts/Test-StateTransitions.ps1
+?? loop-standard/scripts/record-state-transition.ps1
+?? loop-standard/templates/.ai-loop/events/state-transitions.ndjson
+

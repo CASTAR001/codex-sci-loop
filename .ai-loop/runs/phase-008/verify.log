@@ -1,0 +1,60 @@
+﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase008.ps1
+started_at: 2026-06-28T04:15:26.1404343Z
+finished_at: 2026-06-28T04:16:58.4577435Z
+exit_code: 0
+
+output:
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 104
+Running: .\loop-standard\scripts\Test-PluginInstall.ps1 
+Plugin install smoke test: OK
+Install root: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install
+Marketplace: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install\.agents\plugins\marketplace.json
+Plugin: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install\plugins\codex-loop-harness
+Shim: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\install\bin\ai-loop.ps1
+Running: .\loop-standard\scripts\Test-ValidateLoopFailures.ps1 
+Validate-loop failure fixtures: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-validate-loop-failures
+Cases checked: 7
+Running: .\loop-standard\scripts\Test-CollectLedgerIdempotence.ps1 
+powershell.exe : warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+At E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1:218 char:23
++ ...   $Output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Comm ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: unable...rmission denied:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Collect ledger idempotence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-collect-idempotence
+Running: .\loop-standard\scripts\Test-SchemaVersioning.ps1 
+Schema versioning test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-schema-versioning
+Cases checked: 7
+Running: .\loop-standard\scripts\Test-MigrateLoop.ps1 
+Migrate loop test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-migrate
+Cases checked: old-project, future-project, empty-project
+Running: .\loop-standard\scripts\Test-PhaseDecisions.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Phase decision test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-phase-decisions
+Cases checked: REWORK, BLOCKED, decision mismatch
+Running: .\loop-standard\scripts\Test-StateTransitions.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+State transition test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-state-transitions
+Cases checked: normal lifecycle, tampered latest transition
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-008 verification: OK
+
