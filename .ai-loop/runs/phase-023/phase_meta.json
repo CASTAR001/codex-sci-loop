@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-023",
+    "title":  "Add task-kind skill trigger fixtures",
+    "objective":  "Add fixture tests proving task kinds and skill profiles produce the expected required skill sets for full-stack and research workflows without over-triggering scientific skills.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-023",
+    "audit_input":  ".ai-loop/audits/phase-023-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-023-audit.md",
+    "base_commit":  "731613a8ff8fbfac66b543dec2f7ddecd74b3e41",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase023.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-023/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T18:31:12.3523791Z",
+    "evidence_collected_at":  "2026-06-28T19:01:19.7602835Z",
+    "audit_prepared_at":  "2026-06-28T19:01:31.9431313Z",
+    "accepted_at":  "2026-06-28T19:01:44.0273850Z"
+}

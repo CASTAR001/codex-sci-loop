@@ -1,0 +1,5 @@
+﻿loop-standard/docs/RELEASE_NOTES_1.0.md
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase023.ps1
+loop-standard/scripts/Test-TaskKindSkillTriggers.ps1
+

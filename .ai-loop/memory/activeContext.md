@@ -177,6 +177,11 @@ Root phase-022 added semantic migration transforms. `migrate` now reads
 top-level JSON merge, reports `semantic_transforms` in dry-run JSON, and records
 applied transform IDs in migration records. The initial transforms cover legacy
 `required_evidence`, `current_phase_id`, and `completed` status values.
+Root phase-023 added task-kind skill trigger fixtures. The harness now has
+tests proving `fullstack` does not require scientific skills by default, while
+`physics-research`, `data-analysis`, `research-writing`, `physics-sim`, and
+manual full-stack overrides produce the expected required skill sets in
+`phase_requirements.json` and Worker prompts.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -186,7 +191,7 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 ## Next Safe Action
 
 The next best optimization is richer recovery explanations from the append-only
-transition log, more full-stack/physics task-kind fixtures, or a user-approved
+transition log, a compact 1.0 release validation command, or a user-approved
 live global Codex plugin install/discovery test.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:

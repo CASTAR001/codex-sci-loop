@@ -65,6 +65,9 @@ It covers:
 - Migration dry-run text and JSON output.
 - Semantic migration transforms for legacy evidence fields, current phase
   reconstruction, and terminal success status naming.
+- Task-kind skill trigger fixtures for full-stack, physics research,
+  data-analysis, research-writing, research profiles, and manual skill
+  overrides.
 - Readiness text and JSON output.
 
 ## Operator Entry Points

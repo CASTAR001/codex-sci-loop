@@ -179,6 +179,11 @@ before top-level JSON merge, and records applied IDs in migration records.
 `Test-MigrateSemanticTransforms.ps1` covers legacy evidence-field repair,
 current-phase hydration, completed-to-accepted status mapping, dry-run no-write
 behavior, real migration, and no-op behavior for current projects.
+Root self-loop phase-023 added task-kind skill trigger fixtures.
+`Test-TaskKindSkillTriggers.ps1` proves `fullstack` starts without scientific
+skill requirements by default, while `physics-research`, `data-analysis`,
+`research-writing`, the `physics-sim` profile, and manual full-stack skill
+overrides produce the expected required skills and prompt content.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -240,6 +245,5 @@ The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
 Codex/plugin configuration. Good non-global next candidates are richer recovery
-explanations from the append-only transition log, more full-stack/physics
-task-kind fixtures, or a compact 1.0 release validation command that combines
-readiness, validation, and fixture summaries.
+explanations from the append-only transition log or a compact 1.0 release
+validation command that combines readiness, validation, and fixture summaries.

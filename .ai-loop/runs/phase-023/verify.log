@@ -1,0 +1,213 @@
+﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase023.ps1
+started_at: 2026-06-28T18:53:10.8770965Z
+finished_at: 2026-06-28T19:01:18.9289887Z
+exit_code: 0
+
+output:
+Running: .\loop-standard\scripts\Test-TaskKindSkillTriggers.ps1 
+Task-kind skill trigger test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-task-kind-skills\run-20260628185311667-22092-01616c92
+Cases checked: fullstack, physics-research, data-analysis, research-writing, physics-sim profile, manual extra skill
+Running: .\loop-standard\scripts\Test-Phase022.ps1 
+Running: .\loop-standard\scripts\Test-MigrateSemanticTransforms.ps1 
+Migrate semantic transforms test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-migrate-semantic\run-20260628185318301-27500-a7b00b28
+Cases checked: semantic dry-run, no-write dry-run, real migrate, no-op current project
+Running: .\loop-standard\scripts\Test-Phase021.ps1 
+Running: .\loop-standard\scripts\Test-ReleaseDocs.ps1 
+Release docs test: OK
+Running: .\loop-standard\scripts\Test-Phase020.ps1 
+Running: .\loop-standard\scripts\Test-Readiness.ps1 
+Readiness test: OK
+Running: .\loop-standard\scripts\Test-Phase019.ps1 
+Running: .\loop-standard\scripts\Test-PruneTempJson.ps1 
+Prune temp JSON test: OK
+Running: .\loop-standard\scripts\Test-Phase018.ps1 
+Running: .\loop-standard\scripts\Test-MigrateDryRun.ps1 
+Migrate dry-run test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-migrate-dry-run\run-20260628185358977-24612-38156252
+Cases checked: JSON plan, text plan, no writes, real migrate, future schema block
+Running: .\loop-standard\scripts\Test-Phase017.ps1 
+Running: .\loop-standard\scripts\Test-PruneTempFixtures.ps1 
+Prune temp fixtures test: OK
+Running: .\loop-standard\scripts\Test-Phase016.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-ResumeJson.ps1 
+powershell.exe : warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+At E:\codexfiles\loop\loop-standard\scripts\collect-evidence.ps1:223 char:23
++ ...   $Output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Comm ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: unable...rmission denied:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Resume JSON test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-resume-json\run-20260628185407197-32588-7d225f0d
+Cases checked: text compatibility, started JSON, blocked mismatch JSON, missing status JSON
+Running: .\loop-standard\scripts\Test-Phase015.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-AuditFindingExtraction.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+Audit finding extraction test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-audit-findings\run-20260628185412275-28948-c5f38ee4
+Cases checked: extraction, durable decision state, structured rework scaffold, missing findings validation
+Running: .\loop-standard\scripts\Test-Phase014.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-ExternalWorkerEvidence.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+External Worker evidence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-external-worker-evidence\run-20260628185421319-30956-c8b70fee
+Cases checked: missing external Worker evidence blocks; complete local evidence validates and appears in manifest/audit pack
+Running: .\loop-standard\scripts\Test-Phase013.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-ResumeDiagnostics.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Resume diagnostics test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-resume-diagnostics\run-20260628185430705-22888-44a44764
+Cases checked: started phase resume, transition/status mismatch BLOCKED
+Running: .\loop-standard\scripts\Test-Phase012.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-StartPhaseIdempotence.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Start phase idempotence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-start-idempotence\run-20260628185434843-24796-e4f5ccba
+Cases checked: forced restart refreshes status, prompt, evidence rows, artifact rows, and skill usage rows
+Running: .\loop-standard\scripts\Test-Phase011.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-TempIsolation.ps1 
+Temp isolation test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-temp-isolation\run-20260628185439337-32984-c469c04f
+Parallel install roots: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628185439785-21012-655c8872\install; E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628185439785-8224-a0d42cd7\install
+Running: .\loop-standard\scripts\Test-Phase010.ps1 
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 143
+Running: .\loop-standard\scripts\Test-PluginInstall.ps1 
+Plugin install smoke test: OK
+Install root: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628185443670-31844-ca257d66\install
+Marketplace: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628185443670-31844-ca257d66\install\.agents\plugins\marketplace.json
+Plugin: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628185443670-31844-ca257d66\install\plugins\codex-loop-harness
+Shim: E:\codexfiles\loop\.tmp-ai-loop-plugin-smoke\run-20260628185443670-31844-ca257d66\install\bin\ai-loop.ps1
+Running: .\loop-standard\scripts\Test-ValidateLoopFailures.ps1 
+Validate-loop failure fixtures: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-validate-loop-failures\run-20260628185446362-4028-752c4590
+Cases checked: 7
+Running: .\loop-standard\scripts\Test-CollectLedgerIdempotence.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Collect ledger idempotence test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-collect-idempotence\run-20260628185644504-5504-b71ab1a6
+Running: .\loop-standard\scripts\Test-SchemaVersioning.ps1 
+Schema versioning test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-schema-versioning\run-20260628185650596-35708-15a0aa20
+Cases checked: 7
+Running: .\loop-standard\scripts\Test-MigrateLoop.ps1 
+Migrate loop test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-migrate\run-20260628185655415-32680-f4070a09
+Cases checked: old-project, future-project, empty-project
+Running: .\loop-standard\scripts\Test-PhaseDecisions.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: in the working copy of 'verify.ps1', LF will be replaced by CRLF the next time Git touches it
+Phase decision test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-phase-decisions\run-20260628185659753-9000-fc309ee6
+Cases checked: REWORK, BLOCKED, decision mismatch
+Running: .\loop-standard\scripts\Test-StateTransitions.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+State transition test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-state-transitions\run-20260628185717877-35316-ee7eeba3
+Cases checked: normal lifecycle, tampered latest transition
+Running: .\loop-standard\scripts\Test-ReworkScaffold.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+Rework scaffold test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-rework-scaffold\run-20260628185726718-34780-f9d2139f
+Cases checked: REWORK scaffold, BLOCKED refusal
+Running: .\loop-standard\scripts\Test-SkillArtifactManifest.ps1 
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\Lenovo/.config/git/ignore': Permission denied
+Skill artifact manifest test: OK
+Fixture root: E:\codexfiles\loop\.tmp-ai-loop-skill-artifact-manifest\run-20260628185740091-24472-cd94019a
+Cases checked: recorded skill artifact, tampered hash, missing artifact
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-010 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-011 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-012 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-013 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-014 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-015 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-016 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-017 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-018 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-019 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-020 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-021 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-022 verification: OK
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-023 verification: OK
+

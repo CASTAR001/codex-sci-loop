@@ -233,6 +233,12 @@
   `Test-MigrateSemanticTransforms.ps1` plus `Test-Phase022.ps1`. The first
   transform set repairs legacy `required_evidence`, hydrates `current_phase`
   from `current_phase_id`, and maps legacy `completed` statuses to `accepted`.
+- Ran root self-loop phase-023 under the repository root `.ai-loop`: added
+  `Test-TaskKindSkillTriggers.ps1` and `Test-Phase023.ps1` to verify start-time
+  skill requirements for `fullstack`, `physics-research`, `data-analysis`,
+  `research-writing`, the `physics-sim` profile, and manual skill overrides.
+  This preserves a light full-stack default while proving physics/research work
+  automatically declares the required scientific workflow skills.
 
 ## In Progress
 
@@ -254,6 +260,8 @@
   migration model.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
+- Expand task-kind fixtures further only when new task kinds or skill profiles
+  are added.
 - Add new semantic migration transform types only when future schema changes
   require them, with fixture coverage before use.
 
