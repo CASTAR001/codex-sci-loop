@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "prune-temp", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "prune-temp", "readiness", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -697,6 +697,15 @@ switch ($Command) {
         if ($Json) { $ScriptParams.Json = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "prune-temp-fixtures.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "readiness" {
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+        }
+        if ($Json) { $ScriptParams.Json = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "check-readiness.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "doctor" {

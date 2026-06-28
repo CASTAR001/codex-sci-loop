@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-020",
+    "title":  "Add 1.0 readiness audit command",
+    "objective":  "Add a local ai-loop readiness command with text and JSON output that maps the 1.0 delivery goal to current kit/project evidence and reports blocking gaps without modifying global Codex configuration.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-020",
+    "audit_input":  ".ai-loop/audits/phase-020-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-020-audit.md",
+    "base_commit":  "6f6a3eca80e58059881ffb5ec3cdb239ac1a1001",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase020.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-020/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T16:30:09.0257368Z",
+    "evidence_collected_at":  "2026-06-28T17:01:26.7554049Z",
+    "audit_prepared_at":  "2026-06-28T17:01:42.1185934Z",
+    "accepted_at":  "2026-06-28T17:02:03.4175420Z"
+}

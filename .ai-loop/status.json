@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-019",
-                          "title":  "Add prune-temp JSON output",
-                          "objective":  "Add ai-loop prune-temp -Json so maintenance cleanup candidates and delete results can be consumed by scripts, hooks, CI, and plugins while preserving existing text output.",
+                          "phase_id":  "phase-020",
+                          "title":  "Add 1.0 readiness audit command",
+                          "objective":  "Add a local ai-loop readiness command with text and JSON output that maps the 1.0 delivery goal to current kit/project evidence and reports blocking gaps without modifying global Codex configuration.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-019",
-                          "audit_input":  ".ai-loop/audits/phase-019-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-019-audit.md",
-                          "base_commit":  "46a5ec94d4425dfcb8c8b415886eec49d56d7f8f",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase019.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-020",
+                          "audit_input":  ".ai-loop/audits/phase-020-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-020-audit.md",
+                          "base_commit":  "6f6a3eca80e58059881ffb5ec3cdb239ac1a1001",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase020.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "worker_profile":  "",
@@ -27,12 +27,12 @@
                           "required_worker_evidence":  [
 
                                                        ],
-                          "requirements":  ".ai-loop/runs/phase-019/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-020/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T15:58:35.8554334Z",
-                          "evidence_collected_at":  "2026-06-28T16:26:09.5025370Z",
-                          "audit_prepared_at":  "2026-06-28T16:26:26.7785280Z",
-                          "accepted_at":  "2026-06-28T16:26:35.8052866Z"
+                          "started_at":  "2026-06-28T16:30:09.0257368Z",
+                          "evidence_collected_at":  "2026-06-28T17:01:26.7554049Z",
+                          "audit_prepared_at":  "2026-06-28T17:01:42.1185934Z",
+                          "accepted_at":  "2026-06-28T17:02:03.4175420Z"
                       },
     "phases":  [
                    {
@@ -527,13 +527,43 @@
                        "evidence_collected_at":  "2026-06-28T16:26:09.5025370Z",
                        "audit_prepared_at":  "2026-06-28T16:26:26.7785280Z",
                        "accepted_at":  "2026-06-28T16:26:35.8052866Z"
+                   },
+                   {
+                       "phase_id":  "phase-020",
+                       "title":  "Add 1.0 readiness audit command",
+                       "objective":  "Add a local ai-loop readiness command with text and JSON output that maps the 1.0 delivery goal to current kit/project evidence and reports blocking gaps without modifying global Codex configuration.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-020",
+                       "audit_input":  ".ai-loop/audits/phase-020-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-020-audit.md",
+                       "base_commit":  "6f6a3eca80e58059881ffb5ec3cdb239ac1a1001",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase020.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-020/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T16:30:09.0257368Z",
+                       "evidence_collected_at":  "2026-06-28T17:01:26.7554049Z",
+                       "audit_prepared_at":  "2026-06-28T17:01:42.1185934Z",
+                       "accepted_at":  "2026-06-28T17:02:03.4175420Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-019",
+                          "phase_id":  "phase-020",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-019-audit.md",
-                          "decided_at":  "2026-06-28T16:26:35.8052866Z"
+                          "audit":  ".ai-loop/audits/phase-020-audit.md",
+                          "decided_at":  "2026-06-28T17:02:03.4175420Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

@@ -161,6 +161,12 @@ prune-temp -Json` now emits parseable cleanup summaries for dry-run and forced
 delete modes, including candidates, deleted rows, skipped paths, counts,
 retention settings, cutoff, and generated timestamp. Existing text output is
 preserved, and `Test-PruneTempJson.ps1` covers JSON purity and delete results.
+Root phase-020 added a read-only 1.0 readiness command. `ai-loop -Command
+readiness` now emits text or JSON readiness reports that map the delivery goal
+to current kit/project evidence, including core scripts, templates, project
+`.ai-loop`, evidence/state support, plugin scaffold, documentation, test
+matrix files, and loop-wide validation. Real global Codex plugin discovery is a
+warning until the user explicitly approves modifying global config.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -169,7 +175,7 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is a 1.0 readiness audit/checklist command, or
+The next best optimization is 1.0 release-note/operator-checklist polish, or
 deeper semantic migration steps for future schema versions that require more
 than template repair and top-level JSON merging.
 Real global Codex plugin installation validation still requires explicit user

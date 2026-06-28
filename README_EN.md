@@ -193,6 +193,24 @@ object includes `current_phase`, `missing_evidence`, `artifact_manifest`,
 `transitions`, `next_safe_action`, `next_safe_command`, and
 `recovery_decision`.
 
+Check whether a project and this kit are ready for a 1.0 delivery claim:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project
+```
+
+Use JSON for automation:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project -Json
+```
+
+`readiness` is read-only. It checks kit scripts, templates, project `.ai-loop`,
+evidence integrity, state-machine support, plugin scaffold, test matrix, and
+loop-wide validation. Real global Codex plugin discovery modifies the user
+environment, so without explicit approval it is reported as a warning rather
+than silently passing or mutating global config.
+
 When tests or dogfood runs leave many ignored `.tmp-ai-loop-*` directories,
 inspect prune candidates with the default dry-run mode:
 
@@ -364,6 +382,9 @@ Recent checks passed:
 - `Test-MigrateDryRun.ps1`, which verifies `migrate -DryRun` and
   `-DryRun -Json` planning, no-write behavior, future-schema blocking, and
   real migration after planning.
+- `Test-Readiness.ps1`, which verifies readiness text/JSON output, no failing
+  checks for the root project, and parseable `blocked` JSON when `.ai-loop` is
+  missing.
 - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
   structure, `status.json`, phase references, accepted/rework/blocked audits,
   recovery-critical files, and schema versions.

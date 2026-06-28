@@ -45,6 +45,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 li
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 start "C:\path\to\project" phase-001 -TaskKind physics-research -SkillProfile physics-sim
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 worker-preflight "C:\path\to\project" phase-001 -WorkerProfile kimi-code -Yolo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 invoke-worker "C:\path\to\project" phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 readiness "C:\path\to\project" -Json
 ```
 
 The lower-level scripts remain available for compatibility, but new workflows
@@ -170,6 +171,21 @@ match the recorded SHA256.
 
 If `phase_requirements.json` declares required external Worker evidence,
 `collect` also records the preflight and invocation artifacts in the manifest.
+
+Use the readiness command when deciding whether a project and this kit are close
+to a 1.0 delivery claim:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command readiness `
+  -ProjectRoot "C:\path\to\project"
+```
+
+Add `-Json` for scripts, hooks, CI, and plugin checks. The command is read-only:
+it reports blocking gaps and warnings across kit files, templates, project
+`.ai-loop`, evidence/state support, plugin scaffold, tests, and loop-wide
+validation. Real global Codex plugin discovery remains a warning unless the user
+explicitly approves modifying global Codex configuration.
 
 Test fixtures use ignored `.tmp-ai-loop-*` parent directories, but default test
 runs create unique `run-<timestamp>-<pid>-<id>` children. This keeps smoke and

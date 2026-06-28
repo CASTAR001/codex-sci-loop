@@ -155,6 +155,13 @@ now emits parseable cleanup summaries for dry-run and forced delete modes,
 including candidates, deleted rows, skipped paths, retention settings, counts,
 and timestamp. `Test-PruneTempJson.ps1` verifies JSON output remains pure and
 that `-Force -Json` deletes only the old run while retaining the newest run.
+Root self-loop phase-020 added `ai-loop -Command readiness`. The read-only
+command emits text or JSON readiness reports for kit/project evidence, including
+core scripts, templates, project `.ai-loop`, evidence/state support, plugin
+scaffold, docs, test matrix files, and loop-wide validation. It reports real
+global Codex plugin discovery as a warning unless the user explicitly approves
+modifying global config. `Test-Readiness.ps1` covers root readiness, parseable
+JSON, and blocked JSON when `.ai-loop` is missing.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -210,10 +217,11 @@ fixtures, schema compatibility checks, explicit non-destructive migration,
 append-only state transition logs, durable REWORK/BLOCKED outcomes, external
 Worker evidence requirements, structured audit finding extraction,
 machine-readable resume output, safe temp fixture pruning, migration dry-run
-planning, and machine-readable temp cleanup output are now in place.
+planning, machine-readable temp cleanup output, and a read-only 1.0 readiness
+command are now in place.
 The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are a 1.0 readiness
-audit/checklist command or deeper semantic migration support for future schema
-versions.
+Codex/plugin configuration. Good non-global next candidates are 1.0 release
+notes/operator checklist polish or deeper semantic migration support for future
+schema versions.

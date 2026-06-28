@@ -209,6 +209,14 @@
   skipped paths, and counts, while existing text output remains covered.
   `Test-PruneTempJson.ps1` and `Test-Phase019.ps1` cover parseable dry-run and
   force JSON output without mixed human-readable text.
+- Ran root self-loop phase-020 under the repository root `.ai-loop`: added
+  `check-readiness.ps1` and `ai-loop -Command readiness` with text and JSON
+  output. The read-only command maps the 1.0 delivery goal to current kit and
+  project evidence, reports blocking gaps versus warnings, runs loop-wide
+  validation, and treats real global Codex plugin discovery as a warning until
+  the user explicitly approves modifying global configuration. `Test-Readiness.ps1`
+  and `Test-Phase020.ps1` cover root readiness, parseable JSON, missing
+  `.ai-loop` blocked JSON, and the previous non-global matrix.
 
 ## In Progress
 
@@ -230,8 +238,8 @@
   migration model.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Add a 1.0 readiness audit/checklist command that maps the project goal to
-  current evidence and reports remaining gaps without modifying global config.
+- Prepare 1.0 release notes / operator checklist, or add deeper semantic
+  migration support for future schema versions.
 
 ## Last Updated
 
