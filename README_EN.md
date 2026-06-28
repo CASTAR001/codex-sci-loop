@@ -229,6 +229,20 @@ Use loop-wide validation when recovering or checking the whole control plane:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
 ```
 
+If an older project is blocked because its schema manifest is missing, its
+schema version is old, or template files are missing, run the non-destructive
+migration command first:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project
+```
+
+`migrate` fills missing templates, merges missing JSON properties, updates
+schema markers, and writes records under `.ai-loop/schema/migration-records/`
+plus `.ai-loop/schema/migration-log.md`. It does not overwrite project memory,
+evidence ledgers, or business files. Future schema versions are blocked unless
+the Supervisor explicitly uses `-Force`.
+
 `.ai-loop/schema/schema-version.json` records the current control-plane schema,
 minimum supported version, latest version, and `status.json` state-file schema.
 `validate-loop` blocks missing schema manifests, unsupported old versions,

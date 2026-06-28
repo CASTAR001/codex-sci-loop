@@ -1,0 +1,24 @@
+﻿{
+    "phase_id":  "phase-007",
+    "title":  "Add non-destructive loop migration",
+    "objective":  "Add a migrate command that upgrades existing .ai-loop projects to the current schema without overwriting project memory or evidence, with fixture tests proving before/after validation.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-007",
+    "audit_input":  ".ai-loop/audits/phase-007-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-007-audit.md",
+    "base_commit":  "922bbaf9636385c6ff86df434fe5934852074d55",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase007.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "requirements":  ".ai-loop/runs/phase-007/phase_requirements.json",
+    "started_at":  "2026-06-28T01:49:08.0801684Z",
+    "evidence_collected_at":  "2026-06-28T03:53:07.0668834Z",
+    "audit_prepared_at":  "2026-06-28T03:53:52.2444053Z",
+    "accepted_at":  "2026-06-28T03:54:02.6236223Z"
+}

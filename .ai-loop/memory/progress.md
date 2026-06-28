@@ -126,6 +126,12 @@
   `validate-loop.ps1` require matching audits and `rework.txt` / `blocked.txt`,
   added `Test-PhaseDecisions.ps1`, and documented non-accepted decisions in the
   README files and plugin skills.
+- Ran root self-loop phase-007 under the repository root `.ai-loop`: added
+  `migrate-loop.ps1` and `ai-loop -Command migrate` for non-destructive upgrades
+  of existing `.ai-loop` projects, updated installed shims and docs, added
+  `Test-MigrateLoop.ps1` covering old-project repair, project memory
+  preservation, future-schema blocking, and missing `.ai-loop` rejection, and
+  added `Test-Phase007.ps1` as the current non-global verification matrix.
 
 ## In Progress
 
@@ -148,11 +154,11 @@
   collect-time evidence rows.
 - Make start-time Markdown ledger rows idempotent like collect-time evidence
   rows, or explicitly document why start rows are append-only.
-- Decide whether explicit in-place migration commands are needed for old
-  `.ai-loop` projects before 1.0, or whether detect-and-block is sufficient.
 - Decide whether `REWORK` should optionally scaffold a follow-up phase from the
   audit findings.
+- Decide whether future schema upgrades require deep semantic migration
+  transforms beyond phase-007's top-level JSON merge and template repair.
 
 ## Last Updated
 
-2026-06-27
+2026-06-28

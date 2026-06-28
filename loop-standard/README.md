@@ -168,6 +168,20 @@ control-plane schema, minimum supported schema, latest schema, and the
 unsupported old projects, future schema versions, and config/status schema
 mismatches so upgrades are explicit rather than guessed from chat history.
 
+Upgrade an existing project non-destructively with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command migrate `
+  -ProjectRoot "C:\path\to\project"
+```
+
+`migrate` copies missing template files, merges missing top-level JSON
+properties, upgrades schema markers, writes `.ai-loop/schema/migration-records/`,
+and appends `.ai-loop/schema/migration-log.md`. It preserves project memory,
+evidence ledgers, and business files. A future schema version is blocked unless
+the Supervisor explicitly passes `-Force`.
+
 ## Quick Start In A Project
 
 From this kit directory:

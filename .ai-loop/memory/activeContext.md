@@ -83,6 +83,15 @@ decide` now records `REWORK` and `BLOCKED` audit outcomes into `status.json`,
 terminal `rework` and `blocked` states. `Test-PhaseDecisions.ps1` covers
 REWORK, BLOCKED, resume reconstruction, loop validation, and decision/audit
 mismatch rejection.
+Root phase-007 added explicit non-destructive migration for existing `.ai-loop`
+projects. `ai-loop -Command migrate` now fills missing template files, merges
+missing top-level JSON properties, upgrades schema markers, writes migration
+records and backups under `.ai-loop/schema/migration-records/`, appends
+`migration-log.md`, records an event-log entry, and blocks future schemas unless
+`-Force` is explicit. `Test-MigrateLoop.ps1` covers old-project repair,
+project memory preservation, missing-template restoration, future-schema
+blocking, and missing `.ai-loop` rejection. `Test-Phase007.ps1` is the current
+non-global verification matrix.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -91,9 +100,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is stricter state transition logs, explicit migration
-commands for old `.ai-loop` projects, or deciding whether start-time Markdown
-ledger rows should become idempotent like collect-time evidence rows.
+The next best optimization is stricter state transition logs, optional rework
+phase scaffolding, skill artifact manifest integration, or deciding whether
+start-time Markdown ledger rows should become idempotent like collect-time
+evidence rows.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
@@ -116,5 +126,5 @@ approval. Before further harness changes, review:
   `phase_requirements.json` for phases that use an external Worker?
 - Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`
   as well as `collect-evidence.ps1`?
-- Should a future phase implement explicit in-place migration commands for old
-  `.ai-loop` projects, or keep first 1.0 migration handling as detect-and-block?
+- Should `migrate` eventually support deep semantic transforms for future schema
+  versions instead of only top-level JSON merge plus template repair?

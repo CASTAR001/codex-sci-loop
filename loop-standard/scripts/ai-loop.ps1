@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -151,6 +151,13 @@ switch ($Command) {
             }
         }
         Write-Output "Initialized agent skill directory if writable: $AgentSkillsDir"
+    }
+    "migrate" {
+        $ScriptParams = @{ ProjectRoot = $ProjectRoot }
+        if ($Force) { $ScriptParams.Force = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "migrate-loop.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
     }
     "start" {
         Require-PhaseId

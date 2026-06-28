@@ -3,9 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-006 have
-been accepted. Root phase-006 added durable `REWORK` / `BLOCKED` phase
-decisions.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-007 have
+been accepted. Root phase-007 added non-destructive `.ai-loop` migration.
 
 ## Last Verified State
 
@@ -73,6 +72,16 @@ Root self-loop phase-006 added `decide-phase.ps1` and exposed it as
 `event-log.ndjson`. `validate-loop.ps1` validates those non-accepted terminal
 states, and `Test-PhaseDecisions.ps1` proves REWORK, BLOCKED, resume recovery,
 and decision mismatch rejection.
+Root self-loop phase-007 added `migrate-loop.ps1` and exposed it as
+`ai-loop -Command migrate`. Existing `.ai-loop` projects can now be repaired
+without overwriting project memory or evidence: missing template files are
+copied, missing top-level JSON properties are merged, schema markers are
+upgraded, migration backups and records are written under
+`.ai-loop/schema/migration-records/`, and `event-log.ndjson` gets a migration
+event. `Test-MigrateLoop.ps1` proves old-project repair, project memory
+preservation, missing-template restoration, future-schema blocking, and missing
+`.ai-loop` rejection. `Test-Phase007.ps1` is the current non-global verification
+matrix.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -122,12 +131,11 @@ integrity source for required phase evidence.
 
 ## Next Safe Action
 
-Repo-local plugin install/discovery smoke testing and validate-loop negative
-fixture testing are now in place, and schema/migration compatibility is
-detectable through `validate-loop`. Durable REWORK/BLOCKED outcomes are now
-recoverable from files. The remaining plugin-form stability step is a live
-global Codex plugin install/discovery test, which must wait for explicit user
-approval because it modifies real Codex/plugin configuration. Good non-global
-next candidates are stricter state transition logs, explicit migration commands
-for old projects, optional rework phase scaffolding, or start-phase ledger
-idempotence.
+Repo-local plugin install/discovery smoke testing, validate-loop negative
+fixtures, schema compatibility checks, explicit non-destructive migration, and
+durable REWORK/BLOCKED outcomes are now in place. The remaining plugin-form
+stability step is a live global Codex plugin install/discovery test, which must
+wait for explicit user approval because it modifies real Codex/plugin
+configuration. Good non-global next candidates are stricter state transition
+logs, optional rework phase scaffolding, skill artifact manifest integration, or
+start-phase ledger idempotence.

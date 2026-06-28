@@ -116,7 +116,7 @@ if ($CreateShim) {
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = `$true, Position = 0)]
-    [ValidateSet("init", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "resume", "link-skills", "worker-preflight", "invoke-worker", "doctor")]
     [string]`$Command,
 
     [Parameter(Position = 1)]

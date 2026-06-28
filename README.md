@@ -196,6 +196,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
 ```
 
+如果旧项目因为缺少 schema manifest、schema 版本过旧或模板文件缺失而被阻断，先运行非破坏迁移：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project
+```
+
+`migrate` 只补齐缺失模板、合并缺失 JSON 字段、升级 schema 标记，并写入
+`.ai-loop/schema/migration-records/` 与 `.ai-loop/schema/migration-log.md`。
+它不会覆盖已有项目记忆、证据 ledger 或业务文件。遇到未来版本 schema 时会阻断，
+除非 Supervisor 显式使用 `-Force` 并承担审计责任。
+
 `.ai-loop/schema/schema-version.json` 记录当前 control-plane schema、支持的
 最小版本、最新版本和 `status.json` 状态文件格式版本。
 `validate-loop` 会阻断缺失 schema manifest、过旧版本、未来版本和

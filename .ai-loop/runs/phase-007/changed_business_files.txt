@@ -1,0 +1,10 @@
+﻿loop-standard/README.md
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/install-global.ps1
+loop-standard/scripts/migrate-loop.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-MigrateLoop.ps1
+loop-standard/scripts/Test-Phase007.ps1
+README.md
+README_EN.md
+
