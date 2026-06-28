@@ -167,6 +167,11 @@ to current kit/project evidence, including core scripts, templates, project
 `.ai-loop`, evidence/state support, plugin scaffold, documentation, test
 matrix files, and loop-wide validation. Real global Codex plugin discovery is a
 warning until the user explicitly approves modifying global config.
+Root phase-021 added 1.0 release notes and an operator checklist. The release
+notes document the current `ready_with_warnings` status, the verified matrix,
+non-goals, and the remaining `PLUGIN-GLOBAL` warning. The operator checklist
+gives concrete commands for install preparation, initialization, skill linking,
+phase start, external Worker evidence, audit, recovery, and readiness checks.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -175,9 +180,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is 1.0 release-note/operator-checklist polish, or
-deeper semantic migration steps for future schema versions that require more
-than template repair and top-level JSON merging.
+The next best optimization is deeper semantic migration support for future
+schema versions that require more than template repair and top-level JSON
+merging, or a user-approved live global Codex plugin install/discovery test.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

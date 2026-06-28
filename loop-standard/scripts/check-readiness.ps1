@@ -123,6 +123,8 @@ foreach ($Entry in @(
     @{ Id = "DOC-CN"; Root = $RepoRoot; Path = "README.md"; Requirement = "Chinese operator README exists." },
     @{ Id = "DOC-EN"; Root = $RepoRoot; Path = "README_EN.md"; Requirement = "English README exists." },
     @{ Id = "DOC-RUNBOOK"; Root = $KitRoot; Path = "docs/OPERATOR_RUNBOOK.md"; Requirement = "Operator runbook exists." },
+    @{ Id = "DOC-CHECKLIST-1.0"; Root = $KitRoot; Path = "docs/OPERATOR_CHECKLIST_1.0.md"; Requirement = "1.0 operator checklist exists." },
+    @{ Id = "DOC-RELEASE-1.0"; Root = $KitRoot; Path = "docs/RELEASE_NOTES_1.0.md"; Requirement = "1.0 release notes exist." },
     @{ Id = "DOC-BOUNDARY"; Root = $KitRoot; Path = "docs/AGENTS_VS_AI_LOOP_BOUNDARY.md"; Requirement = ".agents versus .ai-loop boundary is documented." },
     @{ Id = "DOC-WORKER"; Root = $KitRoot; Path = "docs/EXTERNAL_WORKER_PROTOCOL.md"; Requirement = "External Worker protocol is documented." }
 )) {

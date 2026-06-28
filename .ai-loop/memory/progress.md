@@ -217,6 +217,14 @@
   the user explicitly approves modifying global configuration. `Test-Readiness.ps1`
   and `Test-Phase020.ps1` cover root readiness, parseable JSON, missing
   `.ai-loop` blocked JSON, and the previous non-global matrix.
+- Ran root self-loop phase-021 under the repository root `.ai-loop`: added
+  `loop-standard/docs/RELEASE_NOTES_1.0.md` and
+  `loop-standard/docs/OPERATOR_CHECKLIST_1.0.md`, linked them from the Chinese
+  and English root README files and `loop-standard/README.md`, extended
+  readiness checks for the release/operator docs, and added
+  `Test-ReleaseDocs.ps1` plus `Test-Phase021.ps1`. The release notes preserve
+  `PLUGIN-GLOBAL` as a warning because live global Codex plugin discovery has
+  not been approved for real global configuration.
 
 ## In Progress
 
@@ -238,9 +246,9 @@
   migration model.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Prepare 1.0 release notes / operator checklist, or add deeper semantic
-  migration support for future schema versions.
+- Add deeper semantic migration support for future schema versions when a
+  schema change needs more than template repair and top-level JSON merging.
 
 ## Last Updated
 
-2026-06-28
+2026-06-29

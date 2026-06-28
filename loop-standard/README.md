@@ -33,6 +33,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-LoopStand
 After `pilot-project/` exists, add `-AllowPilotProject`.
 
 For global migration planning, read `docs/GLOBAL_INSTALL_PLAN.md`.
+For 1.0 delivery notes and the operator checklist, read
+`docs/RELEASE_NOTES_1.0.md` and `docs/OPERATOR_CHECKLIST_1.0.md`.
 
 ## Unified Command
 

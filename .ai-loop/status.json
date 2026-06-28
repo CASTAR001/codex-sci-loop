@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-020",
-                          "title":  "Add 1.0 readiness audit command",
-                          "objective":  "Add a local ai-loop readiness command with text and JSON output that maps the 1.0 delivery goal to current kit/project evidence and reports blocking gaps without modifying global Codex configuration.",
+                          "phase_id":  "phase-021",
+                          "title":  "Add 1.0 release notes and operator checklist",
+                          "objective":  "Add release-facing 1.0 notes and an operator checklist that summarize scope, verification, known warnings, install/use steps, and non-goals for the local-first loop harness.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-020",
-                          "audit_input":  ".ai-loop/audits/phase-020-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-020-audit.md",
-                          "base_commit":  "6f6a3eca80e58059881ffb5ec3cdb239ac1a1001",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase020.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-021",
+                          "audit_input":  ".ai-loop/audits/phase-021-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-021-audit.md",
+                          "base_commit":  "c2668217de0e424840fdd27e6c4aef07288eb9f7",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase021.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "worker_profile":  "",
@@ -27,12 +27,12 @@
                           "required_worker_evidence":  [
 
                                                        ],
-                          "requirements":  ".ai-loop/runs/phase-020/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-021/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T16:30:09.0257368Z",
-                          "evidence_collected_at":  "2026-06-28T17:01:26.7554049Z",
-                          "audit_prepared_at":  "2026-06-28T17:01:42.1185934Z",
-                          "accepted_at":  "2026-06-28T17:02:03.4175420Z"
+                          "started_at":  "2026-06-28T17:05:26.7599630Z",
+                          "evidence_collected_at":  "2026-06-28T17:41:09.9499666Z",
+                          "audit_prepared_at":  "2026-06-28T17:41:23.1802022Z",
+                          "accepted_at":  "2026-06-28T17:41:33.1442203Z"
                       },
     "phases":  [
                    {
@@ -557,13 +557,43 @@
                        "evidence_collected_at":  "2026-06-28T17:01:26.7554049Z",
                        "audit_prepared_at":  "2026-06-28T17:01:42.1185934Z",
                        "accepted_at":  "2026-06-28T17:02:03.4175420Z"
+                   },
+                   {
+                       "phase_id":  "phase-021",
+                       "title":  "Add 1.0 release notes and operator checklist",
+                       "objective":  "Add release-facing 1.0 notes and an operator checklist that summarize scope, verification, known warnings, install/use steps, and non-goals for the local-first loop harness.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-021",
+                       "audit_input":  ".ai-loop/audits/phase-021-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-021-audit.md",
+                       "base_commit":  "c2668217de0e424840fdd27e6c4aef07288eb9f7",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase021.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-021/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T17:05:26.7599630Z",
+                       "evidence_collected_at":  "2026-06-28T17:41:09.9499666Z",
+                       "audit_prepared_at":  "2026-06-28T17:41:23.1802022Z",
+                       "accepted_at":  "2026-06-28T17:41:33.1442203Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-020",
+                          "phase_id":  "phase-021",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-020-audit.md",
-                          "decided_at":  "2026-06-28T17:02:03.4175420Z"
+                          "audit":  ".ai-loop/audits/phase-021-audit.md",
+                          "decided_at":  "2026-06-28T17:41:33.1442203Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

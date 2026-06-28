@@ -162,6 +162,15 @@ scaffold, docs, test matrix files, and loop-wide validation. It reports real
 global Codex plugin discovery as a warning unless the user explicitly approves
 modifying global config. `Test-Readiness.ps1` covers root readiness, parseable
 JSON, and blocked JSON when `.ai-loop` is missing.
+Root self-loop phase-021 added 1.0 release notes and an operator checklist.
+`loop-standard/docs/RELEASE_NOTES_1.0.md` records the current
+`ready_with_warnings` release posture, verified matrix, non-goals, and the
+remaining `PLUGIN-GLOBAL` warning. `loop-standard/docs/OPERATOR_CHECKLIST_1.0.md`
+gives operators copyable commands and confirmation checks for initialization,
+skill linking, phase start, external Worker evidence, collection, audit,
+recovery, and readiness. `Test-ReleaseDocs.ps1` and `Test-Phase021.ps1` cover
+the release-facing docs and aggregate the current non-global verification
+matrix.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -222,6 +231,6 @@ command are now in place.
 The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are 1.0 release
-notes/operator checklist polish or deeper semantic migration support for future
-schema versions.
+Codex/plugin configuration. Good non-global next candidates are deeper semantic
+migration support for future schema versions, richer recovery explanations from
+the append-only transition log, or more full-stack/physics task-kind fixtures.

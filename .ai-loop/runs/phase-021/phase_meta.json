@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-021",
+    "title":  "Add 1.0 release notes and operator checklist",
+    "objective":  "Add release-facing 1.0 notes and an operator checklist that summarize scope, verification, known warnings, install/use steps, and non-goals for the local-first loop harness.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-021",
+    "audit_input":  ".ai-loop/audits/phase-021-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-021-audit.md",
+    "base_commit":  "c2668217de0e424840fdd27e6c4aef07288eb9f7",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase021.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-021/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T17:05:26.7599630Z",
+    "evidence_collected_at":  "2026-06-28T17:41:09.9499666Z",
+    "audit_prepared_at":  "2026-06-28T17:41:23.1802022Z",
+    "accepted_at":  "2026-06-28T17:41:33.1442203Z"
+}

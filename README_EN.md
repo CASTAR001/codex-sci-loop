@@ -33,7 +33,9 @@ Important pieces:
 - `scripts/link-skills.ps1`: links shared skills into a project `.agents/skills/`.
 - `scripts/ai-loop.ps1`: the recommended unified entrypoint.
 
-Use `loop-standard/README.md` for lower-level script details.
+Use `loop-standard/README.md` for lower-level script details. Use
+`loop-standard/docs/RELEASE_NOTES_1.0.md` and
+`loop-standard/docs/OPERATOR_CHECKLIST_1.0.md` for the 1.0 delivery surface.
 
 ### `.ai-loop/`
 
