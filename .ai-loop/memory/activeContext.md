@@ -172,6 +172,11 @@ notes document the current `ready_with_warnings` status, the verified matrix,
 non-goals, and the remaining `PLUGIN-GLOBAL` warning. The operator checklist
 gives concrete commands for install preparation, initialization, skill linking,
 phase start, external Worker evidence, audit, recovery, and readiness checks.
+Root phase-022 added semantic migration transforms. `migrate` now reads
+`.ai-loop/schema/migration-transforms.json`, applies known legacy repairs before
+top-level JSON merge, reports `semantic_transforms` in dry-run JSON, and records
+applied transform IDs in migration records. The initial transforms cover legacy
+`required_evidence`, `current_phase_id`, and `completed` status values.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -180,9 +185,9 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is deeper semantic migration support for future
-schema versions that require more than template repair and top-level JSON
-merging, or a user-approved live global Codex plugin install/discovery test.
+The next best optimization is richer recovery explanations from the append-only
+transition log, more full-stack/physics task-kind fixtures, or a user-approved
+live global Codex plugin install/discovery test.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

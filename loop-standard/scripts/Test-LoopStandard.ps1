@@ -37,6 +37,7 @@ $RequiredPaths = @(
     "templates\.ai-loop\loop.config.json",
     "templates\.ai-loop\status.json",
     "templates\.ai-loop\schema\schema-version.json",
+    "templates\.ai-loop\schema\migration-transforms.json",
     "templates\.ai-loop\schema\migration-log.md",
     "templates\.ai-loop\runs\README.md",
     "templates\.ai-loop\audits\README.md",
@@ -65,6 +66,7 @@ $RequiredPaths = @(
     ".ai-loop\loop.config.json",
     ".ai-loop\status.json",
     ".ai-loop\schema\schema-version.json",
+    ".ai-loop\schema\migration-transforms.json",
     ".ai-loop\schema\migration-log.md",
     ".ai-loop\evidence\README.md",
     ".ai-loop\evidence\evidence-ledger.md",
@@ -145,6 +147,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase020.ps1",
     "scripts\Test-ReleaseDocs.ps1",
     "scripts\Test-Phase021.ps1",
+    "scripts\Test-MigrateSemanticTransforms.ps1",
+    "scripts\Test-Phase022.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -170,7 +174,7 @@ foreach ($RelativePath in $RequiredPaths) {
     Test-RequiredPath -RelativePath $RelativePath
 }
 
-foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.json", ".ai-loop\evidence\artifact-manifest.json", ".ai-loop\schema\schema-version.json", "templates\.ai-loop\loop.config.json", "templates\.ai-loop\status.json", "templates\.ai-loop\evidence\artifact-manifest.json", "templates\.ai-loop\schema\schema-version.json")) {
+foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.json", ".ai-loop\evidence\artifact-manifest.json", ".ai-loop\schema\schema-version.json", ".ai-loop\schema\migration-transforms.json", "templates\.ai-loop\loop.config.json", "templates\.ai-loop\status.json", "templates\.ai-loop\evidence\artifact-manifest.json", "templates\.ai-loop\schema\schema-version.json", "templates\.ai-loop\schema\migration-transforms.json")) {
     $JsonPath = Join-Path $KitRoot $JsonRelativePath
     if (Test-Path -LiteralPath $JsonPath) {
         try {
@@ -315,7 +319,7 @@ if (Test-Path -LiteralPath $RecordTransitionScriptPath -PathType Leaf) {
 $MigrateScriptPath = Join-Path $KitRoot "scripts\migrate-loop.ps1"
 if (Test-Path -LiteralPath $MigrateScriptPath -PathType Leaf) {
     $MigrateText = Get-Content -LiteralPath $MigrateScriptPath -Raw
-    foreach ($Needle in @("migration-record.json", "schema_version", "Merge-TemplateDirectory", "event-log.ndjson", "Cannot migrate future schema")) {
+    foreach ($Needle in @("migration-record.json", "schema_version", "Merge-TemplateDirectory", "event-log.ndjson", "Cannot migrate future schema", "Invoke-SemanticTransforms", "semantic_transforms", "migration-transforms.json")) {
         if ($MigrateText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "migrate-loop.ps1 missing expected migration text: $Needle"
         }

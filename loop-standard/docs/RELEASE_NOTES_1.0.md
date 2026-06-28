@@ -32,7 +32,8 @@ place.
 - Append-only state transition log and recovery diagnostics.
 - Machine-readable JSON for `resume`, `migrate -DryRun`, `prune-temp`, and
   `readiness`.
-- Non-destructive migration with dry-run planning for older `.ai-loop` projects.
+- Non-destructive migration with dry-run planning and semantic transforms for
+  older `.ai-loop` projects.
 - Project-local evolution file that does not override governance until promoted.
 - Repo-local Codex plugin scaffold and temporary install/discovery smoke test.
 
@@ -62,6 +63,8 @@ It covers:
 - Structured audit finding extraction.
 - Safe temp fixture pruning with text and JSON output.
 - Migration dry-run text and JSON output.
+- Semantic migration transforms for legacy evidence fields, current phase
+  reconstruction, and terminal success status naming.
 - Readiness text and JSON output.
 
 ## Operator Entry Points

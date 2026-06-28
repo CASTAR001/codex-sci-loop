@@ -59,6 +59,124 @@ function Set-JsonProperty {
     }
 }
 
+function Test-SchemaVersionLessThan {
+    param(
+        [Parameter(Mandatory = $true)][string]$Current,
+        [Parameter(Mandatory = $true)][string]$Threshold
+    )
+    if ([string]::IsNullOrWhiteSpace($Current) -or $Current -eq "missing") {
+        return $false
+    }
+    return ([version]$Current -lt [version]$Threshold)
+}
+
+function Get-MigrationTransforms {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return @()
+    }
+    $Registry = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    if ($null -eq $Registry.PSObject.Properties["transforms"]) {
+        return @()
+    }
+    return @($Registry.transforms)
+}
+
+function Test-TransformApplies {
+    param(
+        [Parameter(Mandatory = $true)]$Transform,
+        [Parameter(Mandatory = $true)][string]$CurrentSchemaVersion
+    )
+    $LessThan = Get-ObjectStringProperty -Object $Transform -Name "applies_when_schema_less_than"
+    if (-not [string]::IsNullOrWhiteSpace($LessThan)) {
+        return (Test-SchemaVersionLessThan -Current $CurrentSchemaVersion -Threshold $LessThan)
+    }
+    return $true
+}
+
+function Invoke-SemanticTransforms {
+    param(
+        [AllowNull()]$Config,
+        [AllowNull()]$Status,
+        [Parameter(Mandatory = $true)]$Transforms,
+        [Parameter(Mandatory = $true)][string]$CurrentSchemaVersion
+    )
+    $TransformActions = New-Object System.Collections.Generic.List[string]
+    $TransformIds = New-Object System.Collections.Generic.List[string]
+
+    foreach ($Transform in @($Transforms)) {
+        if (-not (Test-TransformApplies -Transform $Transform -CurrentSchemaVersion $CurrentSchemaVersion)) {
+            continue
+        }
+        $Id = Get-ObjectStringProperty -Object $Transform -Name "id"
+        $Type = Get-ObjectStringProperty -Object $Transform -Name "type"
+        $Target = Get-ObjectStringProperty -Object $Transform -Name "target"
+        if ([string]::IsNullOrWhiteSpace($Id)) {
+            $Id = "unnamed-transform"
+        }
+
+        if ($Target -eq "loop.config.json" -and $null -eq $Config) { continue }
+        if ($Target -eq "status.json" -and $null -eq $Status) { continue }
+
+        if ($Type -eq "copy_property_if_missing") {
+            $Object = if ($Target -eq "loop.config.json") { $Config } else { $Status }
+            $From = Get-ObjectStringProperty -Object $Transform -Name "from"
+            $To = Get-ObjectStringProperty -Object $Transform -Name "to"
+            if ($null -ne $Object.PSObject.Properties[$From] -and $null -eq $Object.PSObject.Properties[$To]) {
+                Set-JsonProperty -Object $Object -Name $To -Value $Object.$From
+                $TransformIds.Add($Id)
+                $TransformActions.Add("semantic transform ${Id}: copied $From to $To in $Target")
+            }
+            continue
+        }
+
+        if ($Type -eq "hydrate_current_phase_from_phase_id") {
+            if ($null -eq $Status) { continue }
+            $PhaseId = Get-ObjectStringProperty -Object $Status -Name "current_phase_id"
+            $HasCurrentPhase = ($null -ne $Status.PSObject.Properties["current_phase"] -and $null -ne $Status.current_phase)
+            if ([string]::IsNullOrWhiteSpace($PhaseId) -or $HasCurrentPhase) {
+                continue
+            }
+            $Phases = if ($null -ne $Status.PSObject.Properties["phases"]) { @($Status.phases) } else { @() }
+            $MatchingPhase = @($Phases | Where-Object { (Get-ObjectStringProperty -Object $_ -Name "phase_id") -eq $PhaseId } | Select-Object -First 1)
+            if ($MatchingPhase.Count -gt 0) {
+                Set-JsonProperty -Object $Status -Name "current_phase" -Value $MatchingPhase[0]
+                $TransformIds.Add($Id)
+                $TransformActions.Add("semantic transform ${Id}: hydrated current_phase from current_phase_id $PhaseId")
+            }
+            continue
+        }
+
+        if ($Type -eq "map_phase_status") {
+            if ($null -eq $Status) { continue }
+            $From = Get-ObjectStringProperty -Object $Transform -Name "from"
+            $To = Get-ObjectStringProperty -Object $Transform -Name "to"
+            $Count = 0
+            $Phases = if ($null -ne $Status.PSObject.Properties["phases"]) { @($Status.phases) } else { @() }
+            foreach ($Phase in $Phases) {
+                if ((Get-ObjectStringProperty -Object $Phase -Name "status") -eq $From) {
+                    Set-JsonProperty -Object $Phase -Name "status" -Value $To
+                    $Count++
+                }
+            }
+            if ($null -ne $Status.PSObject.Properties["current_phase"] -and $null -ne $Status.current_phase -and (Get-ObjectStringProperty -Object $Status.current_phase -Name "status") -eq $From) {
+                Set-JsonProperty -Object $Status.current_phase -Name "status" -Value $To
+                $Count++
+            }
+            if ($Count -gt 0) {
+                $TransformIds.Add($Id)
+                $TransformActions.Add("semantic transform ${Id}: mapped $Count phase status value(s) from $From to $To")
+            }
+            continue
+        }
+    }
+
+    return [pscustomobject][ordered]@{
+        actions = @($TransformActions.ToArray())
+        transform_ids = @($TransformIds.ToArray() | Select-Object -Unique)
+    }
+}
+
 function Merge-TemplateDirectory {
     param(
         [Parameter(Mandatory = $true)][string]$SourceRoot,
@@ -163,9 +281,12 @@ function Get-MigrationPlan {
         [Parameter(Mandatory = $true)][string]$ConfigPath,
         [Parameter(Mandatory = $true)][string]$StatusPath,
         [Parameter(Mandatory = $true)][string]$SchemaPath,
+        [Parameter(Mandatory = $true)][string]$TransformRegistryPath,
         [Parameter(Mandatory = $true)][string]$MigrationLogPath
     )
     $PlanActions = New-Object System.Collections.Generic.List[string]
+    $SemanticTransformIds = New-Object System.Collections.Generic.List[string]
+    $Transforms = Get-MigrationTransforms -Path $TransformRegistryPath
     foreach ($Action in @(Get-TemplateMergePlanActions -SourceRoot $TemplateLoopDir -DestinationRoot $LoopDir)) {
         $PlanActions.Add($Action)
     }
@@ -174,6 +295,13 @@ function Get-MigrationPlan {
         $PlanActions.Add("created loop.config.json from template")
     } else {
         $Config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+        $Semantic = Invoke-SemanticTransforms -Config $Config -Status $null -Transforms $Transforms -CurrentSchemaVersion $CurrentSchemaVersion
+        foreach ($Action in @($Semantic.actions)) {
+            $PlanActions.Add($Action)
+        }
+        foreach ($TransformId in @($Semantic.transform_ids)) {
+            $SemanticTransformIds.Add($TransformId)
+        }
         foreach ($Action in @(Get-MissingJsonPropertyActions -Target $Config -Template $TemplateConfig -Label "loop.config.json")) {
             $PlanActions.Add($Action)
         }
@@ -186,6 +314,13 @@ function Get-MigrationPlan {
         $PlanActions.Add("created status.json from template")
     } else {
         $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
+        $Semantic = Invoke-SemanticTransforms -Config $null -Status $Status -Transforms $Transforms -CurrentSchemaVersion $CurrentSchemaVersion
+        foreach ($Action in @($Semantic.actions)) {
+            $PlanActions.Add($Action)
+        }
+        foreach ($TransformId in @($Semantic.transform_ids)) {
+            $SemanticTransformIds.Add($TransformId)
+        }
         foreach ($Action in @(Get-MissingJsonPropertyActions -Target $Status -Template $TemplateStatus -Label "status.json")) {
             $PlanActions.Add($Action)
         }
@@ -241,6 +376,7 @@ function Get-MigrationPlan {
         status_schema_version = $TargetStatusSchemaVersion
         action_count = $PlanActions.Count
         actions = @($PlanActions.ToArray())
+        semantic_transforms = @($SemanticTransformIds.ToArray() | Select-Object -Unique)
         would_write = @($WouldWrite | Select-Object -Unique)
         generated_at = (Get-Date).ToUniversalTime().ToString("o")
     }
@@ -262,6 +398,7 @@ if (-not (Test-Path -LiteralPath $TemplateLoopDir -PathType Container)) {
 $TemplateConfigPath = Join-Path $TemplateLoopDir "loop.config.json"
 $TemplateStatusPath = Join-Path $TemplateLoopDir "status.json"
 $TemplateSchemaPath = Join-Path $TemplateLoopDir "schema\schema-version.json"
+$TemplateTransformRegistryPath = Join-Path $TemplateLoopDir "schema\migration-transforms.json"
 $TemplateMigrationLogPath = Join-Path $TemplateLoopDir "schema\migration-log.md"
 
 $ConfigPath = Join-Path $LoopDir "loop.config.json"
@@ -272,6 +409,7 @@ $MigrationLogPath = Join-Path $LoopDir "schema\migration-log.md"
 $TemplateConfig = Get-Content -LiteralPath $TemplateConfigPath -Raw | ConvertFrom-Json
 $TemplateStatus = Get-Content -LiteralPath $TemplateStatusPath -Raw | ConvertFrom-Json
 $TemplateSchema = Get-Content -LiteralPath $TemplateSchemaPath -Raw | ConvertFrom-Json
+$SemanticTransforms = Get-MigrationTransforms -Path $TemplateTransformRegistryPath
 $TargetSchemaVersion = [string]$TemplateSchema.schema_version
 $TargetStatusSchemaVersion = [string]$TemplateSchema.status_schema_version
 $StartedAt = (Get-Date).ToUniversalTime().ToString("o")
@@ -310,6 +448,7 @@ if ($DryRun) {
         -ConfigPath $ConfigPath `
         -StatusPath $StatusPath `
         -SchemaPath $SchemaPath `
+        -TransformRegistryPath $TemplateTransformRegistryPath `
         -MigrationLogPath $MigrationLogPath
     if ($Json) {
         $Plan | ConvertTo-Json -Depth 30
@@ -330,6 +469,7 @@ $Stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ")
 $MigrationDir = Join-Path $MigrationRoot $Stamp
 $BackupDir = Join-Path $MigrationDir "backups"
 New-Item -ItemType Directory -Force -Path $MigrationDir | Out-Null
+$AppliedSemanticTransformIds = New-Object System.Collections.Generic.List[string]
 
 Merge-TemplateDirectory -SourceRoot $TemplateLoopDir -DestinationRoot $LoopDir
 
@@ -339,6 +479,13 @@ if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
 } else {
     $Config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
     $Before = $Config | ConvertTo-Json -Depth 30
+    $Semantic = Invoke-SemanticTransforms -Config $Config -Status $null -Transforms $SemanticTransforms -CurrentSchemaVersion $CurrentSchemaVersion
+    foreach ($Action in @($Semantic.actions)) {
+        Add-Action $Action
+    }
+    foreach ($TransformId in @($Semantic.transform_ids)) {
+        $AppliedSemanticTransformIds.Add($TransformId)
+    }
     Merge-TopLevelJsonProperties -Target $Config -Template $TemplateConfig -Label "loop.config.json"
     if ((Get-ObjectStringProperty -Object $Config -Name "schema_version") -ne $TargetSchemaVersion) {
         Set-JsonProperty -Object $Config -Name "schema_version" -Value $TargetSchemaVersion
@@ -357,6 +504,13 @@ if (-not (Test-Path -LiteralPath $StatusPath -PathType Leaf)) {
 } else {
     $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
     $Before = $Status | ConvertTo-Json -Depth 30
+    $Semantic = Invoke-SemanticTransforms -Config $null -Status $Status -Transforms $SemanticTransforms -CurrentSchemaVersion $CurrentSchemaVersion
+    foreach ($Action in @($Semantic.actions)) {
+        Add-Action $Action
+    }
+    foreach ($TransformId in @($Semantic.transform_ids)) {
+        $AppliedSemanticTransformIds.Add($TransformId)
+    }
     Merge-TopLevelJsonProperties -Target $Status -Template $TemplateStatus -Label "status.json"
     if ((Get-ObjectStringProperty -Object $Status -Name "schema_version") -ne $TargetStatusSchemaVersion) {
         Set-JsonProperty -Object $Status -Name "schema_version" -Value $TargetStatusSchemaVersion
@@ -416,6 +570,7 @@ $Record = [ordered]@{
     from_schema_version = $CurrentSchemaVersion
     to_schema_version = $TargetSchemaVersion
     status_schema_version = $TargetStatusSchemaVersion
+    semantic_transforms = @($AppliedSemanticTransformIds.ToArray() | Select-Object -Unique)
     actions = @($Actions)
     backups = @(
         if (Test-Path -LiteralPath $BackupDir -PathType Container) {

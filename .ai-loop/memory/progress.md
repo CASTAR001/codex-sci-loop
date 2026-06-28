@@ -225,6 +225,14 @@
   `Test-ReleaseDocs.ps1` plus `Test-Phase021.ps1`. The release notes preserve
   `PLUGIN-GLOBAL` as a warning because live global Codex plugin discovery has
   not been approved for real global configuration.
+- Ran root self-loop phase-022 under the repository root `.ai-loop`: added a
+  declarative semantic migration transform registry in
+  `.ai-loop/schema/migration-transforms.json`, `loop-standard/.ai-loop/`, and
+  `loop-standard/templates/.ai-loop/`; extended `migrate-loop.ps1` so dry-run
+  plans and migration records include `semantic_transforms`; and added
+  `Test-MigrateSemanticTransforms.ps1` plus `Test-Phase022.ps1`. The first
+  transform set repairs legacy `required_evidence`, hydrates `current_phase`
+  from `current_phase_id`, and maps legacy `completed` statuses to `accepted`.
 
 ## In Progress
 
@@ -246,8 +254,8 @@
   migration model.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
-- Add deeper semantic migration support for future schema versions when a
-  schema change needs more than template repair and top-level JSON merging.
+- Add new semantic migration transform types only when future schema changes
+  require them, with fixture coverage before use.
 
 ## Last Updated
 

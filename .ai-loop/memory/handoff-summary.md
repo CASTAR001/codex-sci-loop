@@ -171,6 +171,14 @@ skill linking, phase start, external Worker evidence, collection, audit,
 recovery, and readiness. `Test-ReleaseDocs.ps1` and `Test-Phase021.ps1` cover
 the release-facing docs and aggregate the current non-global verification
 matrix.
+Root self-loop phase-022 added semantic migration transforms. The registry lives
+at `.ai-loop/schema/migration-transforms.json` and is mirrored in
+`loop-standard/.ai-loop/` plus `loop-standard/templates/.ai-loop/`.
+`migrate-loop.ps1` now reports transform IDs in dry-run JSON, applies transforms
+before top-level JSON merge, and records applied IDs in migration records.
+`Test-MigrateSemanticTransforms.ps1` covers legacy evidence-field repair,
+current-phase hydration, completed-to-accepted status mapping, dry-run no-write
+behavior, real migration, and no-op behavior for current projects.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -231,6 +239,7 @@ command are now in place.
 The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are deeper semantic
-migration support for future schema versions, richer recovery explanations from
-the append-only transition log, or more full-stack/physics task-kind fixtures.
+Codex/plugin configuration. Good non-global next candidates are richer recovery
+explanations from the append-only transition log, more full-stack/physics
+task-kind fixtures, or a compact 1.0 release validation command that combines
+readiness, validation, and fixture summaries.

@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-022",
+    "title":  "Add semantic migration transform registry",
+    "objective":  "Add a declarative semantic migration transform registry and test coverage so ai-loop migrate can repair known legacy fields and status values beyond template copying and top-level JSON merging.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-022",
+    "audit_input":  ".ai-loop/audits/phase-022-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-022-audit.md",
+    "base_commit":  "e6ce5fefc9e4ece653c8a20edf1af35cce30f7ee",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase022.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-022/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T17:43:51.3069644Z",
+    "evidence_collected_at":  "2026-06-28T18:28:31.7931782Z",
+    "audit_prepared_at":  "2026-06-28T18:28:46.1956429Z",
+    "accepted_at":  "2026-06-28T18:28:54.8585802Z"
+}

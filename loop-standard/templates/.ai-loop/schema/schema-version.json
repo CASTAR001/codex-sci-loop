@@ -32,6 +32,7 @@
     ".ai-loop/status.json",
     ".ai-loop/events/state-transitions.ndjson",
     ".ai-loop/schema/schema-version.json",
+    ".ai-loop/schema/migration-transforms.json",
     ".ai-loop/schema/migration-log.md"
   ]
 }

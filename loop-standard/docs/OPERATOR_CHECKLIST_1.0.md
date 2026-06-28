@@ -127,6 +127,26 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 If recovery reports `BLOCKED`, do not continue the phase until the blocker is
 resolved or a documented `REWORK` phase is scaffolded.
 
+## Migration
+
+Before upgrading an older project, inspect the migration plan:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File <install-root>\bin\ai-loop.ps1 `
+  -Command migrate `
+  -ProjectRoot <project> `
+  -DryRun `
+  -Json
+```
+
+Confirm:
+
+- The plan lists only expected template, schema, JSON, and semantic transform
+  actions.
+- Any `semantic_transforms` entries are understood before applying migration.
+- A real migration writes `.ai-loop/schema/migration-records/.../migration-record.json`.
+- Project memory, evidence ledgers, and business files are preserved.
+
 ## Release Readiness
 
 Before calling a project ready:

@@ -1,0 +1,12 @@
+﻿loop-standard/.ai-loop/schema/migration-transforms.json
+loop-standard/.ai-loop/schema/schema-version.json
+loop-standard/docs/OPERATOR_CHECKLIST_1.0.md
+loop-standard/docs/RELEASE_NOTES_1.0.md
+loop-standard/README.md
+loop-standard/scripts/migrate-loop.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-MigrateSemanticTransforms.ps1
+loop-standard/scripts/Test-Phase022.ps1
+loop-standard/templates/.ai-loop/schema/migration-transforms.json
+loop-standard/templates/.ai-loop/schema/schema-version.json
+

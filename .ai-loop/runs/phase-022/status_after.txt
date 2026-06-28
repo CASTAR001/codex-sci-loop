@@ -1,0 +1,29 @@
+﻿ M .ai-loop/events/state-transitions.ndjson
+ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/artifact-manifest.json
+ M .ai-loop/evidence/command-log.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/evidence/provenance-map.md
+ M .ai-loop/evidence/test-log.md
+ M .ai-loop/memory/activeContext.md
+ M .ai-loop/memory/handoff-summary.md
+ M .ai-loop/memory/progress.md
+ M .ai-loop/schema/schema-version.json
+ M .ai-loop/skills/skill-usage-ledger.md
+ M .ai-loop/status.json
+ M loop-standard/.ai-loop/schema/schema-version.json
+ M loop-standard/README.md
+ M loop-standard/docs/OPERATOR_CHECKLIST_1.0.md
+ M loop-standard/docs/RELEASE_NOTES_1.0.md
+ M loop-standard/scripts/Test-LoopStandard.ps1
+ M loop-standard/scripts/migrate-loop.ps1
+ M loop-standard/templates/.ai-loop/schema/schema-version.json
+?? .ai-loop/audits/phase-022-audit-input.md
+?? .ai-loop/audits/phase-022-audit.md
+?? .ai-loop/runs/phase-022/
+?? .ai-loop/schema/migration-transforms.json
+?? loop-standard/.ai-loop/schema/migration-transforms.json
+?? loop-standard/scripts/Test-MigrateSemanticTransforms.ps1
+?? loop-standard/scripts/Test-Phase022.ps1
+?? loop-standard/templates/.ai-loop/schema/migration-transforms.json
+

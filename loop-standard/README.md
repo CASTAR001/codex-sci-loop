@@ -232,7 +232,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
   -ProjectRoot "C:\path\to\project"
 ```
 
-`migrate` copies missing template files, merges missing top-level JSON
+`migrate` copies missing template files, applies declared semantic transforms
+from `.ai-loop/schema/migration-transforms.json`, merges missing top-level JSON
 properties, upgrades schema markers, writes `.ai-loop/schema/migration-records/`,
 and appends `.ai-loop/schema/migration-log.md`. It preserves project memory,
 evidence ledgers, and business files. A future schema version is blocked unless

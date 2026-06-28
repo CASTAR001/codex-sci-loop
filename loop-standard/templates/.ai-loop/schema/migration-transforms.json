@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "description": "Declarative semantic transforms used by ai-loop migrate after template repair and before validation.",
+  "transforms": [
+    {
+      "id": "legacy-config-required-evidence",
+      "applies_when_schema_less_than": "1.3",
+      "target": "loop.config.json",
+      "type": "copy_property_if_missing",
+      "from": "required_evidence",
+      "to": "phase_evidence_required",
+      "preserve_source": true,
+      "notes": "Older drafts used required_evidence before the canonical phase_evidence_required name."
+    },
+    {
+      "id": "legacy-status-current-phase-id",
+      "applies_when_schema_less_than": "1.3",
+      "target": "status.json",
+      "type": "hydrate_current_phase_from_phase_id",
+      "preserve_source": true,
+      "notes": "Older status files sometimes stored only current_phase_id. The value is preserved for recovery visibility."
+    },
+    {
+      "id": "legacy-phase-status-completed",
+      "applies_when_schema_less_than": "1.3",
+      "target": "status.json",
+      "type": "map_phase_status",
+      "from": "completed",
+      "to": "accepted",
+      "notes": "The durable terminal success status is accepted, not completed."
+    }
+  ]
+}
