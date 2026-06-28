@@ -109,6 +109,17 @@ function Add-MarkdownRow {
     Add-Content -LiteralPath $Path -Encoding utf8 -Value ("| " + ($Escaped -join " | ") + " |")
 }
 
+function Remove-MarkdownRowsForPhase {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Phase
+    )
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return }
+    $Lines = @(Get-Content -LiteralPath $Path)
+    $Filtered = @($Lines | Where-Object { $_ -notlike "*| $Phase |*" })
+    Set-Content -LiteralPath $Path -Encoding utf8 -Value $Filtered
+}
+
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
 $ProjectGitArgs = Get-SafeGitArgs -Root $ProjectRoot
 $LoopDir = Join-Path $ProjectRoot ".ai-loop"
@@ -269,7 +280,11 @@ $PhaseMeta = [ordered]@{
 Write-JsonFile -Value ([pscustomobject]$PhaseMeta) -Path (Join-Path $RunDir "phase_meta.json")
 
 $Status.current_phase = $PhaseMeta
-$Status.phases = @($Status.phases) + @([pscustomobject]$PhaseMeta)
+$ExistingPhases = @($Status.phases | Where-Object {
+        $null -ne $_ -and
+        ($null -eq $_.PSObject.Properties["phase_id"] -or [string]$_.phase_id -ne $PhaseId)
+    })
+$Status.phases = @($ExistingPhases) + @([pscustomobject]$PhaseMeta)
 Write-JsonFile -Value $Status -Path $StatusPath
 & (Join-Path $PSScriptRoot "record-state-transition.ps1") `
     -ProjectRoot $ProjectRoot `
@@ -287,6 +302,10 @@ New-Item -ItemType Directory -Force -Path $EvidenceDir, $SkillsDir | Out-Null
 $EvidenceLedger = Join-Path $EvidenceDir "evidence-ledger.md"
 $ArtifactIndex = Join-Path $EvidenceDir "artifact-index.md"
 $SkillUsageLedger = Join-Path $SkillsDir "skill-usage-ledger.md"
+
+foreach ($LedgerPath in @($EvidenceLedger, $ArtifactIndex, $SkillUsageLedger)) {
+    Remove-MarkdownRowsForPhase -Path $LedgerPath -Phase $PhaseId
+}
 
 if (Test-Path -LiteralPath $EvidenceLedger) {
     Add-MarkdownRow -Path $EvidenceLedger -Columns @("EVD-$PhaseId-001", $PhaseId, "CLAIM-$PhaseId", "prompt", ".ai-loop/runs/$PhaseId/prompt.md", "Codex Supervisor", "pending", "recorded", "Worker prompt generated.")

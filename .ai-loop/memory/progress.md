@@ -156,6 +156,11 @@
   explicit `Test-PluginInstall.ps1 -InstallRoot` behavior, and verified
   concurrent plugin install smoke tests no longer contend over one fixed temp
   root.
+- Ran root self-loop phase-012 under the repository root `.ai-loop`: made
+  `start-phase.ps1 -Force` refresh same-phase metadata, prompt, requirements,
+  `status.json.phases`, and start-time Markdown ledger rows instead of
+  duplicating status or ledger entries; added `Test-StartPhaseIdempotence.ps1`
+  and `Test-Phase012.ps1`.
 
 ## In Progress
 
@@ -172,10 +177,6 @@
   tests.
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
-- Decide whether start-time Markdown ledger rows should be made idempotent like
-  collect-time evidence rows.
-- Make start-time Markdown ledger rows idempotent like collect-time evidence
-  rows, or explicitly document why start rows are append-only.
 - Add a temp-fixture prune command if ignored `.tmp-ai-loop-*` accumulation
   becomes noisy during repeated local dogfooding.
 - Decide whether future schema upgrades require deep semantic migration

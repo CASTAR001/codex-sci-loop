@@ -120,6 +120,8 @@ $RequiredPaths = @(
     "scripts\test-temp-root.ps1",
     "scripts\Test-TempIsolation.ps1",
     "scripts\Test-Phase011.ps1",
+    "scripts\Test-StartPhaseIdempotence.ps1",
+    "scripts\Test-Phase012.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -327,6 +329,16 @@ if (Test-Path -LiteralPath $CollectEvidenceScriptPath -PathType Leaf) {
     }
     if ($CollectEvidenceText -notmatch "Set-Content\s+-LiteralPath\s+\`$Path\s+-Encoding\s+utf8\s+-Value\s+\`$Filtered") {
         Add-Problem "collect-evidence.ps1 should rewrite filtered ledger rows with Set-Content -Value to avoid read/write stream conflicts."
+    }
+}
+
+$StartPhaseScriptPath = Join-Path $KitRoot "scripts\start-phase.ps1"
+if (Test-Path -LiteralPath $StartPhaseScriptPath -PathType Leaf) {
+    $StartPhaseText = Get-Content -LiteralPath $StartPhaseScriptPath -Raw
+    foreach ($Needle in @("Remove-MarkdownRowsForPhase", "ExistingPhases", "SkillUsageLedger")) {
+        if ($StartPhaseText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "start-phase.ps1 missing expected idempotence text: $Needle"
+        }
     }
 }
 

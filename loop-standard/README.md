@@ -215,6 +215,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
   -TaskKind "fullstack"
 ```
 
+If a Supervisor intentionally restarts the same unfinished phase, pass `-Force`
+to `start`. The command refreshes the phase metadata, prompt, requirements, and
+start-time Markdown ledger rows, and replaces the same phase entry in
+`status.json` instead of appending a duplicate. It does not bypass audit or
+acceptance gates.
+
 After Kimi executes the generated prompt, collect evidence:
 
 ```powershell

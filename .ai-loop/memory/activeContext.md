@@ -112,6 +112,11 @@ Root phase-011 added per-run test temp isolation. Fixture and smoke tests now
 use `test-temp-root.ps1` to create ignored `.tmp-ai-loop-*` parent directories
 with unique `run-<prefix>-<pid>-<guid>` children, and `Test-TempIsolation.ps1`
 proves concurrent plugin install smoke tests use distinct install roots.
+Root phase-012 added start-time idempotence. `start-phase.ps1 -Force` for the
+same phase now refreshes prompt, requirements, metadata, `status.json.phases`,
+and start-time Markdown ledger rows instead of duplicating phase records or
+ledger entries. `Test-StartPhaseIdempotence.ps1` covers status replacement,
+prompt refresh, evidence/artifact/skill ledger row counts, and loop validation.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -120,10 +125,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is start-time Markdown ledger idempotence, richer
-recovery automation using the state transition log, structured audit finding
-extraction for rework scaffolding, or a temp-fixture prune command if ignored
-test directories become noisy.
+The next best optimization is richer recovery automation using the state
+transition log, structured audit finding extraction for rework scaffolding,
+external Worker invocation evidence requirements, or a temp-fixture prune
+command if ignored test directories become noisy.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 
@@ -142,7 +147,5 @@ approval. Before further harness changes, review:
   test, and what path should be used?
 - Should external Worker invocation records become required phase evidence in
   `phase_requirements.json` for phases that use an external Worker?
-- Should Markdown evidence ledgers become fully idempotent for `start-phase.ps1`
-  as well as `collect-evidence.ps1`?
 - Should `migrate` eventually support deep semantic transforms for future schema
   versions instead of only top-level JSON merge plus template repair?

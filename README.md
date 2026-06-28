@@ -161,6 +161,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command start -ProjectRoot E:\some-project -PhaseId phase-001 -TaskKind physics-research -Profile physics-sim -Title "Simulation check" -Objective "Make one evidence-backed simulation change"
 ```
 
+如果 Supervisor 明确需要重启同一个未完成阶段，可以对 `start` 使用
+`-Force`。这会刷新该 phase 的 metadata、prompt、requirements 和 start-time
+Markdown ledger rows，并替换 `status.json` 中的同名 phase 条目；它不应被用来
+绕过 audit/accept gate。
+
 worker 执行完成后，收集证据并准备审计包：
 
 ```powershell

@@ -3,8 +3,8 @@
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-011 have
-been accepted. Root phase-011 added per-run test temp isolation.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-012 have
+been accepted. Root phase-012 added start-time idempotence.
 
 ## Last Verified State
 
@@ -107,6 +107,12 @@ Root self-loop phase-011 added `test-temp-root.ps1` and
 `.tmp-ai-loop-*` parent naming convention but create per-run children with
 timestamp or external prefix plus PID and GUID. The temp isolation test runs two
 plugin install smoke tests concurrently and verifies distinct install roots.
+Root self-loop phase-012 made `start-phase.ps1 -Force` idempotent for
+intentional same-phase restarts. It refreshes prompt, requirements, metadata,
+`status.json.phases`, and start-time evidence/artifact/skill ledger rows
+instead of appending duplicate phase or ledger entries. `Test-StartPhaseIdempotence.ps1`
+proves status replacement, prompt refresh, ledger row counts, and loop-wide
+validation after forced restart.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -163,7 +169,7 @@ append-only state transition logs, and durable REWORK/BLOCKED outcomes are now
 in place. The remaining plugin-form stability step is a live global Codex
 plugin install/discovery test, which must wait for explicit user approval
 because it modifies real Codex/plugin configuration. Good non-global next
-candidates are start-phase ledger idempotence, richer recovery based on the
-transition log, structured audit finding extraction for rework scaffolding, or
-a temp-fixture prune command if local dogfooding leaves too many ignored temp
-directories.
+candidates are richer recovery based on the transition log, structured audit
+finding extraction for rework scaffolding, external Worker invocation evidence
+requirements, or a temp-fixture prune command if local dogfooding leaves too
+many ignored temp directories.

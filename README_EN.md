@@ -133,6 +133,11 @@ Start a physics or numerical research phase:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command start -ProjectRoot E:\some-project -PhaseId phase-001 -TaskKind physics-research -Profile physics-sim -Title "Simulation check" -Objective "Make one evidence-backed simulation change"
 ```
 
+When the Supervisor intentionally restarts the same unfinished phase, `start`
+may use `-Force`. This refreshes that phase's metadata, prompt, requirements,
+and start-time Markdown ledger rows, and replaces the same phase entry in
+`status.json`. It is not an audit or accept gate bypass.
+
 After the worker finishes:
 
 ```powershell

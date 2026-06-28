@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-011",
-                          "title":  "Isolate test temp directories",
-                          "objective":  "Make PowerShell smoke and fixture tests use per-run temporary directories so concurrent or interrupted runs do not contend over fixed .tmp-ai-loop-* paths.",
+                          "phase_id":  "phase-012",
+                          "title":  "Make phase start idempotent",
+                          "objective":  "Make start-phase -Force refresh existing phase metadata and start-time Markdown ledger rows without duplicating status phases or ledger entries.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-011",
-                          "audit_input":  ".ai-loop/audits/phase-011-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-011-audit.md",
-                          "base_commit":  "5a0fd809f039a7c5e3135be58c3d544839c30198",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase011.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-012",
+                          "audit_input":  ".ai-loop/audits/phase-012-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-012-audit.md",
+                          "base_commit":  "f03cf15d1127d80a6f5310b7404020e0657db58e",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase012.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "claim_ids":  [
@@ -22,12 +22,12 @@
                           "required_skills":  [
 
                                               ],
-                          "requirements":  ".ai-loop/runs/phase-011/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-012/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T06:53:33.3389439Z",
-                          "evidence_collected_at":  "2026-06-28T07:21:35.2979224Z",
-                          "audit_prepared_at":  "2026-06-28T07:21:48.7074955Z",
-                          "accepted_at":  "2026-06-28T07:22:38.3495902Z"
+                          "started_at":  "2026-06-28T07:30:11.5581839Z",
+                          "evidence_collected_at":  "2026-06-28T07:52:59.6349249Z",
+                          "audit_prepared_at":  "2026-06-28T07:53:33.9275605Z",
+                          "accepted_at":  "2026-06-28T07:54:38.7691390Z"
                       },
     "phases":  [
                    {
@@ -297,13 +297,38 @@
                        "evidence_collected_at":  "2026-06-28T07:21:35.2979224Z",
                        "audit_prepared_at":  "2026-06-28T07:21:48.7074955Z",
                        "accepted_at":  "2026-06-28T07:22:38.3495902Z"
+                   },
+                   {
+                       "phase_id":  "phase-012",
+                       "title":  "Make phase start idempotent",
+                       "objective":  "Make start-phase -Force refresh existing phase metadata and start-time Markdown ledger rows without duplicating status phases or ledger entries.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-012",
+                       "audit_input":  ".ai-loop/audits/phase-012-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-012-audit.md",
+                       "base_commit":  "f03cf15d1127d80a6f5310b7404020e0657db58e",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase012.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "requirements":  ".ai-loop/runs/phase-012/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-28T07:30:11.5581839Z",
+                       "evidence_collected_at":  "2026-06-28T07:52:59.6349249Z",
+                       "audit_prepared_at":  "2026-06-28T07:53:33.9275605Z",
+                       "accepted_at":  "2026-06-28T07:54:38.7691390Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-011",
+                          "phase_id":  "phase-012",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-011-audit.md",
-                          "decided_at":  "2026-06-28T07:22:38.3495902Z"
+                          "audit":  ".ai-loop/audits/phase-012-audit.md",
+                          "decided_at":  "2026-06-28T07:54:38.7691390Z"
                       },
     "notes":  [
                   "This file is durable loop state.",
