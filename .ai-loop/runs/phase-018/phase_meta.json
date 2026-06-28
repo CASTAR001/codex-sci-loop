@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-018",
+    "title":  "Add migration dry-run plan output",
+    "objective":  "Add ai-loop migrate -DryRun and -Json so supervisors can inspect planned .ai-loop schema/template repair actions before any files are modified.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-018",
+    "audit_input":  ".ai-loop/audits/phase-018-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-018-audit.md",
+    "base_commit":  "e2d4b9172d077a574a3da3a57af2097d46433bdb",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase018.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-018/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-28T15:26:01.6982500Z",
+    "evidence_collected_at":  "2026-06-28T15:55:03.0534458Z",
+    "audit_prepared_at":  "2026-06-28T15:55:14.4579807Z",
+    "accepted_at":  "2026-06-28T15:55:49.3476084Z"
+}

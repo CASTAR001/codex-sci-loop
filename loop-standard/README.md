@@ -191,6 +191,26 @@ Upgrade an existing project non-destructively with:
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
   -Command migrate `
+  -ProjectRoot "C:\path\to\project" `
+  -DryRun
+```
+
+Use `-Json` with `-DryRun` when a script, plugin, or hook needs a
+machine-readable migration plan:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command migrate `
+  -ProjectRoot "C:\path\to\project" `
+  -DryRun `
+  -Json
+```
+
+Apply the migration after reviewing the plan:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command migrate `
   -ProjectRoot "C:\path\to\project"
 ```
 
@@ -199,6 +219,8 @@ properties, upgrades schema markers, writes `.ai-loop/schema/migration-records/`
 and appends `.ai-loop/schema/migration-log.md`. It preserves project memory,
 evidence ledgers, and business files. A future schema version is blocked unless
 the Supervisor explicitly passes `-Force`.
+`migrate -DryRun` performs the same compatibility checks but does not create
+records, modify JSON, append event logs, or copy template files.
 
 State changes are recorded in `.ai-loop/events/state-transitions.ndjson`. For
 new phases that declare `transition_log`, `validate-loop` checks that the latest

@@ -124,3 +124,12 @@
 | ART-phase-017-changed_files.txt | phase-017 | phase-evidence | .ai-loop/runs/phase-017/changed_files.txt | collect-evidence.ps1 | recorded | sha256=A6A29BE67C5D; size=1315; status=recorded |
 | ART-phase-017-changed_business_files.txt | phase-017 | phase-evidence | .ai-loop/runs/phase-017/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=0A84209C4A9C; size=273; status=recorded |
 | ART-phase-017-changed_evidence_files.txt | phase-017 | phase-evidence | .ai-loop/runs/phase-017/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=E5ED6EA185C5; size=1047; status=recorded |
+| ART-phase-018-prompt.md | phase-018 | phase-evidence | .ai-loop/runs/phase-018/prompt.md | start-phase.ps1 | recorded | sha256=5A4E17E70D00; size=1450; status=recorded |
+| ART-phase-018-phase_requirements.json | phase-018 | phase-evidence | .ai-loop/runs/phase-018/phase_requirements.json | start-phase.ps1 | recorded | sha256=1B3AA4A8AE9D; size=1138; status=recorded |
+| ART-phase-018-report.md | phase-018 | phase-evidence | .ai-loop/runs/phase-018/report.md | Worker | recorded | sha256=74F32DB820B3; size=1290; status=recorded |
+| ART-phase-018-status_after.txt | phase-018 | phase-evidence | .ai-loop/runs/phase-018/status_after.txt | collect-evidence.ps1 | recorded | sha256=FE70E5257E2D; size=856; status=recorded |
+| ART-phase-018-diff.patch | phase-018 | phase-evidence | .ai-loop/runs/phase-018/diff.patch | collect-evidence.ps1 | recorded | sha256=6AE5168431F6; size=532069; status=recorded |
+| ART-phase-018-verify.log | phase-018 | phase-evidence | .ai-loop/runs/phase-018/verify.log | collect-evidence.ps1 | recorded | sha256=B371E07708E4; size=10255; status=recorded |
+| ART-phase-018-changed_files.txt | phase-018 | phase-evidence | .ai-loop/runs/phase-018/changed_files.txt | collect-evidence.ps1 | recorded | sha256=E675302A3C00; size=1304; status=recorded |
+| ART-phase-018-changed_business_files.txt | phase-018 | phase-evidence | .ai-loop/runs/phase-018/changed_business_files.txt | collect-evidence.ps1 | recorded | sha256=143DF0D9DE91; size=262; status=recorded |
+| ART-phase-018-changed_evidence_files.txt | phase-018 | phase-evidence | .ai-loop/runs/phase-018/changed_evidence_files.txt | collect-evidence.ps1 | recorded | sha256=7BE170199455; size=1047; status=recorded |

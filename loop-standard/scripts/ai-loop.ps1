@@ -198,6 +198,8 @@ switch ($Command) {
     "migrate" {
         $ScriptParams = @{ ProjectRoot = $ProjectRoot }
         if ($Force) { $ScriptParams.Force = $true }
+        if ($DryRun) { $ScriptParams.DryRun = $true }
+        if ($Json) { $ScriptParams.Json = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "migrate-loop.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?

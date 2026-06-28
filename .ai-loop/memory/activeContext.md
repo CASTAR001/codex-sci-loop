@@ -149,6 +149,13 @@ are limited to `run-*` children under `.tmp-ai-loop-*` parents, latest runs are
 retained, reparse-point directories are skipped, and
 `Test-PruneTempFixtures.ps1` covers dry-run, forced cleanup, namespace
 protection, and idempotence.
+Root phase-018 added migration dry-run planning. `ai-loop -Command migrate`
+now supports `-DryRun` and `-DryRun -Json`, allowing Supervisors and automation
+to inspect planned schema/template repairs before project files are modified.
+Dry-run performs compatibility checks but does not write migration records,
+modify JSON, copy template files, or append event logs. `Test-MigrateDryRun.ps1`
+covers parseable JSON plans, human-readable plans, no-write behavior, real
+migration after planning, and future schema blocking.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -157,9 +164,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is deeper migration/schema polish, or structured
-JSON output for maintenance commands such as `prune-temp` if hooks or CI need
-machine-readable operational summaries.
+The next best optimization is either structured JSON output for maintenance
+commands such as `prune-temp`, or deeper semantic migration steps for future
+schema versions that require more than template repair and top-level JSON
+merging.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

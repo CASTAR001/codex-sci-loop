@@ -194,6 +194,14 @@
   parents are candidates, newest runs are retained, reparse-point directories
   are skipped, and `Test-PruneTempFixtures.ps1` plus `Test-Phase017.ps1`
   cover dry-run, deletion, namespace protection, and idempotence.
+- Ran root self-loop phase-018 under the repository root `.ai-loop`: added
+  `migrate -DryRun` and `migrate -DryRun -Json` so Supervisors, scripts,
+  plugins, and hooks can inspect planned schema/template repair actions before
+  modifying a project. Dry-run does not create migration records, modify JSON,
+  copy template files, or append event logs; future schemas still block unless
+  `-Force` is explicit. `Test-MigrateDryRun.ps1` and `Test-Phase018.ps1`
+  cover JSON planning, text planning, no-write behavior, real migration after
+  planning, and future-schema blocking.
 
 ## In Progress
 
@@ -211,7 +219,8 @@
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
 - Decide whether future schema upgrades require deep semantic migration
-  transforms beyond phase-007's top-level JSON merge and template repair.
+  transforms beyond the current dry-run/top-level JSON merge/template repair
+  migration model.
 - Use the state transition log to improve `resume` with richer recovery
   explanations and stale-state diagnosis.
 - Consider structured JSON output for `prune-temp` if future dashboards, hooks,

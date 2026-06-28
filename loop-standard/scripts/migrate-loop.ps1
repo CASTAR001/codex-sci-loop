@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
-    [switch]$Force
+    [switch]$Force,
+    [switch]$DryRun,
+    [switch]$Json
 )
 
 Set-StrictMode -Version Latest
@@ -108,6 +110,142 @@ function Add-EventLogEntry {
     ($Event | ConvertTo-Json -Depth 20 -Compress) | Add-Content -LiteralPath $EventLog -Encoding utf8
 }
 
+function Get-TemplateMergePlanActions {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationRoot
+    )
+    $Planned = New-Object System.Collections.Generic.List[string]
+    foreach ($Directory in @(Get-ChildItem -LiteralPath $SourceRoot -Recurse -Directory -Force)) {
+        $RelativeDirectory = $Directory.FullName.Substring($SourceRoot.Length).TrimStart("\", "/")
+        $TargetDirectory = Join-Path $DestinationRoot $RelativeDirectory
+        if (-not (Test-Path -LiteralPath $TargetDirectory -PathType Container)) {
+            $Planned.Add("created directory: .ai-loop/$($RelativeDirectory -replace '\\','/')")
+        }
+    }
+    foreach ($File in @(Get-ChildItem -LiteralPath $SourceRoot -Recurse -File -Force)) {
+        $RelativeFile = $File.FullName.Substring($SourceRoot.Length).TrimStart("\", "/")
+        $TargetFile = Join-Path $DestinationRoot $RelativeFile
+        if (-not (Test-Path -LiteralPath $TargetFile -PathType Leaf)) {
+            $Planned.Add("copied missing template file: .ai-loop/$($RelativeFile -replace '\\','/')")
+        }
+    }
+    return @($Planned.ToArray())
+}
+
+function Get-MissingJsonPropertyActions {
+    param(
+        [AllowNull()]$Target,
+        [Parameter(Mandatory = $true)]$Template,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+    $Planned = New-Object System.Collections.Generic.List[string]
+    if ($null -eq $Target) { return @($Planned.ToArray()) }
+    foreach ($Property in $Template.PSObject.Properties) {
+        if ($null -eq $Target.PSObject.Properties[$Property.Name]) {
+            $Planned.Add("added missing $Label property: $($Property.Name)")
+        }
+    }
+    return @($Planned.ToArray())
+}
+
+function Get-MigrationPlan {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][string]$LoopDir,
+        [Parameter(Mandatory = $true)][string]$TemplateLoopDir,
+        [Parameter(Mandatory = $true)]$TemplateConfig,
+        [Parameter(Mandatory = $true)]$TemplateStatus,
+        [Parameter(Mandatory = $true)]$TemplateSchema,
+        [Parameter(Mandatory = $true)][string]$CurrentSchemaVersion,
+        [Parameter(Mandatory = $true)][string]$TargetSchemaVersion,
+        [Parameter(Mandatory = $true)][string]$TargetStatusSchemaVersion,
+        [Parameter(Mandatory = $true)][string]$ConfigPath,
+        [Parameter(Mandatory = $true)][string]$StatusPath,
+        [Parameter(Mandatory = $true)][string]$SchemaPath,
+        [Parameter(Mandatory = $true)][string]$MigrationLogPath
+    )
+    $PlanActions = New-Object System.Collections.Generic.List[string]
+    foreach ($Action in @(Get-TemplateMergePlanActions -SourceRoot $TemplateLoopDir -DestinationRoot $LoopDir)) {
+        $PlanActions.Add($Action)
+    }
+
+    if (-not (Test-Path -LiteralPath $ConfigPath -PathType Leaf)) {
+        $PlanActions.Add("created loop.config.json from template")
+    } else {
+        $Config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+        foreach ($Action in @(Get-MissingJsonPropertyActions -Target $Config -Template $TemplateConfig -Label "loop.config.json")) {
+            $PlanActions.Add($Action)
+        }
+        if ((Get-ObjectStringProperty -Object $Config -Name "schema_version") -ne $TargetSchemaVersion) {
+            $PlanActions.Add("updated loop.config.json schema_version to $TargetSchemaVersion")
+        }
+    }
+
+    if (-not (Test-Path -LiteralPath $StatusPath -PathType Leaf)) {
+        $PlanActions.Add("created status.json from template")
+    } else {
+        $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
+        foreach ($Action in @(Get-MissingJsonPropertyActions -Target $Status -Template $TemplateStatus -Label "status.json")) {
+            $PlanActions.Add($Action)
+        }
+        if ((Get-ObjectStringProperty -Object $Status -Name "schema_version") -ne $TargetStatusSchemaVersion) {
+            $PlanActions.Add("updated status.json schema_version to $TargetStatusSchemaVersion")
+        }
+        if ([string]::IsNullOrWhiteSpace((Get-ObjectStringProperty -Object $Status -Name "project_name"))) {
+            $PlanActions.Add("filled missing status.json project_name")
+        }
+        if ([string]::IsNullOrWhiteSpace((Get-ObjectStringProperty -Object $Status -Name "initialized_at"))) {
+            $PlanActions.Add("filled missing status.json initialized_at")
+        }
+    }
+
+    $SchemaNeedsWrite = $true
+    if (Test-Path -LiteralPath $SchemaPath -PathType Leaf) {
+        try {
+            $ExistingSchema = Get-Content -LiteralPath $SchemaPath -Raw | ConvertFrom-Json
+            $SchemaNeedsWrite = ((Get-ObjectStringProperty -Object $ExistingSchema -Name "schema_version") -ne $TargetSchemaVersion)
+        } catch {
+            $SchemaNeedsWrite = $true
+        }
+    }
+    if ($SchemaNeedsWrite) {
+        $PlanActions.Add("updated schema-version.json to $TargetSchemaVersion")
+    }
+
+    if (-not (Test-Path -LiteralPath $MigrationLogPath -PathType Leaf)) {
+        $PlanActions.Add("created migration-log.md from template")
+    } else {
+        $PlanActions.Add("appended migration-log.md entry")
+    }
+
+    $WouldWrite = @(
+        ".ai-loop/schema/migration-records/<timestamp>/migration-record.json",
+        ".ai-loop/events/event-log.ndjson"
+    )
+    if ($PlanActions.Count -gt 0) {
+        $WouldWrite += @(
+            ".ai-loop/loop.config.json",
+            ".ai-loop/status.json",
+            ".ai-loop/schema/schema-version.json",
+            ".ai-loop/schema/migration-log.md"
+        )
+    }
+
+    return [pscustomobject][ordered]@{
+        schema_version = "1.0"
+        mode = "dry-run"
+        project_root = $ProjectRoot
+        from_schema_version = $CurrentSchemaVersion
+        to_schema_version = $TargetSchemaVersion
+        status_schema_version = $TargetStatusSchemaVersion
+        action_count = $PlanActions.Count
+        actions = @($PlanActions.ToArray())
+        would_write = @($WouldWrite | Select-Object -Unique)
+        generated_at = (Get-Date).ToUniversalTime().ToString("o")
+    }
+}
+
 $KitRoot = Split-Path -Parent $PSScriptRoot
 $TemplateLoopDir = Join-Path $KitRoot "templates\.ai-loop"
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
@@ -156,6 +294,35 @@ if ($CurrentSchemaVersion -ne "missing") {
         if ($_.Exception.Message -like "Cannot migrate future schema*") { throw }
         throw "Invalid schema version in loop.config.json: $CurrentSchemaVersion"
     }
+}
+
+if ($DryRun) {
+    $Plan = Get-MigrationPlan `
+        -ProjectRoot $ProjectRoot `
+        -LoopDir $LoopDir `
+        -TemplateLoopDir $TemplateLoopDir `
+        -TemplateConfig $TemplateConfig `
+        -TemplateStatus $TemplateStatus `
+        -TemplateSchema $TemplateSchema `
+        -CurrentSchemaVersion $CurrentSchemaVersion `
+        -TargetSchemaVersion $TargetSchemaVersion `
+        -TargetStatusSchemaVersion $TargetStatusSchemaVersion `
+        -ConfigPath $ConfigPath `
+        -StatusPath $StatusPath `
+        -SchemaPath $SchemaPath `
+        -MigrationLogPath $MigrationLogPath
+    if ($Json) {
+        $Plan | ConvertTo-Json -Depth 30
+    } else {
+        Write-Output "Migration dry run: $CurrentSchemaVersion -> $TargetSchemaVersion"
+        Write-Output "Project root: $ProjectRoot"
+        Write-Output "Action count: $($Plan.action_count)"
+        foreach ($Action in @($Plan.actions)) {
+            Write-Output "- $Action"
+        }
+        Write-Output "No files were modified. Re-run without -DryRun to apply."
+    }
+    exit 0
 }
 
 $MigrationRoot = Join-Path $LoopDir "schema\migration-records"

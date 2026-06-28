@@ -144,6 +144,12 @@ Root self-loop phase-017 added `ai-loop -Command prune-temp` and
 for deletion, only prunes old `run-*` children under `.tmp-ai-loop-*` parents,
 keeps the latest runs per parent, skips reparse-point directories, and is
 covered by `Test-PruneTempFixtures.ps1` plus `Test-Phase017.ps1`.
+Root self-loop phase-018 added `ai-loop -Command migrate -DryRun` and
+`-DryRun -Json`. Supervisors and automation can now inspect planned
+schema/template repair actions before modifying a project. Dry-run performs the
+same future-schema compatibility block but writes no migration records, JSON,
+template files, or event logs. `Test-MigrateDryRun.ps1` covers JSON/text plans,
+no-write behavior, real migration after planning, and future-schema blocking.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -198,9 +204,11 @@ Repo-local plugin install/discovery smoke testing, validate-loop negative
 fixtures, schema compatibility checks, explicit non-destructive migration,
 append-only state transition logs, durable REWORK/BLOCKED outcomes, external
 Worker evidence requirements, structured audit finding extraction,
-machine-readable resume output, and safe temp fixture pruning are now in place.
+machine-readable resume output, safe temp fixture pruning, and migration
+dry-run planning are now in place.
 The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are deeper
-migration/schema polish or structured JSON output for maintenance commands.
+Codex/plugin configuration. Good non-global next candidates are structured JSON
+output for maintenance commands or deeper semantic migration support for future
+schema versions.

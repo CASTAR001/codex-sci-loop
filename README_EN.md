@@ -309,6 +309,22 @@ plus `.ai-loop/schema/migration-log.md`. It does not overwrite project memory,
 evidence ledgers, or business files. Future schema versions are blocked unless
 the Supervisor explicitly uses `-Force`.
 
+Before modifying an older project, inspect the planned migration:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project -DryRun
+```
+
+Scripts, plugins, and hooks can request a machine-readable plan:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project -DryRun -Json
+```
+
+`migrate -DryRun` does not create migration records, modify JSON, append event
+logs, or copy template files. It only reports the schema/template repair actions
+that would be applied. Future schemas still block unless `-Force` is explicit.
+
 `.ai-loop/schema/schema-version.json` records the current control-plane schema,
 minimum supported version, latest version, and `status.json` state-file schema.
 `validate-loop` blocks missing schema manifests, unsupported old versions,
@@ -333,6 +349,9 @@ Recent checks passed:
 - `Test-PruneTempFixtures.ps1`, which verifies `prune-temp` dry-run behavior,
   latest-run retention, forced old-run deletion, namespace protection, and
   idempotence.
+- `Test-MigrateDryRun.ps1`, which verifies `migrate -DryRun` and
+  `-DryRun -Json` planning, no-write behavior, future-schema blocking, and
+  real migration after planning.
 - `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
   structure, `status.json`, phase references, accepted/rework/blocked audits,
   recovery-critical files, and schema versions.
