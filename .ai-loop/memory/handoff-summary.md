@@ -1,5 +1,22 @@
 # Handoff Summary
 
+## Latest Goal Handoff
+
+For a compact new-chat handoff, read:
+
+```text
+.ai-loop/reports/goal-handoff-2026-06-30.md
+```
+
+Current known state at that handoff:
+
+- Latest commit: `8cff940 Add release check command`
+- Latest accepted phase: `phase-024`
+- `validate-loop`: OK
+- `release-check -Json -SkipMatrix`: `ready_with_warnings`, `fail=0`
+- Expected remaining warning: `PLUGIN-GLOBAL`, pending explicit user approval
+  for real global Codex plugin discovery.
+
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,

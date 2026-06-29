@@ -244,6 +244,10 @@
   The command aggregates readiness, loop-wide validation, and a bounded matrix
   script, emits text or JSON, supports `-SkipMatrix` for quick diagnostics, and
   keeps final release sign-off oriented around a full matrix run.
+- Wrote handoff-only report `.ai-loop/reports/goal-handoff-2026-06-30.md` for
+  a new conversation. This was not a new harness feature phase; it records the
+  paused goal state, current accepted phase, lightweight verification results,
+  next recommended work, and token/audit overhead guidance.
 
 ## In Progress
 
@@ -274,4 +278,4 @@
 
 ## Last Updated
 
-2026-06-29
+2026-06-30

@@ -186,6 +186,10 @@ Root phase-024 added the compact 1.0 `release-check` command. It aggregates
 `readiness`, `validate-loop`, and the current non-global verification matrix
 into text or JSON output. `-SkipMatrix` is available for quick diagnostics, but
 final release sign-off should run the full matrix.
+On 2026-06-30, a handoff-only report was written to
+`.ai-loop/reports/goal-handoff-2026-06-30.md` so a fresh conversation can
+continue without carrying the long thread context. The active goal is paused;
+latest accepted phase remains `phase-024`.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
