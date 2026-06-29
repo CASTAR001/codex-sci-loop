@@ -36,6 +36,9 @@ Important pieces:
 Use `loop-standard/README.md` for lower-level script details. Use
 `loop-standard/docs/RELEASE_NOTES_1.0.md` and
 `loop-standard/docs/OPERATOR_CHECKLIST_1.0.md` for the 1.0 delivery surface.
+Before release, use `ai-loop -Command release-check -ProjectRoot <project>` to
+aggregate readiness, loop-wide validation, and the current non-global
+verification matrix.
 
 ### `.ai-loop/`
 
@@ -212,6 +215,16 @@ evidence integrity, state-machine support, plugin scaffold, test matrix, and
 loop-wide validation. Real global Codex plugin discovery modifies the user
 environment, so without explicit approval it is reported as a warning rather
 than silently passing or mutating global config.
+
+For release sign-off, use the aggregate command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot E:\some-project
+```
+
+`release-check` combines `readiness`, `validate-loop`, and the current
+non-global verification matrix. `-SkipMatrix` is available for quick
+diagnostics, but final release sign-off should run the full matrix.
 
 When tests or dogfood runs leave many ignored `.tmp-ai-loop-*` directories,
 inspect prune candidates with the default dry-run mode:

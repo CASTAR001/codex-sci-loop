@@ -152,12 +152,25 @@ Confirm:
 Before calling a project ready:
 
 ```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot E:\some-project -Json
+```
+
+For quick diagnostics before the full matrix:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot E:\some-project -Json -SkipMatrix
+```
+
+The lower-level readiness command remains available:
+
+```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project -Json
 ```
 
 Required:
 
 - `summary.fail` is `0`.
+- `release-check` has no failing checks.
 - Warnings are understood and explicitly accepted.
 - `validate-loop` passes.
 - Latest phase is accepted, reworked, blocked with a reason, or intentionally

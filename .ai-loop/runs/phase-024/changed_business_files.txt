@@ -1,0 +1,12 @@
+﻿loop-standard/docs/OPERATOR_CHECKLIST_1.0.md
+loop-standard/docs/RELEASE_NOTES_1.0.md
+loop-standard/README.md
+loop-standard/scripts/ai-loop.ps1
+loop-standard/scripts/check-readiness.ps1
+loop-standard/scripts/release-check.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase024.ps1
+loop-standard/scripts/Test-ReleaseCheck.ps1
+README.md
+README_EN.md
+

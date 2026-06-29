@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-024",
+    "title":  "Add release check command",
+    "objective":  "Add a compact read-only release-check command that aggregates readiness, loop validation, and the current non-global verification matrix for 1.0 delivery checks.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-024",
+    "audit_input":  ".ai-loop/audits/phase-024-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-024-audit.md",
+    "base_commit":  "5f0b0a916366558d6d967df90aa7dd32ac1aead7",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase024.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-024/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-29T07:12:39.1115227Z",
+    "evidence_collected_at":  "2026-06-29T08:48:35.5067610Z",
+    "audit_prepared_at":  "2026-06-29T08:49:09.0867110Z",
+    "accepted_at":  "2026-06-29T08:56:06.0056228Z"
+}

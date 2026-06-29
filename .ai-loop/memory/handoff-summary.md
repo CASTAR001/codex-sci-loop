@@ -184,6 +184,12 @@ Root self-loop phase-023 added task-kind skill trigger fixtures.
 skill requirements by default, while `physics-research`, `data-analysis`,
 `research-writing`, the `physics-sim` profile, and manual full-stack skill
 overrides produce the expected required skills and prompt content.
+Root self-loop phase-024 added `release-check.ps1` and
+`ai-loop -Command release-check`. The command is read-only and aggregates
+`readiness`, `validate-loop`, and a bounded matrix script into text or JSON.
+`Test-ReleaseCheck.ps1` covers JSON purity, skipped matrix diagnostics, focused
+matrix execution, text output, and blocked JSON for a project missing
+`.ai-loop`.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -245,5 +251,6 @@ The remaining
 plugin-form stability step is a live global Codex plugin install/discovery
 test, which must wait for explicit user approval because it modifies real
 Codex/plugin configuration. Good non-global next candidates are richer recovery
-explanations from the append-only transition log or a compact 1.0 release
-validation command that combines readiness, validation, and fixture summaries.
+explanations from the append-only transition log, or adding a user-approved
+live global plugin discovery test when real Codex configuration changes are
+allowed.

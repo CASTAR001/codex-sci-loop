@@ -99,6 +99,7 @@ foreach ($Entry in @(
     @{ Id = "KIT-WORKER"; Area = "kit"; Path = "scripts/preflight-worker.ps1"; Requirement = "Can preflight external Worker invocation." },
     @{ Id = "KIT-INVOKE"; Area = "kit"; Path = "scripts/invoke-worker.ps1"; Requirement = "Can invoke Worker only after preflight." },
     @{ Id = "KIT-SKILLS"; Area = "kit"; Path = "scripts/link-skills.ps1"; Requirement = "Can link project-local skills." },
+    @{ Id = "KIT-RELEASE-CHECK"; Area = "kit"; Path = "scripts/release-check.ps1"; Requirement = "Can run compact 1.0 release validation." },
     @{ Id = "KIT-ENTRY"; Area = "kit"; Path = "scripts/ai-loop.ps1"; Requirement = "Provides a unified command entrypoint." }
 )) {
     Add-PathCheck -Id $Entry.Id -Area $Entry.Area -Root $KitRoot -RelativePath $Entry.Path -Requirement $Entry.Requirement
@@ -186,7 +187,7 @@ if ($ValidateLoop.exit_code -eq 0) {
 
 foreach ($Entry in @(
     @{ Id = "TEST-STRUCTURE"; Path = "scripts/Test-LoopStandard.ps1"; Requirement = "Structure self-check exists." },
-    @{ Id = "TEST-LATEST"; Path = "scripts/Test-Phase020.ps1"; Requirement = "Latest full non-global matrix exists." },
+    @{ Id = "TEST-LATEST"; Path = "scripts/Test-Phase024.ps1"; Requirement = "Latest full non-global matrix exists." },
     @{ Id = "TEST-PLUGIN"; Path = "scripts/Test-PluginInstall.ps1"; Requirement = "Repo-local plugin install smoke test exists." },
     @{ Id = "TEST-VALIDATE"; Path = "scripts/Test-ValidateLoopFailures.ps1"; Requirement = "Negative loop validation fixtures exist." }
 )) {

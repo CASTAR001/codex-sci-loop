@@ -182,6 +182,10 @@ tests proving `fullstack` does not require scientific skills by default, while
 `physics-research`, `data-analysis`, `research-writing`, `physics-sim`, and
 manual full-stack overrides produce the expected required skill sets in
 `phase_requirements.json` and Worker prompts.
+Root phase-024 added the compact 1.0 `release-check` command. It aggregates
+`readiness`, `validate-loop`, and the current non-global verification matrix
+into text or JSON output. `-SkipMatrix` is available for quick diagnostics, but
+final release sign-off should run the full matrix.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -191,8 +195,8 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 ## Next Safe Action
 
 The next best optimization is richer recovery explanations from the append-only
-transition log, a compact 1.0 release validation command, or a user-approved
-live global Codex plugin install/discovery test.
+transition log, or a user-approved live global Codex plugin install/discovery
+test.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

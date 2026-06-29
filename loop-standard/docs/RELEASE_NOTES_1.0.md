@@ -30,8 +30,9 @@ place.
 - Durable `REWORK` and `BLOCKED` decisions with structured findings.
 - Bounded rework phase scaffolding from accepted audit findings.
 - Append-only state transition log and recovery diagnostics.
-- Machine-readable JSON for `resume`, `migrate -DryRun`, `prune-temp`, and
-  `readiness`.
+- Machine-readable JSON for `resume`, `migrate -DryRun`, `prune-temp`,
+  `readiness`, and `release-check`.
+- Compact `release-check` command for 1.0 release validation.
 - Non-destructive migration with dry-run planning and semantic transforms for
   older `.ai-loop` projects.
 - Project-local evolution file that does not override governance until promoted.
@@ -68,6 +69,8 @@ It covers:
 - Task-kind skill trigger fixtures for full-stack, physics research,
   data-analysis, research-writing, research profiles, and manual skill
   overrides.
+- Release-check text and JSON output that aggregates readiness, loop-wide
+  validation, and the verification matrix.
 - Readiness text and JSON output.
 
 ## Operator Entry Points

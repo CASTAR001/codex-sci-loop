@@ -48,6 +48,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 st
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 worker-preflight "C:\path\to\project" phase-001 -WorkerProfile kimi-code -Yolo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 invoke-worker "C:\path\to\project" phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 readiness "C:\path\to\project" -Json
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 release-check "C:\path\to\project" -Json
 ```
 
 The lower-level scripts remain available for compatibility, but new workflows
@@ -188,6 +189,18 @@ it reports blocking gaps and warnings across kit files, templates, project
 `.ai-loop`, evidence/state support, plugin scaffold, tests, and loop-wide
 validation. Real global Codex plugin discovery remains a warning unless the user
 explicitly approves modifying global Codex configuration.
+
+Use the release-check command for final 1.0 sign-off:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `
+  -Command release-check `
+  -ProjectRoot "C:\path\to\project"
+```
+
+`release-check` aggregates readiness, loop-wide validation, and the current
+non-global verification matrix. Add `-Json` for automation. Use `-SkipMatrix`
+only for quick diagnostics before a full release run.
 
 Test fixtures use ignored `.tmp-ai-loop-*` parent directories, but default test
 runs create unique `run-<timestamp>-<pid>-<id>` children. This keeps smoke and

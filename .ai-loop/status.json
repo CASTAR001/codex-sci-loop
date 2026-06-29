@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-023",
-                          "title":  "Add task-kind skill trigger fixtures",
-                          "objective":  "Add fixture tests proving task kinds and skill profiles produce the expected required skill sets for full-stack and research workflows without over-triggering scientific skills.",
+                          "phase_id":  "phase-024",
+                          "title":  "Add release check command",
+                          "objective":  "Add a compact read-only release-check command that aggregates readiness, loop validation, and the current non-global verification matrix for 1.0 delivery checks.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-023",
-                          "audit_input":  ".ai-loop/audits/phase-023-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-023-audit.md",
-                          "base_commit":  "731613a8ff8fbfac66b543dec2f7ddecd74b3e41",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase023.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-024",
+                          "audit_input":  ".ai-loop/audits/phase-024-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-024-audit.md",
+                          "base_commit":  "5f0b0a916366558d6d967df90aa7dd32ac1aead7",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase024.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "worker_profile":  "",
@@ -27,12 +27,12 @@
                           "required_worker_evidence":  [
 
                                                        ],
-                          "requirements":  ".ai-loop/runs/phase-023/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-024/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-28T18:31:12.3523791Z",
-                          "evidence_collected_at":  "2026-06-28T19:01:19.7602835Z",
-                          "audit_prepared_at":  "2026-06-28T19:01:31.9431313Z",
-                          "accepted_at":  "2026-06-28T19:01:44.0273850Z"
+                          "started_at":  "2026-06-29T07:12:39.1115227Z",
+                          "evidence_collected_at":  "2026-06-29T08:48:35.5067610Z",
+                          "audit_prepared_at":  "2026-06-29T08:49:09.0867110Z",
+                          "accepted_at":  "2026-06-29T08:56:06.0056228Z"
                       },
     "phases":  [
                    {
@@ -647,13 +647,43 @@
                        "evidence_collected_at":  "2026-06-28T19:01:19.7602835Z",
                        "audit_prepared_at":  "2026-06-28T19:01:31.9431313Z",
                        "accepted_at":  "2026-06-28T19:01:44.0273850Z"
+                   },
+                   {
+                       "phase_id":  "phase-024",
+                       "title":  "Add release check command",
+                       "objective":  "Add a compact read-only release-check command that aggregates readiness, loop validation, and the current non-global verification matrix for 1.0 delivery checks.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-024",
+                       "audit_input":  ".ai-loop/audits/phase-024-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-024-audit.md",
+                       "base_commit":  "5f0b0a916366558d6d967df90aa7dd32ac1aead7",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase024.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-024/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-29T07:12:39.1115227Z",
+                       "evidence_collected_at":  "2026-06-29T08:48:35.5067610Z",
+                       "audit_prepared_at":  "2026-06-29T08:49:09.0867110Z",
+                       "accepted_at":  "2026-06-29T08:56:06.0056228Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-023",
+                          "phase_id":  "phase-024",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-023-audit.md",
-                          "decided_at":  "2026-06-28T19:01:44.0273850Z"
+                          "audit":  ".ai-loop/audits/phase-024-audit.md",
+                          "decided_at":  "2026-06-29T08:56:06.0056228Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

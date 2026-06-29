@@ -99,6 +99,7 @@ $RequiredPaths = @(
     "scripts\invoke-worker.ps1",
     "scripts\prune-temp-fixtures.ps1",
     "scripts\check-readiness.ps1",
+    "scripts\release-check.ps1",
     "scripts\record-state-transition.ps1",
     "scripts\extract-audit-findings.ps1",
     "scripts\scaffold-rework-phase.ps1",
@@ -151,6 +152,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase022.ps1",
     "scripts\Test-TaskKindSkillTriggers.ps1",
     "scripts\Test-Phase023.ps1",
+    "scripts\Test-ReleaseCheck.ps1",
+    "scripts\Test-Phase024.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -301,9 +304,19 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
 $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
 if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
-    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "extract-audit-findings.ps1", "scaffold-rework-phase.ps1", "worker-preflight", "invoke-worker")) {
+    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "extract-audit-findings.ps1", "scaffold-rework-phase.ps1", "worker-preflight", "invoke-worker", "release-check.ps1")) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
+        }
+    }
+}
+
+$ReleaseCheckScriptPath = Join-Path $KitRoot "scripts\release-check.ps1"
+if (Test-Path -LiteralPath $ReleaseCheckScriptPath -PathType Leaf) {
+    $ReleaseCheckText = Get-Content -LiteralPath $ReleaseCheckScriptPath -Raw
+    foreach ($Needle in @("check-readiness.ps1", "validate-loop.ps1", "MatrixScript", "SkipMatrix", "Loop Harness 1.0 Release Check", "RELEASE-MATRIX")) {
+        if ($ReleaseCheckText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "release-check.ps1 missing expected release-check text: $Needle"
         }
     }
 }

@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "prune-temp", "readiness", "doctor")]
+    [ValidateSet("init", "migrate", "start", "collect", "audit-pack", "validate", "validate-loop", "accept", "decide", "extract-audit-findings", "scaffold-rework", "resume", "link-skills", "worker-preflight", "invoke-worker", "prune-temp", "readiness", "release-check", "doctor")]
     [string]$Command,
 
     [Parameter(Position = 1)]
@@ -47,6 +47,8 @@ param(
     [switch]$RequireExternalWorkerEvidence,
     [switch]$Json,
     [switch]$DryRun,
+    [switch]$SkipMatrix,
+    [string]$MatrixScript = "Test-Phase023.ps1",
     [ValidateRange(0, 87600)]
     [int]$MinAgeHours = 24,
     [ValidateRange(0, 10000)]
@@ -706,6 +708,17 @@ switch ($Command) {
         if ($Json) { $ScriptParams.Json = $true }
         $global:LASTEXITCODE = 0
         & (Join-Path $PSScriptRoot "check-readiness.ps1") @ScriptParams
+        Exit-IfScriptFailed -Succeeded $?
+    }
+    "release-check" {
+        $ScriptParams = @{
+            ProjectRoot = $ProjectRoot
+            MatrixScript = $MatrixScript
+        }
+        if ($Json) { $ScriptParams.Json = $true }
+        if ($SkipMatrix) { $ScriptParams.SkipMatrix = $true }
+        $global:LASTEXITCODE = 0
+        & (Join-Path $PSScriptRoot "release-check.ps1") @ScriptParams
         Exit-IfScriptFailed -Succeeded $?
     }
     "doctor" {

@@ -239,6 +239,11 @@
   `research-writing`, the `physics-sim` profile, and manual skill overrides.
   This preserves a light full-stack default while proving physics/research work
   automatically declares the required scientific workflow skills.
+- Ran root self-loop phase-024 under the repository root `.ai-loop`: added the
+  read-only `release-check.ps1` script and `ai-loop -Command release-check`.
+  The command aggregates readiness, loop-wide validation, and a bounded matrix
+  script, emits text or JSON, supports `-SkipMatrix` for quick diagnostics, and
+  keeps final release sign-off oriented around a full matrix run.
 
 ## In Progress
 
@@ -262,6 +267,8 @@
   explanations and stale-state diagnosis.
 - Expand task-kind fixtures further only when new task kinds or skill profiles
   are added.
+- Use `release-check` as the compact 1.0 sign-off entrypoint before claiming
+  delivery.
 - Add new semantic migration transform types only when future schema changes
   require them, with fixture coverage before use.
 
