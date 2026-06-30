@@ -32,3 +32,4 @@ support a phase decision.
 | TEST-phase-023-VERIFY | phase-023 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase023.ps1 | .ai-loop/runs/phase-023/verify.log | 0 | passed | Primary phase verification. |
 | TEST-phase-024-VERIFY | phase-024 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase024.ps1 | .ai-loop/runs/phase-024/verify.log | 0 | passed | Primary phase verification. |
 | TEST-phase-025-VERIFY | phase-025 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase025.ps1 | .ai-loop/runs/phase-025/verify.log | 0 | passed | Primary phase verification. |
+| TEST-phase-026-VERIFY | phase-026 | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase026.ps1 | .ai-loop/runs/phase-026/verify.log | 0 | passed | Primary phase verification. |

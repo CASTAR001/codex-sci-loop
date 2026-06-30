@@ -1,0 +1,13 @@
+﻿ M .ai-loop/events/state-transitions.ndjson
+ M .ai-loop/evidence/artifact-index.md
+ M .ai-loop/evidence/evidence-ledger.md
+ M .ai-loop/skills/skill-usage-ledger.md
+ M .ai-loop/status.json
+ M loop-standard/scripts/Test-LoopStandard.ps1
+ M loop-standard/scripts/Test-ReleaseCheck.ps1
+ M loop-standard/scripts/ai-loop.ps1
+ M loop-standard/scripts/check-readiness.ps1
+ M loop-standard/scripts/release-check.ps1
+?? .ai-loop/runs/phase-026/
+?? loop-standard/scripts/Test-Phase026.ps1
+

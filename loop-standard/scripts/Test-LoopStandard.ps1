@@ -154,6 +154,8 @@ $RequiredPaths = @(
     "scripts\Test-Phase023.ps1",
     "scripts\Test-ReleaseCheck.ps1",
     "scripts\Test-Phase024.ps1",
+    "scripts\Test-Phase025.ps1",
+    "scripts\Test-Phase026.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\Test-PluginInstall.ps1",
@@ -314,7 +316,7 @@ if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
 $ReleaseCheckScriptPath = Join-Path $KitRoot "scripts\release-check.ps1"
 if (Test-Path -LiteralPath $ReleaseCheckScriptPath -PathType Leaf) {
     $ReleaseCheckText = Get-Content -LiteralPath $ReleaseCheckScriptPath -Raw
-    foreach ($Needle in @("check-readiness.ps1", "validate-loop.ps1", "MatrixScript", "SkipMatrix", "Loop Harness 1.0 Release Check", "RELEASE-MATRIX")) {
+    foreach ($Needle in @("check-readiness.ps1", "validate-loop.ps1", "MatrixScript", "SkipMatrix", "Test-Phase*.ps1", "Loop Harness 1.0 Release Check", "RELEASE-MATRIX")) {
         if ($ReleaseCheckText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "release-check.ps1 missing expected release-check text: $Needle"
         }

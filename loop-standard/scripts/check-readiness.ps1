@@ -85,6 +85,16 @@ $RepoRoot = Split-Path -Parent $KitRoot
 $ProjectRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ProjectRoot)
 $Checks = New-Object System.Collections.Generic.List[object]
 
+$LatestPhaseMatrix = @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter "Test-Phase*.ps1" -File | ForEach-Object {
+    if ($_.Name -match '^Test-Phase(\d+)\.ps1$') {
+        [pscustomobject]@{
+            PhaseNumber = [int]$Matches[1]
+            RelativePath = "scripts/$($_.Name)"
+        }
+    }
+} | Sort-Object PhaseNumber -Descending | Select-Object -First 1)
+$LatestPhaseMatrixPath = if ($LatestPhaseMatrix.Count -gt 0) { $LatestPhaseMatrix[0].RelativePath } else { "scripts/Test-PhaseNNN.ps1" }
+
 foreach ($Entry in @(
     @{ Id = "KIT-INIT"; Area = "kit"; Path = "scripts/init-loop.ps1"; Requirement = "Can initialize .ai-loop in an arbitrary project." },
     @{ Id = "KIT-MIGRATE"; Area = "kit"; Path = "scripts/migrate-loop.ps1"; Requirement = "Can migrate existing .ai-loop projects non-destructively." },
@@ -187,7 +197,7 @@ if ($ValidateLoop.exit_code -eq 0) {
 
 foreach ($Entry in @(
     @{ Id = "TEST-STRUCTURE"; Path = "scripts/Test-LoopStandard.ps1"; Requirement = "Structure self-check exists." },
-    @{ Id = "TEST-LATEST"; Path = "scripts/Test-Phase024.ps1"; Requirement = "Latest full non-global matrix exists." },
+    @{ Id = "TEST-LATEST"; Path = $LatestPhaseMatrixPath; Requirement = "Latest full non-global matrix exists." },
     @{ Id = "TEST-PLUGIN"; Path = "scripts/Test-PluginInstall.ps1"; Requirement = "Repo-local plugin install smoke test exists." },
     @{ Id = "TEST-VALIDATE"; Path = "scripts/Test-ValidateLoopFailures.ps1"; Requirement = "Negative loop validation fixtures exist." }
 )) {

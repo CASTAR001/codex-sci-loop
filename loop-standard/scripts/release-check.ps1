@@ -3,7 +3,7 @@ param(
     [string]$ProjectRoot = (Get-Location).Path,
     [switch]$Json,
     [switch]$SkipMatrix,
-    [string]$MatrixScript = "Test-Phase023.ps1"
+    [string]$MatrixScript = ""
 )
 
 Set-StrictMode -Version Latest
@@ -33,7 +33,21 @@ function Invoke-CheckedCommand {
 }
 
 function Resolve-MatrixScriptPath {
-    param([Parameter(Mandatory = $true)][string]$NameOrPath)
+    param([string]$NameOrPath = "")
+    if ([string]::IsNullOrWhiteSpace($NameOrPath)) {
+        $Latest = @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter "Test-Phase*.ps1" -File | ForEach-Object {
+            if ($_.Name -match '^Test-Phase(\d+)\.ps1$') {
+                [pscustomobject]@{
+                    PhaseNumber = [int]$Matches[1]
+                    FullName = $_.FullName
+                }
+            }
+        } | Sort-Object PhaseNumber -Descending | Select-Object -First 1)
+        if ($Latest.Count -eq 0) {
+            throw "No Test-PhaseNNN.ps1 matrix scripts found under loop-standard/scripts."
+        }
+        return $Latest[0].FullName
+    }
     $Candidate = if ([System.IO.Path]::IsPathRooted($NameOrPath)) {
         $NameOrPath
     } else {
@@ -54,7 +68,7 @@ function Resolve-MatrixScriptPath {
 $ProjectRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ProjectRoot)
 $ReadinessScript = Join-Path $PSScriptRoot "check-readiness.ps1"
 $ValidateLoopScript = Join-Path $PSScriptRoot "validate-loop.ps1"
-$MatrixScriptPath = if ($SkipMatrix) { "" } else { Resolve-MatrixScriptPath -NameOrPath $MatrixScript }
+$MatrixScriptPath = Resolve-MatrixScriptPath -NameOrPath $MatrixScript
 
 $Readiness = Invoke-CheckedCommand -Label "readiness" -ScriptPath $ReadinessScript -Arguments @("-ProjectRoot", $ProjectRoot, "-Json")
 $ReadinessObject = $null
@@ -100,7 +114,7 @@ $Checks.Add([pscustomobject][ordered]@{
 $Checks.Add([pscustomobject][ordered]@{
     id = "RELEASE-MATRIX"
     status = if ($SkipMatrix) { "skipped" } elseif ($Matrix.exit_code -eq 0) { "pass" } else { "fail" }
-    evidence = if ($SkipMatrix) { "matrix skipped by operator" } else { (Split-Path -Leaf $MatrixScriptPath) }
+    evidence = if ($SkipMatrix) { "$(Split-Path -Leaf $MatrixScriptPath) skipped by operator" } else { (Split-Path -Leaf $MatrixScriptPath) }
     exit_code = $Matrix.exit_code
     notes = if ($SkipMatrix) { "Use without -SkipMatrix for the full non-global verification matrix." } elseif ($Matrix.exit_code -eq 0) { "matrix passed" } else { $Matrix.output }
 })

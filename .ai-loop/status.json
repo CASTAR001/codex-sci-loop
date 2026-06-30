@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-025",
-                          "title":  "Richer recovery explanations",
-                          "objective":  "Enhance ai-loop resume so text and JSON outputs explain why a phase is resumable or blocked, list concrete transition/status/evidence causes, and expose compact recovery_reason and recovery_causes fields for automation.",
+                          "phase_id":  "phase-026",
+                          "title":  "Discover latest release matrix",
+                          "objective":  "Make release-check and readiness discover the latest Test-PhaseNNN.ps1 non-global matrix by default so final 1.0 sign-off cannot silently run a stale phase matrix after new accepted phases.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-025",
-                          "audit_input":  ".ai-loop/audits/phase-025-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-025-audit.md",
-                          "base_commit":  "8796f37fb65543726113d171db7098e78e42a1e2",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase025.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-026",
+                          "audit_input":  ".ai-loop/audits/phase-026-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-026-audit.md",
+                          "base_commit":  "687d2c9e6c6ee310fc55cbd8831069a894022772",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase026.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "worker_profile":  "",
@@ -27,12 +27,12 @@
                           "required_worker_evidence":  [
 
                                                        ],
-                          "requirements":  ".ai-loop/runs/phase-025/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-026/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-30T13:29:19.9923183Z",
-                          "evidence_collected_at":  "2026-06-30T13:57:57.7401303Z",
-                          "audit_prepared_at":  "2026-06-30T13:58:24.5762301Z",
-                          "accepted_at":  "2026-06-30T13:59:17.8042518Z"
+                          "started_at":  "2026-06-30T14:06:34.4185036Z",
+                          "evidence_collected_at":  "2026-06-30T14:40:22.2469151Z",
+                          "audit_prepared_at":  "2026-06-30T14:40:37.3941419Z",
+                          "accepted_at":  "2026-06-30T14:41:26.1921568Z"
                       },
     "phases":  [
                    {
@@ -707,13 +707,43 @@
                        "evidence_collected_at":  "2026-06-30T13:57:57.7401303Z",
                        "audit_prepared_at":  "2026-06-30T13:58:24.5762301Z",
                        "accepted_at":  "2026-06-30T13:59:17.8042518Z"
+                   },
+                   {
+                       "phase_id":  "phase-026",
+                       "title":  "Discover latest release matrix",
+                       "objective":  "Make release-check and readiness discover the latest Test-PhaseNNN.ps1 non-global matrix by default so final 1.0 sign-off cannot silently run a stale phase matrix after new accepted phases.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-026",
+                       "audit_input":  ".ai-loop/audits/phase-026-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-026-audit.md",
+                       "base_commit":  "687d2c9e6c6ee310fc55cbd8831069a894022772",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase026.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-026/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-06-30T14:06:34.4185036Z",
+                       "evidence_collected_at":  "2026-06-30T14:40:22.2469151Z",
+                       "audit_prepared_at":  "2026-06-30T14:40:37.3941419Z",
+                       "accepted_at":  "2026-06-30T14:41:26.1921568Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-025",
+                          "phase_id":  "phase-026",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-025-audit.md",
-                          "decided_at":  "2026-06-30T13:59:17.8042518Z"
+                          "audit":  ".ai-loop/audits/phase-026-audit.md",
+                          "decided_at":  "2026-06-30T14:41:26.1921568Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

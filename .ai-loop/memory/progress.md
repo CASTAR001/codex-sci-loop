@@ -251,6 +251,18 @@
   started/resumable, transition mismatch/BLOCKED, missing evidence, artifact
   manifest, and missing status cases, and added `Test-Phase025.ps1` as the
   current non-global verification matrix.
+- Ran root self-loop phase-026 under the repository root `.ai-loop`: changed
+  `release-check` and the unified wrapper to discover the highest numbered
+  `Test-PhaseNNN.ps1` by default, made `release-check -SkipMatrix` report the
+  matrix it would run, updated readiness `TEST-LATEST` to use the discovered
+  latest matrix, extended release-check/structure tests to catch stale matrix
+  defaults, and added `Test-Phase026.ps1` as the current non-global
+  verification matrix.
+- Ran a full post-accept release sign-off check without `-SkipMatrix`; it
+  executed `Test-Phase026.ps1` and reported `pass=3`, `warn=1`, `fail=0`,
+  `skipped=0`. The only warning remains `PLUGIN-GLOBAL`, which is blocked by
+  policy until the user explicitly approves real global Codex configuration
+  changes.
 - Wrote handoff-only report `.ai-loop/reports/goal-handoff-2026-06-30.md` for
   a new conversation. This was not a new harness feature phase; it records the
   paused goal state, current accepted phase, lightweight verification results,
@@ -274,8 +286,6 @@
   migration model.
 - Expand task-kind fixtures further only when new task kinds or skill profiles
   are added.
-- Use `release-check` as the compact 1.0 sign-off entrypoint before claiming
-  delivery.
 - Add new semantic migration transform types only when future schema changes
   require them, with fixture coverage before use.
 

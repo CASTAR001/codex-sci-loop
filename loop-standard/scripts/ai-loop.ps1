@@ -48,7 +48,7 @@ param(
     [switch]$Json,
     [switch]$DryRun,
     [switch]$SkipMatrix,
-    [string]$MatrixScript = "Test-Phase023.ps1",
+    [string]$MatrixScript = "",
     [ValidateRange(0, 87600)]
     [int]$MinAgeHours = 24,
     [ValidateRange(0, 10000)]
@@ -786,8 +786,8 @@ switch ($Command) {
     "release-check" {
         $ScriptParams = @{
             ProjectRoot = $ProjectRoot
-            MatrixScript = $MatrixScript
         }
+        if (-not [string]::IsNullOrWhiteSpace($MatrixScript)) { $ScriptParams.MatrixScript = $MatrixScript }
         if ($Json) { $ScriptParams.Json = $true }
         if ($SkipMatrix) { $ScriptParams.SkipMatrix = $true }
         $global:LASTEXITCODE = 0

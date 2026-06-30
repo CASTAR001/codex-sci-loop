@@ -19,17 +19,19 @@ Current known state at that handoff:
 
 Current state after the latest self-loop:
 
-- Latest accepted phase: `phase-025`
-- `phase-025` verification: `Test-Phase025.ps1` passed.
+- Latest accepted phase: `phase-026`
+- `phase-026` verification: `Test-Phase026.ps1` passed.
+- Full `release-check` without `-SkipMatrix`: `ready_with_warnings`,
+  `pass=3`, `warn=1`, `fail=0`, `skipped=0`, matrix `Test-Phase026.ps1`.
 - Remaining expected release warning: `PLUGIN-GLOBAL`, pending explicit user
   approval for real global Codex plugin discovery.
 
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-025 have
-been accepted. Root phase-025 added richer recovery reason/cause output for
-`ai-loop resume`.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-026 have
+been accepted. Root phase-026 made release-check/readiness discover the latest
+non-global matrix by default.
 
 ## Last Verified State
 
@@ -222,6 +224,12 @@ and artifact manifest checks. `Test-ResumeDiagnostics.ps1` and
 `Test-ResumeJson.ps1` cover the started/resumable path, transition mismatch
 BLOCKED path, missing evidence causes, artifact manifest causes, and missing
 status JSON. `Test-Phase025.ps1` is the current non-global verification matrix.
+Root self-loop phase-026 changed `release-check` so omitting `-MatrixScript`
+discovers the highest numbered `Test-PhaseNNN.ps1` under
+`loop-standard/scripts/`. `release-check -SkipMatrix` now reports the matrix it
+would run, readiness `TEST-LATEST` points to the discovered latest matrix, and
+`Test-ReleaseCheck.ps1` asserts both surfaces. `Test-Phase026.ps1` is the
+current non-global verification matrix.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -278,9 +286,9 @@ append-only state transition logs, durable REWORK/BLOCKED outcomes, external
 Worker evidence requirements, structured audit finding extraction,
 machine-readable resume output, richer recovery reasons/causes, safe temp
 fixture pruning, migration dry-run planning, machine-readable temp cleanup
-output, readiness, and release-check are now in place.
+output, readiness, release-check, and dynamic latest matrix discovery are now
+in place.
 The remaining plugin-form stability step is a live global Codex plugin
 install/discovery test, which must wait for explicit user approval because it
-modifies real Codex/plugin configuration. Good next non-global action is a
-final `release-check` without `-SkipMatrix`, or a small bounded polish phase
-only if that release check exposes a gap.
+modifies real Codex/plugin configuration. The non-global release check now
+passes with warnings only for that approval-gated global plugin check.

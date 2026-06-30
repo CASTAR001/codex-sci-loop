@@ -1,0 +1,15 @@
+﻿.ai-loop/events/state-transitions.ndjson
+.ai-loop/evidence/artifact-index.md
+.ai-loop/evidence/evidence-ledger.md
+.ai-loop/runs/phase-026/base_commit.txt
+.ai-loop/runs/phase-026/diff.patch
+.ai-loop/runs/phase-026/phase_meta.json
+.ai-loop/runs/phase-026/phase_requirements.json
+.ai-loop/runs/phase-026/prompt.md
+.ai-loop/runs/phase-026/report.md
+.ai-loop/runs/phase-026/status_after.txt
+.ai-loop/runs/phase-026/status_before.txt
+.ai-loop/runs/phase-026/verify.log
+.ai-loop/skills/skill-usage-ledger.md
+.ai-loop/status.json
+

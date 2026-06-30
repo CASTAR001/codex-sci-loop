@@ -194,11 +194,22 @@ started/resumable phases, transition/status mismatch blocking, missing evidence
 causes, artifact manifest causes, and missing status JSON. `Test-Phase025.ps1`
 aggregates the new recovery tests plus the accepted phase-024 non-global
 matrix.
+Root phase-026 fixed final sign-off matrix discovery. `release-check` and the
+`ai-loop release-check` wrapper now discover the highest numbered
+`Test-PhaseNNN.ps1` by default when `-MatrixScript` is omitted, while explicit
+matrix overrides still work. `release-check -SkipMatrix` reports the matrix it
+would have run, and readiness `TEST-LATEST` now points to the discovered latest
+matrix instead of a hard-coded older phase file. `Test-Phase026.ps1` is the
+current non-global verification matrix.
+After phase-026 acceptance, full `ai-loop -Command release-check -ProjectRoot .
+-Json` ran without `-SkipMatrix`, executed `Test-Phase026.ps1`, and reported
+`pass=3`, `warn=1`, `fail=0`, `skipped=0`, with the remaining warning being
+`PLUGIN-GLOBAL`.
 On 2026-06-30, a handoff-only report was written to
 `.ai-loop/reports/goal-handoff-2026-06-30.md` so a fresh conversation can
 continue without carrying the long thread context. The active goal is paused;
 latest accepted phase at that handoff was `phase-024`; the current accepted
-phase is now `phase-025`.
+phase is now `phase-026`.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -207,10 +218,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best non-global action is a compact final release sign-off using
-`release-check` without `-SkipMatrix`, or a small polish phase only if the
-release check exposes a gap. The remaining plugin-form stability step is a
-user-approved live global Codex plugin install/discovery test.
+The next best action is either user-approved live global Codex plugin
+install/discovery validation, or declaring the non-global 1.0 package
+`ready_with_warnings` with `PLUGIN-GLOBAL` explicitly documented as an
+approval-gated warning.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

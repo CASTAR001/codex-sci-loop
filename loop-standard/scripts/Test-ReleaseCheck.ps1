@@ -30,6 +30,17 @@ $AiLoop = Join-Path $PSScriptRoot "ai-loop.ps1"
 . (Join-Path $PSScriptRoot "test-temp-root.ps1")
 $TempRoot = New-LoopTestTempRoot -RepoRoot $RepoRoot -Name "release-check"
 $Problems = New-Object System.Collections.Generic.List[string]
+$LatestMatrix = @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter "Test-Phase*.ps1" -File | ForEach-Object {
+    if ($_.Name -match '^Test-Phase(\d+)\.ps1$') {
+        [pscustomobject]@{
+            PhaseNumber = [int]$Matches[1]
+            Name = $_.Name
+        }
+    }
+} | Sort-Object PhaseNumber -Descending | Select-Object -First 1)
+if ($LatestMatrix.Count -eq 0) {
+    Add-Problem "no Test-PhaseNNN.ps1 matrix scripts found."
+}
 
 if ((Test-Path -LiteralPath $TempRoot) -and -not $KeepTemp) {
     Remove-Item -LiteralPath $TempRoot -Recurse -Force
@@ -51,6 +62,19 @@ try {
             }
             if ([int]$Parsed.summary.skipped -ne 1) {
                 Add-Problem "skip-matrix release-check should report one skipped check."
+            }
+            if ($LatestMatrix.Count -gt 0) {
+                if ([string]$Parsed.commands.matrix.script -notmatch [regex]::Escape($LatestMatrix[0].Name)) {
+                    Add-Problem "skip-matrix release-check should report the latest matrix script: $($LatestMatrix[0].Name)"
+                }
+                $MatrixCheck = @($Parsed.checks | Where-Object { $_.id -eq "RELEASE-MATRIX" }) | Select-Object -First 1
+                if ([string]$MatrixCheck.evidence -notmatch [regex]::Escape($LatestMatrix[0].Name)) {
+                    Add-Problem "skip-matrix release-check evidence should name latest matrix script: $($MatrixCheck.evidence)"
+                }
+                $ReadinessLatest = @($Parsed.readiness.checks | Where-Object { $_.id -eq "TEST-LATEST" }) | Select-Object -First 1
+                if ([string]$ReadinessLatest.evidence -ne "scripts/$($LatestMatrix[0].Name)") {
+                    Add-Problem "readiness TEST-LATEST should point to scripts/$($LatestMatrix[0].Name): $($ReadinessLatest.evidence)"
+                }
             }
             if ($SkipJson.Output -match "Loop Harness 1.0 Release Check") {
                 Add-Problem "release-check JSON mixed human-readable heading into JSON."
