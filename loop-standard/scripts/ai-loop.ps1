@@ -355,12 +355,17 @@ switch ($Command) {
                     status_path = ".ai-loop/status.json"
                     current_phase = $null
                     recovery_decision = "BLOCKED"
+                    recovery_reason = "missing_status"
+                    recovery_causes = @("missing_status:.ai-loop/status.json")
                     blocked = $true
                     reason = "missing .ai-loop/status.json"
                     generated_at = (Get-Date).ToUniversalTime().ToString("o")
                 } | ConvertTo-Json -Depth 30
             } else {
                 Write-Output "Recovery decision: BLOCKED"
+                Write-Output "Recovery reason: missing_status"
+                Write-Output "Recovery causes:"
+                Write-Output "- missing_status:.ai-loop/status.json"
                 Write-Output "Reason: missing .ai-loop/status.json"
             }
             exit 2
@@ -375,12 +380,17 @@ switch ($Command) {
                     status_path = ".ai-loop/status.json"
                     current_phase = $null
                     recovery_decision = "BLOCKED"
+                    recovery_reason = "invalid_status"
+                    recovery_causes = @("invalid_status:.ai-loop/status.json")
                     blocked = $true
                     reason = "invalid .ai-loop/status.json :: $($_.Exception.Message)"
                     generated_at = (Get-Date).ToUniversalTime().ToString("o")
                 } | ConvertTo-Json -Depth 30
             } else {
                 Write-Output "Recovery decision: BLOCKED"
+                Write-Output "Recovery reason: invalid_status"
+                Write-Output "Recovery causes:"
+                Write-Output "- invalid_status:.ai-loop/status.json"
                 Write-Output "Reason: invalid .ai-loop/status.json :: $($_.Exception.Message)"
             }
             exit 2
@@ -409,6 +419,8 @@ switch ($Command) {
                 next_safe_action = "start a bounded phase with ai-loop start."
                 next_safe_command = (Format-AiLoopCommand -ProjectRoot $ProjectRoot -Command "start" -PhaseId "<phase-id>")
                 recovery_decision = "RESUMABLE"
+                recovery_reason = "no_current_phase"
+                recovery_causes = @("no_current_phase:start")
                 blocked = $false
                 generated_at = (Get-Date).ToUniversalTime().ToString("o")
             }
@@ -423,6 +435,9 @@ switch ($Command) {
                 Write-Output "Next safe action: $($ResumeObject.next_safe_action)"
                 Write-Output "Next safe command: $($ResumeObject.next_safe_command)"
                 Write-Output "Recovery decision: RESUMABLE"
+                Write-Output "Recovery reason: no_current_phase"
+                Write-Output "Recovery causes:"
+                Write-Output "- no_current_phase:start"
             }
         } else {
             $PhaseId = $CurrentPhase.phase_id
@@ -555,6 +570,59 @@ switch ($Command) {
                 $Blocked = $true
             }
             $RecoveryDecision = if ($Blocked) { "BLOCKED" } else { "RESUMABLE" }
+            $RecoveryCauses = New-Object System.Collections.Generic.List[string]
+            $RecoveryCauses.Add("phase_status:$PhaseStatus")
+            if ($TransitionProblems.Count -gt 0) {
+                foreach ($Problem in @($TransitionProblems)) {
+                    $RecoveryCauses.Add("transition:$Problem")
+                }
+            } elseif ($TransitionConsistency -eq "OK") {
+                $RecoveryCauses.Add("transition:ok")
+            } else {
+                $RecoveryCauses.Add("transition:$TransitionConsistency")
+            }
+            if ($MissingEvidence.Count -gt 0) {
+                if ($PhaseStatus -in @("started", "phase_started", "accepted")) {
+                    $RecoveryCauses.Add("missing_evidence:allowed_for_$PhaseStatus")
+                } else {
+                    foreach ($Evidence in @($MissingEvidence)) {
+                        $RecoveryCauses.Add("missing_evidence:$Evidence")
+                    }
+                }
+            }
+            if ($ArtifactIntegrityProblemCount -gt 0) {
+                if ($PhaseStatus -in @("started", "phase_started", "accepted")) {
+                    $RecoveryCauses.Add("artifact_manifest:unchecked_until_collect")
+                } else {
+                    $RecoveryCauses.Add("artifact_manifest:integrity_problem_count=$ArtifactIntegrityProblemCount")
+                }
+            } elseif ($ArtifactManifestStatus -eq "present") {
+                $RecoveryCauses.Add("artifact_manifest:ok")
+            } else {
+                $RecoveryCauses.Add("artifact_manifest:$ArtifactManifestStatus")
+            }
+            $RecoveryReason = if ($Blocked) {
+                if ($TransitionProblems.Count -gt 0) {
+                    "blocked_transition_problem"
+                } elseif ($MissingEvidence.Count -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
+                    "blocked_missing_evidence"
+                } elseif ($ArtifactIntegrityProblemCount -gt 0 -and $PhaseStatus -notin @("started", "phase_started", "accepted")) {
+                    "blocked_artifact_integrity"
+                } else {
+                    "blocked_unknown"
+                }
+            } else {
+                switch ($PhaseStatus) {
+                    "started" { "phase_started_collect_next" }
+                    "phase_started" { "phase_started_collect_next" }
+                    "evidence_collected" { "evidence_collected_audit_pack_next" }
+                    "audit_ready" { "audit_ready_decision_next" }
+                    "accepted" { "phase_accepted_terminal" }
+                    "rework" { "phase_rework_scaffold_next" }
+                    "blocked" { "phase_blocked_resolve_next" }
+                    default { "phase_resumable_validate_next" }
+                }
+            }
             $ResumeObject = [pscustomobject][ordered]@{
                 schema_version = "1.0"
                 project_root = $ProjectRoot
@@ -585,6 +653,8 @@ switch ($Command) {
                 next_safe_action = $NextSafeAction
                 next_safe_command = $NextSafeCommand
                 recovery_decision = $RecoveryDecision
+                recovery_reason = $RecoveryReason
+                recovery_causes = @($RecoveryCauses)
                 blocked = [bool]$Blocked
                 generated_at = (Get-Date).ToUniversalTime().ToString("o")
             }
@@ -620,6 +690,9 @@ switch ($Command) {
                 Write-Output "Next safe action: $NextSafeAction"
                 Write-Output "Next safe command: $NextSafeCommand"
                 Write-Output "Recovery decision: $RecoveryDecision"
+                Write-Output "Recovery reason: $RecoveryReason"
+                Write-Output "Recovery causes:"
+                foreach ($Item in $RecoveryCauses) { Write-Output "- $Item" }
             }
         }
         if (-not $Json) {

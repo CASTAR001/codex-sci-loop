@@ -397,7 +397,7 @@ if (Test-Path -LiteralPath $StartPhaseScriptPath -PathType Leaf) {
 $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
 if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
-    foreach ($Needle in @("Read-StateTransitions", "Latest transition:", "Transition consistency:", "Next safe command:", "schema_version", "recovery_decision", "next_safe_command")) {
+    foreach ($Needle in @("Read-StateTransitions", "Latest transition:", "Transition consistency:", "Next safe command:", "schema_version", "recovery_decision", "recovery_reason", "recovery_causes", "next_safe_command")) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected resume diagnostic text: $Needle"
         }

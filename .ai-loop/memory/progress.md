@@ -244,6 +244,13 @@
   The command aggregates readiness, loop-wide validation, and a bounded matrix
   script, emits text or JSON, supports `-SkipMatrix` for quick diagnostics, and
   keeps final release sign-off oriented around a full matrix run.
+- Ran root self-loop phase-025 under the repository root `.ai-loop`: enhanced
+  `ai-loop resume` so text and JSON outputs include `recovery_reason` and
+  `recovery_causes` derived from existing status, transition, missing evidence,
+  and artifact manifest diagnostics. Updated resume text/JSON fixtures for
+  started/resumable, transition mismatch/BLOCKED, missing evidence, artifact
+  manifest, and missing status cases, and added `Test-Phase025.ps1` as the
+  current non-global verification matrix.
 - Wrote handoff-only report `.ai-loop/reports/goal-handoff-2026-06-30.md` for
   a new conversation. This was not a new harness feature phase; it records the
   paused goal state, current accepted phase, lightweight verification results,
@@ -257,8 +264,6 @@
 
 - Choose final non-temporary global install root.
 - Expand skill trigger matrix for full-stack and physics workflows.
-- Use append-only state transition logs for richer recovery paths beyond durable
-  non-accepted decisions.
 - Validate plugin discovery in real global Codex configuration after explicit
   approval, if plugin-form stability must be claimed beyond repo-local smoke
   tests.
@@ -267,8 +272,6 @@
 - Decide whether future schema upgrades require deep semantic migration
   transforms beyond the current dry-run/top-level JSON merge/template repair
   migration model.
-- Use the state transition log to improve `resume` with richer recovery
-  explanations and stale-state diagnosis.
 - Expand task-kind fixtures further only when new task kinds or skill profiles
   are added.
 - Use `release-check` as the compact 1.0 sign-off entrypoint before claiming

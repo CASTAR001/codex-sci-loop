@@ -17,11 +17,19 @@ Current known state at that handoff:
 - Expected remaining warning: `PLUGIN-GLOBAL`, pending explicit user approval
   for real global Codex plugin discovery.
 
+Current state after the latest self-loop:
+
+- Latest accepted phase: `phase-025`
+- `phase-025` verification: `Test-Phase025.ps1` passed.
+- Remaining expected release warning: `PLUGIN-GLOBAL`, pending explicit user
+  approval for real global Codex plugin discovery.
+
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-016 have
-been accepted. Root phase-016 added machine-readable resume output.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-025 have
+been accepted. Root phase-025 added richer recovery reason/cause output for
+`ai-loop resume`.
 
 ## Last Verified State
 
@@ -207,6 +215,13 @@ Root self-loop phase-024 added `release-check.ps1` and
 `Test-ReleaseCheck.ps1` covers JSON purity, skipped matrix diagnostics, focused
 matrix execution, text output, and blocked JSON for a project missing
 `.ai-loop`.
+Root self-loop phase-025 added `recovery_reason` and `recovery_causes` to
+`ai-loop resume` text and JSON output. The values are derived from existing
+phase status, transition consistency, transition problems, missing evidence,
+and artifact manifest checks. `Test-ResumeDiagnostics.ps1` and
+`Test-ResumeJson.ps1` cover the started/resumable path, transition mismatch
+BLOCKED path, missing evidence causes, artifact manifest causes, and missing
+status JSON. `Test-Phase025.ps1` is the current non-global verification matrix.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -261,13 +276,11 @@ Repo-local plugin install/discovery smoke testing, validate-loop negative
 fixtures, schema compatibility checks, explicit non-destructive migration,
 append-only state transition logs, durable REWORK/BLOCKED outcomes, external
 Worker evidence requirements, structured audit finding extraction,
-machine-readable resume output, safe temp fixture pruning, migration dry-run
-planning, machine-readable temp cleanup output, and a read-only 1.0 readiness
-command are now in place.
-The remaining
-plugin-form stability step is a live global Codex plugin install/discovery
-test, which must wait for explicit user approval because it modifies real
-Codex/plugin configuration. Good non-global next candidates are richer recovery
-explanations from the append-only transition log, or adding a user-approved
-live global plugin discovery test when real Codex configuration changes are
-allowed.
+machine-readable resume output, richer recovery reasons/causes, safe temp
+fixture pruning, migration dry-run planning, machine-readable temp cleanup
+output, readiness, and release-check are now in place.
+The remaining plugin-form stability step is a live global Codex plugin
+install/discovery test, which must wait for explicit user approval because it
+modifies real Codex/plugin configuration. Good next non-global action is a
+final `release-check` without `-SkipMatrix`, or a small bounded polish phase
+only if that release check exposes a gap.

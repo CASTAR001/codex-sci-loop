@@ -90,6 +90,9 @@ Expect-Text -Text $Resume.Text -Pattern "Latest transition: .* -> started" -Labe
 Expect-Text -Text $Resume.Text -Pattern "Transition consistency: OK" -Label "started resume"
 Expect-Text -Text $Resume.Text -Pattern "Next safe command: .* -Command collect .* -PhaseId phase-001" -Label "started resume"
 Expect-Text -Text $Resume.Text -Pattern "Recovery decision: RESUMABLE" -Label "started resume"
+Expect-Text -Text $Resume.Text -Pattern "Recovery reason: phase_started_collect_next" -Label "started resume"
+Expect-Text -Text $Resume.Text -Pattern "Recovery causes:" -Label "started resume"
+Expect-Text -Text $Resume.Text -Pattern "phase_status:started" -Label "started resume"
 
 $StatusPath = Join-Path $ProjectRoot ".ai-loop\status.json"
 $Status = Get-Content -LiteralPath $StatusPath -Raw | ConvertFrom-Json
@@ -104,6 +107,9 @@ if ($TamperedResume.ExitCode -eq 0) {
 Expect-Text -Text $TamperedResume.Text -Pattern "Transition consistency: MISMATCH latest=started status=audit_ready" -Label "tampered resume"
 Expect-Text -Text $TamperedResume.Text -Pattern "Transition problems:" -Label "tampered resume"
 Expect-Text -Text $TamperedResume.Text -Pattern "Recovery decision: BLOCKED" -Label "tampered resume"
+Expect-Text -Text $TamperedResume.Text -Pattern "Recovery reason: blocked_transition_problem" -Label "tampered resume"
+Expect-Text -Text $TamperedResume.Text -Pattern "transition:latest transition status does not match status.json" -Label "tampered resume"
+Expect-Text -Text $TamperedResume.Text -Pattern "missing_evidence:report.md" -Label "tampered resume"
 
 if ($Problems.Count -gt 0) {
     Write-Output "Resume diagnostics test: FAILED"

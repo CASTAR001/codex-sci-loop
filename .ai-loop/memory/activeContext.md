@@ -186,10 +186,19 @@ Root phase-024 added the compact 1.0 `release-check` command. It aggregates
 `readiness`, `validate-loop`, and the current non-global verification matrix
 into text or JSON output. `-SkipMatrix` is available for quick diagnostics, but
 final release sign-off should run the full matrix.
+Root phase-025 added richer recovery explanations to `ai-loop resume`. Text
+and JSON output now include `recovery_reason` and `recovery_causes`, derived
+from the existing phase status, transition-log, missing-evidence, and artifact
+manifest checks. `Test-ResumeDiagnostics.ps1` and `Test-ResumeJson.ps1` cover
+started/resumable phases, transition/status mismatch blocking, missing evidence
+causes, artifact manifest causes, and missing status JSON. `Test-Phase025.ps1`
+aggregates the new recovery tests plus the accepted phase-024 non-global
+matrix.
 On 2026-06-30, a handoff-only report was written to
 `.ai-loop/reports/goal-handoff-2026-06-30.md` so a fresh conversation can
 continue without carrying the long thread context. The active goal is paused;
-latest accepted phase remains `phase-024`.
+latest accepted phase at that handoff was `phase-024`; the current accepted
+phase is now `phase-025`.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -198,9 +207,10 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best optimization is richer recovery explanations from the append-only
-transition log, or a user-approved live global Codex plugin install/discovery
-test.
+The next best non-global action is a compact final release sign-off using
+`release-check` without `-SkipMatrix`, or a small polish phase only if the
+release check exposes a gap. The remaining plugin-form stability step is a
+user-approved live global Codex plugin install/discovery test.
 Real global Codex plugin installation validation still requires explicit user
 approval. Before further harness changes, review:
 

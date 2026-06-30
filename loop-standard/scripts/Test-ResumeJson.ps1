@@ -99,6 +99,9 @@ if ($null -ne $ResumeObject) {
     if ([string]$ResumeObject.schema_version -ne "1.0") { Add-Problem "resume JSON schema_version should be 1.0." }
     if ([string]$ResumeObject.current_phase.phase_id -ne "phase-001") { Add-Problem "resume JSON current phase should be phase-001." }
     if ([string]$ResumeObject.recovery_decision -ne "RESUMABLE") { Add-Problem "resume JSON should be RESUMABLE." }
+    if ([string]$ResumeObject.recovery_reason -ne "phase_started_collect_next") { Add-Problem "resume JSON recovery_reason should explain started phase." }
+    if (@($ResumeObject.recovery_causes | Where-Object { [string]$_ -eq "phase_status:started" }).Count -eq 0) { Add-Problem "resume JSON should include phase status recovery cause." }
+    if (@($ResumeObject.recovery_causes | Where-Object { [string]$_ -eq "transition:ok" }).Count -eq 0) { Add-Problem "resume JSON should include transition ok recovery cause." }
     if ([bool]$ResumeObject.blocked) { Add-Problem "resume JSON should not be blocked for started phase." }
     if ([string]$ResumeObject.transitions.consistency -ne "OK") { Add-Problem "resume JSON transition consistency should be OK." }
     if ([string]$ResumeObject.next_safe_command -notmatch "-Command collect") { Add-Problem "resume JSON next_safe_command should point to collect." }
@@ -118,6 +121,10 @@ if ($TamperedJson.ExitCode -eq 0) {
 $TamperedObject = Read-JsonResult -Result $TamperedJson -Label "tampered resume json"
 if ($null -ne $TamperedObject) {
     if ([string]$TamperedObject.recovery_decision -ne "BLOCKED") { Add-Problem "tampered resume JSON should be BLOCKED." }
+    if ([string]$TamperedObject.recovery_reason -ne "blocked_transition_problem") { Add-Problem "tampered resume JSON should explain transition problem." }
+    if (@($TamperedObject.recovery_causes | Where-Object { [string]$_ -like "transition:*" }).Count -eq 0) { Add-Problem "tampered resume JSON should include transition recovery cause." }
+    if (@($TamperedObject.recovery_causes | Where-Object { [string]$_ -like "missing_evidence:*" }).Count -eq 0) { Add-Problem "tampered resume JSON should include missing evidence recovery causes." }
+    if (@($TamperedObject.recovery_causes | Where-Object { [string]$_ -like "artifact_manifest:*" }).Count -eq 0) { Add-Problem "tampered resume JSON should include artifact manifest recovery cause." }
     if (-not [bool]$TamperedObject.blocked) { Add-Problem "tampered resume JSON should have blocked=true." }
     if ([string]$TamperedObject.transitions.consistency -notmatch "MISMATCH") { Add-Problem "tampered resume JSON should report transition mismatch." }
     if (@($TamperedObject.transitions.problems).Count -eq 0) { Add-Problem "tampered resume JSON should include transition problems." }
@@ -133,6 +140,10 @@ $MissingObject = Read-JsonResult -Result $MissingJson -Label "missing status res
 if ($null -ne $MissingObject) {
     if ([string]$MissingObject.recovery_decision -ne "BLOCKED" -or [string]$MissingObject.reason -notmatch "missing .ai-loop/status.json") {
         Add-Problem "missing status resume JSON should explain missing status file."
+    }
+    if ([string]$MissingObject.recovery_reason -ne "missing_status") { Add-Problem "missing status resume JSON should include recovery_reason." }
+    if (@($MissingObject.recovery_causes | Where-Object { [string]$_ -eq "missing_status:.ai-loop/status.json" }).Count -eq 0) {
+        Add-Problem "missing status resume JSON should include machine-readable recovery cause."
     }
 }
 

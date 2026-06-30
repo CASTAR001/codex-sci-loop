@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-025",
+    "title":  "Richer recovery explanations",
+    "objective":  "Enhance ai-loop resume so text and JSON outputs explain why a phase is resumable or blocked, list concrete transition/status/evidence causes, and expose compact recovery_reason and recovery_causes fields for automation.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-025",
+    "audit_input":  ".ai-loop/audits/phase-025-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-025-audit.md",
+    "base_commit":  "8796f37fb65543726113d171db7098e78e42a1e2",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase025.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-025/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-06-30T13:29:19.9923183Z",
+    "evidence_collected_at":  "2026-06-30T13:57:57.7401303Z",
+    "audit_prepared_at":  "2026-06-30T13:58:24.5762301Z",
+    "accepted_at":  "2026-06-30T13:59:17.8042518Z"
+}
