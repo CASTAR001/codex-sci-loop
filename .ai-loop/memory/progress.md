@@ -263,6 +263,12 @@
   `skipped=0`. The only warning remains `PLUGIN-GLOBAL`, which is blocked by
   policy until the user explicitly approves real global Codex configuration
   changes.
+- Ran root self-loop phase-027 under the repository root `.ai-loop`: added
+  `loop-standard/docs/DELIVERY_AUDIT_1.0.md` mapping the 1.0 delivery
+  objective to current evidence, updated release notes to use dynamic
+  `release-check` matrix discovery instead of the stale phase-020 matrix
+  command, updated the operator checklist to verify `RELEASE-MATRIX` evidence,
+  and added `Test-DeliveryAudit.ps1` plus `Test-Phase027.ps1`.
 - Wrote handoff-only report `.ai-loop/reports/goal-handoff-2026-06-30.md` for
   a new conversation. This was not a new harness feature phase; it records the
   paused goal state, current accepted phase, lightweight verification results,

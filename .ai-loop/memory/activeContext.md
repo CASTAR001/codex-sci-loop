@@ -205,11 +205,17 @@ After phase-026 acceptance, full `ai-loop -Command release-check -ProjectRoot .
 -Json` ran without `-SkipMatrix`, executed `Test-Phase026.ps1`, and reported
 `pass=3`, `warn=1`, `fail=0`, `skipped=0`, with the remaining warning being
 `PLUGIN-GLOBAL`.
+Root phase-027 added `loop-standard/docs/DELIVERY_AUDIT_1.0.md`, mapping the
+1.0 objective requirements to current repository evidence and documenting the
+approval-gated `PLUGIN-GLOBAL` warning. Release notes now describe dynamic
+`release-check` matrix discovery instead of a stale phase script, and the
+operator checklist tells users to confirm `RELEASE-MATRIX` evidence names the
+expected latest matrix.
 On 2026-06-30, a handoff-only report was written to
 `.ai-loop/reports/goal-handoff-2026-06-30.md` so a fresh conversation can
 continue without carrying the long thread context. The active goal is paused;
 latest accepted phase at that handoff was `phase-024`; the current accepted
-phase is now `phase-026`.
+phase is now `phase-027`.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.

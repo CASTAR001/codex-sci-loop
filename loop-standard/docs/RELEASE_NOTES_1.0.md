@@ -33,6 +33,8 @@ place.
 - Machine-readable JSON for `resume`, `migrate -DryRun`, `prune-temp`,
   `readiness`, and `release-check`.
 - Compact `release-check` command for 1.0 release validation.
+- Dynamic latest-matrix discovery for release sign-off: when `-MatrixScript` is
+  omitted, `release-check` runs the highest numbered `Test-PhaseNNN.ps1`.
 - Non-destructive migration with dry-run planning and semantic transforms for
   older `.ai-loop` projects.
 - Project-local evolution file that does not override governance until promoted.
@@ -40,10 +42,15 @@ place.
 
 ## Verified Matrix
 
-The current non-global verification matrix is aggregated by:
+The current non-global verification matrix is selected by `release-check`.
+When `-MatrixScript` is omitted, it discovers the highest numbered
+`Test-PhaseNNN.ps1` under `loop-standard/scripts/` and executes it. The latest
+full release sign-off run executed `Test-Phase026.ps1` and reported
+`pass=3`, `warn=1`, `fail=0`, `skipped=0`; the only warning was the
+approval-gated `PLUGIN-GLOBAL` check.
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase020.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot .
 ```
 
 It covers:
@@ -70,7 +77,7 @@ It covers:
   data-analysis, research-writing, research profiles, and manual skill
   overrides.
 - Release-check text and JSON output that aggregates readiness, loop-wide
-  validation, and the verification matrix.
+  validation, and the dynamically discovered verification matrix.
 - Readiness text and JSON output.
 
 ## Operator Entry Points

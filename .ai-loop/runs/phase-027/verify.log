@@ -1,0 +1,19 @@
+﻿verify_command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\Test-Phase027.ps1
+started_at: 2026-06-30T15:11:32.9786161Z
+finished_at: 2026-06-30T15:11:53.4843403Z
+exit_code: 0
+
+output:
+Running: .\loop-standard\scripts\Test-ReleaseDocs.ps1 
+Release docs test: OK
+Running: .\loop-standard\scripts\Test-DeliveryAudit.ps1 
+Delivery audit test: OK
+Running: .\loop-standard\scripts\Test-LoopStandard.ps1 -AllowPilotProject
+Loop standard self-check: OK
+Kit root: E:\codexfiles\loop\loop-standard
+Checked paths: 151
+Running: .\loop-standard\scripts\validate-loop.ps1 -ProjectRoot .
+Loop validation: OK
+Project root: E:\codexfiles\loop
+Phase-027 verification: OK
+

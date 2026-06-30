@@ -23,15 +23,17 @@ Current state after the latest self-loop:
 - `phase-026` verification: `Test-Phase026.ps1` passed.
 - Full `release-check` without `-SkipMatrix`: `ready_with_warnings`,
   `pass=3`, `warn=1`, `fail=0`, `skipped=0`, matrix `Test-Phase026.ps1`.
+- Latest documentation phase: `phase-027`, adding
+  `loop-standard/docs/DELIVERY_AUDIT_1.0.md` and updating release docs to
+  describe dynamic `release-check` matrix discovery.
 - Remaining expected release warning: `PLUGIN-GLOBAL`, pending explicit user
   approval for real global Codex plugin discovery.
 
 ## Current Phase
 
 External Worker invocation hardening is implemented; dogfood phase-001,
-loop-standard self-loop phases 002-003, and root self-loop phases 001-026 have
-been accepted. Root phase-026 made release-check/readiness discover the latest
-non-global matrix by default.
+loop-standard self-loop phases 002-003, and root self-loop phases 001-027 have
+been accepted. Root phase-027 added the 1.0 delivery evidence audit.
 
 ## Last Verified State
 
@@ -230,6 +232,11 @@ discovers the highest numbered `Test-PhaseNNN.ps1` under
 would run, readiness `TEST-LATEST` points to the discovered latest matrix, and
 `Test-ReleaseCheck.ps1` asserts both surfaces. `Test-Phase026.ps1` is the
 current non-global verification matrix.
+Root self-loop phase-027 added `loop-standard/docs/DELIVERY_AUDIT_1.0.md`,
+updated `RELEASE_NOTES_1.0.md` to point at dynamic `release-check` verification
+instead of stale `Test-Phase020.ps1`, updated the operator checklist to verify
+`RELEASE-MATRIX` evidence, and added `Test-DeliveryAudit.ps1` plus
+`Test-Phase027.ps1`.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.

@@ -36,6 +36,7 @@ $Problems = New-Object System.Collections.Generic.List[string]
 
 $ReleaseNotes = Join-Path $KitRoot "docs\RELEASE_NOTES_1.0.md"
 $Checklist = Join-Path $KitRoot "docs\OPERATOR_CHECKLIST_1.0.md"
+$DeliveryAudit = Join-Path $KitRoot "docs\DELIVERY_AUDIT_1.0.md"
 $Readme = Join-Path $RepoRoot "README.md"
 $ReadmeEn = Join-Path $RepoRoot "README_EN.md"
 $KitReadme = Join-Path $KitRoot "README.md"
@@ -44,6 +45,8 @@ Assert-Text -Path $ReleaseNotes -Patterns @(
     "ready_with_warnings",
     "What 1.0 Delivers",
     "Verified Matrix",
+    "release-check",
+    "Test-Phase026.ps1",
     "Known Warning",
     "PLUGIN-GLOBAL",
     "No real global Codex configuration mutation"
@@ -57,7 +60,23 @@ Assert-Text -Path $Checklist -Patterns @(
     "External Worker Use",
     "Collect And Audit",
     "Recovery",
-    "Release Readiness"
+    "Release Readiness",
+    "highest numbered",
+    "RELEASE-MATRIX"
+)
+
+Assert-Text -Path $DeliveryAudit -Patterns @(
+    "Codex Loop Harness 1.0 Delivery Audit",
+    "Requirement Evidence Map",
+    "Local-first operation",
+    "Markdown-first project control plane",
+    "Worker-agnostic loop",
+    "Hash-backed evidence collection",
+    "State-machine gates",
+    "Durable `REWORK` and `BLOCKED` handling",
+    "Complete non-global PowerShell matrix",
+    "PLUGIN-GLOBAL",
+    "ready_with_warnings"
 )
 
 Assert-Text -Path $Readme -Patterns @(

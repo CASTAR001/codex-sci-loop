@@ -155,6 +155,10 @@ Before calling a project ready:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot E:\some-project -Json
 ```
 
+By default, `release-check` discovers and runs the highest numbered
+`Test-PhaseNNN.ps1` under `loop-standard/scripts/`. Use `-MatrixScript` only
+when intentionally running a focused or historical matrix.
+
 For quick diagnostics before the full matrix:
 
 ```powershell
@@ -171,6 +175,7 @@ Required:
 
 - `summary.fail` is `0`.
 - `release-check` has no failing checks.
+- `checks[RELEASE-MATRIX].evidence` names the expected latest matrix.
 - Warnings are understood and explicitly accepted.
 - `validate-loop` passes.
 - Latest phase is accepted, reworked, blocked with a reason, or intentionally
