@@ -215,7 +215,14 @@ On 2026-06-30, a handoff-only report was written to
 `.ai-loop/reports/goal-handoff-2026-06-30.md` so a fresh conversation can
 continue without carrying the long thread context. The active goal is paused;
 latest accepted phase at that handoff was `phase-024`; the current accepted
-phase is now `phase-027`.
+phase is now `phase-028`.
+Root phase-028 completed the user-approved live global Codex plugin discovery
+validation. `codex plugin marketplace add` and
+`codex plugin add codex-loop-harness@loop-harness-local` succeeded, evidence is
+recorded in `.ai-loop/evidence/global-plugin-discovery.json`, and
+`PLUGIN-GLOBAL` is now evidence-gated instead of a permanent warning. The live
+run also found that Codex CLI rejects BOM-prefixed marketplace JSON, so
+`install-global.ps1` now writes marketplace JSON without a UTF-8 BOM.
 
 Do not install external memory dependencies.
 Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
@@ -224,12 +231,11 @@ Keep reusable framework code under `loop-standard/` and pilot fixture work under
 
 ## Next Safe Action
 
-The next best action is either user-approved live global Codex plugin
-install/discovery validation, or declaring the non-global 1.0 package
-`ready_with_warnings` with `PLUGIN-GLOBAL` explicitly documented as an
-approval-gated warning.
-Real global Codex plugin installation validation still requires explicit user
-approval. Before further harness changes, review:
+Run final phase-028 release sign-off, commit the accepted phase, and then treat
+Codex Loop Harness 1.0 as ready if `release-check -Json` reports zero warnings,
+zero failures, and `Test-Phase028.ps1` as the matrix. Future real global Codex
+plugin configuration changes still require explicit user approval. Before
+further harness changes, review:
 
 - `.ai-loop/memory/handoff-summary.md`
 - `.ai-loop/memory/constraint-ledger.md`
@@ -241,8 +247,9 @@ approval. Before further harness changes, review:
 
 ## Open Questions
 
-- What final global install root should be used outside temporary tests?
-- Should real Codex global plugin configuration be modified for a live install
-  test, and what path should be used?
+- Should the Codex CLI registered global plugin root
+  `E:\.codex\loop-harness` remain installed after delivery, or should the
+  rollback command in `.ai-loop/evidence/global-plugin-discovery.json` be run
+  later by explicit request?
 - Should `migrate` eventually support deep semantic transforms for future schema
   versions instead of only top-level JSON merge plus template repair?

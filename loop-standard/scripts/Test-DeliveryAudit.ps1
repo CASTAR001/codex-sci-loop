@@ -18,10 +18,10 @@ if (-not (Test-Path -LiteralPath $AuditPath -PathType Leaf)) {
 } else {
     $Text = Get-Content -LiteralPath $AuditPath -Raw
     foreach ($Needle in @(
-        "ready_with_warnings",
-        "phase-027",
-        "phase-026",
-        "Test-Phase026.ps1",
+        "ready",
+        "phase-028",
+        "Test-Phase028.ps1",
+        ".ai-loop/evidence/global-plugin-discovery.json",
         "PLUGIN-GLOBAL",
         "Local-first operation",
         "Markdown-first project control plane",
@@ -39,7 +39,7 @@ if (-not (Test-Path -LiteralPath $AuditPath -PathType Leaf)) {
         "Project-local memory, constraints, and evolution",
         "Non-destructive migration",
         "Release readiness reporting",
-        "Complete non-global PowerShell matrix",
+        "Complete PowerShell matrix",
         "Real global Codex plugin discovery"
     )) {
         if ($Text -notmatch [regex]::Escape($Needle)) {

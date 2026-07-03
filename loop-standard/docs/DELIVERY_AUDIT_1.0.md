@@ -6,13 +6,14 @@ claim depends on.
 
 ## Release Posture
 
-- Status: `ready_with_warnings`.
-- Latest accepted root phase: `phase-027`.
+- Status: `ready`.
+- Latest accepted root phase: `phase-028`.
 - Latest full release sign-off evidence: `ai-loop -Command release-check
-  -ProjectRoot . -Json` executed `Test-Phase026.ps1` with `pass=3`, `warn=1`,
+  -ProjectRoot . -Json` executed `Test-Phase028.ps1` with `pass=3`, `warn=0`,
   `fail=0`, `skipped=0`.
-- Expected warning: `PLUGIN-GLOBAL`, because real global Codex plugin discovery
-  requires explicit user approval to modify real global Codex configuration.
+- `PLUGIN-GLOBAL` has approved live evidence in
+  `.ai-loop/evidence/global-plugin-discovery.json`. Future live global
+  configuration changes still require explicit user approval.
 
 ## Requirement Evidence Map
 
@@ -34,16 +35,22 @@ claim depends on.
 | Project-local memory, constraints, and evolution | `.ai-loop/memory/`, `.ai-loop/evolution/project-loop-evolution.md`, templates and readiness checks | Passed |
 | Non-destructive migration | `migrate-loop.ps1`, dry-run JSON, semantic migration transforms and tests | Passed |
 | Safe temp fixture cleanup | `prune-temp-fixtures.ps1`, `prune-temp -Json`, retention/idempotence tests | Passed |
-| Release readiness reporting | `check-readiness.ps1`, `release-check.ps1`, dynamic latest matrix discovery in `phase-026` | Passed |
-| Complete non-global PowerShell matrix | `Test-Phase026.ps1` through full `release-check` without `-SkipMatrix` | Passed |
-| Real global Codex plugin discovery | Repo-local plugin smoke tests pass; live global config mutation is not performed without explicit user approval | Warning |
+| Release readiness reporting | `check-readiness.ps1`, `release-check.ps1`, dynamic latest matrix discovery, evidence-gated `PLUGIN-GLOBAL` | Passed |
+| Complete PowerShell matrix | `Test-Phase028.ps1` through full `release-check` without `-SkipMatrix` | Passed |
+| Real global Codex plugin discovery | `.ai-loop/evidence/global-plugin-discovery.json`, `phase-028` Codex CLI marketplace/list/add JSON, manifest and marketplace SHA-256 hashes | Passed |
 
 ## Acceptance Boundary
 
-The harness is deliverable as a non-global, local-first 1.0 package with one
-explicit warning: live global Codex plugin discovery is approval-gated. Do not
-claim `PLUGIN-GLOBAL` as passed until a user-approved test modifies or inspects
-real global Codex plugin configuration and records evidence.
+The harness is deliverable as a local-first 1.0 package with live global plugin
+discovery evidence. Do not repeat, mutate, or repair real global Codex plugin
+configuration without explicit user approval. If
+`.ai-loop/evidence/global-plugin-discovery.json` is missing, malformed, or
+mismatched, readiness must not claim `PLUGIN-GLOBAL` as passed.
+
+Phase-028 also fixed a live installer compatibility issue: Windows PowerShell
+`Set-Content -Encoding utf8` emitted a UTF-8 BOM in `marketplace.json`, which
+Codex CLI rejected. `install-global.ps1` now writes marketplace JSON with
+`System.Text.UTF8Encoding(false)`.
 
 ## Operator Verification Commands
 

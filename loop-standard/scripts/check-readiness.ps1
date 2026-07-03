@@ -64,6 +64,61 @@ function Read-JsonFile {
     }
 }
 
+function Test-GlobalPluginDiscoveryEvidence {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return [pscustomobject][ordered]@{
+            status = "missing"
+            notes = "No live global Codex plugin discovery evidence is recorded."
+        }
+    }
+
+    $Evidence = $null
+    try {
+        $Evidence = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    } catch {
+        return [pscustomobject][ordered]@{
+            status = "invalid"
+            notes = "Evidence JSON is not parseable: $($_.Exception.Message)"
+        }
+    }
+
+    $Problems = New-Object System.Collections.Generic.List[string]
+    if ([string]$Evidence.schema_version -ne "1.0") { $Problems.Add("schema_version must be 1.0") }
+    if ([string]$Evidence.status -ne "pass") { $Problems.Add("status must be pass") }
+    if ([string]$Evidence.approval_scope -ne "PLUGIN-GLOBAL") { $Problems.Add("approval_scope must be PLUGIN-GLOBAL") }
+    if ([string]$Evidence.plugin_id -ne "codex-loop-harness") { $Problems.Add("plugin_id must be codex-loop-harness") }
+    if ([string]$Evidence.marketplace_name -ne "loop-harness-local") { $Problems.Add("marketplace_name must be loop-harness-local") }
+    foreach ($Field in @("install_root", "plugin_root", "manifest_path", "marketplace_path", "manifest_sha256", "marketplace_sha256", "validated_at")) {
+        if ([string]::IsNullOrWhiteSpace([string]$Evidence.$Field)) {
+            $Problems.Add("$Field is required")
+        }
+    }
+    foreach ($Field in @("manifest_sha256", "marketplace_sha256")) {
+        $Value = [string]$Evidence.$Field
+        if (-not [string]::IsNullOrWhiteSpace($Value) -and $Value -notmatch '^[0-9A-Fa-f]{64}$') {
+            $Problems.Add("$Field must be a SHA-256 hex digest")
+        }
+    }
+    if ($null -eq $Evidence.codex_cli -or [string]$Evidence.codex_cli.marketplace_add -ne "pass" -or [string]$Evidence.codex_cli.plugin_list -ne "pass" -or [string]$Evidence.codex_cli.plugin_add -ne "pass") {
+        $Problems.Add("codex_cli marketplace_add/plugin_list/plugin_add must all be pass")
+    }
+    if ($null -eq $Evidence.rollback -or [string]::IsNullOrWhiteSpace([string]$Evidence.rollback.command)) {
+        $Problems.Add("rollback.command is required")
+    }
+
+    if ($Problems.Count -gt 0) {
+        return [pscustomobject][ordered]@{
+            status = "invalid"
+            notes = ($Problems -join "; ")
+        }
+    }
+    return [pscustomobject][ordered]@{
+        status = "valid"
+        notes = "Live global Codex plugin discovery evidence is recorded."
+    }
+}
+
 function Invoke-ScriptCheck {
     param(
         [Parameter(Mandatory = $true)][string]$ScriptPath,
@@ -153,7 +208,16 @@ foreach ($Entry in @(
 )) {
     Add-PathCheck -Id $Entry.Id -Area "plugin" -Root $PluginRoot -RelativePath $Entry.Path -Requirement "Codex plugin scaffold includes $($Entry.Path)."
 }
-Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "warn" -Evidence "repo-local plugin smoke tests" -Notes "Skipped by policy until the user explicitly approves modifying real global Codex configuration."
+$GlobalPluginEvidenceRelativePath = ".ai-loop/evidence/global-plugin-discovery.json"
+$GlobalPluginEvidencePath = Join-Path $ProjectRoot $GlobalPluginEvidenceRelativePath
+$GlobalPluginEvidence = Test-GlobalPluginDiscoveryEvidence -Path $GlobalPluginEvidencePath
+if ($GlobalPluginEvidence.status -eq "valid") {
+    Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "pass" -Evidence $GlobalPluginEvidenceRelativePath -Notes $GlobalPluginEvidence.notes
+} elseif ($GlobalPluginEvidence.status -eq "missing") {
+    Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "warn" -Evidence "repo-local plugin smoke tests" -Notes "Skipped by policy until the user explicitly approves modifying real global Codex configuration."
+} else {
+    Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "fail" -Evidence $GlobalPluginEvidenceRelativePath -Notes $GlobalPluginEvidence.notes
+}
 
 foreach ($Entry in @(
     @{ Id = "PROJECT-LOOP"; Path = ".ai-loop/README.md"; Requirement = "Project has a local .ai-loop control plane." },
@@ -213,7 +277,7 @@ if ($FailCount -gt 0) {
     $NextActions.Add("Fix failing readiness checks before claiming 1.0 delivery.")
 }
 if ($WarnCount -gt 0) {
-    $NextActions.Add("Resolve warnings when policy allows; global plugin discovery requires explicit user approval.")
+    $NextActions.Add("Resolve warnings when policy allows; global plugin discovery requires explicit user approval and .ai-loop/evidence/global-plugin-discovery.json.")
 }
 if ($FailCount -eq 0 -and $WarnCount -eq 0) {
     $NextActions.Add("Run the full verification matrix and prepare release notes.")

@@ -5,6 +5,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $Scripts = @(
+    @{ Path = ".\loop-standard\scripts\Test-Phase026.ps1"; Arguments = @() },
     @{ Path = ".\loop-standard\scripts\Test-ReleaseDocs.ps1"; Arguments = @() },
     @{ Path = ".\loop-standard\scripts\Test-DeliveryAudit.ps1"; Arguments = @() },
     @{ Path = ".\loop-standard\scripts\Test-LoopStandard.ps1"; Arguments = @("-AllowPilotProject") },

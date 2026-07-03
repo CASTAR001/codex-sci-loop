@@ -1,0 +1,518 @@
+﻿{
+    "schema_version":  "1.0",
+    "project_root":  "E:\\codexfiles\\loop",
+    "kit_root":  "E:\\codexfiles\\loop\\loop-standard",
+    "status":  "ready",
+    "generated_at":  "2026-07-03T13:32:41.3154853Z",
+    "summary":  {
+                    "pass":  3,
+                    "warn":  0,
+                    "fail":  0,
+                    "skipped":  0,
+                    "total":  3
+                },
+    "checks":  [
+                   {
+                       "id":  "RELEASE-READINESS",
+                       "status":  "pass",
+                       "evidence":  "check-readiness.ps1 -Json",
+                       "exit_code":  0,
+                       "notes":  "status=ready warn=0 fail=0"
+                   },
+                   {
+                       "id":  "RELEASE-VALIDATE-LOOP",
+                       "status":  "pass",
+                       "evidence":  "validate-loop.ps1 -Quiet",
+                       "exit_code":  0,
+                       "notes":  "loop validation passed"
+                   },
+                   {
+                       "id":  "RELEASE-MATRIX",
+                       "status":  "pass",
+                       "evidence":  "Test-Phase028.ps1",
+                       "exit_code":  0,
+                       "notes":  "matrix passed"
+                   }
+               ],
+    "readiness":  {
+                      "schema_version":  "1.0",
+                      "project_root":  "E:\\codexfiles\\loop",
+                      "kit_root":  "E:\\codexfiles\\loop\\loop-standard",
+                      "status":  "ready",
+                      "generated_at":  "2026-07-03T13:18:16.6429384Z",
+                      "summary":  {
+                                      "pass":  53,
+                                      "warn":  0,
+                                      "fail":  0,
+                                      "total":  53
+                                  },
+                      "checks":  [
+                                     {
+                                         "id":  "KIT-INIT",
+                                         "area":  "kit",
+                                         "requirement":  "Can initialize .ai-loop in an arbitrary project.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/init-loop.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-MIGRATE",
+                                         "area":  "kit",
+                                         "requirement":  "Can migrate existing .ai-loop projects non-destructively.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/migrate-loop.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-START",
+                                         "area":  "kit",
+                                         "requirement":  "Can start phases and produce phase requirements.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/start-phase.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-COLLECT",
+                                         "area":  "kit",
+                                         "requirement":  "Can collect hash-backed evidence.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/collect-evidence.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-AUDIT",
+                                         "area":  "kit",
+                                         "requirement":  "Can prepare Codex audit packages.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/prepare-audit-pack.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-VALIDATE",
+                                         "area":  "kit",
+                                         "requirement":  "Can enforce phase gates.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/validate-phase-gates.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-ACCEPT",
+                                         "area":  "kit",
+                                         "requirement":  "Can accept only audited phases.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/accept-phase.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-DECIDE",
+                                         "area":  "kit",
+                                         "requirement":  "Can record REWORK/BLOCKED decisions.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/decide-phase.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-REWORK",
+                                         "area":  "kit",
+                                         "requirement":  "Can scaffold bounded rework phases.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/scaffold-rework-phase.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-RECOVERY",
+                                         "area":  "kit",
+                                         "requirement":  "Can validate loop-wide recovery state.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/validate-loop.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-WORKER",
+                                         "area":  "kit",
+                                         "requirement":  "Can preflight external Worker invocation.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/preflight-worker.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-INVOKE",
+                                         "area":  "kit",
+                                         "requirement":  "Can invoke Worker only after preflight.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/invoke-worker.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-SKILLS",
+                                         "area":  "kit",
+                                         "requirement":  "Can link project-local skills.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/link-skills.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-RELEASE-CHECK",
+                                         "area":  "kit",
+                                         "requirement":  "Can run compact 1.0 release validation.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/release-check.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "KIT-ENTRY",
+                                         "area":  "kit",
+                                         "requirement":  "Provides a unified command entrypoint.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/ai-loop.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-README",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/README.md.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/README.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-CONFIG",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/loop.config.json.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/loop.config.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-STATUS",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/status.json.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/status.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-SCHEMA",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/schema/schema-version.json.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/schema/schema-version.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-MEMORY",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/memory/activeContext.md.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/memory/activeContext.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-CONSTRAINTS",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/memory/constraint-ledger.md.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/memory/constraint-ledger.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-GATES",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/gates/pre-action-check.md.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/gates/pre-action-check.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-EVIDENCE",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/evidence/artifact-manifest.json.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/evidence/artifact-manifest.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-SKILLS",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/skills/skill-trigger-matrix.md.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/skills/skill-trigger-matrix.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TPL-EVOLUTION",
+                                         "area":  "templates",
+                                         "requirement":  "Reusable .ai-loop template includes templates/.ai-loop/evolution/project-loop-evolution.md.",
+                                         "status":  "pass",
+                                         "evidence":  "templates/.ai-loop/evolution/project-loop-evolution.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-CN",
+                                         "area":  "docs",
+                                         "requirement":  "Chinese operator README exists.",
+                                         "status":  "pass",
+                                         "evidence":  "README.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-EN",
+                                         "area":  "docs",
+                                         "requirement":  "English README exists.",
+                                         "status":  "pass",
+                                         "evidence":  "README_EN.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-RUNBOOK",
+                                         "area":  "docs",
+                                         "requirement":  "Operator runbook exists.",
+                                         "status":  "pass",
+                                         "evidence":  "docs/OPERATOR_RUNBOOK.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-CHECKLIST-1.0",
+                                         "area":  "docs",
+                                         "requirement":  "1.0 operator checklist exists.",
+                                         "status":  "pass",
+                                         "evidence":  "docs/OPERATOR_CHECKLIST_1.0.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-RELEASE-1.0",
+                                         "area":  "docs",
+                                         "requirement":  "1.0 release notes exist.",
+                                         "status":  "pass",
+                                         "evidence":  "docs/RELEASE_NOTES_1.0.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-BOUNDARY",
+                                         "area":  "docs",
+                                         "requirement":  ".agents versus .ai-loop boundary is documented.",
+                                         "status":  "pass",
+                                         "evidence":  "docs/AGENTS_VS_AI_LOOP_BOUNDARY.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "DOC-WORKER",
+                                         "area":  "docs",
+                                         "requirement":  "External Worker protocol is documented.",
+                                         "status":  "pass",
+                                         "evidence":  "docs/EXTERNAL_WORKER_PROTOCOL.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-MANIFEST",
+                                         "area":  "plugin",
+                                         "requirement":  "Codex plugin scaffold includes .codex-plugin/plugin.json.",
+                                         "status":  "pass",
+                                         "evidence":  ".codex-plugin/plugin.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-SUPERVISOR",
+                                         "area":  "plugin",
+                                         "requirement":  "Codex plugin scaffold includes skills/loop-supervisor/SKILL.md.",
+                                         "status":  "pass",
+                                         "evidence":  "skills/loop-supervisor/SKILL.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-AUDITOR",
+                                         "area":  "plugin",
+                                         "requirement":  "Codex plugin scaffold includes skills/loop-auditor/SKILL.md.",
+                                         "status":  "pass",
+                                         "evidence":  "skills/loop-auditor/SKILL.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-RECOVERY",
+                                         "area":  "plugin",
+                                         "requirement":  "Codex plugin scaffold includes skills/loop-recovery/SKILL.md.",
+                                         "status":  "pass",
+                                         "evidence":  "skills/loop-recovery/SKILL.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-RESEARCH",
+                                         "area":  "plugin",
+                                         "requirement":  "Codex plugin scaffold includes skills/research-loop-orchestrator/SKILL.md.",
+                                         "status":  "pass",
+                                         "evidence":  "skills/research-loop-orchestrator/SKILL.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-WRAPPER",
+                                         "area":  "plugin",
+                                         "requirement":  "Codex plugin scaffold includes scripts/ai-loop.ps1.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/ai-loop.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PLUGIN-GLOBAL",
+                                         "area":  "plugin",
+                                         "requirement":  "Real global Codex plugin discovery is live-validated.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/evidence/global-plugin-discovery.json",
+                                         "notes":  "Live global Codex plugin discovery evidence is recorded."
+                                     },
+                                     {
+                                         "id":  "PROJECT-LOOP",
+                                         "area":  "project",
+                                         "requirement":  "Project has a local .ai-loop control plane.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/README.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PROJECT-AGENTS",
+                                         "area":  "project",
+                                         "requirement":  "Project has a short AGENTS.md bootstrap.",
+                                         "status":  "pass",
+                                         "evidence":  "AGENTS.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PROJECT-MEMORY",
+                                         "area":  "project",
+                                         "requirement":  "Project has resumable active context.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/memory/activeContext.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PROJECT-CONSTRAINTS",
+                                         "area":  "project",
+                                         "requirement":  "Project has local constraint ledger.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/memory/constraint-ledger.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PROJECT-EVIDENCE",
+                                         "area":  "project",
+                                         "requirement":  "Project has machine-readable artifact manifest.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/evidence/artifact-manifest.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PROJECT-SKILLS",
+                                         "area":  "project",
+                                         "requirement":  "Project has skill trigger matrix.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/skills/skill-trigger-matrix.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "PROJECT-EVOLUTION",
+                                         "area":  "project",
+                                         "requirement":  "Project has project-local evolution file.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/evolution/project-loop-evolution.md",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "STATE-STATUS",
+                                         "area":  "state",
+                                         "requirement":  "status.json is parseable.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/status.json",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "STATE-CURRENT-PHASE",
+                                         "area":  "state",
+                                         "requirement":  "Current phase is in a terminal accepted state.",
+                                         "status":  "pass",
+                                         "evidence":  ".ai-loop/runs/phase-028",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "STATE-VALIDATE-LOOP",
+                                         "area":  "state",
+                                         "requirement":  "Loop-wide validator passes.",
+                                         "status":  "pass",
+                                         "evidence":  "validate-loop.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TEST-STRUCTURE",
+                                         "area":  "tests",
+                                         "requirement":  "Structure self-check exists.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/Test-LoopStandard.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TEST-LATEST",
+                                         "area":  "tests",
+                                         "requirement":  "Latest full non-global matrix exists.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/Test-Phase028.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TEST-PLUGIN",
+                                         "area":  "tests",
+                                         "requirement":  "Repo-local plugin install smoke test exists.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/Test-PluginInstall.ps1",
+                                         "notes":  ""
+                                     },
+                                     {
+                                         "id":  "TEST-VALIDATE",
+                                         "area":  "tests",
+                                         "requirement":  "Negative loop validation fixtures exist.",
+                                         "status":  "pass",
+                                         "evidence":  "scripts/Test-ValidateLoopFailures.ps1",
+                                         "notes":  ""
+                                     }
+                                 ],
+                      "next_actions":  [
+                                           "Run the full verification matrix and prepare release notes."
+                                       ]
+                  },
+    "commands":  {
+                     "readiness":  {
+                                       "label":  "readiness",
+                                       "script":  "E:\\codexfiles\\loop\\loop-standard\\scripts\\check-readiness.ps1",
+                                       "arguments":  [
+                                                         "-ProjectRoot",
+                                                         "E:\\codexfiles\\loop",
+                                                         "-Json"
+                                                     ],
+                                       "exit_code":  0,
+                                       "duration_seconds":  17.61,
+                                       "output":  "{\r\n    \"schema_version\":  \"1.0\",\r\n    \"project_root\":  \"E:\\\\codexfiles\\\\loop\",\r\n    \"kit_root\":  \"E:\\\\codexfiles\\\\loop\\\\loop-standard\",\r\n    \"status\":  \"ready\",\r\n    \"generated_at\":  \"2026-07-03T13:18:16.6429384Z\",\r\n    \"summary\":  {\r\n                    \"pass\":  53,\r\n                    \"warn\":  0,\r\n                    \"fail\":  0,\r\n                    \"total\":  53\r\n                },\r\n    \"checks\":  [\r\n                   {\r\n                       \"id\":  \"KIT-INIT\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can initialize .ai-loop in an arbitrary project.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/init-loop.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-MIGRATE\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can migrate existing .ai-loop projects non-destructively.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/migrate-loop.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-START\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can start phases and produce phase requirements.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/start-phase.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-COLLECT\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can collect hash-backed evidence.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/collect-evidence.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-AUDIT\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can prepare Codex audit packages.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/prepare-audit-pack.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-VALIDATE\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can enforce phase gates.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/validate-phase-gates.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-ACCEPT\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can accept only audited phases.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/accept-phase.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-DECIDE\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can record REWORK/BLOCKED decisions.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/decide-phase.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-REWORK\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can scaffold bounded rework phases.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/scaffold-rework-phase.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-RECOVERY\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can validate loop-wide recovery state.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/validate-loop.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-WORKER\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can preflight external Worker invocation.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/preflight-worker.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-INVOKE\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can invoke Worker only after preflight.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/invoke-worker.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-SKILLS\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can link project-local skills.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/link-skills.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-RELEASE-CHECK\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Can run compact 1.0 release validation.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/release-check.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"KIT-ENTRY\",\r\n                       \"area\":  \"kit\",\r\n                       \"requirement\":  \"Provides a unified command entrypoint.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/ai-loop.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-README\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/README.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/README.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-CONFIG\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/loop.config.json.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/loop.config.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-STATUS\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/status.json.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/status.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-SCHEMA\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/schema/schema-version.json.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/schema/schema-version.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-MEMORY\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/memory/activeContext.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/memory/activeContext.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-CONSTRAINTS\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/memory/constraint-ledger.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/memory/constraint-ledger.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-GATES\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/gates/pre-action-check.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/gates/pre-action-check.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-EVIDENCE\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/evidence/artifact-manifest.json.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/evidence/artifact-manifest.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-SKILLS\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/skills/skill-trigger-matrix.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/skills/skill-trigger-matrix.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TPL-EVOLUTION\",\r\n                       \"area\":  \"templates\",\r\n                       \"requirement\":  \"Reusable .ai-loop template includes templates/.ai-loop/evolution/project-loop-evolution.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"templates/.ai-loop/evolution/project-loop-evolution.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-CN\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \"Chinese operator README exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"README.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-EN\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \"English README exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"README_EN.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-RUNBOOK\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \"Operator runbook exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"docs/OPERATOR_RUNBOOK.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-CHECKLIST-1.0\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \"1.0 operator checklist exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"docs/OPERATOR_CHECKLIST_1.0.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-RELEASE-1.0\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \"1.0 release notes exist.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"docs/RELEASE_NOTES_1.0.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-BOUNDARY\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \".agents versus .ai-loop boundary is documented.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"docs/AGENTS_VS_AI_LOOP_BOUNDARY.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"DOC-WORKER\",\r\n                       \"area\":  \"docs\",\r\n                       \"requirement\":  \"External Worker protocol is documented.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"docs/EXTERNAL_WORKER_PROTOCOL.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-MANIFEST\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Codex plugin scaffold includes .codex-plugin/plugin.json.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".codex-plugin/plugin.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-SUPERVISOR\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Codex plugin scaffold includes skills/loop-supervisor/SKILL.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"skills/loop-supervisor/SKILL.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-AUDITOR\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Codex plugin scaffold includes skills/loop-auditor/SKILL.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"skills/loop-auditor/SKILL.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-RECOVERY\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Codex plugin scaffold includes skills/loop-recovery/SKILL.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"skills/loop-recovery/SKILL.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-RESEARCH\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Codex plugin scaffold includes skills/research-loop-orchestrator/SKILL.md.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"skills/research-loop-orchestrator/SKILL.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-WRAPPER\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Codex plugin scaffold includes scripts/ai-loop.ps1.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/ai-loop.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PLUGIN-GLOBAL\",\r\n                       \"area\":  \"plugin\",\r\n                       \"requirement\":  \"Real global Codex plugin discovery is live-validated.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/evidence/global-plugin-discovery.json\",\r\n                       \"notes\":  \"Live global Codex plugin discovery evidence is recorded.\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-LOOP\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has a local .ai-loop control plane.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/README.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-AGENTS\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has a short AGENTS.md bootstrap.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"AGENTS.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-MEMORY\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has resumable active context.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/memory/activeContext.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-CONSTRAINTS\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has local constraint ledger.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/memory/constraint-ledger.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-EVIDENCE\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has machine-readable artifact manifest.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/evidence/artifact-manifest.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-SKILLS\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has skill trigger matrix.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/skills/skill-trigger-matrix.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"PROJECT-EVOLUTION\",\r\n                       \"area\":  \"project\",\r\n                       \"requirement\":  \"Project has project-local evolution file.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/evolution/project-loop-evolution.md\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"STATE-STATUS\",\r\n                       \"area\":  \"state\",\r\n                       \"requirement\":  \"status.json is parseable.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/status.json\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"STATE-CURRENT-PHASE\",\r\n                       \"area\":  \"state\",\r\n                       \"requirement\":  \"Current phase is in a terminal accepted state.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \".ai-loop/runs/phase-028\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"STATE-VALIDATE-LOOP\",\r\n                       \"area\":  \"state\",\r\n                       \"requirement\":  \"Loop-wide validator passes.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"validate-loop.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TEST-STRUCTURE\",\r\n                       \"area\":  \"tests\",\r\n                       \"requirement\":  \"Structure self-check exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/Test-LoopStandard.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TEST-LATEST\",\r\n                       \"area\":  \"tests\",\r\n                       \"requirement\":  \"Latest full non-global matrix exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/Test-Phase028.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TEST-PLUGIN\",\r\n                       \"area\":  \"tests\",\r\n                       \"requirement\":  \"Repo-local plugin install smoke test exists.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/Test-PluginInstall.ps1\",\r\n                       \"notes\":  \"\"\r\n                   },\r\n                   {\r\n                       \"id\":  \"TEST-VALIDATE\",\r\n                       \"area\":  \"tests\",\r\n                       \"requirement\":  \"Negative loop validation fixtures exist.\",\r\n                       \"status\":  \"pass\",\r\n                       \"evidence\":  \"scripts/Test-ValidateLoopFailures.ps1\",\r\n                       \"notes\":  \"\"\r\n                   }\r\n               ],\r\n    \"next_actions\":  [\r\n                         \"Run the full verification matrix and prepare release notes.\"\r\n                     ]\r\n}"
+                                   },
+                     "validate_loop":  {
+                                           "label":  "validate-loop",
+                                           "script":  "E:\\codexfiles\\loop\\loop-standard\\scripts\\validate-loop.ps1",
+                                           "arguments":  [
+                                                             "-ProjectRoot",
+                                                             "E:\\codexfiles\\loop",
+                                                             "-Quiet"
+                                                         ],
+                                           "exit_code":  0,
+                                           "duration_seconds":  16.983,
+                                           "output":  ""
+                                       },
+                     "matrix":  {
+                                    "label":  "matrix",
+                                    "script":  "E:\\codexfiles\\loop\\loop-standard\\scripts\\Test-Phase028.ps1",
+                                    "arguments":  [
+
+                                                  ],
+                                    "exit_code":  0,
+                                    "duration_seconds":  847.406,
+                                    "output":  "Running: .\\loop-standard\\scripts\\Test-GlobalPluginDiscoveryEvidence.ps1 \r\nGlobal plugin discovery evidence test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Readiness.ps1 \r\nReadiness test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Phase027.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-Phase026.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-ReleaseCheck.ps1 \r\nRelease check test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-Phase025.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-ResumeDiagnostics.ps1 \r\npowershell.exe : warning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nAt E:\\codexfiles\\loop\\loop-standard\\scripts\\release-check.ps1:21 char:17\r\n+ ... $Output = @(\u0026 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\nResume diagnostics test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-resume-diagnostics\\run-20260703132108086-13096-1c77f689\r\nCases checked: started phase resume, transition/status mismatch BLOCKED\r\nRunning: .\\loop-standard\\scripts\\Test-ResumeJson.ps1 \r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nResume JSON test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-resume-json\\run-20260703132111017-32420-b761f134\r\nCases checked: text compatibility, started JSON, blocked mismatch JSON, missing status JSON\r\nRunning: .\\loop-standard\\scripts\\Test-Phase024.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-ReleaseCheck.ps1 \r\nRelease check test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Phase023.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-TaskKindSkillTriggers.ps1 \r\nTask-kind skill trigger test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-task-kind-skills\\run-20260703132308558-18476-08bc64bf\r\nCases checked: fullstack, physics-research, data-analysis, research-writing, physics-sim profile, manual extra skill\r\nRunning: .\\loop-standard\\scripts\\Test-Phase022.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-MigrateSemanticTransforms.ps1 \r\nMigrate semantic transforms test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-migrate-semantic\\run-20260703132314122-26432-24b5f632\r\nCases checked: semantic dry-run, no-write dry-run, real migrate, no-op current project\r\nRunning: .\\loop-standard\\scripts\\Test-Phase021.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-ReleaseDocs.ps1 \r\nRelease docs test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Phase020.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-Readiness.ps1 \r\nReadiness test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Phase019.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-PruneTempJson.ps1 \r\nPrune temp JSON test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Phase018.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-MigrateDryRun.ps1 \r\nMigrate dry-run test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-migrate-dry-run\\run-20260703132356694-10396-da4403b7\r\nCases checked: JSON plan, text plan, no writes, real migrate, future schema block\r\nRunning: .\\loop-standard\\scripts\\Test-Phase017.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-PruneTempFixtures.ps1 \r\nPrune temp fixtures test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-Phase016.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-ResumeJson.ps1 \r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nResume JSON test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-resume-json\\run-20260703132404172-33136-f7016a39\r\nCases checked: text compatibility, started JSON, blocked mismatch JSON, missing status JSON\r\nRunning: .\\loop-standard\\scripts\\Test-Phase015.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-AuditFindingExtraction.ps1 \r\nAudit finding extraction test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-audit-findings\\run-20260703132408749-28440-0dcac058\r\nCases checked: extraction, durable decision state, structured rework scaffold, missing findings validation\r\nRunning: .\\loop-standard\\scripts\\Test-Phase014.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-ExternalWorkerEvidence.ps1 \r\nExternal Worker evidence test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-external-worker-evidence\\run-20260703132416772-16376-6e95bef4\r\nCases checked: missing external Worker evidence blocks; complete local evidence validates and appears in manifest/audit pack\r\nRunning: .\\loop-standard\\scripts\\Test-Phase013.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-ResumeDiagnostics.ps1 \r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nResume diagnostics test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-resume-diagnostics\\run-20260703132425283-31444-e5ad9e70\r\nCases checked: started phase resume, transition/status mismatch BLOCKED\r\nRunning: .\\loop-standard\\scripts\\Test-Phase012.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-StartPhaseIdempotence.ps1 \r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nStart phase idempotence test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-start-idempotence\\run-20260703132429004-4420-f8aeae56\r\nCases checked: forced restart refreshes status, prompt, evidence rows, artifact rows, and skill usage rows\r\nRunning: .\\loop-standard\\scripts\\Test-Phase011.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-TempIsolation.ps1 \r\nTemp isolation test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-temp-isolation\\run-20260703132433203-22440-6da2c67d\r\nParallel install roots: E:\\codexfiles\\loop\\.tmp-ai-loop-plugin-smoke\\run-20260703132433574-7648-6ff642f2\\install; E:\\codexfiles\\loop\\.tmp-ai-loop-plugin-smoke\\run-20260703132433577-11424-b2af67ef\\install\r\nRunning: .\\loop-standard\\scripts\\Test-Phase010.ps1 \r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\Test-PluginInstall.ps1 \r\nPlugin install smoke test: OK\r\nInstall root: E:\\codexfiles\\loop\\.tmp-ai-loop-plugin-smoke\\run-20260703132437181-12212-f5db6dca\\install\r\nMarketplace: E:\\codexfiles\\loop\\.tmp-ai-loop-plugin-smoke\\run-20260703132437181-12212-f5db6dca\\install\\.agents\\plugins\\marketplace.json\r\nPlugin: E:\\codexfiles\\loop\\.tmp-ai-loop-plugin-smoke\\run-20260703132437181-12212-f5db6dca\\install\\plugins\\codex-loop-harness\r\nShim: E:\\codexfiles\\loop\\.tmp-ai-loop-plugin-smoke\\run-20260703132437181-12212-f5db6dca\\install\\bin\\ai-loop.ps1\r\nRunning: .\\loop-standard\\scripts\\Test-ValidateLoopFailures.ps1 \r\nValidate-loop failure fixtures: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-validate-loop-failures\\run-20260703132439713-12304-f80c73c2\r\nCases checked: 7\r\nRunning: .\\loop-standard\\scripts\\Test-CollectLedgerIdempotence.ps1 \r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nCollect ledger idempotence test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-collect-idempotence\\run-20260703132653752-31764-c5392673\r\nRunning: .\\loop-standard\\scripts\\Test-SchemaVersioning.ps1 \r\nSchema versioning test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-schema-versioning\\run-20260703132659054-11036-86524829\r\nCases checked: 7\r\nRunning: .\\loop-standard\\scripts\\Test-MigrateLoop.ps1 \r\nMigrate loop test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-migrate\\run-20260703132703290-27020-9d7e8e34\r\nCases checked: old-project, future-project, empty-project\r\nRunning: .\\loop-standard\\scripts\\Test-PhaseDecisions.ps1 \r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nwarning: in the working copy of \u0027verify.ps1\u0027, LF will be replaced by CRLF the next time Git touches it\r\nPhase decision test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-phase-decisions\\run-20260703132707129-13108-f83080e6\r\nCases checked: REWORK, BLOCKED, decision mismatch\r\nRunning: .\\loop-standard\\scripts\\Test-StateTransitions.ps1 \r\nState transition test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-state-transitions\\run-20260703132723201-21736-40929fd5\r\nCases checked: normal lifecycle, tampered latest transition\r\nRunning: .\\loop-standard\\scripts\\Test-ReworkScaffold.ps1 \r\nRework scaffold test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-rework-scaffold\\run-20260703132730829-2296-f631d0ad\r\nCases checked: REWORK scaffold, BLOCKED refusal\r\nRunning: .\\loop-standard\\scripts\\Test-SkillArtifactManifest.ps1 \r\nSkill artifact manifest test: OK\r\nFixture root: E:\\codexfiles\\loop\\.tmp-ai-loop-skill-artifact-manifest\\run-20260703132742815-16188-a3b0a519\r\nCases checked: recorded skill artifact, tampered hash, missing artifact\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-010 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-011 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-012 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-013 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-014 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-015 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-016 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-017 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-018 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-019 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-020 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-021 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-022 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-023 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-024 verification: OK\r\nPhase-025 verification: OK\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-026 verification: OK\r\nRunning: .\\loop-standard\\scripts\\Test-ReleaseDocs.ps1 \r\nRelease docs test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-DeliveryAudit.ps1 \r\nDelivery audit test: OK\r\nRunning: .\\loop-standard\\scripts\\Test-LoopStandard.ps1 -AllowPilotProject\r\nLoop standard self-check: OK\r\nKit root: E:\\codexfiles\\loop\\loop-standard\r\nChecked paths: 154\r\nRunning: .\\loop-standard\\scripts\\validate-loop.ps1 -ProjectRoot .\r\nLoop validation: OK\r\nProject root: E:\\codexfiles\\loop\r\nPhase-027 verification: OK\r\nPhase-028 verification: OK"
+                                }
+                 },
+    "next_actions":  [
+
+                     ]
+}

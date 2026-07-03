@@ -1,0 +1,14 @@
+﻿loop-standard/docs/DELIVERY_AUDIT_1.0.md
+loop-standard/docs/OPERATOR_CHECKLIST_1.0.md
+loop-standard/docs/RELEASE_NOTES_1.0.md
+loop-standard/scripts/check-readiness.ps1
+loop-standard/scripts/install-global.ps1
+loop-standard/scripts/record-global-plugin-discovery.ps1
+loop-standard/scripts/Test-DeliveryAudit.ps1
+loop-standard/scripts/Test-GlobalPluginDiscoveryEvidence.ps1
+loop-standard/scripts/Test-LoopStandard.ps1
+loop-standard/scripts/Test-Phase027.ps1
+loop-standard/scripts/Test-Phase028.ps1
+loop-standard/scripts/Test-Readiness.ps1
+loop-standard/scripts/Test-ReleaseDocs.ps1
+

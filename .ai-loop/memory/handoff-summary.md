@@ -237,6 +237,12 @@ updated `RELEASE_NOTES_1.0.md` to point at dynamic `release-check` verification
 instead of stale `Test-Phase020.ps1`, updated the operator checklist to verify
 `RELEASE-MATRIX` evidence, and added `Test-DeliveryAudit.ps1` plus
 `Test-Phase027.ps1`.
+Root self-loop phase-028 completed approved live global Codex plugin discovery
+validation. It installed the local harness for discovery, ran Codex CLI
+marketplace/list/add for `codex-loop-harness@loop-harness-local`, recorded
+`.ai-loop/evidence/global-plugin-discovery.json`, made `PLUGIN-GLOBAL`
+evidence-gated, fixed BOM-free marketplace JSON writing in `install-global.ps1`,
+and added `Test-GlobalPluginDiscoveryEvidence.ps1` plus `Test-Phase028.ps1`.
 
 Root `AGENTS.md` is the only bootstrap file. Former `agent.md` content was
 merged into `.ai-loop/` memory and the file was removed.
@@ -295,7 +301,7 @@ machine-readable resume output, richer recovery reasons/causes, safe temp
 fixture pruning, migration dry-run planning, machine-readable temp cleanup
 output, readiness, release-check, and dynamic latest matrix discovery are now
 in place.
-The remaining plugin-form stability step is a live global Codex plugin
-install/discovery test, which must wait for explicit user approval because it
-modifies real Codex/plugin configuration. The non-global release check now
-passes with warnings only for that approval-gated global plugin check.
+The plugin-form stability step now has live evidence. Future global Codex
+plugin configuration changes still require explicit user approval. The current
+release claim should be based on `release-check -Json` running
+`Test-Phase028.ps1` with zero warnings and zero failures.

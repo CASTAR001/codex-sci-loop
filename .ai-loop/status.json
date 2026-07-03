@@ -5,15 +5,15 @@
     "supervisor":  "Codex",
     "worker":  "Worker Agent",
     "current_phase":  {
-                          "phase_id":  "phase-027",
-                          "title":  "Add 1.0 delivery evidence audit",
-                          "objective":  "Add a release-facing delivery audit that maps Codex Loop Harness 1.0 objective requirements to current files, tests, phase evidence, and approval-gated warnings, and update release docs so the verified matrix references the current dynamic release-check flow.",
+                          "phase_id":  "phase-028",
+                          "title":  "Validate approved global plugin discovery",
+                          "objective":  "Perform and record a user-approved live global Codex plugin install/discovery validation for codex-loop-harness, make PLUGIN-GLOBAL pass only when recorded evidence exists, preserve rollback/safety evidence, and keep the latest phase matrix chained to the full verification suite.",
                           "status":  "accepted",
-                          "run_dir":  ".ai-loop/runs/phase-027",
-                          "audit_input":  ".ai-loop/audits/phase-027-audit-input.md",
-                          "audit_result":  ".ai-loop/audits/phase-027-audit.md",
-                          "base_commit":  "5389b60ec809091460cc53b50a63dddecb9831f9",
-                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase027.ps1",
+                          "run_dir":  ".ai-loop/runs/phase-028",
+                          "audit_input":  ".ai-loop/audits/phase-028-audit-input.md",
+                          "audit_result":  ".ai-loop/audits/phase-028-audit.md",
+                          "base_commit":  "673fa9c15cf6f134e7633ec0f0252e7955df6383",
+                          "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase028.ps1",
                           "task_kind":  "fullstack",
                           "skill_profile":  "none",
                           "worker_profile":  "",
@@ -27,12 +27,12 @@
                           "required_worker_evidence":  [
 
                                                        ],
-                          "requirements":  ".ai-loop/runs/phase-027/phase_requirements.json",
+                          "requirements":  ".ai-loop/runs/phase-028/phase_requirements.json",
                           "transition_log":  ".ai-loop/events/state-transitions.ndjson",
-                          "started_at":  "2026-06-30T15:04:37.4207630Z",
-                          "evidence_collected_at":  "2026-06-30T15:11:54.3867675Z",
-                          "audit_prepared_at":  "2026-06-30T15:12:06.3793052Z",
-                          "accepted_at":  "2026-06-30T15:12:46.0904511Z"
+                          "started_at":  "2026-07-03T11:30:02.4221029Z",
+                          "evidence_collected_at":  "2026-07-03T13:11:59.0039490Z",
+                          "audit_prepared_at":  "2026-07-03T13:13:12.8140938Z",
+                          "accepted_at":  "2026-07-03T13:14:50.8618355Z"
                       },
     "phases":  [
                    {
@@ -767,13 +767,43 @@
                        "evidence_collected_at":  "2026-06-30T15:11:54.3867675Z",
                        "audit_prepared_at":  "2026-06-30T15:12:06.3793052Z",
                        "accepted_at":  "2026-06-30T15:12:46.0904511Z"
+                   },
+                   {
+                       "phase_id":  "phase-028",
+                       "title":  "Validate approved global plugin discovery",
+                       "objective":  "Perform and record a user-approved live global Codex plugin install/discovery validation for codex-loop-harness, make PLUGIN-GLOBAL pass only when recorded evidence exists, preserve rollback/safety evidence, and keep the latest phase matrix chained to the full verification suite.",
+                       "status":  "accepted",
+                       "run_dir":  ".ai-loop/runs/phase-028",
+                       "audit_input":  ".ai-loop/audits/phase-028-audit-input.md",
+                       "audit_result":  ".ai-loop/audits/phase-028-audit.md",
+                       "base_commit":  "673fa9c15cf6f134e7633ec0f0252e7955df6383",
+                       "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase028.ps1",
+                       "task_kind":  "fullstack",
+                       "skill_profile":  "none",
+                       "worker_profile":  "",
+                       "require_external_worker_evidence":  false,
+                       "claim_ids":  [
+
+                                     ],
+                       "required_skills":  [
+
+                                           ],
+                       "required_worker_evidence":  [
+
+                                                    ],
+                       "requirements":  ".ai-loop/runs/phase-028/phase_requirements.json",
+                       "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+                       "started_at":  "2026-07-03T11:30:02.4221029Z",
+                       "evidence_collected_at":  "2026-07-03T13:11:59.0039490Z",
+                       "audit_prepared_at":  "2026-07-03T13:13:12.8140938Z",
+                       "accepted_at":  "2026-07-03T13:14:50.8618355Z"
                    }
                ],
     "last_decision":  {
-                          "phase_id":  "phase-027",
+                          "phase_id":  "phase-028",
                           "decision":  "ACCEPTED",
-                          "audit":  ".ai-loop/audits/phase-027-audit.md",
-                          "decided_at":  "2026-06-30T15:12:46.0904511Z"
+                          "audit":  ".ai-loop/audits/phase-028-audit.md",
+                          "decided_at":  "2026-07-03T13:14:50.8618355Z"
                       },
     "notes":  [
                   "This file is durable loop state.",

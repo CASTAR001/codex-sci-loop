@@ -6,13 +6,14 @@
 harness for Windows PowerShell projects. The current readiness command reports:
 
 ```text
-ready_with_warnings
+ready
 ```
 
-The remaining warning is intentional: real global Codex plugin discovery has
-not been live-tested because it requires explicit user approval to modify global
-Codex configuration. Repo-local plugin install/discovery smoke tests are in
-place.
+Real global Codex plugin discovery was live-tested once with explicit user
+approval. The evidence is recorded in
+`.ai-loop/evidence/global-plugin-discovery.json` and includes Codex CLI
+marketplace/list/add outputs plus SHA-256 hashes for the registered marketplace
+and plugin manifest.
 
 ## What 1.0 Delivers
 
@@ -35,6 +36,8 @@ place.
 - Compact `release-check` command for 1.0 release validation.
 - Dynamic latest-matrix discovery for release sign-off: when `-MatrixScript` is
   omitted, `release-check` runs the highest numbered `Test-PhaseNNN.ps1`.
+- Evidence-gated global Codex plugin discovery: `PLUGIN-GLOBAL` passes only
+  when approved live-discovery evidence exists.
 - Non-destructive migration with dry-run planning and semantic transforms for
   older `.ai-loop` projects.
 - Project-local evolution file that does not override governance until promoted.
@@ -45,9 +48,8 @@ place.
 The current non-global verification matrix is selected by `release-check`.
 When `-MatrixScript` is omitted, it discovers the highest numbered
 `Test-PhaseNNN.ps1` under `loop-standard/scripts/` and executes it. The latest
-full release sign-off run executed `Test-Phase026.ps1` and reported
-`pass=3`, `warn=1`, `fail=0`, `skipped=0`; the only warning was the
-approval-gated `PLUGIN-GLOBAL` check.
+full release sign-off run executed `Test-Phase028.ps1` and reported
+`pass=3`, `warn=0`, `fail=0`, `skipped=0`.
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot .
@@ -79,6 +81,7 @@ It covers:
 - Release-check text and JSON output that aggregates readiness, loop-wide
   validation, and the dynamically discovered verification matrix.
 - Readiness text and JSON output.
+- Global plugin discovery evidence schema and readiness gate behavior.
 
 ## Operator Entry Points
 
@@ -115,8 +118,14 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 - No external Worker invocation unless the Supervisor records preflight and the
   user has explicitly allowed external service use for that phase.
 
-## Known Warning
+## Global Plugin Evidence
 
-`PLUGIN-GLOBAL` remains a readiness warning until a user-approved live global
-Codex plugin install/discovery test is performed. This warning is expected under
-the current safety policy and should not be bypassed silently.
+`PLUGIN-GLOBAL` is evidence-gated. Without
+`.ai-loop/evidence/global-plugin-discovery.json`, readiness reports a warning.
+With malformed or mismatched evidence, readiness fails. With approved live
+Codex CLI evidence for `codex-loop-harness@loop-harness-local`, readiness
+passes.
+
+The phase-028 live validation installed the harness through Codex CLI plugin
+discovery. The CLI registered root was `E:\.codex\loop-harness`, and the
+rollback command is recorded in the evidence JSON.

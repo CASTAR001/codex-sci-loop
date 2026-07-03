@@ -1,0 +1,51 @@
+﻿{
+    "schema_version":  "1.0",
+    "status":  "pass",
+    "approval_scope":  "PLUGIN-GLOBAL",
+    "validation_mode":  "live-global-codex-plugin-discovery",
+    "plugin_id":  "codex-loop-harness",
+    "marketplace_name":  "loop-harness-local",
+    "install_root":  "E:\\.codex\\loop-harness",
+    "plugin_root":  "E:\\.codex\\loop-harness\\plugins\\codex-loop-harness",
+    "manifest_path":  "E:\\.codex\\loop-harness\\plugins\\codex-loop-harness\\.codex-plugin\\plugin.json",
+    "marketplace_path":  "E:\\.codex\\loop-harness\\.agents\\plugins\\marketplace.json",
+    "manifest_sha256":  "5E8A0FAF83FA686581285F7713AB27FE0E09933B17571A7160831E23EDEB0935",
+    "marketplace_sha256":  "14AD1E3BA749939531845EFB208B9A7A6C4E765776F8B13C4EEE53C1831C4FDC",
+    "validated_at":  "2026-07-03T12:18:33.1291381Z",
+    "codex_cli":  {
+                      "marketplace_add":  "pass",
+                      "marketplace_list":  "pass",
+                      "plugin_list":  "pass",
+                      "plugin_add":  "pass",
+                      "evidence_files":  [
+                                             {
+                                                 "label":  "marketplace_add",
+                                                 "status":  "pass",
+                                                 "path":  "E:\\codexfiles\\loop\\.ai-loop\\runs\\phase-028\\codex-marketplace-add.json",
+                                                 "sha256":  "F62E44B438A19E1E1301FEDC82A68187E41EE29C656C468C035F106A9672B9AD"
+                                             },
+                                             {
+                                                 "label":  "marketplace_list",
+                                                 "status":  "pass",
+                                                 "path":  "E:\\codexfiles\\loop\\.ai-loop\\runs\\phase-028\\codex-marketplace-list.json",
+                                                 "sha256":  "1EE87DDC846D650E46889257EC12AF4F30DBA61BFFABC3CB8996B7315AA5269F"
+                                             },
+                                             {
+                                                 "label":  "plugin_list",
+                                                 "status":  "pass",
+                                                 "path":  "E:\\codexfiles\\loop\\.ai-loop\\runs\\phase-028\\codex-plugin-list.json",
+                                                 "sha256":  "56C05E12CD72D3D26339B28E6EE38207761056221FFD2697837D64EE3D01B906"
+                                             },
+                                             {
+                                                 "label":  "plugin_add",
+                                                 "status":  "pass",
+                                                 "path":  "E:\\codexfiles\\loop\\.ai-loop\\runs\\phase-028\\codex-plugin-add.json",
+                                                 "sha256":  "0C41FA2242AB6DF32EF40BA1A102D801B5A70DBBBB342FE77EBAA3A8E7033D55"
+                                             }
+                                         ]
+                  },
+    "rollback":  {
+                     "command":  "codex plugin remove codex-loop-harness; codex plugin marketplace remove loop-harness-local; Remove-Item -LiteralPath \"E:\\.codex\\loop-harness\" -Recurse -Force",
+                     "notes":  "The install root is dedicated to Codex Loop Harness; remove the plugin, remove the marketplace, then delete the dedicated install root to roll back."
+                 }
+}

@@ -54,7 +54,8 @@ function Write-JsonFile {
         [Parameter(Mandatory = $true)]$Value,
         [Parameter(Mandatory = $true)][string]$Path
     )
-    $Value | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $Path -Encoding utf8
+    $Json = $Value | ConvertTo-Json -Depth 20
+    [System.IO.File]::WriteAllText($Path, $Json, [System.Text.UTF8Encoding]::new($false))
 }
 
 $KitRoot = Split-Path -Parent $PSScriptRoot

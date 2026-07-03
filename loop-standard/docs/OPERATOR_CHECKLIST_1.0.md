@@ -14,8 +14,11 @@ changes.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\codexfiles\loop
 ```
 
-- Accept `PLUGIN-GLOBAL` as a warning only if real global Codex plugin discovery
-  has not been user-approved.
+- `PLUGIN-GLOBAL` should pass only when
+  `.ai-loop/evidence/global-plugin-discovery.json` exists and readiness accepts
+  it. If the evidence is missing, accept the warning only for local-only use.
+- Do not modify real global Codex plugin configuration unless the user
+  explicitly approves that specific validation run.
 - Do not run external Worker commands before `worker-preflight` is recorded.
 
 ## Initialize

@@ -1,0 +1,30 @@
+﻿{
+    "phase_id":  "phase-028",
+    "title":  "Validate approved global plugin discovery",
+    "objective":  "Perform and record a user-approved live global Codex plugin install/discovery validation for codex-loop-harness, make PLUGIN-GLOBAL pass only when recorded evidence exists, preserve rollback/safety evidence, and keep the latest phase matrix chained to the full verification suite.",
+    "status":  "accepted",
+    "run_dir":  ".ai-loop/runs/phase-028",
+    "audit_input":  ".ai-loop/audits/phase-028-audit-input.md",
+    "audit_result":  ".ai-loop/audits/phase-028-audit.md",
+    "base_commit":  "673fa9c15cf6f134e7633ec0f0252e7955df6383",
+    "verify_command":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\loop-standard\\scripts\\Test-Phase028.ps1",
+    "task_kind":  "fullstack",
+    "skill_profile":  "none",
+    "worker_profile":  "",
+    "require_external_worker_evidence":  false,
+    "claim_ids":  [
+
+                  ],
+    "required_skills":  [
+
+                        ],
+    "required_worker_evidence":  [
+
+                                 ],
+    "requirements":  ".ai-loop/runs/phase-028/phase_requirements.json",
+    "transition_log":  ".ai-loop/events/state-transitions.ndjson",
+    "started_at":  "2026-07-03T11:30:02.4221029Z",
+    "evidence_collected_at":  "2026-07-03T13:11:59.0039490Z",
+    "audit_prepared_at":  "2026-07-03T13:13:12.8140938Z",
+    "accepted_at":  "2026-07-03T13:14:50.8618355Z"
+}

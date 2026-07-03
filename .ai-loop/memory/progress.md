@@ -273,18 +273,27 @@
   a new conversation. This was not a new harness feature phase; it records the
   paused goal state, current accepted phase, lightweight verification results,
   next recommended work, and token/audit overhead guidance.
+- Ran root self-loop phase-028 under the repository root `.ai-loop`: after
+  explicit one-time user approval, performed live global Codex plugin
+  marketplace/list/add validation for `codex-loop-harness@loop-harness-local`;
+  recorded `.ai-loop/evidence/global-plugin-discovery.json`; changed
+  `PLUGIN-GLOBAL` from a hard-coded warning into an evidence-gated readiness
+  check; fixed `install-global.ps1` to write marketplace JSON without a UTF-8
+  BOM after Codex CLI rejected the BOM file; added
+  `record-global-plugin-discovery.ps1`, `Test-GlobalPluginDiscoveryEvidence.ps1`,
+  and `Test-Phase028.ps1`; and chained `Test-Phase027.ps1` back to
+  `Test-Phase026.ps1` so dynamic latest-matrix discovery remains complete.
 
 ## In Progress
 
-- Continue 1.0 hardening without modifying real global Codex configuration.
+- Final phase-028 release sign-off and commit.
 
 ## Pending
 
-- Choose final non-temporary global install root.
+- Decide whether to keep the Codex CLI registered global plugin root at
+  `E:\.codex\loop-harness` long term or remove it with the rollback command in
+  `.ai-loop/evidence/global-plugin-discovery.json` after delivery.
 - Expand skill trigger matrix for full-stack and physics workflows.
-- Validate plugin discovery in real global Codex configuration after explicit
-  approval, if plugin-form stability must be claimed beyond repo-local smoke
-  tests.
 - Run dogfood phase-002 through `worker-preflight` and `invoke-worker` once the
   external-service invocation is explicitly approved for that phase.
 - Decide whether future schema upgrades require deep semantic migration
@@ -297,4 +306,4 @@
 
 ## Last Updated
 
-2026-06-30
+2026-07-03

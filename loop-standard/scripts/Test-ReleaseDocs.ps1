@@ -42,12 +42,12 @@ $ReadmeEn = Join-Path $RepoRoot "README_EN.md"
 $KitReadme = Join-Path $KitRoot "README.md"
 
 Assert-Text -Path $ReleaseNotes -Patterns @(
-    "ready_with_warnings",
+    "ready",
     "What 1.0 Delivers",
     "Verified Matrix",
     "release-check",
-    "Test-Phase026.ps1",
-    "Known Warning",
+    "Test-Phase028.ps1",
+    "Global Plugin Evidence",
     "PLUGIN-GLOBAL",
     "No real global Codex configuration mutation"
 )
@@ -74,9 +74,9 @@ Assert-Text -Path $DeliveryAudit -Patterns @(
     "Hash-backed evidence collection",
     "State-machine gates",
     "Durable `REWORK` and `BLOCKED` handling",
-    "Complete non-global PowerShell matrix",
+    "Complete PowerShell matrix",
     "PLUGIN-GLOBAL",
-    "ready_with_warnings"
+    "ready"
 )
 
 Assert-Text -Path $Readme -Patterns @(

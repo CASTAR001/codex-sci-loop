@@ -50,8 +50,10 @@ try {
                 Add-Problem "root readiness should have zero failing checks: $($RootJson.Output)"
             }
             $PluginGlobal = @($Parsed.checks | Where-Object { $_.id -eq "PLUGIN-GLOBAL" }) | Select-Object -First 1
-            if ($null -eq $PluginGlobal -or $PluginGlobal.status -ne "warn") {
-                Add-Problem "root readiness should include PLUGIN-GLOBAL warning until real global install is approved."
+            $GlobalEvidencePath = Join-Path $RepoRoot ".ai-loop\evidence\global-plugin-discovery.json"
+            $ExpectedPluginGlobalStatus = if (Test-Path -LiteralPath $GlobalEvidencePath -PathType Leaf) { "pass" } else { "warn" }
+            if ($null -eq $PluginGlobal -or $PluginGlobal.status -ne $ExpectedPluginGlobalStatus) {
+                Add-Problem "root readiness PLUGIN-GLOBAL should be $ExpectedPluginGlobalStatus. Actual=$($PluginGlobal.status)"
             }
             if ($RootJson.Output -match "Loop Harness 1.0 Readiness") {
                 Add-Problem "root readiness JSON mixed human-readable text with JSON."
