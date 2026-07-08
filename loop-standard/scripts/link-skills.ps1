@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
-    [string]$SkillLibraryRoot = "E:\codexfiles\test\.agents\skills",
+    [string]$SkillLibraryRoot = "",
     [ValidateSet("none", "research-core", "physics-sim", "manuscript", "full-research")]
     [string]$Profile = "full-research",
     [ValidateSet("research-task-tree", "invariant-contract", "bounded-experiment-loop", "deterministic-verification", "independent-crosscheck", "result-provenance-audit", "manuscript-consistency-audit", "skill-compliance-audit")]
@@ -11,6 +11,23 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+function Resolve-DefaultSkillLibraryRoot {
+    if ([System.IO.Path]::DirectorySeparatorChar -eq "\") {
+        return "E:\codexfiles\test\.agents\skills"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_HOME)) {
+        return (Join-Path $env:CODEX_HOME "skills")
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:HOME)) {
+        return (Join-Path (Join-Path $env:HOME ".codex") "skills")
+    }
+    throw "Cannot resolve default SkillLibraryRoot. Pass -SkillLibraryRoot explicitly."
+}
+
+if ([string]::IsNullOrWhiteSpace($SkillLibraryRoot)) {
+    $SkillLibraryRoot = Resolve-DefaultSkillLibraryRoot
+}
 
 function Get-SkillsForProfile {
     param([Parameter(Mandatory = $true)][string]$Name)
@@ -39,6 +56,14 @@ function New-SkillLink {
         [Parameter(Mandatory = $true)][string]$Source,
         [Parameter(Mandatory = $true)][string]$Target
     )
+    if ([System.IO.Path]::DirectorySeparatorChar -ne "\") {
+        try {
+            New-Item -ItemType SymbolicLink -Path $Target -Target $Source -Force | Out-Null
+            return "symbolic-link"
+        } catch {
+            return "mapped-only"
+        }
+    }
     try {
         New-Item -ItemType Junction -Path $Target -Target $Source -Force | Out-Null
         return "junction"
@@ -154,4 +179,3 @@ Write-Output "Skill source map: $SourceMapPath"
 foreach ($Result in $Results) {
     Write-Output "$($Result.skill): $($Result.status) ($($Result.link_type))"
 }
-

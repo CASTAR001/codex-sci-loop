@@ -5,8 +5,10 @@ coding work. The goal is to make a workflow that can be copied or installed into
 any project folder, then used by Codex, Kimi Code, or another worker agent
 without relying on chat history as the source of truth.
 
-The harness is local-first, markdown-first, git-trackable, and Windows
-PowerShell-first.
+The harness is local-first, markdown-first, git-trackable, and now has
+platform-aware installation. Windows remains PowerShell-first; Linux has a
+native shell installer and shim; macOS is an explicit placeholder for a later
+optimized path.
 
 Humans should start with `README.md` or this English companion. Agents should
 bootstrap from `AGENTS.md` and then follow `.ai-loop/`; long governance rules do
@@ -109,6 +111,22 @@ The harness now uses a two-layer model:
    follow the workflow.
 
 All project-specific state belongs in the target project's `.ai-loop/`.
+
+For a global layout, use the repository-level platform dispatcher first:
+
+```bash
+./install.sh --install-root "$HOME/.codex/loop-harness" --install-plugin --create-shim --create-marketplace --force
+```
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\install.ps1 -InstallRoot E:\codexfiles\loop\.tmp-install -InstallPlugin -CreateShim -SkillLibraryRoot E:\codexfiles\test\.agents\skills -Force
+```
+
+The dispatcher sends Windows to `loop-standard/scripts/install-global.ps1`,
+Linux to `loop-standard/scripts/install-global.sh`, and Darwin/macOS to a clear
+placeholder exit. Linux installation uses native shell file operations and
+POSIX paths; the installed Linux shim still needs PowerShell 7 as `pwsh` to run
+the shared loop command core.
 
 ## How To Use In Another Project
 
@@ -284,7 +302,10 @@ Profiles:
 
 The 8 research skills are linked into each project with Windows directory
 junctions when possible. If linking fails, the source map records the failure
-and gates can block required phases.
+and gates can block required phases. Linux uses symbolic links for project
+skill exposure. On Linux, the installer defaults the shared skill root to
+`${CODEX_HOME:-$HOME/.codex}/skills` and the Linux shim forwards that path as
+`-SkillLibraryRoot`.
 
 ## Evidence Rule
 
@@ -386,6 +407,9 @@ Recent checks passed:
 - `Test-PluginInstall.ps1`, which verifies a temporary install root, local
   marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
   wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
+- `Test-PlatformInstall.sh`, which verifies the Linux install layout, local
+  marketplace file, plugin manifest, plugin skills, executable `bin/ai-loop`
+  shim, and shell syntax for the platform dispatcher.
 - `Test-TempIsolation.ps1`, which starts two plugin install smoke tests in
   parallel and verifies that they use distinct per-run install roots instead of
   contending over one fixed `.tmp-ai-loop-*` directory.

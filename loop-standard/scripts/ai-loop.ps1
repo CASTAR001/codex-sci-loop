@@ -30,7 +30,7 @@ param(
     [ValidateSet("research-task-tree", "invariant-contract", "bounded-experiment-loop", "deterministic-verification", "independent-crosscheck", "result-provenance-audit", "manuscript-consistency-audit", "skill-compliance-audit")]
     [string[]]$RequiredSkills = @(),
     [string[]]$ClaimIds = @(),
-    [string]$SkillLibraryRoot = "E:\codexfiles\test\.agents\skills",
+    [string]$SkillLibraryRoot = "",
     [switch]$Commit,
     [string]$CommitMessage = "",
     [switch]$Force,
@@ -57,6 +57,23 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+function Resolve-DefaultSkillLibraryRoot {
+    if ([System.IO.Path]::DirectorySeparatorChar -eq "\") {
+        return "E:\codexfiles\test\.agents\skills"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:CODEX_HOME)) {
+        return (Join-Path $env:CODEX_HOME "skills")
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:HOME)) {
+        return (Join-Path (Join-Path $env:HOME ".codex") "skills")
+    }
+    throw "Cannot resolve default SkillLibraryRoot. Pass -SkillLibraryRoot explicitly."
+}
+
+if ([string]::IsNullOrWhiteSpace($SkillLibraryRoot)) {
+    $SkillLibraryRoot = Resolve-DefaultSkillLibraryRoot
+}
 
 function Require-PhaseId {
     if ([string]::IsNullOrWhiteSpace($PhaseId)) {

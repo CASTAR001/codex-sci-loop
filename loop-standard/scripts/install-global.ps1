@@ -13,6 +13,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+if ([System.IO.Path]::DirectorySeparatorChar -ne "\") {
+    throw "install-global.ps1 is the Windows installer. Use ./install.sh on Linux. macOS install is reserved for a later phase."
+}
+
 function Resolve-TargetRoot {
     if (-not [string]::IsNullOrWhiteSpace($InstallRoot) -and -not [string]::IsNullOrWhiteSpace($CodexHome)) {
         $ResolvedInstall = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($InstallRoot)

@@ -122,7 +122,25 @@ readiness、loop-wide validation 和当前非全局验证矩阵。
 
 所有项目特定状态都留在目标项目自己的 `.ai-loop/`。
 
-如果要先安装成临时全局布局，可以使用：
+如果要安装成全局布局，优先使用仓库根目录的 dispatcher。它会先判断平台：
+
+- Windows：调用 `loop-standard/scripts/install-global.ps1`。
+- Linux：调用 `loop-standard/scripts/install-global.sh`。
+- macOS：当前只保留占位并明确退出，后续再接入 mac 优化安装器。
+
+Linux 示例：
+
+```bash
+./install.sh --install-root "$HOME/.codex/loop-harness" --install-plugin --create-shim --create-marketplace --force
+```
+
+Windows 示例：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\install.ps1 -InstallRoot E:\codexfiles\loop\.tmp-install -InstallPlugin -CreateShim -SkillLibraryRoot E:\codexfiles\test\.agents\skills -Force
+```
+
+如果要直接使用 Windows 安装器，可以运行：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\install-global.ps1 -InstallRoot E:\codexfiles\loop\.tmp-install -InstallPlugin -CreateShim -SkillLibraryRoot E:\codexfiles\test\.agents\skills -Force
@@ -136,6 +154,15 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\.tmp-install\bin\ai-loop.ps1 -Command doctor
 ```
+
+Linux 安装后 shim 是可执行文件：
+
+```bash
+"$HOME/.codex/loop-harness/bin/ai-loop" -Command doctor
+```
+
+Linux 安装阶段使用原生 shell 和 POSIX 路径；共享 loop 命令核心仍由
+PowerShell 7 执行，因此实际运行 loop 命令前需要系统有 `pwsh`。
 
 ## 如何套用到任意项目
 
@@ -361,7 +388,10 @@ E:\codexfiles\test\.agents\skills
 - `full-research`：全部 8 个科研 workflow skills。
 
 Windows 下优先用 directory junction 链接 skill。失败时尝试 symbolic link，
-再失败则只写 source map，并由 gate 标记 unavailable。
+再失败则只写 source map，并由 gate 标记 unavailable。Linux 下使用 symbolic
+link 暴露 skill。Linux 安装器默认把共享 skill 根放在
+`${CODEX_HOME:-$HOME/.codex}/skills`，并由 Linux shim 作为 `-SkillLibraryRoot`
+传给共享命令核心。
 
 ## 证据规则
 
@@ -409,6 +439,9 @@ invocation 记录也会作为 `external-worker-evidence` 类型进入 manifest�
 - `Test-PluginInstall.ps1`：在 `.tmp-ai-loop-plugin-smoke/` 中验证临时
   install root、local marketplace、plugin manifest、plugin skills、shim
   `doctor` 和 plugin wrapper `doctor`。
+- `Test-PlatformInstall.sh`：在 Linux 下验证 dispatcher 相关脚本语法、Linux
+  install root、local marketplace、plugin manifest、plugin skills 和可执行
+  `bin/ai-loop` shim。
 - `Test-TempIsolation.ps1`：并发启动两个 plugin install smoke test，并验证
   它们使用不同的 per-run install root，避免固定 `.tmp-ai-loop-*` 目录竞争。
 - `Test-PruneTempFixtures.ps1`：验证 `prune-temp` 的 dry-run、保留最新 run、

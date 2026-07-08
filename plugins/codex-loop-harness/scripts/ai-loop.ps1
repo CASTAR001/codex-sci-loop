@@ -20,5 +20,10 @@ if (-not (Test-Path -LiteralPath $LoopScript -PathType Leaf)) {
     throw "Cannot locate loop-standard scripts. Set LOOP_STANDARD_ROOT or run from the development repository."
 }
 
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $LoopScript @Arguments
+$PowerShellHost = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") { "powershell.exe" } else { "pwsh" }
+if ($null -eq (Get-Command $PowerShellHost -ErrorAction SilentlyContinue)) {
+    throw "Cannot locate $PowerShellHost. Install PowerShell 7 (pwsh) on Linux/macOS or Windows PowerShell on Windows."
+}
+
+& $PowerShellHost -NoProfile -ExecutionPolicy Bypass -File $LoopScript @Arguments
 exit $LASTEXITCODE

@@ -65,7 +65,28 @@ requires `external-worker-preflight.json/.md` and
 `external-worker-evidence`, and validate/audit block if they are missing or
 stale.
 
-To install a temporary global layout with a shim:
+To install a temporary global layout with platform detection, run the dispatcher
+from the repository root:
+
+```bash
+./install.sh --install-root "$HOME/.codex/loop-harness" --install-plugin --create-shim --create-marketplace --force
+```
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
+  -InstallRoot "C:\path\to\loop-install" `
+  -InstallPlugin `
+  -CreateShim `
+  -CreateMarketplace `
+  -SkillLibraryRoot "E:\codexfiles\test\.agents\skills" `
+  -Force
+```
+
+The dispatcher sends Windows to `scripts\install-global.ps1`, Linux to
+`scripts/install-global.sh`, and Darwin/macOS to a placeholder that exits
+without installing.
+
+To call the Windows installer directly:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-global.ps1 `
@@ -83,6 +104,16 @@ Then call:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\path\to\loop-install\bin\ai-loop.ps1" -Command doctor
 ```
 
+On Linux, the shim is executable:
+
+```bash
+"$HOME/.codex/loop-harness/bin/ai-loop" -Command doctor
+```
+
+The Linux installer uses native shell file operations and POSIX paths. The
+shared loop command core still runs through PowerShell 7, so install `pwsh`
+before using the Linux shim for loop commands.
+
 `-CreateMarketplace` creates a local Codex marketplace file at
 `<install-root>\.agents\plugins\marketplace.json` for discovery smoke tests. It
 does not modify real global Codex configuration or run `codex plugin add`.
@@ -91,6 +122,12 @@ Run the plugin install/discovery smoke test from this repository:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-PluginInstall.ps1
+```
+
+On Linux, run the platform install smoke test:
+
+```bash
+bash ./scripts/Test-PlatformInstall.sh
 ```
 
 ## Required Phase Evidence

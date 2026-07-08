@@ -62,6 +62,9 @@ $RequiredPaths = @(
     "docs\CONTROL_PLANE_BUILD_PLAN.md",
     "docs\AGENTS_VS_AI_LOOP_BOUNDARY.md",
     "docs\EXTERNAL_WORKER_PROTOCOL.md",
+    "platforms\windows\README.md",
+    "platforms\linux\README.md",
+    "platforms\macos\README.md",
     ".ai-loop\README.md",
     ".ai-loop\.gitignore",
     ".ai-loop\loop.config.json",
@@ -164,7 +167,9 @@ $RequiredPaths = @(
     "scripts\Test-Phase028.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
+    "scripts\install-global.sh",
     "scripts\Test-PluginInstall.ps1",
+    "scripts\Test-PlatformInstall.sh",
     "scripts\Initialize-AiLoop.ps1",
     "scripts\Start-LoopPhase.ps1",
     "scripts\Collect-LoopEvidence.ps1",
@@ -175,6 +180,8 @@ $RequiredPaths = @(
     "worker-profiles\kimi-code.md",
     "..\README.md",
     "..\README_EN.md",
+    "..\install.ps1",
+    "..\install.sh",
     "..\plugins\codex-loop-harness\.codex-plugin\plugin.json",
     "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
@@ -297,14 +304,53 @@ if (Test-Path -LiteralPath $PluginScriptsDir -PathType Container) {
             }
         }
     }
+    $PluginWrapperPath = Join-Path $PluginScriptsDir "ai-loop.ps1"
+    if (Test-Path -LiteralPath $PluginWrapperPath -PathType Leaf) {
+        $PluginWrapperText = Get-Content -LiteralPath $PluginWrapperPath -Raw
+        foreach ($Needle in @("PowerShellHost", "powershell.exe", "pwsh", "LOOP_STANDARD_ROOT")) {
+            if ($PluginWrapperText -notmatch [regex]::Escape($Needle)) {
+                Add-Problem "plugin wrapper missing expected platform text: $Needle"
+            }
+        }
+    }
 }
 
 $InstallScriptPath = Join-Path $KitRoot "scripts\install-global.ps1"
 if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
     $InstallText = Get-Content -LiteralPath $InstallScriptPath -Raw
-    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "validate-loop", "migrate", "decide", "scaffold-rework", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1")) {
+    foreach ($Needle in @("InstallRoot", "CodexHome", "SkillLibraryRoot", "InstallPlugin", "CreateShim", "CreateMarketplace", "MarketplaceName", "validate-loop", "migrate", "decide", "scaffold-rework", "worker-preflight", "invoke-worker", "ShimPath", "ai-loop.ps1", "Windows installer")) {
         if ($InstallText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "install-global.ps1 missing expected interface text: $Needle"
+        }
+    }
+}
+
+$LinuxInstallScriptPath = Join-Path $KitRoot "scripts\install-global.sh"
+if (Test-Path -LiteralPath $LinuxInstallScriptPath -PathType Leaf) {
+    $LinuxInstallText = Get-Content -LiteralPath $LinuxInstallScriptPath -Raw
+    foreach ($Needle in @("install-global.sh", "--install-root", "--install-plugin", "--create-shim", "--create-marketplace", "marketplace.json", "bin/ai-loop", "pwsh", "Linux installer")) {
+        if ($LinuxInstallText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "install-global.sh missing expected interface text: $Needle"
+        }
+    }
+}
+
+$RootInstallShPath = Join-Path (Split-Path -Parent $KitRoot) "install.sh"
+if (Test-Path -LiteralPath $RootInstallShPath -PathType Leaf) {
+    $RootInstallShText = Get-Content -LiteralPath $RootInstallShPath -Raw
+    foreach ($Needle in @("Linux", "Darwin", "powershell.exe", "install-global.sh", "install-global.ps1")) {
+        if ($RootInstallShText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "install.sh missing expected platform dispatch text: $Needle"
+        }
+    }
+}
+
+$RootInstallPsPath = Join-Path (Split-Path -Parent $KitRoot) "install.ps1"
+if (Test-Path -LiteralPath $RootInstallPsPath -PathType Leaf) {
+    $RootInstallPsText = Get-Content -LiteralPath $RootInstallPsPath -Raw
+    foreach ($Needle in @("Get-LoopInstallPlatform", "windows", "linux", "macos", "install-global.ps1", "install-global.sh")) {
+        if ($RootInstallPsText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "install.ps1 missing expected platform dispatch text: $Needle"
         }
     }
 }
@@ -312,9 +358,19 @@ if (Test-Path -LiteralPath $InstallScriptPath -PathType Leaf) {
 $AiLoopScriptPath = Join-Path $KitRoot "scripts\ai-loop.ps1"
 if (Test-Path -LiteralPath $AiLoopScriptPath -PathType Leaf) {
     $AiLoopText = Get-Content -LiteralPath $AiLoopScriptPath -Raw
-    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "extract-audit-findings.ps1", "scaffold-rework-phase.ps1", "worker-preflight", "invoke-worker", "release-check.ps1")) {
+    foreach ($Needle in @("TargetStatus", "validate-phase-gates.ps1", "validate-loop.ps1", "migrate-loop.ps1", "decide-phase.ps1", "extract-audit-findings.ps1", "scaffold-rework-phase.ps1", "worker-preflight", "invoke-worker", "release-check.ps1", "Resolve-DefaultSkillLibraryRoot", 'Join-Path $env:CODEX_HOME "skills"')) {
         if ($AiLoopText -notmatch [regex]::Escape($Needle)) {
             Add-Problem "ai-loop.ps1 missing expected interface text: $Needle"
+        }
+    }
+}
+
+$LinkSkillsScriptPath = Join-Path $KitRoot "scripts\link-skills.ps1"
+if (Test-Path -LiteralPath $LinkSkillsScriptPath -PathType Leaf) {
+    $LinkSkillsText = Get-Content -LiteralPath $LinkSkillsScriptPath -Raw
+    foreach ($Needle in @("Resolve-DefaultSkillLibraryRoot", 'Join-Path $env:CODEX_HOME "skills"', "DirectorySeparatorChar", "SymbolicLink", "Junction")) {
+        if ($LinkSkillsText -notmatch [regex]::Escape($Needle)) {
+            Add-Problem "link-skills.ps1 missing expected platform text: $Needle"
         }
     }
 }
