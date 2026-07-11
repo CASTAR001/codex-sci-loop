@@ -10,3 +10,7 @@ The preflight writes phase-local evidence under `.ai-loop/runs/<phase-id>/`.
 Yolo mode may be enabled without a separate confirmation, but external service
 use, sensitive prompt content, and long-term memory/governance upgrades require
 explicit user confirmation.
+
+Bundled profiles include `kimi-code` and `claude-mimo`. The latter invokes the
+server-local `claude-mimo` wrapper; endpoint routing and credentials remain
+outside the harness.

@@ -9,6 +9,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PowerShellHost = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") { "powershell.exe" } else { "pwsh" }
 
 function Write-JsonFile {
     param(
@@ -220,7 +221,7 @@ if (-not [string]::IsNullOrWhiteSpace($CommandToRun)) {
         $PreviousErrorActionPreference = $ErrorActionPreference
         try {
             $ErrorActionPreference = "Continue"
-            $Output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $CommandToRun 2>&1
+            $Output = & $PowerShellHost -NoProfile -ExecutionPolicy Bypass -Command $CommandToRun 2>&1
             $ExitCode = $LASTEXITCODE
         } finally {
             $ErrorActionPreference = $PreviousErrorActionPreference

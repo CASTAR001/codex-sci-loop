@@ -109,12 +109,12 @@ if ($null -ne $Marketplace) {
     } else {
         if ($Entry[0].source.source -ne "local") { Add-Problem "marketplace source must be local" }
         if ($Entry[0].source.path -ne "./plugins/codex-loop-harness") { Add-Problem "marketplace plugin path mismatch: $($Entry[0].source.path)" }
-        if ($Entry[0].policy.installation -ne "AVAILABLE") { Add-Problem "marketplace installation policy mismatch" }
+        if ($Entry[0].policy.installation -ne "INSTALLED_BY_DEFAULT") { Add-Problem "marketplace installation policy mismatch" }
         if ($Entry[0].policy.authentication -ne "ON_INSTALL") { Add-Problem "marketplace authentication policy mismatch" }
     }
 }
 
-$ExpectedSkillNames = @("loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")
+$ExpectedSkillNames = @("loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")
 foreach ($SkillName in $ExpectedSkillNames) {
     $SkillPath = Join-Path $PluginRoot "skills\$SkillName\SKILL.md"
     Test-RequiredFile -Path $SkillPath

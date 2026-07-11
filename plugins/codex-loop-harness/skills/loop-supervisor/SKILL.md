@@ -1,12 +1,14 @@
 ---
 name: loop-supervisor
-description: "Start and manage a local Supervisor-Worker loop phase using .ai-loop evidence, state, constraints, and skill gates."
+description: "Start and manage a local Supervisor-Worker loop phase using .ai-loop evidence, state, constraints, and skill gates; use after loop-goal-bootstrap has initialized and validated the repository."
 ---
 
 # Loop Supervisor
 
 Use this skill when a project should be run through the reusable
 Supervisor-Worker loop harness.
+
+Run `loop-goal-bootstrap` before reading phase state, planning, or editing.
 
 ## Required Reading
 
@@ -50,7 +52,7 @@ Use one of these entrypoints:
 5. Before invoking an external Worker service, run preflight:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command worker-preflight -ProjectRoot <project-root> -PhaseId <phase-id> -WorkerProfile kimi-code -Yolo
+   ai-loop -Command worker-preflight -ProjectRoot <project-root> -PhaseId <phase-id> -WorkerProfile claude-mimo
    ```
 
    If the decision is `NEEDS_USER_APPROVAL`, stop and ask before passing project
@@ -62,11 +64,11 @@ Use one of these entrypoints:
    ad hoc command:
 
    ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File <ai-loop-entrypoint> -Command invoke-worker -ProjectRoot <project-root> -PhaseId <phase-id> -WorkerProfile kimi-code -AllowExternalService -Yolo
+   ai-loop -Command invoke-worker -ProjectRoot <project-root> -PhaseId <phase-id> -WorkerProfile claude-mimo -AllowExternalService
    ```
 
-   Treat Kimi Code as a thin Worker profile. Do not make the harness route
-   depend on Kimi specifically.
+   Treat `claude-mimo` as a thin Worker profile. The harness route remains
+   generic and must invoke `claude-mimo`, never `claude`.
 
 7. If the audit decision is `REWORK`, first record the durable decision with
    `ai-loop decide`, then scaffold a bounded follow-up phase:

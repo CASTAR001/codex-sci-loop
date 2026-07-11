@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
     [Parameter(Mandatory = $true)][string]$PhaseId,
-    [string]$WorkerProfile = "kimi-code",
+    [string]$WorkerProfile = "claude-mimo",
     [string]$PromptPath = "",
     [string]$WorkerStateRoot = "",
     [switch]$AllowExternalService,
@@ -47,6 +47,15 @@ if (-not (Test-Path -LiteralPath $ProfilePath -PathType Leaf)) {
 }
 $Profile = Get-Content -LiteralPath $ProfilePath -Raw | ConvertFrom-Json
 
+$PowerShellCommand = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") {
+    "powershell.exe"
+} else {
+    "pwsh"
+}
+if ($null -eq (Get-Command $PowerShellCommand -ErrorAction SilentlyContinue)) {
+    throw "PowerShell executable not found on PATH: $PowerShellCommand"
+}
+
 $PreflightArgs = @(
     "-NoProfile",
     "-ExecutionPolicy",
@@ -66,7 +75,7 @@ if ($AllowExternalService) { $PreflightArgs += "-AllowExternalService" }
 if ($AllowSensitivePrompt) { $PreflightArgs += "-AllowSensitivePrompt" }
 if ($Yolo) { $PreflightArgs += "-Yolo" }
 
-$PreflightOutput = @(& powershell.exe @PreflightArgs 2>&1)
+$PreflightOutput = @(& $PowerShellCommand @PreflightArgs 2>&1)
 $PreflightExitCode = $LASTEXITCODE
 if ($PreflightExitCode -ne 0) {
     $PreflightOutput | Set-Content -LiteralPath $InvocationLogPath -Encoding utf8
@@ -81,16 +90,23 @@ if ($Review.decision -ne "SAFE_TO_INVOKE") {
     exit 2
 }
 
-$PromptResolvedPath = $Review.prompt_path -replace "/", "\"
+$PromptResolvedPath = [string]$Review.prompt_path
 $PromptText = Get-Content -LiteralPath $PromptResolvedPath -Raw
-$SkillsDir = $Review.skills_dir -replace "/", "\"
-$WorkerStateRoot = $Review.worker_state_root -replace "/", "\"
+$SkillsDir = [string]$Review.skills_dir
+$WorkerStateRoot = [string]$Review.worker_state_root
 if (-not [string]::IsNullOrWhiteSpace($Review.state_env_var)) {
     New-Item -ItemType Directory -Force -Path $WorkerStateRoot | Out-Null
 }
 
 $Command = [string]$Profile.command
 $Arguments = New-Object System.Collections.Generic.List[string]
+if ($null -ne $Profile.PSObject.Properties["base_arguments"]) {
+    foreach ($BaseArgument in @($Profile.base_arguments)) {
+        if (-not [string]::IsNullOrWhiteSpace([string]$BaseArgument)) {
+            $Arguments.Add([string]$BaseArgument)
+        }
+    }
+}
 if ($Yolo -and $Profile.supports_yolo -and -not [string]::IsNullOrWhiteSpace($Profile.yolo_argument)) {
     $Arguments.Add([string]$Profile.yolo_argument)
 }
@@ -127,8 +143,13 @@ if ($DryRun) {
         Set-Item -Path "Env:$StateName" -Value $WorkerStateRoot
     }
     try {
-        $Output = @(& $Command @Arguments 2>&1)
-        $ExitCode = $LASTEXITCODE
+        Push-Location -LiteralPath $ProjectRoot
+        try {
+            $Output = @(& $Command @Arguments 2>&1)
+            $ExitCode = $LASTEXITCODE
+        } finally {
+            Pop-Location
+        }
     } finally {
         if (-not [string]::IsNullOrWhiteSpace($Review.state_env_var)) {
             $StateName = [string]$Review.state_env_var

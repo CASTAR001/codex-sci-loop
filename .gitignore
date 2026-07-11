@@ -1,3 +1,5 @@
 .tmp-loop-e2e-*/
 .tmp-install/
 .tmp-ai-loop-*/
+__pycache__/
+*.pyc

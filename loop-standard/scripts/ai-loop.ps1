@@ -38,7 +38,7 @@ param(
     [switch]$CreateAgentsBootstrap,
     [ValidateSet("started", "evidence_collected", "audit_ready", "accepted")]
     [string]$TargetStatus = "audit_ready",
-    [string]$WorkerProfile = "kimi-code",
+    [string]$WorkerProfile = "claude-mimo",
     [string]$PromptPath = "",
     [string]$WorkerStateRoot = "",
     [switch]$AllowExternalService,
@@ -837,6 +837,8 @@ switch ($Command) {
         foreach ($WorkerPath in @(
             (Join-Path $KitRoot "worker-profiles\kimi-code.json"),
             (Join-Path $KitRoot "worker-profiles\kimi-code.md"),
+            (Join-Path $KitRoot "worker-profiles\claude-mimo.json"),
+            (Join-Path $KitRoot "worker-profiles\claude-mimo.md"),
             (Join-Path $PSScriptRoot "preflight-worker.ps1"),
             (Join-Path $PSScriptRoot "invoke-worker.ps1")
         )) {
@@ -846,10 +848,12 @@ switch ($Command) {
         }
         $WorkerProfileJson = Get-Content -LiteralPath (Join-Path $KitRoot "worker-profiles\kimi-code.json") -Raw | ConvertFrom-Json
         if ($WorkerProfileJson.profile -ne "kimi-code") { throw "Unexpected Worker profile name: $($WorkerProfileJson.profile)" }
+        $DefaultWorkerProfileJson = Get-Content -LiteralPath (Join-Path $KitRoot "worker-profiles\claude-mimo.json") -Raw | ConvertFrom-Json
+        if ($DefaultWorkerProfileJson.profile -ne "claude-mimo") { throw "Unexpected default Worker profile name: $($DefaultWorkerProfileJson.profile)" }
         if (-not (Test-Path -LiteralPath $PluginManifest -PathType Leaf)) { throw "Plugin manifest missing: $PluginManifest" }
         $Plugin = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
         if ($Plugin.name -ne "codex-loop-harness") { throw "Unexpected plugin name: $($Plugin.name)" }
-        foreach ($SkillName in @("loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")) {
+        foreach ($SkillName in @("loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")) {
             $SkillPath = Join-Path $PluginRoot (Join-Path "skills\$SkillName" "SKILL.md")
             $SkillCheck = Test-PluginSkillFile -Path $SkillPath
             if ($SkillCheck -ne "ok") {

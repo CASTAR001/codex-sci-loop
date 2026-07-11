@@ -11,6 +11,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PowerShellHost = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") { "powershell.exe" } else { "pwsh" }
 
 function Write-JsonFile {
     param(
@@ -74,7 +75,7 @@ $GateScript = Join-Path $PSScriptRoot "validate-phase-gates.ps1"
 $GateOutput = @()
 $GateExitCode = 0
 if (Test-Path -LiteralPath $GateScript) {
-    $GateOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $GateScript -ProjectRoot $ProjectRoot -PhaseId $PhaseId -TargetStatus accepted 2>&1)
+    $GateOutput = @(& $PowerShellHost -NoProfile -ExecutionPolicy Bypass -File $GateScript -ProjectRoot $ProjectRoot -PhaseId $PhaseId -TargetStatus accepted 2>&1)
     $GateExitCode = $LASTEXITCODE
 } else {
     $GateOutput = @("Phase gate validation: FAILED", "- missing validate-phase-gates.ps1")

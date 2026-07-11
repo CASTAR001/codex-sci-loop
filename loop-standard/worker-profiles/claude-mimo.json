@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "profile": "claude-mimo",
+  "display_name": "Claude via local LiteLLM",
+  "external_service": true,
+  "command": "claude-mimo",
+  "prompt_argument": "-p",
+  "base_arguments": [
+    "--no-session-persistence"
+  ],
+  "skills_dir_argument": "",
+  "yolo_argument": "--dangerously-skip-permissions",
+  "supports_yolo": true,
+  "supports_skills_dir": false,
+  "state_env_var": "",
+  "default_state_root": ".ai-loop/runtime/claude-mimo",
+  "endpoint": "http://127.0.0.1:4000",
+  "notes": [
+    "The claude-mimo wrapper owns LiteLLM authentication and endpoint configuration; the harness does not duplicate credentials.",
+    "Non-interactive runs disable session persistence so loop prompts and responses are not added to Claude session history.",
+    "Yolo mode maps to --dangerously-skip-permissions and is recorded in preflight and invocation evidence."
+  ]
+}

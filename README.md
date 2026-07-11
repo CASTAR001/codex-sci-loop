@@ -40,11 +40,13 @@ Supervisor、Worker、Auditor、Verifier、Recovery 这些角色协议稳定存�
 - `scripts/preflight-worker.ps1`：外部 Worker 调用前的安全性和可行性审查。
 - `scripts/invoke-worker.ps1`：仅在 preflight 通过后调用外部 Worker。
 - `scripts/ai-loop.ps1`：推荐使用的统一命令入口。
-- `worker-profiles/`：Worker agent 的薄 profile，例如 `kimi-code`。
+- `worker-profiles/`：Worker agent 的薄 profile，例如 `kimi-code` 和 `claude-mimo`。
 
 更底层的脚本说明在 `loop-standard/README.md`。
 1.0 交付面请看 `loop-standard/docs/RELEASE_NOTES_1.0.md` 和
 `loop-standard/docs/OPERATOR_CHECKLIST_1.0.md`。
+Linux sudo 用户可直接复制给 Codex 的安装、初始化和 `claude-mimo` Worker
+配置 prompt，请看 `loop-standard/docs/SUDO_MULTI_USER_INSTALL.md`。
 发布前可用 `ai-loop -Command release-check -ProjectRoot <project>` 汇总
 readiness、loop-wide validation 和当前非全局验证矩阵。
 
@@ -216,6 +218,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command invoke-worker -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
 ```
+
+本服务器也提供 `claude-mimo` profile。它调用已有的 `claude-mimo` 命令，由该
+命令继续使用本机 `127.0.0.1:4000` 上的 LiteLLM；harness 不读取或复制任何
+LiteLLM/Claude 凭据配置。Linux 示例：
+
+```bash
+ai-loop -Command invoke-worker -ProjectRoot /path/to/project -PhaseId phase-001 -WorkerProfile claude-mimo -AllowExternalService -Yolo
+```
+
+该 profile 默认加入 `--no-session-persistence`，避免 loop 调用写入 Claude 会话
+历史；`-Yolo` 映射为 `--dangerously-skip-permissions`。
 
 `-Yolo` 会被记录，但不需要单独停下来确认。外部服务调用、敏感 prompt、长期记忆
 或治理规则升级，仍然需要明确确认。

@@ -347,6 +347,15 @@ When a phase will use an external Worker, start it with
 artifact manifest, validate gates, and the audit pack. Ordinary phases do not
 require these files by default.
 
+On this server, the `claude-mimo` profile invokes the existing `claude-mimo`
+command routed through LiteLLM at `127.0.0.1:4000`. The harness does not read or
+copy Claude/LiteLLM credentials. It also passes `--no-session-persistence` by
+default:
+
+```bash
+ai-loop -Command invoke-worker -ProjectRoot /path/to/project -PhaseId phase-001 -WorkerProfile claude-mimo -AllowExternalService -Yolo
+```
+
 Use phase validation before acceptance:
 
 ```powershell

@@ -6,6 +6,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PowerShellHost = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") { "powershell.exe" } else { "pwsh" }
 
 function Add-Check {
     param(
@@ -126,7 +127,7 @@ function Invoke-ScriptCheck {
     )
     $PreviousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    $Output = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ScriptPath @Arguments 2>&1)
+    $Output = @(& $PowerShellHost -NoProfile -ExecutionPolicy Bypass -File $ScriptPath @Arguments 2>&1)
     $ExitCode = $LASTEXITCODE
     $ErrorActionPreference = $PreviousErrorActionPreference
     return [pscustomobject]@{

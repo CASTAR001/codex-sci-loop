@@ -112,7 +112,7 @@ if ($null -ne $Marketplace) {
     } else {
         if ([string]$Entry[0].source.source -ne "local") { Add-Problem "marketplace source must be local" }
         if ([string]$Entry[0].source.path -ne "./plugins/$PluginId") { Add-Problem "marketplace plugin path must be ./plugins/$PluginId" }
-        if ([string]$Entry[0].policy.installation -ne "AVAILABLE") { Add-Problem "marketplace installation policy must be AVAILABLE" }
+        if ([string]$Entry[0].policy.installation -ne "INSTALLED_BY_DEFAULT") { Add-Problem "marketplace installation policy must be INSTALLED_BY_DEFAULT" }
     }
 }
 

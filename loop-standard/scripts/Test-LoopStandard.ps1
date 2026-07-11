@@ -168,6 +168,11 @@ $RequiredPaths = @(
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\install-global.sh",
+    "scripts\install-system-wide.sh",
+    "scripts\Test-GoalLoopHook.py",
+    "scripts\Test-CodexHookUpdateCheck.py",
+    "system\requirements.toml",
+    "system\codex-loop-wrapper.sh",
     "scripts\Test-PluginInstall.ps1",
     "scripts\Test-PlatformInstall.sh",
     "scripts\Initialize-AiLoop.ps1",
@@ -176,13 +181,20 @@ $RequiredPaths = @(
     "scripts\Prepare-LoopAuditPackage.ps1",
     "scripts\Accept-LoopPhase.ps1",
     "scripts\Test-LoopStandard.ps1",
+    "docs\SUDO_MULTI_USER_INSTALL.md",
     "worker-profiles\kimi-code.json",
     "worker-profiles\kimi-code.md",
+    "worker-profiles\claude-mimo.json",
+    "worker-profiles\claude-mimo.md",
     "..\README.md",
     "..\README_EN.md",
     "..\install.ps1",
     "..\install.sh",
     "..\plugins\codex-loop-harness\.codex-plugin\plugin.json",
+    "..\plugins\codex-loop-harness\scripts\goal-loop-bootstrap.py",
+    "..\plugins\codex-loop-harness\scripts\check-codex-hook-after-update.py",
+    "..\plugins\codex-loop-harness\skills\loop-goal-bootstrap\SKILL.md",
+    "..\plugins\codex-loop-harness\skills\loop-goal-bootstrap\agents\openai.yaml",
     "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-recovery\SKILL.md",
@@ -237,7 +249,32 @@ if (Test-Path -LiteralPath $WorkerProfilePath) {
     }
 }
 
+$ClaudeMimoProfilePath = Join-Path $KitRoot "worker-profiles\claude-mimo.json"
+if (Test-Path -LiteralPath $ClaudeMimoProfilePath) {
+    try {
+        $ClaudeMimoProfile = Get-Content -LiteralPath $ClaudeMimoProfilePath -Raw | ConvertFrom-Json
+        if ($ClaudeMimoProfile.profile -ne "claude-mimo") {
+            Add-Problem "Claude Mimo Worker profile has unexpected name: $($ClaudeMimoProfile.profile)"
+        }
+        if ($ClaudeMimoProfile.command -ne "claude-mimo") {
+            Add-Problem "Claude Mimo Worker profile must invoke claude-mimo."
+        }
+        if ($ClaudeMimoProfile.prompt_argument -ne "-p") {
+            Add-Problem "Claude Mimo Worker profile must use non-interactive -p mode."
+        }
+        if (@($ClaudeMimoProfile.base_arguments) -notcontains "--no-session-persistence") {
+            Add-Problem "Claude Mimo Worker profile must disable session persistence."
+        }
+        if ($ClaudeMimoProfile.endpoint -ne "http://127.0.0.1:4000") {
+            Add-Problem "Claude Mimo Worker profile has unexpected LiteLLM endpoint metadata."
+        }
+    } catch {
+        Add-Problem "Invalid Claude Mimo Worker profile JSON: $($_.Exception.Message)"
+    }
+}
+
 foreach ($SkillFile in @(
+    "..\plugins\codex-loop-harness\skills\loop-goal-bootstrap\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
     "..\plugins\codex-loop-harness\skills\loop-recovery\SKILL.md",

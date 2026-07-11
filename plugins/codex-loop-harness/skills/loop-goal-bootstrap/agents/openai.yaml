@@ -1,0 +1,4 @@
+interface:
+  display_name: "Loop Goal Bootstrap"
+  short_description: "Initialize loop state before loop and goal work"
+  default_prompt: "Use $loop-goal-bootstrap to prepare this repository before starting the requested loop or goal."

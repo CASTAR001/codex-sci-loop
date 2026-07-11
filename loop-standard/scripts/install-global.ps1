@@ -102,7 +102,7 @@ if ($CreateMarketplace) {
                     path = "./plugins/codex-loop-harness"
                 }
                 policy = [ordered]@{
-                    installation = "AVAILABLE"
+                    installation = "INSTALLED_BY_DEFAULT"
                     authentication = "ON_INSTALL"
                 }
                 category = "Productivity"

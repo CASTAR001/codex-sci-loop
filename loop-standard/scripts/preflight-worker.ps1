@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
     [Parameter(Mandatory = $true)][string]$PhaseId,
-    [string]$WorkerProfile = "kimi-code",
+    [string]$WorkerProfile = "claude-mimo",
     [string]$PromptPath = "",
     [string]$WorkerStateRoot = "",
     [switch]$AllowExternalService,

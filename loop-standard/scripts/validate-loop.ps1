@@ -6,6 +6,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PowerShellHost = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") { "powershell.exe" } else { "pwsh" }
 
 function Add-Problem {
     param([Parameter(Mandatory = $true)][string]$Message)
@@ -312,7 +313,7 @@ if ($null -ne $Status) {
             }
             $GateScript = Join-Path $PSScriptRoot "validate-phase-gates.ps1"
             if (Test-Path -LiteralPath $GateScript -PathType Leaf) {
-                $GateOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $GateScript -ProjectRoot $ProjectRoot -PhaseId $PhaseId -TargetStatus accepted -Quiet 2>&1)
+                $GateOutput = @(& $PowerShellHost -NoProfile -ExecutionPolicy Bypass -File $GateScript -ProjectRoot $ProjectRoot -PhaseId $PhaseId -TargetStatus accepted -Quiet 2>&1)
                 if ($LASTEXITCODE -ne 0) {
                     Add-Problem "phase $PhaseId accepted gate failed: $($GateOutput | Out-String)"
                 }

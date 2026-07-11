@@ -187,7 +187,7 @@ if [[ "$CREATE_MARKETPLACE" == "1" ]]; then
         "path": "./plugins/codex-loop-harness"
       },
       "policy": {
-        "installation": "AVAILABLE",
+        "installation": "INSTALLED_BY_DEFAULT",
         "authentication": "ON_INSTALL"
       },
       "category": "Productivity"
@@ -206,7 +206,8 @@ if [[ "$CREATE_SHIM" == "1" ]]; then
 #!/usr/bin/env bash
 set -euo pipefail
 
-SHIM_DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd -P)"
+SHIM_SOURCE="\$(readlink -f "\${BASH_SOURCE[0]}")"
+SHIM_DIR="\$(cd "\$(dirname "\$SHIM_SOURCE")" && pwd -P)"
 INSTALL_ROOT="\$(cd "\$SHIM_DIR/.." && pwd -P)"
 LOOP_SCRIPT="\$INSTALL_ROOT/loop-standard/scripts/ai-loop.ps1"
 SKILL_LIBRARY_ROOT="$SKILL_LIBRARY_ROOT"

@@ -5,6 +5,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PowerShellHost = if ([System.IO.Path]::DirectorySeparatorChar -eq "\") { "powershell.exe" } else { "pwsh" }
 
 function Add-Problem {
     param([Parameter(Mandatory = $true)][string]$Message)
@@ -50,7 +51,7 @@ try {
                     path = "./plugins/$PluginId"
                 }
                 policy = [ordered]@{
-                    installation = "AVAILABLE"
+                    installation = "INSTALLED_BY_DEFAULT"
                 }
             }
         )
@@ -67,7 +68,7 @@ try {
 
     $EvidencePath = Join-Path $TempRoot ".ai-loop\evidence\global-plugin-discovery.json"
     $Recorder = Join-Path $PSScriptRoot "record-global-plugin-discovery.ps1"
-    $Output = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Recorder `
+    $Output = @(& $PowerShellHost -NoProfile -ExecutionPolicy Bypass -File $Recorder `
         -ProjectRoot $TempRoot `
         -InstallRoot $InstallRoot `
         -EvidencePath $EvidencePath `
