@@ -13,7 +13,8 @@ Supervisor、Worker、Auditor、Verifier、Recovery 这些角色协议稳定存�
 - markdown-first：记忆、约束、证据、报告都尽量可读。
 - git-trackable：关键状态可以被 git 追踪和审计。
 - evidence-first：不能只看 worker 总结就验收。
-- Windows PowerShell-first：第一版优先服务 Windows 使用场景。
+- PowerShell core：共享命令核心使用 PowerShell 7，同时提供 Windows 和 Linux
+  安装入口与平台适配。
 
 英文版说明保存在 `README_EN.md`。
 
@@ -103,6 +104,7 @@ readiness、loop-wide validation 和当前非全局验证矩阵。
 
 当前插件 skills：
 
+- `loop-goal-bootstrap`：在 goal/loop 工作开始前初始化并验证项目 harness。
 - `loop-supervisor`：指导 Codex 何时启动和监督 loop 阶段。
 - `loop-auditor`：指导 Codex 如何审计 worker 产物。
 - `loop-recovery`：指导新会话如何从 `.ai-loop/` 恢复。
@@ -117,14 +119,47 @@ readiness、loop-wide validation 和当前非全局验证矩阵。
 
 ## 当前运行模型
 
-现在采用“双层固定”：
+现在采用“三层固定”：
 
 1. 脚本核心：`loop-standard/scripts/ai-loop.ps1` 是推荐命令入口。
 2. 插件分发：`plugins/codex-loop-harness/` 帮助 Codex 发现并遵守流程。
+3. Managed hooks：Linux 多用户安装可在 goal/loop prompt 进入模型前自动初始化、
+   校验并注入流程约束。
 
 所有项目特定状态都留在目标项目自己的 `.ai-loop/`。
 
-如果要安装成全局布局，优先使用仓库根目录的 dispatcher。它会先判断平台：
+### Linux 多用户系统安装
+
+sudo 用户可以在 clone 后的仓库中审查并手动执行：
+
+```bash
+sudo ./loop-standard/scripts/install-system-wide.sh
+```
+
+脚本会把 harness、科研 skills、Codex CLI 和命令 shim 安装到系统路径，为现有
+普通用户及 `/etc/skel` 链接 loop skills，并写入受管的
+`/etc/codex/requirements.toml`。sudo 密码只应在本机终端输入，不要交给 Codex。
+
+安装后的自动行为：
+
+- `UserPromptSubmit`：识别涉及 loop 或 goal 的 prompt，定位 Git 根目录；项目未
+  初始化时先创建 `.ai-loop` 和 `AGENTS.md`，随后执行 `validate-loop`。失败会
+  阻断本次 prompt，成功后才允许模型开始任务或创建 goal。
+- `SessionStart`：Codex 版本变化后检查 hooks 功能、受管配置和 hook 自测。检查
+  通过时完全静默；不可用时显示 `Codex hook compatibility warning`。
+- `/usr/local/bin/codex`：在启动层执行同一兼容性检查，作为 SessionStart 之外的
+  第二条检测路径。
+- 外部 Worker 默认使用 `claude-mimo`，不会替换成 `claude`。实际调用仍需通过
+  preflight 并显式允许外部服务，且不会默认启用 `-Yolo`。
+
+hook 只读取 Codex 提供的 prompt、工作目录和事件类型，不读取 LiteLLM 配置、
+历史日志、环境变量转储或凭据文件。更完整的管理员与普通用户说明见
+`loop-standard/docs/SUDO_MULTI_USER_INSTALL.md`。全局安装或升级后，应开启新的
+Codex 对话以发现新 skills。
+
+### 用户目录安装
+
+如果只安装到当前用户目录，优先使用仓库根目录的 dispatcher。它会先判断平台：
 
 - Windows：调用 `loop-standard/scripts/install-global.ps1`。
 - Linux：调用 `loop-standard/scripts/install-global.sh`。
@@ -206,7 +241,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command audit-pack -ProjectRoot E:\some-project -PhaseId phase-001
 ```
 
-如果要让 harness 调用外部 Worker，先运行 preflight：
+如果要让 harness 调用外部 Worker，先运行 preflight。默认 profile 是
+`claude-mimo`；下面显式指定 `kimi-code` 展示如何切换 Worker：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command worker-preflight -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile kimi-code -Yolo
@@ -449,12 +485,18 @@ invocation 记录也会作为 `external-worker-evidence` 类型进入 manifest�
 
 - PowerShell 脚本解析检查。
 - `Test-LoopStandard.ps1 -AllowPilotProject`。
+- `Test-GoalLoopHook.py`：验证普通 prompt 不介入、goal prompt 自动初始化、已有
+  loop 只校验，以及校验失败会阻断。
+- `Test-CodexHookUpdateCheck.py`：验证 Codex 版本变化后执行兼容性检查、成功时
+  零输出、失败时生成警告。
 - `Test-PluginInstall.ps1`：在 `.tmp-ai-loop-plugin-smoke/` 中验证临时
   install root、local marketplace、plugin manifest、plugin skills、shim
   `doctor` 和 plugin wrapper `doctor`。
 - `Test-PlatformInstall.sh`：在 Linux 下验证 dispatcher 相关脚本语法、Linux
-  install root、local marketplace、plugin manifest、plugin skills 和可执行
-  `bin/ai-loop` shim。
+  install root、local marketplace、plugin manifest、plugin skills、hook 测试和
+  可执行 `bin/ai-loop` shim。
+- Linux 系统安装后已验证受管 `SessionStart`、`UserPromptSubmit`、系统 wrapper、
+  源码哈希和真实 Codex 新会话；正常兼容性检查为零输出。
 - `Test-TempIsolation.ps1`：并发启动两个 plugin install smoke test，并验证
   它们使用不同的 per-run install root，避免固定 `.tmp-ai-loop-*` 目录竞争。
 - `Test-PruneTempFixtures.ps1`：验证 `prune-temp` 的 dry-run、保留最新 run、
@@ -497,10 +539,13 @@ invocation 记录也会作为 `external-worker-evidence` 类型进入 manifest�
 - skill linking 与 skill source map。
 - Codex plugin scaffold。
 - repo-local plugin install/discovery smoke test。
+- Linux 多用户系统安装、现有用户和 `/etc/skel` skill 分发。
+- goal/loop prompt 自动初始化与 fail-closed 校验。
+- Codex 更新后的静默 hook 兼容性检查和失效提醒。
+- `claude-mimo` 默认 Worker profile 与外部调用 preflight。
 
 下一步计划：
 
-- 真实 Codex 全局配置中的插件安装/发现验证，需用户明确允许后再做。
 - 更深入的 recovery automation。
 - 更完整的状态机检查。
 - evidence ledger 自动化增强。
