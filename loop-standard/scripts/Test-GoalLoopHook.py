@@ -24,7 +24,10 @@ if [[ "$*" == *"-Command init"* ]]; then
   printf '{"status":"initialized"}\\n' > "$FAKE_PROJECT_ROOT/.ai-loop/status.json"
 fi
 if [[ "$*" == *"-Command validate-loop"* && "${FAKE_VALIDATE_FAIL:-0}" == "1" ]]; then
-  printf 'fixture validation failed\\n'
+  printf 'Loop validation: FAILED\\n'
+  printf '%s\\n' '- loop.config.json missing required property: skill_ledgers'
+  printf '%s\\n' "The property 'skill_ledgers' cannot be found on this object."
+  printf 'Verify that the property exists.\\n'
   exit 2
 fi
 """,
@@ -90,7 +93,12 @@ def main() -> int:
 
         result, output, calls = invoke(project, fake_ai_loop, "Start a durable goal.", fail_validate=True)
         require(output.get("decision") == "block", "validation failure should block the prompt")
-        require("validate-loop failed" in output.get("reason", ""), "block reason should identify validation")
+        reason = output.get("reason", "")
+        require("validate-loop failed" in reason, "block reason should identify validation")
+        require("skill_ledgers" in reason, "block reason should retain the failing property name")
+        require("Verify that the property exists." in reason, "block reason should retain the final diagnostic line")
+        require(" | " in reason, "block reason should delimit retained diagnostic lines")
+        require(len(reason) <= 1200, "block reason should remain bounded")
 
     print("Goal loop hook test: OK")
     return 0

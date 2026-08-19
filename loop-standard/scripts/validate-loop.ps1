@@ -46,15 +46,49 @@ function Test-RequiredFile {
     }
 }
 
+function Test-ObjectProperty {
+    param(
+        [AllowNull()]$Object,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+    return $null -ne $Object -and $null -ne $Object.PSObject.Properties[$Name]
+}
+
+function Get-ObjectPropertyValue {
+    param(
+        [AllowNull()]$Object,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+    if (-not (Test-ObjectProperty -Object $Object -Name $Name)) {
+        return $null
+    }
+    return $Object.PSObject.Properties[$Name].Value
+}
+
 function Get-ObjectStringProperty {
     param(
         [AllowNull()]$Object,
         [Parameter(Mandatory = $true)][string]$Name
     )
-    if ($null -eq $Object -or $null -eq $Object.PSObject.Properties[$Name]) {
-        return ""
+    return [string](Get-ObjectPropertyValue -Object $Object -Name $Name)
+}
+
+function Get-RequiredArrayProperty {
+    param(
+        [AllowNull()]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$SourceName
+    )
+    if (-not (Test-ObjectProperty -Object $Object -Name $Name)) {
+        Add-Problem "$SourceName missing required property: $Name"
+        return @()
     }
-    return [string]$Object.$Name
+    $Value = Get-ObjectPropertyValue -Object $Object -Name $Name
+    if ($null -eq $Value) {
+        Add-Problem "$SourceName required property is null: $Name"
+        return @()
+    }
+    return @($Value)
 }
 
 function Compare-SchemaVersion {
@@ -126,14 +160,18 @@ if (Test-Path -LiteralPath $TransitionLogPath -PathType Leaf) {
         if ([string]::IsNullOrWhiteSpace($Line)) { continue }
         try {
             $Entry = $Line | ConvertFrom-Json
+            $EntryHasAllRequiredProperties = $true
             foreach ($PropertyName in @("ts", "phase_id", "from_status", "to_status", "actor", "action", "paths")) {
-                if ($null -eq $Entry.PSObject.Properties[$PropertyName]) {
+                if (-not (Test-ObjectProperty -Object $Entry -Name $PropertyName)) {
                     Add-Problem "state-transitions.ndjson line $LineNumber missing required property: $PropertyName"
+                    $EntryHasAllRequiredProperties = $false
                 }
             }
-            $TransitionRows += [pscustomobject]@{
-                line_number = $LineNumber
-                entry = $Entry
+            if ($EntryHasAllRequiredProperties) {
+                $TransitionRows += [pscustomobject]@{
+                    line_number = $LineNumber
+                    entry = $Entry
+                }
             }
         } catch {
             Add-Problem "invalid state-transitions.ndjson line $LineNumber - $($_.Exception.Message)"
@@ -142,13 +180,16 @@ if (Test-Path -LiteralPath $TransitionLogPath -PathType Leaf) {
 }
 
 if ($null -ne $Config) {
+    $ConfigDecisions = @(Get-RequiredArrayProperty -Object $Config -Name "decisions" -SourceName "loop.config.json")
+    $ConfigEvidenceLedgers = @(Get-RequiredArrayProperty -Object $Config -Name "evidence_ledgers" -SourceName "loop.config.json")
+    $ConfigSkillLedgers = @(Get-RequiredArrayProperty -Object $Config -Name "skill_ledgers" -SourceName "loop.config.json")
     foreach ($Decision in @("ACCEPTED", "REWORK", "BLOCKED")) {
-        if ($Config.decisions -notcontains $Decision) {
+        if ($ConfigDecisions -notcontains $Decision) {
             Add-Problem "loop.config.json missing decision: $Decision"
         }
     }
     foreach ($Ledger in @(".ai-loop/evidence/artifact-manifest.json", ".ai-loop/evidence/evidence-ledger.md", ".ai-loop/skills/skill-usage-ledger.md")) {
-        if (($Config.evidence_ledgers -notcontains $Ledger) -and ($Config.skill_ledgers -notcontains $Ledger)) {
+        if (($ConfigEvidenceLedgers -notcontains $Ledger) -and ($ConfigSkillLedgers -notcontains $Ledger)) {
             Add-Problem "loop.config.json missing ledger reference: $Ledger"
         }
     }
@@ -203,15 +244,19 @@ if ($null -ne $Manifest -and $null -eq $Manifest.PSObject.Properties["artifacts"
     Add-Problem "artifact-manifest.json missing artifacts array"
 }
 
+$CurrentPhase = $null
+$CurrentPhaseId = ""
 if ($null -ne $Status) {
-    if ([string]::IsNullOrWhiteSpace([string]$Status.project_name)) {
+    if ([string]::IsNullOrWhiteSpace((Get-ObjectStringProperty -Object $Status -Name "project_name"))) {
         Add-Problem "status.json missing project_name"
     }
-    if ($null -eq $Status.PSObject.Properties["phases"]) {
+    if (-not (Test-ObjectProperty -Object $Status -Name "phases")) {
         Add-Problem "status.json missing phases array"
+        $Phases = @()
+    } else {
+        $Phases = @((Get-ObjectPropertyValue -Object $Status -Name "phases"))
     }
-    $Phases = @($Status.phases)
-    $PhaseGroups = $Phases | Group-Object -Property phase_id
+    $PhaseGroups = $Phases | Group-Object -Property { Get-ObjectStringProperty -Object $_ -Name "phase_id" }
     foreach ($Group in $PhaseGroups) {
         if ([string]::IsNullOrWhiteSpace([string]$Group.Name)) {
             Add-Problem "status.json contains phase with blank phase_id"
@@ -220,27 +265,38 @@ if ($null -ne $Status) {
         }
     }
 
-    if ($null -ne $Status.current_phase) {
-        $CurrentPhaseId = [string]$Status.current_phase.phase_id
-        $CurrentStatus = [string]$Status.current_phase.status
+    if (-not (Test-ObjectProperty -Object $Status -Name "current_phase")) {
+        Add-Problem "status.json missing current_phase property"
+    } else {
+        $CurrentPhase = Get-ObjectPropertyValue -Object $Status -Name "current_phase"
+    }
+    if ($null -ne $CurrentPhase) {
+        $CurrentPhaseId = Get-ObjectStringProperty -Object $CurrentPhase -Name "phase_id"
+        $CurrentStatus = Get-ObjectStringProperty -Object $CurrentPhase -Name "status"
         if ([string]::IsNullOrWhiteSpace($CurrentPhaseId)) {
             Add-Problem "current_phase missing phase_id"
         }
-        if ($ValidStatuses -notcontains $CurrentStatus) {
+        if ([string]::IsNullOrWhiteSpace($CurrentStatus)) {
+            Add-Problem "current_phase missing status"
+        } elseif ($ValidStatuses -notcontains $CurrentStatus) {
             Add-Problem "current_phase has illegal status: $CurrentStatus"
         }
-        $CurrentMatches = @($Phases | Where-Object { $_.phase_id -eq $CurrentPhaseId })
+        $CurrentMatches = @($Phases | Where-Object { (Get-ObjectStringProperty -Object $_ -Name "phase_id") -eq $CurrentPhaseId })
         if ($CurrentMatches.Count -ne 1) {
             Add-Problem "current_phase does not match exactly one status.json phases entry: $CurrentPhaseId"
-        } elseif ([string]$CurrentMatches[0].status -ne $CurrentStatus) {
+        } elseif ((Get-ObjectStringProperty -Object $CurrentMatches[0] -Name "status") -ne $CurrentStatus) {
             Add-Problem "current_phase status differs from phases entry for $CurrentPhaseId"
         }
     }
 
     foreach ($Phase in $Phases) {
-        $PhaseId = [string]$Phase.phase_id
-        $PhaseStatus = [string]$Phase.status
+        $PhaseId = Get-ObjectStringProperty -Object $Phase -Name "phase_id"
+        $PhaseStatus = Get-ObjectStringProperty -Object $Phase -Name "status"
         if ([string]::IsNullOrWhiteSpace($PhaseId)) { continue }
+        if ([string]::IsNullOrWhiteSpace($PhaseStatus)) {
+            Add-Problem "phase $PhaseId missing status"
+            continue
+        }
         if ($ValidStatuses -notcontains $PhaseStatus) {
             Add-Problem "phase $PhaseId has illegal status: $PhaseStatus"
             continue
@@ -253,23 +309,25 @@ if ($null -ne $Status) {
         }
         $Meta = Read-JsonOrProblem -Path $MetaPath
         if ($null -ne $Meta) {
-            if ([string]$Meta.phase_id -ne $PhaseId) {
+            if ((Get-ObjectStringProperty -Object $Meta -Name "phase_id") -ne $PhaseId) {
                 Add-Problem "phase $PhaseId metadata phase_id mismatch"
             }
-            if ([string]$Meta.status -ne $PhaseStatus) {
+            if ((Get-ObjectStringProperty -Object $Meta -Name "status") -ne $PhaseStatus) {
                 Add-Problem "phase $PhaseId metadata status differs from status.json"
             }
-            if ($null -ne $Meta.PSObject.Properties["transition_log"]) {
-                if ([string]$Meta.transition_log -ne ".ai-loop/events/state-transitions.ndjson") {
-                    Add-Problem "phase $PhaseId transition_log has unexpected path: $($Meta.transition_log)"
+            if (Test-ObjectProperty -Object $Meta -Name "transition_log") {
+                $MetaTransitionLog = Get-ObjectStringProperty -Object $Meta -Name "transition_log"
+                if ($MetaTransitionLog -ne ".ai-loop/events/state-transitions.ndjson") {
+                    Add-Problem "phase $PhaseId transition_log has unexpected path: $MetaTransitionLog"
                 }
-                $PhaseTransitions = @($TransitionRows | Where-Object { [string]$_.entry.phase_id -eq $PhaseId })
+                $PhaseTransitions = @($TransitionRows | Where-Object { (Get-ObjectStringProperty -Object $_.entry -Name "phase_id") -eq $PhaseId })
                 if ($PhaseTransitions.Count -eq 0) {
                     Add-Problem "phase $PhaseId has transition_log but no state transition entries"
                 } else {
                     $LatestTransition = $PhaseTransitions | Sort-Object line_number | Select-Object -Last 1
-                    if ([string]$LatestTransition.entry.to_status -ne $PhaseStatus) {
-                        Add-Problem "phase $PhaseId transition log latest status differs from status.json: transition=$($LatestTransition.entry.to_status) status=$PhaseStatus"
+                    $LatestTransitionStatus = Get-ObjectStringProperty -Object $LatestTransition.entry -Name "to_status"
+                    if ($LatestTransitionStatus -ne $PhaseStatus) {
+                        Add-Problem "phase $PhaseId transition log latest status differs from status.json: transition=$LatestTransitionStatus status=$PhaseStatus"
                     }
                 }
             }
@@ -346,19 +404,21 @@ if ($null -ne $Status) {
             } else {
                 $Findings = Read-JsonOrProblem -Path $AuditFindings
                 if ($null -ne $Findings) {
-                    if ([string]$Findings.phase_id -ne $PhaseId) {
-                        Add-Problem "phase $PhaseId audit findings have wrong phase_id: $($Findings.phase_id)"
+                    $FindingsPhaseId = Get-ObjectStringProperty -Object $Findings -Name "phase_id"
+                    $FindingsDecision = Get-ObjectStringProperty -Object $Findings -Name "decision"
+                    if ($FindingsPhaseId -ne $PhaseId) {
+                        Add-Problem "phase $PhaseId audit findings have wrong phase_id: $FindingsPhaseId"
                     }
-                    if ([string]$Findings.decision -ne $ExpectedDecision) {
-                        Add-Problem "phase $PhaseId audit findings have wrong decision: $($Findings.decision)"
+                    if ($FindingsDecision -ne $ExpectedDecision) {
+                        Add-Problem "phase $PhaseId audit findings have wrong decision: $FindingsDecision"
                     }
-                    if ($null -eq $Findings.PSObject.Properties["findings"]) {
+                    if (-not (Test-ObjectProperty -Object $Findings -Name "findings")) {
                         Add-Problem "phase $PhaseId audit findings JSON missing findings array"
                     }
                 }
             }
         }
-        if (($TerminalStatuses -notcontains $PhaseStatus) -and ($null -ne $Status.current_phase) -and ([string]$Status.current_phase.phase_id -ne $PhaseId)) {
+        if (($TerminalStatuses -notcontains $PhaseStatus) -and ($null -ne $CurrentPhase) -and ($CurrentPhaseId -ne $PhaseId)) {
             Add-Problem "non-terminal phase is not current_phase: $PhaseId status=$PhaseStatus"
         }
     }

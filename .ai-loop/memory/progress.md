@@ -283,6 +283,14 @@
   `record-global-plugin-discovery.ps1`, `Test-GlobalPluginDiscoveryEvidence.ps1`,
   and `Test-Phase028.ps1`; and chained `Test-Phase027.ps1` back to
   `Test-Phase026.ps1` so dynamic latest-matrix discovery remains complete.
+- On 2026-08-19, performed an explicitly requested harness-maintenance repair
+  for managed Goal-hook diagnostics. Guarded JSON property access prevents
+  `validate-loop.ps1` StrictMode exceptions from hiding missing field names,
+  and the hook preserves a bounded four-line failure tail. Added 11 malformed
+  JSON fixtures, strengthened the hook regression, and wired the new test into
+  Linux platform-install smoke coverage. Focused tests, parser checks,
+  loop-standard self-check and platform install smoke all pass. The installed
+  `/opt` plugin and managed Codex requirements remain unchanged.
 
 ## In Progress
 
@@ -306,4 +314,4 @@
 
 ## Last Updated
 
-2026-07-03
+2026-08-19

@@ -1,5 +1,22 @@
 # Handoff Summary
 
+## 2026-08-19 Managed Goal Hook Diagnostic Repair
+
+The authoritative source checkout now contains a focused source-only repair
+for the reported `UserPromptSubmit hook (blocked)` message that ended with only
+`Verify that the property exists.`
+
+- `validate-loop.ps1` safely reads external JSON under StrictMode and reports
+  exact missing required fields, including `skill_ledgers`.
+- `goal-loop-bootstrap.py` retains the final four non-empty validator lines in
+  a bounded summary instead of discarding every line except the last.
+- The new missing-property test passes 11 malformed JSON cases without leaking
+  raw StrictMode property exceptions. Hook, update-check, PowerShell parser,
+  loop-standard self-check and Linux install-smoke tests pass.
+- No source was copied into `/opt`, no managed hook/requirements file was
+  changed, and no LumiForge/Kimi/production state was touched. Installation or
+  remote publication remains a separate explicitly authorized action.
+
 ## Latest Goal Handoff
 
 For a compact new-chat handoff, read:

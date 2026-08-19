@@ -20,6 +20,9 @@ TRIGGER_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+FAILURE_DETAIL_LINES = 4
+FAILURE_DETAIL_CHARS = 1000
+
 
 def emit(value: dict[str, object]) -> None:
     print(json.dumps(value, ensure_ascii=False, separators=(",", ":")))
@@ -62,7 +65,12 @@ def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 def concise_failure(label: str, result: subprocess.CompletedProcess[str]) -> str:
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    detail = lines[-1][:300] if lines else f"exit code {result.returncode}"
+    if lines:
+        detail = " | ".join(lines[-FAILURE_DETAIL_LINES:])
+        if len(detail) > FAILURE_DETAIL_CHARS:
+            detail = detail[: FAILURE_DETAIL_CHARS - 3].rstrip() + "..."
+    else:
+        detail = f"exit code {result.returncode}"
     return f"Goal loop bootstrap blocked: {label} failed ({detail})."
 
 

@@ -170,6 +170,7 @@ $RequiredPaths = @(
     "scripts\install-global.sh",
     "scripts\install-system-wide.sh",
     "scripts\Test-GoalLoopHook.py",
+    "scripts\Test-ValidateLoopMissingProperties.py",
     "scripts\Test-CodexHookUpdateCheck.py",
     "system\requirements.toml",
     "system\codex-loop-wrapper.sh",

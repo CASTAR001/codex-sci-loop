@@ -52,6 +52,8 @@ bash "$SCRIPT_DIR/install-global.sh" \
 
 require_file "$INSTALL_ROOT/loop-standard/scripts/ai-loop.ps1"
 require_file "$INSTALL_ROOT/loop-standard/scripts/install-global.sh"
+require_file "$INSTALL_ROOT/loop-standard/scripts/Test-ValidateLoopMissingProperties.py"
+require_file "$INSTALL_ROOT/loop-standard/scripts/validate-loop.ps1"
 require_file "$INSTALL_ROOT/plugins/codex-loop-harness/.codex-plugin/plugin.json"
 require_file "$INSTALL_ROOT/plugins/codex-loop-harness/scripts/goal-loop-bootstrap.py"
 require_file "$INSTALL_ROOT/plugins/codex-loop-harness/scripts/check-codex-hook-after-update.py"
@@ -80,6 +82,12 @@ fi
 if ! grep -q 'pwsh' "$INSTALL_ROOT/plugins/codex-loop-harness/scripts/ai-loop.ps1"; then
     add_problem "plugin wrapper does not support pwsh"
 fi
+if ! cmp -s "$SCRIPT_DIR/validate-loop.ps1" "$INSTALL_ROOT/loop-standard/scripts/validate-loop.ps1"; then
+    add_problem "installed validator differs from the source candidate"
+fi
+if ! cmp -s "$REPO_ROOT/plugins/codex-loop-harness/scripts/goal-loop-bootstrap.py" "$INSTALL_ROOT/plugins/codex-loop-harness/scripts/goal-loop-bootstrap.py"; then
+    add_problem "installed Goal hook differs from the source candidate"
+fi
 
 if ! bash -n "$REPO_ROOT/install.sh"; then
     add_problem "root install.sh has a bash syntax error"
@@ -89,6 +97,9 @@ if ! bash -n "$SCRIPT_DIR/install-global.sh"; then
 fi
 if ! python3 "$SCRIPT_DIR/Test-GoalLoopHook.py" >"$TEMP_ROOT/goal-hook-output.txt" 2>&1; then
     add_problem "goal loop hook test failed"
+fi
+if ! python3 "$SCRIPT_DIR/Test-ValidateLoopMissingProperties.py" >"$TEMP_ROOT/validate-loop-properties-output.txt" 2>&1; then
+    add_problem "validate-loop missing-property regression failed"
 fi
 if ! python3 "$SCRIPT_DIR/Test-CodexHookUpdateCheck.py" >"$TEMP_ROOT/hook-update-output.txt" 2>&1; then
     add_problem "Codex hook update check test failed"

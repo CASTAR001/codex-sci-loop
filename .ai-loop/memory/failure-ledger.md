@@ -10,3 +10,4 @@
 | F006 | Governance drift | Worker edits rules during normal execution | Treat governance files as read-mostly | Active |
 | F007 | Scientific hallucination | Model says result is correct without deterministic evidence | Require correctness skill and verification artifact | Active |
 | F008 | Auditor becomes polite approver | Audit praises report without checking files | Auditor contract requires evidence inspection | Active |
+| F009 | StrictMode hides validator root cause | An older or incomplete loop JSON omits a property read directly by `validate-loop.ps1` | Guard all external JSON reads, emit the exact missing field, retain a bounded multi-line hook failure tail, and run malformed-property fixtures | Fixed 2026-08-19 |

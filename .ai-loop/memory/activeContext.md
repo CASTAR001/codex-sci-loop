@@ -1,5 +1,26 @@
 # Active Context
 
+## Harness Maintenance Update - 2026-08-19
+
+- Fixed the managed Goal hook failure where `validate-loop.ps1` ran under
+  `Set-StrictMode` and dereferenced missing external JSON properties such as
+  `loop.config.json.skill_ledgers`, replacing the actionable field name with a
+  generic `Verify that the property exists` hook message.
+- `validate-loop.ps1` now uses guarded property readers for configuration,
+  status, phase metadata, transition rows and audit findings. Missing required
+  properties become explicit validation problems; incomplete transition rows
+  are not admitted to later status comparisons.
+- `goal-loop-bootstrap.py` now keeps the last four non-empty diagnostic lines
+  in a 1,000-character bounded summary, so the named field and final diagnostic
+  remain together without emitting unbounded subprocess output.
+- Added an 11-case cross-platform missing-property regression and strengthened
+  the hook test. Python compilation, both focused regressions, PowerShell
+  parsing, the loop-standard self-check and Linux platform-install smoke test
+  pass.
+- This is a source-only maintenance candidate. The managed copy under `/opt`,
+  `/etc/codex/requirements.toml`, the clean LumiForge worktree, services and
+  production were not changed. No remote push or installation occurred.
+
 ## Current Phase
 
 Self-loop optimization of the loop harness MVP.
