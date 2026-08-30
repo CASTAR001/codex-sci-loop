@@ -13,8 +13,11 @@ host-issued receipt from a protected root can finalize `PASS`; prose audit files
 cannot accept or block a phase.
 
 The default `hooks/hooks.json` maps the certified Codex lifecycle events into
-this protocol. `UserPromptSubmit` captures only explicit Goal-mode requests or
-revisions to an active loop. The `Agent` pre-tool guard requires the exact
+this protocol. The lifecycle adapter is inert unless the host explicitly sets
+`LUMIFORGE_SCI_LOOP_MODE=goal`; installing the portable plugin into an ordinary
+Codex home therefore cannot block normal prompts or sessions. In a managed Goal
+runtime, `UserPromptSubmit` captures requests and active-loop revisions and any
+certification failure remains fail-closed. The `Agent` pre-tool guard requires the exact
 delegation and `fork_turns=none`; subagent start/stop hooks bind the observed
 native identity and opaque transcript; `Stop` continues or denies the turn
 until the signed gate passes. Hook names and wire shapes remain confined to the

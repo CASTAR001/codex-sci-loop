@@ -665,20 +665,31 @@ def emit(value: dict[str, Any]) -> None:
     print(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
 
 
+def managed_hook_mode() -> bool:
+    """Return true only for a LumiForge-managed Goal runtime.
+
+    The plugin is also useful as a portable collection of skills and commands.
+    Installing it into a normal Codex home must therefore not make its strict,
+    version-certified lifecycle adapter global.  Check the host-owned activation
+    marker before parsing a hook payload so an unrelated Codex schema update
+    cannot fail-close an ordinary session.
+    """
+
+    return os.environ.get("LUMIFORGE_SCI_LOOP_MODE") == "goal"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=sorted(COMMAND_EVENTS))
     args = parser.parse_args()
+    if not managed_hook_mode():
+        emit({})
+        return 0
     event: dict[str, Any] | None = None
     try:
         event = read_event(COMMAND_EVENTS[args.command])
         project = git_project(event["cwd"])
         if project is None:
-            emit({})
-            return 0
-        active = current_phase(project) is not None
-        goal_mode = os.environ.get("LUMIFORGE_SCI_LOOP_MODE") == "goal"
-        if not active and not goal_mode:
             emit({})
             return 0
         state_root = plugin_data()

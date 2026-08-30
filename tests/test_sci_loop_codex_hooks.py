@@ -365,8 +365,19 @@ def main() -> None:
         }
 
         session = {**common(project, "SessionStart"), "source": "startup"}
-        missing_environment = {key: value for key, value in environment.items() if not key.startswith("LUMIFORGE_")}
-        denied = hook(adapter, "session-start", session, missing_environment)
+        unmanaged_environment = {
+            key: value for key, value in environment.items() if not key.startswith("LUMIFORGE_")
+        }
+        assert hook(adapter, "session-start", session, unmanaged_environment) == {}
+        assert hook(adapter, "session-start", {"unexpected": True}, unmanaged_environment) == {}
+        managed_missing_environment = dict(environment)
+        for name in (
+            "LUMIFORGE_SCI_LOOP_PROBE",
+            "LUMIFORGE_SCI_LOOP_CERTIFICATE_ROOT",
+            "LUMIFORGE_SCI_LOOP_TRUSTED_ROOT",
+        ):
+            managed_missing_environment.pop(name)
+        denied = hook(adapter, "session-start", session, managed_missing_environment)
         assert denied["continue"] is False
         identity_path = trusted / "runtime-certification.json"
         identity = json.loads(identity_path.read_text(encoding="utf-8"))
@@ -381,7 +392,8 @@ def main() -> None:
         prompt_text = "  exact follow-up\nwith spacing  "
         prompt_event = {**common(project, "UserPromptSubmit", "turn-001"), "prompt": prompt_text}
         run_dir = project / ".ai-loop" / "runs" / PHASE_ID
-        assert hook(adapter, "user-prompt-submit", prompt_event, missing_environment)["decision"] == "block"
+        assert hook(adapter, "user-prompt-submit", prompt_event, unmanaged_environment) == {}
+        assert hook(adapter, "user-prompt-submit", prompt_event, managed_missing_environment)["decision"] == "block"
         assert not (run_dir / "request-envelope.json").exists()
         assert hook(adapter, "user-prompt-submit", prompt_event, environment) == {}
         assert hook(adapter, "user-prompt-submit", prompt_event, environment) == {}
