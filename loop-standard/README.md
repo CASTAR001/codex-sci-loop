@@ -1,8 +1,9 @@
 # Supervisor-Worker Loop Standard Kit
 
-This kit defines a reusable coding loop where Codex acts as Supervisor and
-Kimi Code acts as Worker. The Worker executes only the current phase. Codex
-owns route planning, evidence review, audit decisions, and phase acceptance.
+This compatibility kit defines a reusable coding loop where Codex owns phase
+planning, execution boundaries, evidence review, audit decisions, and phase
+acceptance. Codex can execute the phase itself; a generic external Worker is an
+optional legacy path and is never the authority for acceptance.
 
 ## Directory Layout
 
@@ -32,7 +33,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-LoopStand
 
 After `pilot-project/` exists, add `-AllowPilotProject`.
 
-For global migration planning, read `docs/GLOBAL_INSTALL_PLAN.md`.
 For 1.0 delivery notes and the operator checklist, read
 `docs/RELEASE_NOTES_1.0.md` and `docs/OPERATOR_CHECKLIST_1.0.md`.
 
@@ -45,8 +45,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 do
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 init "C:\path\to\project"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 link-skills "C:\path\to\project" -SkillProfile full-research
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 start "C:\path\to\project" phase-001 -TaskKind physics-research -SkillProfile physics-sim
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 worker-preflight "C:\path\to\project" phase-001 -WorkerProfile kimi-code -Yolo
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 invoke-worker "C:\path\to\project" phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 worker-preflight "C:\path\to\project" phase-001 -WorkerProfile claude-mimo -Yolo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 invoke-worker "C:\path\to\project" phase-001 -WorkerProfile claude-mimo -AllowExternalService -Yolo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 readiness "C:\path\to\project" -Json
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 release-check "C:\path\to\project" -Json
 ```
@@ -57,7 +57,7 @@ should call `ai-loop.ps1`.
 External Worker invocation is Worker-agnostic. `worker-preflight` records the
 prompt hash, state directory, external service status, yolo mode, and approval
 requirements. `invoke-worker` refuses to run unless preflight returns
-`SAFE_TO_INVOKE`. The first thin Worker profile is `worker-profiles/kimi-code`.
+`SAFE_TO_INVOKE`. The first thin Worker profile is `worker-profiles/claude-mimo`.
 When a phase is expected to use an external Worker, start it with
 `-RequireExternalWorkerEvidence -WorkerProfile <profile>`. The phase then
 requires `external-worker-preflight.json/.md` and
@@ -135,7 +135,7 @@ bash ./scripts/Test-PlatformInstall.sh
 Every phase must produce these files under `.ai-loop/runs/<phase-id>/`:
 
 - `prompt.md` - Codex-generated Worker prompt for the current phase.
-- `report.md` - Kimi Worker report after executing the phase.
+- `report.md` - factual execution report after the phase.
 - `diff.patch` - project diff captured by the evidence script.
 - `verify.log` - verification command output and exit code.
 - `status_after.txt` - git status after Worker execution.
@@ -321,7 +321,7 @@ start-time Markdown ledger rows, and replaces the same phase entry in
 `status.json` instead of appending a duplicate. It does not bypass audit or
 acceptance gates.
 
-After Kimi executes the generated prompt, collect evidence:
+After the current executor completes the generated prompt, collect evidence:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai-loop.ps1 `

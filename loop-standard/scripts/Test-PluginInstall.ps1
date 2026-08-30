@@ -7,6 +7,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$PowerShellHost = (Get-Process -Id $PID).Path
 
 function Add-Problem {
     param([Parameter(Mandatory = $true)][string]$Message)
@@ -65,7 +66,7 @@ if ((Test-Path -LiteralPath $TempRoot) -and -not $KeepTemp) {
 New-Item -ItemType Directory -Force -Path $TempRoot | Out-Null
 
 $InstallScript = Join-Path $KitRoot "scripts\install-global.ps1"
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $InstallScript `
+& $PowerShellHost -NoProfile -File $InstallScript `
     -InstallRoot $InstallRoot `
     -SkillLibraryRoot $SkillLibraryRoot `
     -InstallPlugin `
@@ -77,11 +78,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $LoopStandard = Join-Path $InstallRoot "loop-standard"
-$PluginRoot = Join-Path $InstallRoot "plugins\codex-loop-harness"
+$PluginRoot = Join-Path $InstallRoot "plugins\codex-sci-loop"
 $ManifestPath = Join-Path $PluginRoot ".codex-plugin\plugin.json"
 $ShimPath = Join-Path $InstallRoot "bin\ai-loop.ps1"
 $MarketplacePath = Join-Path $InstallRoot ".agents\plugins\marketplace.json"
-$PluginWrapper = Join-Path $PluginRoot "scripts\ai-loop.ps1"
+$PluginCore = Join-Path $PluginRoot "scripts\sci_loop.py"
+$HookManifest = Join-Path $PluginRoot "hooks\hooks.json"
 
 foreach ($Path in @(
     (Join-Path $LoopStandard "scripts\ai-loop.ps1"),
@@ -89,32 +91,33 @@ foreach ($Path in @(
     $ManifestPath,
     $ShimPath,
     $MarketplacePath,
-    $PluginWrapper
+    $PluginCore,
+    $HookManifest
 )) {
     Test-RequiredFile -Path $Path
 }
 
 $Manifest = Read-JsonFile -Path $ManifestPath
 if ($null -ne $Manifest) {
-    if ($Manifest.name -ne "codex-loop-harness") { Add-Problem "unexpected plugin name: $($Manifest.name)" }
+    if ($Manifest.name -ne "codex-sci-loop") { Add-Problem "unexpected plugin name: $($Manifest.name)" }
     if ($Manifest.skills -ne "./skills/") { Add-Problem "plugin skills path should be ./skills/: $($Manifest.skills)" }
     if ([string]::IsNullOrWhiteSpace($Manifest.interface.displayName)) { Add-Problem "plugin manifest missing interface.displayName" }
 }
 
 $Marketplace = Read-JsonFile -Path $MarketplacePath
 if ($null -ne $Marketplace) {
-    $Entry = @($Marketplace.plugins | Where-Object { $_.name -eq "codex-loop-harness" })
+    $Entry = @($Marketplace.plugins | Where-Object { $_.name -eq "codex-sci-loop" })
     if ($Entry.Count -ne 1) {
-        Add-Problem "marketplace must contain exactly one codex-loop-harness entry"
+        Add-Problem "marketplace must contain exactly one codex-sci-loop entry"
     } else {
         if ($Entry[0].source.source -ne "local") { Add-Problem "marketplace source must be local" }
-        if ($Entry[0].source.path -ne "./plugins/codex-loop-harness") { Add-Problem "marketplace plugin path mismatch: $($Entry[0].source.path)" }
+        if ($Entry[0].source.path -ne "./plugins/codex-sci-loop") { Add-Problem "marketplace plugin path mismatch: $($Entry[0].source.path)" }
         if ($Entry[0].policy.installation -ne "INSTALLED_BY_DEFAULT") { Add-Problem "marketplace installation policy mismatch" }
         if ($Entry[0].policy.authentication -ne "ON_INSTALL") { Add-Problem "marketplace authentication policy mismatch" }
     }
 }
 
-$ExpectedSkillNames = @("loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")
+$ExpectedSkillNames = @("independent-completion-auditor", "loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")
 foreach ($SkillName in $ExpectedSkillNames) {
     $SkillPath = Join-Path $PluginRoot "skills\$SkillName\SKILL.md"
     Test-RequiredFile -Path $SkillPath
@@ -129,20 +132,18 @@ foreach ($SkillName in $ExpectedSkillNames) {
     }
 }
 
-$ShimDoctor = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ShimPath -Command doctor 2>&1)
+$ShimDoctor = @(& $PowerShellHost -NoProfile -File $ShimPath -Command doctor 2>&1)
 if ($LASTEXITCODE -ne 0 -or (($ShimDoctor | Out-String) -notmatch "Doctor:\s+OK")) {
     Add-Problem "installed shim doctor failed: $($ShimDoctor | Out-String)"
 }
 
-$PreviousLoopStandardRoot = $env:LOOP_STANDARD_ROOT
-try {
-    $env:LOOP_STANDARD_ROOT = $LoopStandard
-    $WrapperDoctor = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $PluginWrapper -Command doctor -SkillLibraryRoot $SkillLibraryRoot 2>&1)
-    if ($LASTEXITCODE -ne 0 -or (($WrapperDoctor | Out-String) -notmatch "Doctor:\s+OK")) {
-        Add-Problem "plugin wrapper doctor failed: $($WrapperDoctor | Out-String)"
-    }
-} finally {
-    $env:LOOP_STANDARD_ROOT = $PreviousLoopStandardRoot
+$PluginVersion = @(& python3 $PluginCore --version 2>&1)
+if ($LASTEXITCODE -ne 0 -or (($PluginVersion | Out-String).Trim() -ne "1.0.0")) {
+    Add-Problem "plugin core version check failed: $($PluginVersion | Out-String)"
+}
+$PluginDistribution = @(& python3 $PluginCore validate-distribution 2>&1)
+if ($LASTEXITCODE -ne 0 -or (($PluginDistribution | Out-String) -notmatch "DISTRIBUTION:\s+OK")) {
+    Add-Problem "plugin distribution validation failed: $($PluginDistribution | Out-String)"
 }
 
 if ($Problems.Count -gt 0) {

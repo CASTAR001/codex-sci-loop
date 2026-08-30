@@ -1,0 +1,81 @@
+{
+  "schema": "sci-loop-codex-adapter-v1",
+  "adapter_id": "codex-hooks-0.147-v1",
+  "runtime": "codex",
+  "supported_versions": [
+    "0.147.0"
+  ],
+  "capability_protocol": "sci-loop-capabilities/v1",
+  "capabilities": {
+    "request.capture": {
+      "version": 1,
+      "source": "UserPromptSubmit",
+      "input": "prompt",
+      "authority": "adapter"
+    },
+    "evidence.snapshot": {
+      "version": 1,
+      "source": "sci_loop.py audit input",
+      "authority": "domain-core"
+    },
+    "reviewer.spawn": {
+      "version": 1,
+      "source": "native spawn_agent",
+      "authority": "codex-runtime"
+    },
+    "reviewer.isolation": {
+      "version": 1,
+      "source": "LumiForge read-only reviewer profile plus canonical snapshot",
+      "authority": "lumiforge-host"
+    },
+    "reviewer.observe_completion": {
+      "version": 1,
+      "source": "SubagentStart and SubagentStop",
+      "authority": "adapter"
+    },
+    "audit.receipt": {
+      "version": 1,
+      "source": "validated reviewer output plus LumiForge host Ed25519 signature",
+      "authority": "lumiforge-host"
+    },
+    "completion.block": {
+      "version": 1,
+      "source": "Stop",
+      "authority": "adapter"
+    },
+    "runtime.bootstrap": {
+      "version": 1,
+      "source": "SessionStart and UserPromptSubmit",
+      "authority": "adapter"
+    }
+  },
+  "event_contract": {
+    "request_event": "UserPromptSubmit",
+    "reviewer_spawn_guard_event": "PreToolUse:Agent",
+    "reviewer_start_event": "SubagentStart",
+    "reviewer_stop_event": "SubagentStop",
+    "completion_event": "Stop",
+    "shared_identity_fields": [
+      "session_id",
+      "turn_id",
+      "cwd",
+      "model"
+    ],
+    "reviewer_identity_fields": [
+      "agent_id",
+      "agent_type"
+    ],
+    "reviewer_result_field": "last_assistant_message",
+    "transcript_format_is_authoritative": false
+  },
+  "required_runtime_features": [
+    "hooks",
+    "multi_agent"
+  ],
+  "limitations": [
+    "SubagentStart is observational and cannot stop a reviewer from starting.",
+    "Plugin hooks require a separately verified trust or managed-policy decision.",
+    "The reviewer transcript path is not a stable protocol and is never parsed for certification.",
+    "Tool hooks are guardrails and do not replace LumiForge filesystem and process isolation."
+  ]
+}

@@ -1,7 +1,7 @@
 # Supervisor-Worker Operator Runbook
 
-This runbook is the shortest safe operating procedure for the Codex Supervisor
-and Kimi Code Worker loop.
+This runbook is the shortest safe operating procedure for the legacy
+Supervisor-Worker compatibility loop.
 
 ## 1. Discovery
 
@@ -11,7 +11,7 @@ Codex reads:
 - `.ai-loop/status.json`;
 - prior run evidence if present.
 
-Codex writes durable context and a bounded Kimi prompt. Do not rely on chat
+Codex writes durable context and a bounded phase prompt. Do not rely on chat
 history as the source of truth.
 
 ## 2. Triage
@@ -22,21 +22,21 @@ Codex defines one small phase. The phase must include:
 - exact verification command;
 - required report path;
 - acceptance criteria;
-- what Kimi must not change.
+- what the executor must not change.
 
 ## 3. Execution
 
-Kimi edits only the allowed files and writes:
+The executor edits only the allowed files and writes:
 
 ```text
 .ai-loop/runs/<phase-id>/report.md
 ```
 
-Kimi does not approve the phase and does not decide the route.
+The executor does not approve its own phase and does not decide the global route.
 
 ## 4. Verification
 
-Kimi or Codex runs:
+Codex runs:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\collect-evidence.ps1 -ProjectRoot <project> -PhaseId <phase-id>
@@ -92,5 +92,5 @@ Use `BLOCKED` or `REWORK` when:
 - required evidence is missing;
 - any evidence contains `MISSING:`;
 - verification failed;
-- Kimi changed files outside the phase scope;
+- the executor changed files outside the phase scope;
 - Codex cannot inspect relevant source files.

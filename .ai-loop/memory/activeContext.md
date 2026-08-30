@@ -1,276 +1,62 @@
 # Active Context
 
-## Harness Maintenance Update - 2026-08-19
+## Current Architecture
 
-- Fixed the managed Goal hook failure where `validate-loop.ps1` ran under
-  `Set-StrictMode` and dereferenced missing external JSON properties such as
-  `loop.config.json.skill_ledgers`, replacing the actionable field name with a
-  generic `Verify that the property exists` hook message.
-- `validate-loop.ps1` now uses guarded property readers for configuration,
-  status, phase metadata, transition rows and audit findings. Missing required
-  properties become explicit validation problems; incomplete transition rows
-  are not admitted to later status comparisons.
-- `goal-loop-bootstrap.py` now keeps the last four non-empty diagnostic lines
-  in a 1,000-character bounded summary, so the named field and final diagnostic
-  remain together without emitting unbounded subprocess output.
-- Added an 11-case cross-platform missing-property regression and strengthened
-  the hook test. Python compilation, both focused regressions, PowerShell
-  parsing, the loop-standard self-check and Linux platform-install smoke test
-  pass.
-- This is a source-only maintenance candidate. The managed copy under `/opt`,
-  `/etc/codex/requirements.toml`, the clean LumiForge worktree, services and
-  production were not changed. No remote push or installation occurred.
+codex-sci-loop is a project-local evidence and recovery plugin for the native
+Codex runtime. It does not implement a second Agent engine.
 
-## Current Phase
+- The active Codex thread executes the bounded phase.
+- The host captures the original Goal request before model execution.
+- An isolated native Codex subagent reviews a canonical audit snapshot with
+  fork_turns=none.
+- Only a fresh, host-signed receipt in the protected receipt root may authorize
+  completion.
+- Capability ABI checks distinguish compatible Codex updates from relevant
+  interface drift. Compatible updates continue without intervention.
 
-Self-loop optimization of the loop harness MVP.
+## Current Source Candidate
 
-## Current Objective
+- Plugin: plugins/codex-sci-loop/
+- Version: 1.0.0
+- Core SHA-256:
+  4812d207225e50bc3f8474570e8587573521308ae3ef1518c998bd6e1462752b
+- Skills: goal bootstrap, supervisor, auditor, recovery, research orchestrator,
+  and independent completion auditor.
+- loop-standard/ is retained only as a compatibility toolkit for existing
+  projects. New runtime behavior belongs in the Python plugin core.
 
-Root-level `.ai-loop/` control plane now includes memory, constraints, evidence
-ledgers, artifact integrity manifest, skill trigger records, phase gate checks,
-project-local loop evolution notes, and skill source maps.
-`loop-standard/scripts/ai-loop.ps1` is the recommended command entrypoint.
+The source candidate removes the retired external reviewer-specific routes and
+the duplicate system-level hook bootstrap. Historical phase evidence remains
+in Git and under historical run directories; it is not an active instruction
+surface.
 
-## Active Plan
+## Last Verification
 
-The next build plan is:
+Provider-free phase-029 verification passed:
 
-```text
-loop-standard/docs/CONTROL_PLANE_BUILD_PLAN.md
-```
+- native distribution/lifecycle suite;
+- capability ABI suite;
+- signed audit-receipt suite;
+- Codex hook and clean-room subagent suite;
+- 172-path compatibility structure check;
+- Linux isolated-install smoke test;
+- Git whitespace check.
 
-The near-term build order is now:
+External action count: Provider=0, Browser=0, ServiceLifecycle=0, Production=0,
+Remote=0, CurrentPluginChanges=0.
 
-1. Memory + constraints.
-2. Evidence ledger + skill dispatcher.
-3. Phase gate automation.
-4. Global entrypoint + Codex plugin distribution.
-5. Recovery summary and state validation.
-6. Broader validation CLI.
+## Known Boundary
 
-## Current Work Boundary
+Historical phase-001..028 artifact validation is non-portable in this Linux
+checkout because some old recorded hashes differ from checkout bytes. Do not
+rewrite accepted evidence to make that old chain green. The native v1 gate is
+independent and records current evidence.
 
-The memory/constraint layer, evidence/skills/gate layer, artifact manifest,
-unified wrapper, skill linker, plugin scaffold, install shim, compatibility
-wrappers, and recovery summary are now in place. Required phase evidence must be
-present, non-empty, recorded in `.ai-loop/evidence/artifact-manifest.json`, and
-hash-matched before validation passes.
+## Next Safe Actions
 
-The dogfood project initialized successfully, linked all 8 research workflow
-skills via `.agents/skills/`, generated a phase-001 Worker prompt, collected
-evidence, and accepted phase-001 after the user ran Kimi Code externally.
-
-The harness now includes a Worker-agnostic external invocation layer:
-`worker-preflight` records safety and feasibility evidence before any external
-Worker call, and `invoke-worker` refuses to run unless preflight is safe or the
-user has explicitly approved the external service invocation. `-Yolo` is
-recorded but does not require a separate confirmation.
-
-Self-loop phases now run against both `loop-standard/.ai-loop` and the root
-`.ai-loop`. Phase-002 exposed `-TargetStatus` on the unified `ai-loop validate`
-command. Phase-003 fixed changed-file classification so `.ai-loop/*` evidence
-files are no longer listed as business files when the project root is a
-subdirectory inside a larger git repository. Root phase-001 made the repository
-root control plane directly runnable without overwriting existing memory. Root
-phase-002 added a repository-local Codex plugin install/discovery smoke test
-using a temporary install root and local marketplace file.
-Root phase-003 added loop-wide state validation through `validate-loop.ps1` and
-`ai-loop -Command validate-loop`, covering control-plane structure,
-`status.json` consistency, phase references, accepted audits, accepted phase
-gates, and recovery-critical files.
-Root phase-004 added negative fixture tests for `validate-loop.ps1` through
-`Test-ValidateLoopFailures.ps1`, proving the loop-wide validator rejects
-duplicate phase IDs, broken `current_phase` references, illegal statuses,
-missing accepted audits, stale artifact hashes, and missing recovery-critical
-files. The same phase also fixed collect-time Markdown ledger refreshes and
-verification stderr capture, then added `Test-CollectLedgerIdempotence.ps1` to
-prove repeated collect refreshes do not duplicate evidence/command/test/
-provenance ledger rows. `Test-Phase004.ps1` now runs the main self-check,
-plugin install smoke test, negative fixtures, collect idempotence, and root
-loop validation.
-Root phase-005 added schema/migration versioning for `.ai-loop`: schema
-manifests and migration logs now exist in the root control plane,
-`loop-standard/templates/.ai-loop/`, and `loop-standard/.ai-loop/`.
-`validate-loop.ps1` now blocks missing schema manifests, missing required schema
-properties, unsupported old config schemas, future config schemas,
-config/manifest mismatches, and status schema mismatches.
-`Test-SchemaVersioning.ps1` covers these cases, and `Test-Phase005.ps1`
-aggregates the current full non-global verification matrix.
-Root phase-006 added durable non-accepted phase decisions. `ai-loop -Command
-decide` now records `REWORK` and `BLOCKED` audit outcomes into `status.json`,
-`phase_meta.json`, `rework.txt` or `blocked.txt`, and the event log.
-`validate-loop.ps1` now requires matching audit decisions and decision files for
-terminal `rework` and `blocked` states. `Test-PhaseDecisions.ps1` covers
-REWORK, BLOCKED, resume reconstruction, loop validation, and decision/audit
-mismatch rejection.
-Root phase-007 added explicit non-destructive migration for existing `.ai-loop`
-projects. `ai-loop -Command migrate` now fills missing template files, merges
-missing top-level JSON properties, upgrades schema markers, writes migration
-records and backups under `.ai-loop/schema/migration-records/`, appends
-`migration-log.md`, records an event-log entry, and blocks future schemas unless
-`-Force` is explicit. `Test-MigrateLoop.ps1` covers old-project repair,
-project memory preservation, missing-template restoration, future-schema
-blocking, and missing `.ai-loop` rejection. `Test-Phase007.ps1` is the current
-non-global verification matrix.
-Root phase-008 added append-only state transition logging. Canonical scripts now
-append phase status changes to `.ai-loop/events/state-transitions.ndjson`, and
-schema `1.3` makes that log part of the control plane. `validate-loop.ps1`
-parses the transition log and, for phases declaring `transition_log`, verifies
-that the latest transition status matches `status.json`. `Test-StateTransitions.ps1`
-covers a normal lifecycle plus tampered latest-transition rejection.
-Root phase-009 added bounded `REWORK` follow-up scaffolding. `ai-loop -Command
-scaffold-rework` now turns a durable `REWORK` decision into a new bounded phase
-using the source audit and `rework.txt` as fixed scope inputs, writes
-`rework_source.json`, and refuses non-REWORK sources. `Test-ReworkScaffold.ps1`
-covers REWORK scaffold creation and BLOCKED refusal.
-Root phase-010 added required skill artifact hashing. `collect-evidence.ps1`
-now records declared required skill artifacts as `skill-artifact` entries in
-the artifact index and artifact manifest. Validation has fixture coverage for
-recorded, tampered, and missing skill artifacts through
-`Test-SkillArtifactManifest.ps1` and `Test-Phase010.ps1`.
-Root phase-011 added per-run test temp isolation. Fixture and smoke tests now
-use `test-temp-root.ps1` to create ignored `.tmp-ai-loop-*` parent directories
-with unique `run-<prefix>-<pid>-<guid>` children, and `Test-TempIsolation.ps1`
-proves concurrent plugin install smoke tests use distinct install roots.
-Root phase-012 added start-time idempotence. `start-phase.ps1 -Force` for the
-same phase now refreshes prompt, requirements, metadata, `status.json.phases`,
-and start-time Markdown ledger rows instead of duplicating phase records or
-ledger entries. `Test-StartPhaseIdempotence.ps1` covers status replacement,
-prompt refresh, evidence/artifact/skill ledger row counts, and loop validation.
-Root phase-013 enhanced recovery diagnostics. `ai-loop resume` now reads
-`state-transitions.ndjson`, reports latest transition, recent transitions,
-transition consistency, transition problems, missing evidence, next safe action,
-and a copyable next safe command. Transition/status mismatch is reported as
-`Recovery decision: BLOCKED` and covered by `Test-ResumeDiagnostics.ps1`.
-Root phase-014 added explicit external Worker evidence requirements. Phases
-started with `-RequireExternalWorkerEvidence -WorkerProfile <profile>` now add
-Worker preflight and invocation records to `phase_requirements.json`,
-`evidence_required`, audit input, Markdown ledgers, and
-`artifact-manifest.json`. `Test-ExternalWorkerEvidence.ps1` proves missing
-preflight/invocation evidence blocks validation and complete local evidence
-validates without calling an external Worker service. `prepare-audit-pack.ps1`
-also now emits valid Markdown code fences for phase gate output.
-Root phase-015 added structured audit finding extraction. `decide-phase.ps1`
-now generates `.ai-loop/audits/<phase>-findings.json` for durable `REWORK` and
-`BLOCKED` decisions, `scaffold-rework-phase.ps1` uses structured findings for
-bounded follow-up scope, and `validate-loop.ps1` requires findings JSON for
-terminal non-accepted phases. `Test-AuditFindingExtraction.ps1` covers
-extraction, durable decision state, structured rework scaffolding, and missing
-findings validation.
-Root phase-016 added machine-readable recovery output. `ai-loop resume -Json`
-now emits a single JSON object for normal, BLOCKED, and missing-status recovery
-states, while default `resume` remains human-readable and still expands the
-memory/handoff files. `Test-ResumeJson.ps1` covers text compatibility, started
-JSON, transition/status mismatch JSON, and missing status JSON.
-Root phase-017 added safe temp fixture pruning. `ai-loop -Command prune-temp`
-and `prune-temp-fixtures.ps1` now provide dry-run-first cleanup for ignored
-`.tmp-ai-loop-*` fixture run directories. Deletion requires `-Force`, candidates
-are limited to `run-*` children under `.tmp-ai-loop-*` parents, latest runs are
-retained, reparse-point directories are skipped, and
-`Test-PruneTempFixtures.ps1` covers dry-run, forced cleanup, namespace
-protection, and idempotence.
-Root phase-018 added migration dry-run planning. `ai-loop -Command migrate`
-now supports `-DryRun` and `-DryRun -Json`, allowing Supervisors and automation
-to inspect planned schema/template repairs before project files are modified.
-Dry-run performs compatibility checks but does not write migration records,
-modify JSON, copy template files, or append event logs. `Test-MigrateDryRun.ps1`
-covers parseable JSON plans, human-readable plans, no-write behavior, real
-migration after planning, and future schema blocking.
-Root phase-019 added machine-readable temp cleanup output. `ai-loop -Command
-prune-temp -Json` now emits parseable cleanup summaries for dry-run and forced
-delete modes, including candidates, deleted rows, skipped paths, counts,
-retention settings, cutoff, and generated timestamp. Existing text output is
-preserved, and `Test-PruneTempJson.ps1` covers JSON purity and delete results.
-Root phase-020 added a read-only 1.0 readiness command. `ai-loop -Command
-readiness` now emits text or JSON readiness reports that map the delivery goal
-to current kit/project evidence, including core scripts, templates, project
-`.ai-loop`, evidence/state support, plugin scaffold, documentation, test
-matrix files, and loop-wide validation. Real global Codex plugin discovery is a
-warning until the user explicitly approves modifying global config.
-Root phase-021 added 1.0 release notes and an operator checklist. The release
-notes document the current `ready_with_warnings` status, the verified matrix,
-non-goals, and the remaining `PLUGIN-GLOBAL` warning. The operator checklist
-gives concrete commands for install preparation, initialization, skill linking,
-phase start, external Worker evidence, audit, recovery, and readiness checks.
-Root phase-022 added semantic migration transforms. `migrate` now reads
-`.ai-loop/schema/migration-transforms.json`, applies known legacy repairs before
-top-level JSON merge, reports `semantic_transforms` in dry-run JSON, and records
-applied transform IDs in migration records. The initial transforms cover legacy
-`required_evidence`, `current_phase_id`, and `completed` status values.
-Root phase-023 added task-kind skill trigger fixtures. The harness now has
-tests proving `fullstack` does not require scientific skills by default, while
-`physics-research`, `data-analysis`, `research-writing`, `physics-sim`, and
-manual full-stack overrides produce the expected required skill sets in
-`phase_requirements.json` and Worker prompts.
-Root phase-024 added the compact 1.0 `release-check` command. It aggregates
-`readiness`, `validate-loop`, and the current non-global verification matrix
-into text or JSON output. `-SkipMatrix` is available for quick diagnostics, but
-final release sign-off should run the full matrix.
-Root phase-025 added richer recovery explanations to `ai-loop resume`. Text
-and JSON output now include `recovery_reason` and `recovery_causes`, derived
-from the existing phase status, transition-log, missing-evidence, and artifact
-manifest checks. `Test-ResumeDiagnostics.ps1` and `Test-ResumeJson.ps1` cover
-started/resumable phases, transition/status mismatch blocking, missing evidence
-causes, artifact manifest causes, and missing status JSON. `Test-Phase025.ps1`
-aggregates the new recovery tests plus the accepted phase-024 non-global
-matrix.
-Root phase-026 fixed final sign-off matrix discovery. `release-check` and the
-`ai-loop release-check` wrapper now discover the highest numbered
-`Test-PhaseNNN.ps1` by default when `-MatrixScript` is omitted, while explicit
-matrix overrides still work. `release-check -SkipMatrix` reports the matrix it
-would have run, and readiness `TEST-LATEST` now points to the discovered latest
-matrix instead of a hard-coded older phase file. `Test-Phase026.ps1` is the
-current non-global verification matrix.
-After phase-026 acceptance, full `ai-loop -Command release-check -ProjectRoot .
--Json` ran without `-SkipMatrix`, executed `Test-Phase026.ps1`, and reported
-`pass=3`, `warn=1`, `fail=0`, `skipped=0`, with the remaining warning being
-`PLUGIN-GLOBAL`.
-Root phase-027 added `loop-standard/docs/DELIVERY_AUDIT_1.0.md`, mapping the
-1.0 objective requirements to current repository evidence and documenting the
-approval-gated `PLUGIN-GLOBAL` warning. Release notes now describe dynamic
-`release-check` matrix discovery instead of a stale phase script, and the
-operator checklist tells users to confirm `RELEASE-MATRIX` evidence names the
-expected latest matrix.
-On 2026-06-30, a handoff-only report was written to
-`.ai-loop/reports/goal-handoff-2026-06-30.md` so a fresh conversation can
-continue without carrying the long thread context. The active goal is paused;
-latest accepted phase at that handoff was `phase-024`; the current accepted
-phase is now `phase-028`.
-Root phase-028 completed the user-approved live global Codex plugin discovery
-validation. `codex plugin marketplace add` and
-`codex plugin add codex-loop-harness@loop-harness-local` succeeded, evidence is
-recorded in `.ai-loop/evidence/global-plugin-discovery.json`, and
-`PLUGIN-GLOBAL` is now evidence-gated instead of a permanent warning. The live
-run also found that Codex CLI rejects BOM-prefixed marketplace JSON, so
-`install-global.ps1` now writes marketplace JSON without a UTF-8 BOM.
-
-Do not install external memory dependencies.
-Do not delete or rewrite existing `loop-standard/` or `pilot-project/` evidence.
-Keep reusable framework code under `loop-standard/` and pilot fixture work under
-`pilot-project/`.
-
-## Next Safe Action
-
-Run final phase-028 release sign-off, commit the accepted phase, and then treat
-Codex Loop Harness 1.0 as ready if `release-check -Json` reports zero warnings,
-zero failures, and `Test-Phase028.ps1` as the matrix. Future real global Codex
-plugin configuration changes still require explicit user approval. Before
-further harness changes, review:
-
-- `.ai-loop/memory/handoff-summary.md`
-- `.ai-loop/memory/constraint-ledger.md`
-- `.ai-loop/gates/pre-action-check.md`
-- `.ai-loop/evidence/evidence-ledger.md`
-- `.ai-loop/evidence/artifact-manifest.json`
-- `.ai-loop/skills/skill-trigger-matrix.md`
-- `.ai-loop/skills/skill-source-map.md`
-
-## Open Questions
-
-- Should the Codex CLI registered global plugin root
-  `E:\.codex\loop-harness` remain installed after delivery, or should the
-  rollback command in `.ai-loop/evidence/global-plugin-discovery.json` be run
-  later by explicit request?
-- Should `migrate` eventually support deep semantic transforms for future schema
-  versions instead of only top-level JSON merge plus template repair?
+1. Complete the external workspace audit for the source-only candidate.
+2. Create a local canonical checkpoint commit; do not push without explicit
+   authorization.
+3. In a separate LumiForge phase, update the vendored upstream revision and
+   reviewed-input metadata to that canonical commit.
+4. Do not install into the currently running Codex until separately authorized.

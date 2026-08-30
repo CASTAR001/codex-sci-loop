@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lumiforge.invalid/schemas/sci-loop-request-envelope-v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "request_id", "original_request", "revisions"],
+  "properties": {
+    "schema": {"const": "sci-loop-request-envelope-v1"},
+    "request_id": {"$ref": "#/$defs/id"},
+    "original_request": {"type": "string", "minLength": 1},
+    "revisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["revision_id", "text"],
+        "properties": {
+          "revision_id": {"$ref": "#/$defs/id"},
+          "text": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$"}
+  }
+}

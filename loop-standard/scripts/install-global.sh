@@ -11,7 +11,7 @@ Options:
   --install-root PATH          Install target. Defaults to ${CODEX_HOME:-$HOME/.codex}/loop-harness.
   --codex-home PATH            Alias for --install-root, kept for parity with the Windows installer.
   --skill-library-root PATH    Shared skill library root. Defaults to ${CODEX_HOME:-$HOME/.codex}/skills.
-  --install-plugin             Install plugins/codex-loop-harness.
+  --install-plugin             Install plugins/codex-sci-loop.
   --create-shim                Create bin/ai-loop.
   --create-marketplace         Create .agents/plugins/marketplace.json. Requires --install-plugin.
   --marketplace-name NAME      Marketplace name. Defaults to loop-harness-local.
@@ -150,8 +150,8 @@ KIT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 REPO_ROOT="$(cd "$KIT_ROOT/.." && pwd -P)"
 
 LOOP_STANDARD_DESTINATION="$INSTALL_ROOT/loop-standard"
-PLUGIN_SOURCE="$REPO_ROOT/plugins/codex-loop-harness"
-PLUGIN_DESTINATION="$INSTALL_ROOT/plugins/codex-loop-harness"
+PLUGIN_SOURCE="$REPO_ROOT/plugins/codex-sci-loop"
+PLUGIN_DESTINATION="$INSTALL_ROOT/plugins/codex-sci-loop"
 BIN_DIR="$INSTALL_ROOT/bin"
 SHIM_PATH="$BIN_DIR/ai-loop"
 MARKETPLACE_DIR="$INSTALL_ROOT/.agents/plugins"
@@ -181,10 +181,10 @@ if [[ "$CREATE_MARKETPLACE" == "1" ]]; then
   },
   "plugins": [
     {
-      "name": "codex-loop-harness",
+      "name": "codex-sci-loop",
       "source": {
         "source": "local",
-        "path": "./plugins/codex-loop-harness"
+        "path": "./plugins/codex-sci-loop"
       },
       "policy": {
         "installation": "INSTALLED_BY_DEFAULT",

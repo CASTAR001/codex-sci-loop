@@ -3,7 +3,7 @@ param(
     [string]$ProjectRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
     [string]$InstallRoot = (Join-Path $env:USERPROFILE ".codex\loop-harness"),
     [string]$EvidencePath = "",
-    [string]$PluginId = "codex-loop-harness",
+    [string]$PluginId = "codex-sci-loop",
     [string]$MarketplaceName = "loop-harness-local",
     [string]$MarketplaceAddJsonPath = "",
     [string]$MarketplaceListJsonPath = "",

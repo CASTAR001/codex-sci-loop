@@ -814,7 +814,7 @@ switch ($Command) {
     "doctor" {
         $TemplateDir = Join-Path $KitRoot "templates\.ai-loop"
         $InstallRoot = Split-Path -Parent $KitRoot
-        $PluginRoot = Join-Path $InstallRoot "plugins\codex-loop-harness"
+        $PluginRoot = Join-Path $InstallRoot "plugins\codex-sci-loop"
         $PluginManifest = Join-Path $PluginRoot ".codex-plugin\plugin.json"
         $ShimPath = Join-Path $InstallRoot "bin\ai-loop.ps1"
         $SkillProblems = @(Test-ResearchSkills -Root $SkillLibraryRoot)
@@ -835,8 +835,6 @@ switch ($Command) {
         if ($TemplateSchemaJson.schema_name -ne "ai-loop-control-plane") { throw "Unexpected template schema name: $($TemplateSchemaJson.schema_name)" }
         if ($TemplateSchemaJson.schema_version -ne $TemplateSchemaJson.latest_schema_version) { throw "Template schema latest version mismatch." }
         foreach ($WorkerPath in @(
-            (Join-Path $KitRoot "worker-profiles\kimi-code.json"),
-            (Join-Path $KitRoot "worker-profiles\kimi-code.md"),
             (Join-Path $KitRoot "worker-profiles\claude-mimo.json"),
             (Join-Path $KitRoot "worker-profiles\claude-mimo.md"),
             (Join-Path $PSScriptRoot "preflight-worker.ps1"),
@@ -846,23 +844,25 @@ switch ($Command) {
                 throw "External Worker harness file missing: $WorkerPath"
             }
         }
-        $WorkerProfileJson = Get-Content -LiteralPath (Join-Path $KitRoot "worker-profiles\kimi-code.json") -Raw | ConvertFrom-Json
-        if ($WorkerProfileJson.profile -ne "kimi-code") { throw "Unexpected Worker profile name: $($WorkerProfileJson.profile)" }
         $DefaultWorkerProfileJson = Get-Content -LiteralPath (Join-Path $KitRoot "worker-profiles\claude-mimo.json") -Raw | ConvertFrom-Json
         if ($DefaultWorkerProfileJson.profile -ne "claude-mimo") { throw "Unexpected default Worker profile name: $($DefaultWorkerProfileJson.profile)" }
         if (-not (Test-Path -LiteralPath $PluginManifest -PathType Leaf)) { throw "Plugin manifest missing: $PluginManifest" }
         $Plugin = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
-        if ($Plugin.name -ne "codex-loop-harness") { throw "Unexpected plugin name: $($Plugin.name)" }
-        foreach ($SkillName in @("loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")) {
+        if ($Plugin.name -ne "codex-sci-loop") { throw "Unexpected plugin name: $($Plugin.name)" }
+        foreach ($SkillName in @("independent-completion-auditor", "loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")) {
             $SkillPath = Join-Path $PluginRoot (Join-Path "skills\$SkillName" "SKILL.md")
             $SkillCheck = Test-PluginSkillFile -Path $SkillPath
             if ($SkillCheck -ne "ok") {
                 throw "Plugin skill check failed: $SkillName ($SkillCheck)"
             }
         }
-        $PluginWrapper = Join-Path $PluginRoot "scripts\ai-loop.ps1"
-        if (-not (Test-Path -LiteralPath $PluginWrapper -PathType Leaf)) {
-            throw "Plugin wrapper missing: $PluginWrapper"
+        $PluginCore = Join-Path $PluginRoot "scripts\sci_loop.py"
+        $HookManifest = Join-Path $PluginRoot "hooks\hooks.json"
+        if (-not (Test-Path -LiteralPath $PluginCore -PathType Leaf)) {
+            throw "Native plugin core missing: $PluginCore"
+        }
+        if (-not (Test-Path -LiteralPath $HookManifest -PathType Leaf)) {
+            throw "Native plugin hook manifest missing: $HookManifest"
         }
         if ($SkillProblems.Count -gt 0) {
             throw "Missing required research skills: $($SkillProblems -join ', ')"
@@ -875,6 +875,7 @@ switch ($Command) {
         Write-Output "Required research skills: OK"
         Write-Output "Plugin manifest JSON: OK"
         Write-Output "Plugin skill frontmatter: OK"
+        Write-Output "Native plugin core and hooks: OK"
         Write-Output "Template artifact manifest: OK"
         Write-Output "Template schema manifest: OK"
         Write-Output "External Worker harness: OK"

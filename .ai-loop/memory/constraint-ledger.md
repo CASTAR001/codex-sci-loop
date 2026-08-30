@@ -33,8 +33,9 @@
 - Prefer evidence-based verification over subjective review.
 - Keep root `AGENTS.md` short; put detailed rules in `.ai-loop/`.
 
-## Worker-Agnostic Rule
+## Native Execution Rule
 
-The harness must not depend on Kimi Code specifically. Any Worker agent,
-including Codex acting in Worker mode, must follow the same contracts and
-evidence requirements.
+The plugin must not depend on a second Agent engine. The active Codex thread
+executes the bounded phase; an isolated native subagent may audit completion
+but cannot continue implementation or authorize its own result. Every claim
+must follow the same evidence and signed-receipt requirements.

@@ -24,7 +24,7 @@ if ((Test-Path -LiteralPath $TempRoot) -and -not $KeepTemp) {
 New-Item -ItemType Directory -Force -Path $TempRoot | Out-Null
 
 try {
-    $PluginId = "codex-loop-harness"
+    $PluginId = "codex-sci-loop"
     $MarketplaceName = "loop-harness-local"
     $InstallRoot = Join-Path $TempRoot "install"
     $PluginRoot = Join-Path $InstallRoot "plugins\$PluginId"

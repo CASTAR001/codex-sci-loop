@@ -14,10 +14,8 @@ Use the lowercase PowerShell scripts in `scripts/` as the standard interface.
 The earlier PascalCase scripts are retained as compatibility helpers.
 
 See `OPERATOR_RUNBOOK.md` for the concise human operating procedure.
-See `SUDO_MULTI_USER_INSTALL.md` for copy-ready Chinese prompts that ask Codex
-to perform Linux system-wide installation, repository initialization, and
-`claude-mimo` Worker setup for sudo users.
-See `GLOBAL_INSTALL_PLAN.md` for the planned Codex-global layout.
+System-wide Codex installation is deliberately outside this compatibility kit;
+LumiForge projects the certified native plugin into account-private homes.
 See `CONTROL_PLANE_BUILD_PLAN.md` for the next-stage memory, evidence, state,
 role, recovery, change-control, and skill-dispatch plan.
 See `AGENTS_VS_AI_LOOP_BOUNDARY.md` for the boundary between root bootstrap,

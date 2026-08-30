@@ -1,552 +1,116 @@
-# Loop Harness
+# codex-sci-loop
 
-这个仓库正在搭建一套可复用的 Supervisor-Worker coding loop 工作流。
+`codex-sci-loop` 是一套给原生 Codex 使用的、项目本地优先的证据闭环插件。它不替换
+Codex 的 Agent 内核，也不启动另一套 Worker 引擎；当前 Codex 线程负责执行工作，插件
+负责保存阶段状态、验证结果、Git 证据、独立复核结果与可恢复状态。
 
-目标是：把一套本地优先、证据优先、可审计、可迁移的 AI coding harness
-固定下来，使它可以套用到任意项目文件夹中，由 Codex、Kimi Code，或其他
-worker agent 执行阶段任务。长期目标不是绑定某一个 worker，而是让
-Supervisor、Worker、Auditor、Verifier、Recovery 这些角色协议稳定存在。
+Agent 进入仓库时先读取短入口 `AGENTS.md`，再按其中指向读取项目控制面；不要用聊天
+历史替代落盘事实。
 
-这套系统的核心原则是：
+## v1 架构
 
-- local-first：所有状态落在项目本地文件里。
-- markdown-first：记忆、约束、证据、报告都尽量可读。
-- git-trackable：关键状态可以被 git 追踪和审计。
-- evidence-first：不能只看 worker 总结就验收。
-- PowerShell core：共享命令核心使用 PowerShell 7，同时提供 Windows 和 Linux
-  安装入口与平台适配。
+- `plugins/codex-sci-loop/`：正式的 1.0.0 插件。包含 Python 阶段控制核心、能力 ABI、
+  Codex hook adapter、签名审计协议、schemas 与 6 个 skills。
+- `loop-standard/`：旧项目仍可使用的 PowerShell 兼容工具箱。它不是 LumiForge 的原生
+  Agent 运行时，也不会被插件当作执行引擎。
+- `.ai-loop/`：本仓库自身的历史控制面和审计证据。历史记录保留，不代表当前推荐架构。
+- `tests/`：插件分发、能力认证、签名收据和 Codex hooks 的 provider-free 测试。
 
-英文版说明保存在 `README_EN.md`。
+插件的核心边界是：
 
-日常人工使用从本文件开始；英文说明看 `README_EN.md`；agent 入口只使用
-`AGENTS.md` 作为 bootstrap，不把长规则塞进根入口文件。
+1. 原始 Goal 请求由 host adapter 在模型执行前捕获，不从聊天记忆重建。
+2. 当前 Codex 线程只能提交可验证的完成声明，不能凭自己的总结完成验收。
+3. 独立复核由隔离的原生 Codex subagent 执行，必须使用 `fork_turns=none`，只读取规范化
+   audit snapshot，不继承执行线程的推理历史。
+4. 只有 host 受保护目录中的新鲜签名收据可以放行完成；普通 Markdown 审计文本不能
+   伪造 PASS。
+5. Codex 更新后先比较能力 ABI、adapter、运行时制品与行为证据。没有冲突时继续运行；
+   只有关键能力变更或证据过期时才要求重新认证或升级插件。
 
-## 仓库结构
+## 插件内容
 
-### `loop-standard/`
-
-这是可复用标准套件，是未来复制、初始化或插件分发到任意项目的主体。
-
-关键内容：
-
-- `templates/.ai-loop/`：要复制到目标项目的 `.ai-loop/` 模板。
-- `scripts/init-loop.ps1`：初始化目标项目的 `.ai-loop/`。
-- `scripts/start-phase.ps1`：开始一个阶段，记录 base commit、状态、阶段需求。
-- `scripts/collect-evidence.ps1`：worker 执行后收集 diff、verify log、changed files 等证据。
-- `scripts/prepare-audit-pack.ps1`：整理 Codex 审计入口文件。
-- `scripts/validate-phase-gates.ps1`：检查阶段 gate，缺证据、缺 skill artifact、坏链接都会阻断。
-- `scripts/accept-phase.ps1`：Codex 审计通过后才允许接受阶段。
-- `scripts/decide-phase.ps1`：把 `REWORK` / `BLOCKED` 审计结果写入 durable state。
-- `scripts/link-skills.ps1`：把共享 skill 库链接到目标项目的 `.agents/skills/`。
-- `scripts/preflight-worker.ps1`：外部 Worker 调用前的安全性和可行性审查。
-- `scripts/invoke-worker.ps1`：仅在 preflight 通过后调用外部 Worker。
-- `scripts/ai-loop.ps1`：推荐使用的统一命令入口。
-- `worker-profiles/`：Worker agent 的薄 profile，例如 `kimi-code` 和 `claude-mimo`。
-
-更底层的脚本说明在 `loop-standard/README.md`。
-1.0 交付面请看 `loop-standard/docs/RELEASE_NOTES_1.0.md` 和
-`loop-standard/docs/OPERATOR_CHECKLIST_1.0.md`。
-Linux sudo 用户可直接复制给 Codex 的安装、初始化和 `claude-mimo` Worker
-配置 prompt，请看 `loop-standard/docs/SUDO_MULTI_USER_INSTALL.md`。
-发布前可用 `ai-loop -Command release-check -ProjectRoot <project>` 汇总
-readiness、loop-wide validation 和当前非全局验证矩阵。
-
-### `.ai-loop/`
-
-这是本仓库自己的 loop 控制面，也是目标项目初始化后会拥有的事实源。
-
-它记录：
-
-- 项目记忆
-- 约束
-- 角色协议
-- 阶段 gate
-- 证据 ledger
-- skill 触发与使用记录
-- event log
-- prompt 模板
-- handoff / resume 信息
-- 项目局部自进化建议
-
-重要边界：不要依赖聊天历史作为关键事实来源。重要状态必须落进
-`.ai-loop/`。
-
-关键子目录：
-
-- `memory/`：project brief、active context、decision log、failure ledger、progress、handoff summary。
-- `roles/`：Supervisor、Worker、Auditor、Verifier、Recovery 的行为协议。
-- `gates/`：pre-action check、phase gates、stop rules。
-- `evidence/`：evidence ledger、artifact index、command log、test log、provenance map。
-- `skills/`：skill trigger matrix、skill usage ledger、skill artifact map、skill source map。
-- `events/`：本地 append-only 事件日志，使用 ndjson。
-- `prompts/`：恢复、更新记忆、预行动检查、下一步决策等 prompt。
-- `evolution/`：项目本地的 loop 自进化建议；默认不直接成为治理规则。
-- `reports/`：实现报告、审计报告、阶段报告。
-
-### `.agents/`
-
-这是 agent runtime 资产目录，不是项目记忆目录。
-
-当前规划中：
-
-- `.ai-loop/` 保存项目治理、记忆、证据和状态。
-- `.agents/` 保存 agent 可用的 runtime 资产，例如链接进来的 skills。
-
-科研 workflow 的 8 个 skill 不会复制到每个项目里，而是通过
-`.agents/skills/` 暴露给项目，并把来源、链接类型、hash、可用状态记录到
-`.ai-loop/skills/skill-source-map.md`。
-
-### `plugins/codex-loop-harness/`
-
-这是第一版 Codex 插件源码目录，用于分发和发现这套 workflow。
-
-插件不保存项目状态。项目状态仍然只属于目标项目自己的 `.ai-loop/`。
-
-当前插件 skills：
-
-- `loop-goal-bootstrap`：在 goal/loop 工作开始前初始化并验证项目 harness。
-- `loop-supervisor`：指导 Codex 何时启动和监督 loop 阶段。
-- `loop-auditor`：指导 Codex 如何审计 worker 产物。
-- `loop-recovery`：指导新会话如何从 `.ai-loop/` 恢复。
-- `research-loop-orchestrator`：指导科研任务如何选择 skill profile。
-
-插件是发现层和分发层，脚本仍然是稳定执行核心。
-
-### `pilot-project/`
-
-一个很小的测试项目，用于验证完整 loop 流程。它是本仓库追踪的 fixture，
-不是嵌套 git 仓库。
-
-## 当前运行模型
-
-现在采用“三层固定”：
-
-1. 脚本核心：`loop-standard/scripts/ai-loop.ps1` 是推荐命令入口。
-2. 插件分发：`plugins/codex-loop-harness/` 帮助 Codex 发现并遵守流程。
-3. Managed hooks：Linux 多用户安装可在 goal/loop prompt 进入模型前自动初始化、
-   校验并注入流程约束。
-
-所有项目特定状态都留在目标项目自己的 `.ai-loop/`。
-
-### Linux 多用户系统安装
-
-sudo 用户可以在 clone 后的仓库中审查并手动执行：
+主要入口：
 
 ```bash
-sudo ./loop-standard/scripts/install-system-wide.sh
+python3 plugins/codex-sci-loop/scripts/sci_loop.py --help
+python3 plugins/codex-sci-loop/scripts/audit_protocol.py --help
+python3 plugins/codex-sci-loop/scripts/capability_gate.py --help
 ```
 
-脚本会把 harness、科研 skills、Codex CLI 和命令 shim 安装到系统路径，为现有
-普通用户及 `/etc/skel` 链接 loop skills，并写入受管的
-`/etc/codex/requirements.toml`。sudo 密码只应在本机终端输入，不要交给 Codex。
+主要 skills：
 
-安装后的自动行为：
+- `loop-goal-bootstrap`
+- `loop-supervisor`
+- `loop-auditor`
+- `loop-recovery`
+- `research-loop-orchestrator`
+- `independent-completion-auditor`
 
-- `UserPromptSubmit`：识别涉及 loop 或 goal 的 prompt，定位 Git 根目录；项目未
-  初始化时先创建 `.ai-loop` 和 `AGENTS.md`，随后执行 `validate-loop`。失败会
-  阻断本次 prompt，成功后才允许模型开始任务或创建 goal。
-- `SessionStart`：Codex 版本变化后检查 hooks 功能、受管配置和 hook 自测。检查
-  通过时完全静默；不可用时显示 `Codex hook compatibility warning`。
-- `/usr/local/bin/codex`：在启动层执行同一兼容性检查，作为 SessionStart 之外的
-  第二条检测路径。
-- 外部 Worker 默认使用 `claude-mimo`，不会替换成 `claude`。实际调用仍需通过
-  preflight 并显式允许外部服务，且不会默认启用 `-Yolo`。
+其中最后一个只允许在 LumiForge host 创建的隔离复核 subagent 中使用。
 
-hook 只读取 Codex 提供的 prompt、工作目录和事件类型，不读取 LiteLLM 配置、
-历史日志、环境变量转储或凭据文件。更完整的管理员与普通用户说明见
-`loop-standard/docs/SUDO_MULTI_USER_INSTALL.md`。全局安装或升级后，应开启新的
-Codex 对话以发现新 skills。
+## 本地验证
 
-### 用户目录安装
-
-如果只安装到当前用户目录，优先使用仓库根目录的 dispatcher。它会先判断平台：
-
-- Windows：调用 `loop-standard/scripts/install-global.ps1`。
-- Linux：调用 `loop-standard/scripts/install-global.sh`。
-- macOS：当前只保留占位并明确退出，后续再接入 mac 优化安装器。
-
-Linux 示例：
+这些检查不调用真实 Provider，不启动浏览器，也不会安装或更新当前 Codex：
 
 ```bash
-./install.sh --install-root "$HOME/.codex/loop-harness" --install-plugin --create-shim --create-marketplace --force
+python3 tests/test_sci_loop_distribution.py
+python3 tests/test_sci_loop_capability_abi.py
+python3 tests/test_sci_loop_audit_receipt.py
+python3 tests/test_sci_loop_codex_hooks.py
+bash loop-standard/scripts/Test-PlatformInstall.sh
 ```
 
-Windows 示例：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\install.ps1 -InstallRoot E:\codexfiles\loop\.tmp-install -InstallPlugin -CreateShim -SkillLibraryRoot E:\codexfiles\test\.agents\skills -Force
-```
-
-如果要直接使用 Windows 安装器，可以运行：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\install-global.ps1 -InstallRoot E:\codexfiles\loop\.tmp-install -InstallPlugin -CreateShim -SkillLibraryRoot E:\codexfiles\test\.agents\skills -Force
-```
-
-如需验证插件发现面，可以加 `-CreateMarketplace`。这会在安装根下生成
-`.agents/plugins/marketplace.json`，但不会自动修改真实 Codex 全局配置。
-
-安装后推荐从 shim 调用：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\.tmp-install\bin\ai-loop.ps1 -Command doctor
-```
-
-Linux 安装后 shim 是可执行文件：
+插件和 skill 的格式还可以直接验证：
 
 ```bash
-"$HOME/.codex/loop-harness/bin/ai-loop" -Command doctor
+python3 ~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py \
+  plugins/codex-sci-loop
+
+for skill in plugins/codex-sci-loop/skills/*; do
+  python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"
+done
 ```
 
-Linux 安装阶段使用原生 shell 和 POSIX 路径；共享 loop 命令核心仍由
-PowerShell 7 执行，因此实际运行 loop 命令前需要系统有 `pwsh`。
+## 用户目录安装
 
-## 如何套用到任意项目
+安装只复制到指定目录，不会自动替换正在运行的 Codex 插件。更新真实 Codex 前应先审查
+diff、跑完上述测试，并在新的 Codex 会话中验证发现结果。
 
-下面用 `E:\some-project` 代表目标项目。
-
-初始化 loop：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command init -ProjectRoot E:\some-project -CreateAgentsBootstrap
-```
-
-如果项目需要科研 workflow，链接共享 skill：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command link-skills -ProjectRoot E:\some-project -Profile full-research
-```
-
-启动一个普通全栈开发阶段：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command start -ProjectRoot E:\some-project -PhaseId phase-001 -TaskKind fullstack -Title "Small fix" -Objective "Make one verifiable change" -VerifyCommand "npm test"
-```
-
-启动一个物理或数值科研阶段：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command start -ProjectRoot E:\some-project -PhaseId phase-001 -TaskKind physics-research -Profile physics-sim -Title "Simulation check" -Objective "Make one evidence-backed simulation change"
-```
-
-如果 Supervisor 明确需要重启同一个未完成阶段，可以对 `start` 使用
-`-Force`。这会刷新该 phase 的 metadata、prompt、requirements 和 start-time
-Markdown ledger rows，并替换 `status.json` 中的同名 phase 条目；它不应被用来
-绕过 audit/accept gate。
-
-worker 执行完成后，收集证据并准备审计包：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command collect -ProjectRoot E:\some-project -PhaseId phase-001
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command audit-pack -ProjectRoot E:\some-project -PhaseId phase-001
-```
-
-如果要让 harness 调用外部 Worker，先运行 preflight。默认 profile 是
-`claude-mimo`；下面显式指定 `kimi-code` 展示如何切换 Worker：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command worker-preflight -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile kimi-code -Yolo
-```
-
-`kimi-code` 属于外部服务 Worker；除非你已经确认本次调用可以把 prompt 交给
-外部 agent，否则 preflight 会返回 `NEEDS_USER_APPROVAL`。确认后再显式运行：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command invoke-worker -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
-```
-
-本服务器也提供 `claude-mimo` profile。它调用已有的 `claude-mimo` 命令，由该
-命令继续使用本机 `127.0.0.1:4000` 上的 LiteLLM；harness 不读取或复制任何
-LiteLLM/Claude 凭据配置。Linux 示例：
+Linux：
 
 ```bash
-ai-loop -Command invoke-worker -ProjectRoot /path/to/project -PhaseId phase-001 -WorkerProfile claude-mimo -AllowExternalService -Yolo
+./install.sh \
+  --install-root "$HOME/.codex/loop-harness" \
+  --install-plugin \
+  --create-shim \
+  --create-marketplace \
+  --force
 ```
 
-该 profile 默认加入 `--no-session-persistence`，避免 loop 调用写入 Claude 会话
-历史；`-Yolo` 映射为 `--dangerously-skip-permissions`。
-
-`-Yolo` 会被记录，但不需要单独停下来确认。外部服务调用、敏感 prompt、长期记忆
-或治理规则升级，仍然需要明确确认。
-
-如果某个阶段会使用外部 Worker，Supervisor 应在 `start` 时加上
-`-RequireExternalWorkerEvidence -WorkerProfile <profile>`。这样
-`external-worker-preflight.json/.md` 和
-`external-worker-invocation.json/.log` 会进入 `phase_requirements.json`、
-artifact manifest、validate gate 和 audit pack；缺失或 hash 不匹配会阻断
-audit/accept。默认普通阶段不要求这些文件。
-
-验收前先运行 gate：
+Windows：
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate -ProjectRoot E:\some-project -PhaseId phase-001
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
+  -InstallRoot C:\path\to\loop-harness `
+  -InstallPlugin -CreateShim -CreateMarketplace -Force
 ```
 
-也可以检查整个 `.ai-loop` 控制面的恢复和状态一致性：
+LumiForge 不从可变源码目录直接加载插件。它会验证并原子投影一份认证副本到各账号私有
+Codex home；收据根、复核观察和账号数据仍由 host 隔离。
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
-```
+## 兼容工具箱
 
-如果旧项目因为缺少 schema manifest、schema 版本过旧或模板文件缺失而被阻断，先运行非破坏迁移：
+已有项目若仍使用 `loop-standard/`，可以继续通过 `ai-loop.ps1` 完成 `init`、`start`、
+`collect`、`audit-pack`、`resume` 和 schema migration。它保留通用外部 Worker 兼容接口，
+但 v1 原生插件和 LumiForge Goal 模式不依赖该接口。新的功能应优先加入 Python 插件核心，
+避免再次复制一套 Agent 执行内核。
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project
-```
+## 安全与运维
 
-`migrate` 只补齐缺失模板、合并缺失 JSON 字段、升级 schema 标记，并写入
-`.ai-loop/schema/migration-records/` 与 `.ai-loop/schema/migration-log.md`。
-在真正修改旧项目之前，可以先查看迁移计划：
+- 不把密码、token、Provider key 或账号文件写入 `.ai-loop`。
+- 不从可写的源码 checkout 直接运行正式插件。
+- 不把执行线程 prose 当作验收证据。
+- 不复用旧审计收据；任何受保护输入、workspace diff 或 runtime identity 变化都会使其失效。
+- 安装、远端 push、tag 以及正式环境切换始终是独立授权动作。
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project -DryRun
-```
-
-脚本、插件或 hook 需要读取迁移计划时，可以加 `-Json`：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project -DryRun -Json
-```
-
-`migrate -DryRun` 不会创建 migration records、不会修改 JSON、不会补模板文件，
-只报告将要执行的 schema/template 修复动作。未来 schema 仍会被阻断，除非显式
-使用 `-Force`。
-它不会覆盖已有项目记忆、证据 ledger 或业务文件。遇到未来版本 schema 时会阻断，
-除非 Supervisor 显式使用 `-Force` 并承担审计责任。
-
-`.ai-loop/schema/schema-version.json` 记录当前 control-plane schema、支持的
-最小版本、最新版本和 `status.json` 状态文件格式版本。
-`validate-loop` 会阻断缺失 schema manifest、过旧版本、未来版本和
-config/status schema 不匹配的项目。人类可读的迁移记录保存在
-`.ai-loop/schema/migration-log.md`。
-状态变化还会追加记录到 `.ai-loop/events/state-transitions.ndjson`。
-新 phase 一旦声明 `transition_log`，`validate-loop` 会检查该 phase 的最后一条
-状态转移是否与 `status.json` 当前状态一致。
-
-只有 Codex 写出包含 `Decision: ACCEPTED` 的 audit 后，才接受阶段：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command accept -ProjectRoot E:\some-project -PhaseId phase-001
-```
-
-如果 Codex 审计结论是 `REWORK` 或 `BLOCKED`，不要运行 `accept`，而是记录
-非接受决策：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision REWORK -Reason "Audit found a scoped fix is required."
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision BLOCKED -Reason "Required evidence is missing."
-```
-
-`decide` 会写入 `.ai-loop/status.json`、`phase_meta.json`、`rework.txt` 或
-`blocked.txt`，生成 `.ai-loop/audits/<phase>-findings.json`，并追加
-`.ai-loop/events/event-log.ndjson`。之后 `resume` 会基于这些文件给出下一步
-安全动作。
-
-中断或换会话后，可以运行：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project
-```
-
-`resume` 会读取 `status.json`、required evidence、artifact manifest 和
-`state-transitions.ndjson`，报告最新状态转移、最近状态转移、transition
-consistency、缺失证据、下一步安全动作和可复制的下一步命令。若 transition log
-与 `status.json` 不一致，会输出 `Recovery decision: BLOCKED`。
-
-脚本、插件或 hook 需要消费恢复状态时，可以使用机器可读输出：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project -Json
-```
-
-`-Json` 只输出 JSON，不附加 memory/handoff 文件正文。字段包括
-`current_phase`、`missing_evidence`、`artifact_manifest`、`transitions`、
-`next_safe_action`、`next_safe_command` 和 `recovery_decision`。
-
-检查一个项目和本套 kit 距离 1.0 可交付状态还有哪些阻断项或警告：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project
-```
-
-自动化消费时使用 JSON：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project -Json
-```
-
-`readiness` 是只读检查。它会检查 kit 脚本、模板、项目 `.ai-loop`、证据系统、
-状态机、插件 scaffold、测试矩阵和 loop-wide validation。因为真实全局 Codex
-插件发现会修改用户环境，未获明确批准时会作为 warning，而不是静默通过或强行修改。
-
-发布验收时使用聚合入口：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot E:\some-project
-```
-
-`release-check` 会汇总 `readiness`、`validate-loop` 和当前非全局验证矩阵。
-快速诊断可以加 `-SkipMatrix`，但最终发布前应运行完整矩阵。
-
-如果测试或 dogfood 产生了很多被 `.gitignore` 忽略的
-`.tmp-ai-loop-*` 目录，可以先 dry-run 查看候选：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command prune-temp -ProjectRoot E:\some-project -MinAgeHours 24 -KeepLatest 2
-```
-
-`prune-temp` 只检查 `.tmp-ai-loop-*` 父目录里的 `run-*` 子目录。默认不会删除；
-真正清理必须显式加 `-Force`。它不会删除普通项目文件，也不会删除不符合
-harness 临时目录命名的文件夹。
-脚本、hook、CI 或插件需要读取候选和删除结果时，可以加 `-Json`：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command prune-temp -ProjectRoot E:\some-project -MinAgeHours 24 -KeepLatest 2 -Json
-```
-
-JSON 输出包含 `mode`、`candidate_count`、`deleted_count`、`candidates`、
-`deleted`、`skipped` 和 `generated_at`。使用 `-Force -Json` 时仍会真实删除候选，
-并在 `deleted` 中记录已删除的 run 目录。
-
-如果结论是 `REWORK`，可以让 Supervisor 把返工结论脚手架成一个新的有界阶段：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command scaffold-rework -ProjectRoot E:\some-project -PhaseId phase-001 -ReworkPhaseId phase-002
-```
-
-`scaffold-rework` 只接受 durable `REWORK` 源阶段。它会读取
-`.ai-loop/audits/<source>-audit.md`、`.ai-loop/audits/<source>-findings.json`
-和 `.ai-loop/runs/<source>/rework.txt`，生成新阶段的 prompt、requirements、
-`rework_source.json` 和状态记录。Worker 只能执行新阶段，不得重新解释总路线
-或扩大 audit scope。审计文件中可以写 `Finding:`、`Severity:`、
-`Required fix:`、`Evidence:`、`Files:`，这些会被抽取到 findings JSON。
-
-## 科研 Skill Profiles
-
-第一版默认共享 skill 库来源是：
-
-```text
-E:\codexfiles\test\.agents\skills
-```
-
-当前 profiles：
-
-- `research-core`：research-task-tree、invariant-contract、deterministic-verification、skill-compliance-audit。
-- `physics-sim`：research-task-tree、invariant-contract、bounded-experiment-loop、deterministic-verification、independent-crosscheck、result-provenance-audit、skill-compliance-audit。
-- `manuscript`：research-task-tree、deterministic-verification、result-provenance-audit、manuscript-consistency-audit、skill-compliance-audit。
-- `full-research`：全部 8 个科研 workflow skills。
-
-Windows 下优先用 directory junction 链接 skill。失败时尝试 symbolic link，
-再失败则只写 source map，并由 gate 标记 unavailable。Linux 下使用 symbolic
-link 暴露 skill。Linux 安装器默认把共享 skill 根放在
-`${CODEX_HOME:-$HOME/.codex}/skills`，并由 Linux shim 作为 `-SkillLibraryRoot`
-传给共享命令核心。
-
-## 证据规则
-
-Codex 不能只根据 worker report 接受阶段。
-
-一个阶段至少应该有这些 evidence：
-
-- phase prompt
-- worker report
-- git status before / after
-- diff patch
-- verify log
-- changed files
-- phase requirements
-- evidence ledgers
-- artifact manifest hashing
-- skill usage records
-- 触发 skill 后要求的 skill artifacts
-- Codex audit result
-
-证据完整性使用双轨模型：
-
-- Markdown ledgers 面向人工审计。
-- `.ai-loop/evidence/artifact-manifest.json` 面向脚本校验，记录 SHA256、文件大小、mtime、phase 和 path。
-
-`collect` 会把当前 phase 的 required evidence 和 required skill artifacts 都登记进
-artifact manifest。required skill artifacts 使用 `skill-artifact` 类型记录；如果文件
-缺失、为空、包含 `MISSING:` 占位符，或登记后的 SHA256 与当前文件不一致，`validate`
-都会阻断。
-
-当阶段声明 `-RequireExternalWorkerEvidence` 时，外部 Worker preflight 与
-invocation 记录也会作为 `external-worker-evidence` 类型进入 manifest。Codex 审计
-必须检查这些本地文件，不能仅凭 Worker prose 接受阶段。
-
-如果证据缺失、验证失败、skill artifact 缺失、required skill 链接不可用，
-阶段必须是 `BLOCKED` 或 `REWORK`。只有 Supervisor 记录明确 override reason
-时，才允许 force accept。
-
-## 已验证内容
-
-最近通过的检查：
-
-- PowerShell 脚本解析检查。
-- `Test-LoopStandard.ps1 -AllowPilotProject`。
-- `Test-GoalLoopHook.py`：验证普通 prompt 不介入、goal prompt 自动初始化、已有
-  loop 只校验，以及校验失败会阻断。
-- `Test-CodexHookUpdateCheck.py`：验证 Codex 版本变化后执行兼容性检查、成功时
-  零输出、失败时生成警告。
-- `Test-PluginInstall.ps1`：在 `.tmp-ai-loop-plugin-smoke/` 中验证临时
-  install root、local marketplace、plugin manifest、plugin skills、shim
-  `doctor` 和 plugin wrapper `doctor`。
-- `Test-PlatformInstall.sh`：在 Linux 下验证 dispatcher 相关脚本语法、Linux
-  install root、local marketplace、plugin manifest、plugin skills、hook 测试和
-  可执行 `bin/ai-loop` shim。
-- Linux 系统安装后已验证受管 `SessionStart`、`UserPromptSubmit`、系统 wrapper、
-  源码哈希和真实 Codex 新会话；正常兼容性检查为零输出。
-- `Test-TempIsolation.ps1`：并发启动两个 plugin install smoke test，并验证
-  它们使用不同的 per-run install root，避免固定 `.tmp-ai-loop-*` 目录竞争。
-- `Test-PruneTempFixtures.ps1`：验证 `prune-temp` 的 dry-run、保留最新 run、
-  强制删除旧 run、命名空间保护和幂等行为。
-- `Test-PruneTempJson.ps1`：验证 `prune-temp -Json` 和 `-Force -Json` 输出
-  可解析 JSON，且不会混入普通文本。
-- `Test-MigrateDryRun.ps1`：验证 `migrate -DryRun` 和 `-DryRun -Json` 可以生成
-  迁移计划、不会写文件、未来 schema 会阻断，并且真实 migrate 仍能修复旧项目。
-- `Test-Readiness.ps1`：验证 `readiness` 文本/JSON 输出、root 项目无失败、
-  缺 `.ai-loop` 的项目会返回可解析的 `blocked` JSON。
-- `ai-loop.ps1 -Command validate-loop`：检查整个 `.ai-loop` 控制面结构、
-  `status.json`、phase 引用、accepted/rework/blocked audit、恢复关键文件和
-  schema 版本。
-- `ai-loop.ps1 doctor`。
-- 插件 wrapper `doctor`。
-- 临时项目行为测试：
-  - `init` 创建 `.ai-loop/` 和 `.agents/skills/`。
-  - `link-skills -Profile full-research` 链接 8 个 skill。
-  - full-stack 阶段可以通过普通 evidence gates。
-  - physics-research 阶段在缺少 required skill artifacts 时阻断。
-  - force accept 必须写 override reason。
-  - `REWORK` / `BLOCKED` 可以通过 `decide` 写入 durable state 并由
-    `resume` 恢复。
-  - broken skill link 会阻断 validation。
-
-详细报告见 `.ai-loop/reports/fixed-wrapper-plugin-report.md`。
-
-## 当前完成状态
-
-已经完成：
-
-- 可复用 `loop-standard/` kit。
-- `.ai-loop/` 记忆与约束系统。
-- evidence ledgers。
-- artifact manifest hashing。
-- skill trigger matrix 与 skill usage records。
-- phase gate automation。
-- project-local evolution file。
-- 统一 `ai-loop.ps1` wrapper。
-- skill linking 与 skill source map。
-- Codex plugin scaffold。
-- repo-local plugin install/discovery smoke test。
-- Linux 多用户系统安装、现有用户和 `/etc/skel` skill 分发。
-- goal/loop prompt 自动初始化与 fail-closed 校验。
-- Codex 更新后的静默 hook 兼容性检查和失效提醒。
-- `claude-mimo` 默认 Worker profile 与外部调用 preflight。
-
-下一步计划：
-
-- 更深入的 recovery automation。
-- 更完整的状态机检查。
-- evidence ledger 自动化增强。
-- 针对全栈开发和物理科研继续扩展 skill trigger matrix。
+English documentation: [README_EN.md](README_EN.md).

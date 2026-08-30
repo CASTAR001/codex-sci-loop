@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lumiforge.invalid/schemas/sci-loop-runtime-certificate-v1.json",
+  "title": "sci-loop runtime behavior certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "issued_by",
+    "runtime",
+    "runtime_version",
+    "plugin_version",
+    "adapter_id",
+    "plugin_tree_sha256",
+    "runtime_artifact_sha256",
+    "behavior_evidence_sha256",
+    "required_contract_sha256",
+    "adapter_sha256",
+    "behavior_probe_sha256",
+    "observed_runtime_capabilities_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sci-loop-runtime-certificate-v1"
+    },
+    "status": {
+      "enum": [
+        "CERTIFIED",
+        "QUARANTINED_NEW_VERSION",
+        "INCOMPATIBLE",
+        "PLUGIN_UPDATE_REQUIRED"
+      ]
+    },
+    "issued_by": {
+      "const": "lumiforge-runtime-certifier-v1"
+    },
+    "runtime": {
+      "const": "codex"
+    },
+    "runtime_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "plugin_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "plugin_tree_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "runtime_artifact_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "behavior_evidence_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "required_contract_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "adapter_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "behavior_probe_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "observed_runtime_capabilities_sha256": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

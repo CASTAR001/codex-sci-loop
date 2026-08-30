@@ -4,8 +4,7 @@ This plan turns the current Supervisor-Worker loop harness into a portable,
 global-ready control plane. The final system must be usable from any project
 folder, must not depend on one specific Worker agent, and must support both:
 
-- Codex as Supervisor with an external Worker such as Kimi Code, Claude Code, or
-  another coding agent.
+- Codex as Supervisor with an optional external agent CLI or local process.
 - Codex acting as both Supervisor and Worker when no external Worker is used.
 
 The current harness already has runnable loop scripts, a pilot fixture, audit
@@ -224,7 +223,7 @@ Add a neutral worker interface:
 templates/.ai-loop/workers/
   worker-adapter.md
   codex-worker.md
-  kimi-code-worker.md
+  claude-mimo-worker.md
   claude-code-worker.md
 ```
 
@@ -402,7 +401,7 @@ Then update:
 
 - `init-loop.ps1`
 - `start-phase.ps1`
-- Kimi/Worker prompt generation
+- bounded execution prompt generation
 - `test-pilot-loop.ps1`
 - docs and self-check
 

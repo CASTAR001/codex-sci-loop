@@ -1,0 +1,35 @@
+{
+  "schema": "sci-loop-capability-contract-v1",
+  "protocol": "sci-loop-capabilities/v1",
+  "revision": 1,
+  "required": {
+    "request.capture": ">=1",
+    "evidence.snapshot": ">=1",
+    "reviewer.spawn": ">=1",
+    "reviewer.isolation": ">=1",
+    "reviewer.observe_completion": ">=1",
+    "audit.receipt": ">=1",
+    "completion.block": ">=1",
+    "runtime.bootstrap": ">=1"
+  },
+  "semantics": {
+    "request.capture": "Capture the exact user request before model execution and bind it to the active turn.",
+    "evidence.snapshot": "Create a canonical, reproducible snapshot of requirements, claims, source changes, verification, and artifacts.",
+    "reviewer.spawn": "Start one native reviewer thread identified separately from the executor thread.",
+    "reviewer.isolation": "Give the reviewer only the canonical snapshot under a host-enforced read-only policy, without executor reasoning history.",
+    "reviewer.observe_completion": "Observe reviewer start and terminal output with stable thread identity and no transcript-format dependency.",
+    "audit.receipt": "Validate structured per-requirement outcomes and persist an Ed25519-signed, hash-bound audit receipt outside model authority.",
+    "completion.block": "Prevent a completion claim when the audit receipt is missing, stale, non-passing, or uncertified.",
+    "runtime.bootstrap": "Validate loop state, plugin identity, adapter identity, runtime version, and certification before goal work."
+  },
+  "required_preconditions": [
+    "hooks_enabled",
+    "hooks_trusted",
+    "multi_agent_enabled",
+    "reviewer_read_only_isolation",
+    "plugin_data_private",
+    "receipt_authority_configured",
+    "openssl_ed25519_available",
+    "completion_gate_enabled"
+  ]
+}

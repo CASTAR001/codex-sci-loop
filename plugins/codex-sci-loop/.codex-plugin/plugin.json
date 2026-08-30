@@ -1,0 +1,28 @@
+{
+  "id": "codex-sci-loop",
+  "name": "codex-sci-loop",
+  "version": "1.0.0",
+  "description": "Run native Codex phases with durable evidence, verification, audit, and recovery gates.",
+  "author": {
+    "name": "LumiForge"
+  },
+  "repository": "https://github.com/CASTAR001/codex-sci-loop",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Scientific Loop",
+    "shortDescription": "Evidence-gated native Codex phases.",
+    "longDescription": "Codex Scientific Loop records bounded native Codex phases, reproducible verification, source diffs, explicit audit decisions, and resumable state without replacing the Codex agent runtime.",
+    "developerName": "LumiForge",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Initialize and validate the loop state for this repository.",
+      "Start one bounded phase for the active goal.",
+      "Collect evidence and prepare the current phase for audit.",
+      "Recover the current phase from durable project state."
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "description": "Fail-closed sci-loop lifecycle adapter for certified LumiForge Codex runtimes.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" session-start",
+            "timeout": 20,
+            "statusMessage": "Validating sci-loop runtime"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" user-prompt-submit",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Agent$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-pre-tool",
+            "timeout": 10,
+            "statusMessage": "Validating independent reviewer isolation"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-start",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-stop",
+            "timeout": 30,
+            "statusMessage": "Validating independent audit output"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" stop",
+            "timeout": 30,
+            "statusMessage": "Checking signed completion receipt"
+          }
+        ]
+      }
+    ]
+  }
+}

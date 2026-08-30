@@ -6,7 +6,7 @@ Supervisor-Worker loop. Do not start this phase during Phase A.
 ## Objective
 
 Create `E:\codexfiles\loop\pilot-project`, initialize `.ai-loop`, generate one
-Kimi Worker phase prompt, simulate or run the Worker phase, collect evidence,
+bounded phase prompt, run the phase, collect evidence,
 prepare an audit package, and have Codex decide exactly one of:
 
 - `ACCEPTED`
@@ -46,9 +46,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\loop-standard\scripts\
 
 ## Worker Boundary For Pilot
 
-Kimi may only execute `.ai-loop/evidence/phase-001/prompt.md`. Kimi must write
-the report to `.ai-loop/evidence/phase-001/report.md` and must not approve the
-phase or decide the route.
+The executor may only perform `.ai-loop/evidence/phase-001/prompt.md`. It must
+write `.ai-loop/evidence/phase-001/report.md` and cannot approve its own phase
+or decide the global route.
 
 ## Codex Audit Requirement
 

@@ -66,8 +66,8 @@ $KitRoot = Split-Path -Parent $PSScriptRoot
 $RepoRoot = Split-Path -Parent $KitRoot
 $InstallRoot = Resolve-TargetRoot
 $LoopStandardDestination = Join-Path $InstallRoot "loop-standard"
-$PluginSource = Join-Path $RepoRoot "plugins\codex-loop-harness"
-$PluginDestination = Join-Path $InstallRoot "plugins\codex-loop-harness"
+$PluginSource = Join-Path $RepoRoot "plugins\codex-sci-loop"
+$PluginDestination = Join-Path $InstallRoot "plugins\codex-sci-loop"
 $BinDir = Join-Path $InstallRoot "bin"
 $ShimPath = Join-Path $BinDir "ai-loop.ps1"
 $MarketplaceDir = Join-Path $InstallRoot ".agents\plugins"
@@ -96,10 +96,10 @@ if ($CreateMarketplace) {
         }
         plugins = @(
             [ordered]@{
-                name = "codex-loop-harness"
+                name = "codex-sci-loop"
                 source = [ordered]@{
                     source = "local"
-                    path = "./plugins/codex-loop-harness"
+                    path = "./plugins/codex-sci-loop"
                 }
                 policy = [ordered]@{
                     installation = "INSTALLED_BY_DEFAULT"

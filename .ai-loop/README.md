@@ -1,9 +1,8 @@
 # AI Loop Control Plane
 
 This `.ai-loop/` directory is the local, git-trackable control plane for this
-repository. It stores memory, constraints, roles, gates, events, prompts, and
-templates for a reusable Supervisor-Worker loop harness. It now also includes
-evidence ledgers, skill trigger records, and project-local loop evolution notes.
+repository. It stores current memory, constraints, gates, events, evidence,
+prompts, and recovery state for the native Codex loop plugin.
 
 ## Bootstrap Read Order
 
@@ -42,9 +41,9 @@ Governance directories:
 
 ## Current Phase
 
-Current phase: 1.0 hardening of the reusable loop harness.
+Current phase: native `codex-sci-loop` 1.0 source certification.
 
-The control plane now includes evidence integrity, skill gates, Worker
-preflight, plugin smoke tests, loop-wide validation, negative validation
-fixtures, and schema/migration versioning. Remaining non-global work focuses on
-deeper recovery automation, state transition coverage, and packaging polish.
+The active path uses the native Codex execution thread, an isolated native
+completion auditor, capability ABI checks, signed receipts, evidence
+integrity, and recovery state. The PowerShell toolkit is compatibility-only;
+historical run evidence is not current execution guidance.

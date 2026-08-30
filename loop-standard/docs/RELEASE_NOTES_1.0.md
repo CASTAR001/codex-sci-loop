@@ -123,7 +123,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-
 `PLUGIN-GLOBAL` is evidence-gated. Without
 `.ai-loop/evidence/global-plugin-discovery.json`, readiness reports a warning.
 With malformed or mismatched evidence, readiness fails. With approved live
-Codex CLI evidence for `codex-loop-harness@loop-harness-local`, readiness
+Codex CLI evidence for the then-current `codex-loop-harness@loop-harness-local`, readiness
 passes.
 
 The phase-028 live validation installed the harness through Codex CLI plugin

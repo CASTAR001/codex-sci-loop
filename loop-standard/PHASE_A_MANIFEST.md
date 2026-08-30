@@ -41,11 +41,10 @@ does not create or run `pilot-project/`.
 - `.ai-loop/logs/README.md` - optional log directory note.
 - `.ai-loop/templates/phase-plan.md` - phase planning template.
 - `.ai-loop/templates/prompt.md` - Codex-generated Worker prompt template.
-- `.ai-loop/templates/report.md` - Kimi Worker report template.
+- `.ai-loop/templates/report.md` - execution report template.
 - `.ai-loop/templates/audit-input.md` - generated audit package input template.
 - `.ai-loop/templates/audit.md` - Codex audit result template.
 - `prompts/codex-supervisor.md` - Codex Supervisor operating prompt.
-- `prompts/kimi-worker.md` - Kimi Worker operating prompt.
 - `prompts/codex-audit.md` - Codex Audit operating prompt.
 - `scripts/init-loop.ps1` - copy `templates/.ai-loop` into a target project;
   supports `.\init-loop.ps1 -ProjectRoot "E:\some-project"`.
@@ -61,7 +60,7 @@ does not create or run `pilot-project/`.
 - `scripts/Initialize-AiLoop.ps1` - compatibility helper to copy `.ai-loop` template into a target
   project and initialize `status.json`.
 - `scripts/Start-LoopPhase.ps1` - create a phase evidence directory, generate
-  Kimi's current-phase prompt, and update `status.json`.
+  the current-phase prompt, and update `status.json`.
 - `scripts/Collect-LoopEvidence.ps1` - collect `report.md`, `diff.patch`,
   `verify.log`, and `status.txt`.
 - `scripts/Prepare-LoopAuditPackage.ps1` - check required evidence and generate
@@ -108,6 +107,6 @@ Phase B should create `pilot-project/` and then run:
 .\loop-standard\scripts\Start-LoopPhase.ps1 -TargetRoot E:\codexfiles\loop\pilot-project -PhaseId phase-001 -Title "Minimal pilot change" -Objective "Run the smallest end-to-end Supervisor-Worker loop test."
 ```
 
-After Kimi executes `.ai-loop/evidence/phase-001/prompt.md`, Phase B should
+After the executor completes `.ai-loop/evidence/phase-001/prompt.md`, Phase B should
 collect evidence, prepare an audit package, and have Codex write
 `.ai-loop/audits/phase-001/audit.md` with exactly one decision.

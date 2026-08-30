@@ -1,477 +1,116 @@
-# Loop Harness
+# codex-sci-loop
 
-This repository is building a reusable Supervisor-Worker loop harness for AI
-coding work. The goal is to make a workflow that can be copied or installed into
-any project folder, then used by Codex, Kimi Code, or another worker agent
-without relying on chat history as the source of truth.
+`codex-sci-loop` is a project-local, evidence-gated plugin for the native Codex
+runtime. It does not replace the Codex agent engine or launch a second worker
+runtime. The active Codex thread performs the work; the plugin records phase
+state, verification, Git evidence, independent review, and recovery state.
 
-The harness is local-first, markdown-first, git-trackable, and now has
-platform-aware installation. Windows remains PowerShell-first; Linux has a
-native shell installer and shim; macOS is an explicit placeholder for a later
-optimized path.
+## v1 architecture
 
-Humans should start with `README.md` or this English companion. Agents should
-bootstrap from `AGENTS.md` and then follow `.ai-loop/`; long governance rules do
-not belong in the root bootstrap.
+- `plugins/codex-sci-loop/`: the 1.0.0 plugin with a Python phase core,
+  capability ABI, Codex hook adapter, signed audit protocol, schemas, and six
+  skills.
+- `loop-standard/`: a PowerShell compatibility toolkit for older projects. It
+  is not LumiForge's native agent runtime.
+- `.ai-loop/`: this repository's historical control plane and audit evidence.
+- `tests/`: provider-free distribution, capability, receipt, and hook tests.
 
-## What This Repository Contains
+The completion boundary is deliberately fail closed:
 
-### `loop-standard/`
+1. The host adapter captures the original Goal request before model execution.
+2. The executor may submit verifiable claims but cannot accept its own prose.
+3. A clean-room native Codex subagent reviews only the canonical audit snapshot
+   with `fork_turns=none` and no parent reasoning history.
+4. Only a fresh host-issued signed receipt from a protected root can allow
+   completion; a Markdown verdict is not authority.
+5. After a Codex update, the capability ABI, adapter, runtime artifact, and
+   behavior evidence are compared first. Compatible updates continue normally;
+   only relevant drift requires recertification or a plugin update.
 
-The reusable kit. This is the part intended to be applied to other projects.
-
-Important pieces:
-
-- `templates/.ai-loop/`: template control plane copied into target projects.
-- `scripts/init-loop.ps1`: initializes `.ai-loop/` in a project.
-- `scripts/start-phase.ps1`: starts a phase and generates phase requirements.
-- `scripts/collect-evidence.ps1`: collects status, diff, verify log, and file
-  evidence after a worker acts.
-- `scripts/prepare-audit-pack.ps1`: prepares the Codex audit input.
-- `scripts/validate-phase-gates.ps1`: blocks phases with missing evidence,
-  invalid state, missing skill artifacts, or broken skill links.
-- `scripts/accept-phase.ps1`: accepts a phase only after audit and gate checks.
-- `scripts/decide-phase.ps1`: records `REWORK` / `BLOCKED` audit outcomes as durable state.
-- `scripts/link-skills.ps1`: links shared skills into a project `.agents/skills/`.
-- `scripts/ai-loop.ps1`: the recommended unified entrypoint.
-
-Use `loop-standard/README.md` for lower-level script details. Use
-`loop-standard/docs/RELEASE_NOTES_1.0.md` and
-`loop-standard/docs/OPERATOR_CHECKLIST_1.0.md` for the 1.0 delivery surface.
-Before release, use `ai-loop -Command release-check -ProjectRoot <project>` to
-aggregate readiness, loop-wide validation, and the current non-global
-verification matrix.
-
-### `.ai-loop/`
-
-This repository's own loop control plane. It records project memory,
-constraints, evidence, skill usage, phase gates, events, reports, and handoff
-state.
-
-This directory is also the model for what gets installed into other projects.
-It is the durable source of truth. Do not rely on chat history for important
-state.
-
-Key subdirectories:
-
-- `memory/`: project brief, active context, decisions, failures, progress,
-  handoff summary.
-- `roles/`: Supervisor, Worker, Auditor, Verifier, and Recovery contracts.
-- `gates/`: pre-action checks, phase gates, stop rules.
-- `evidence/`: evidence ledger, artifact index, command log, test log,
-  provenance map.
-- `skills/`: skill trigger matrix, usage ledger, artifact map, skill source map.
-- `events/`: append-only event log in ndjson form.
-- `prompts/`: reusable prompts for resume, pre-action checks, memory updates,
-  and next-step decisions.
-- `evolution/`: project-local loop improvement proposals that do not become
-  governance until promoted.
-- `reports/`: implementation and audit reports.
-
-### `.agents/`
-
-Runtime agent assets. This is where project-visible skills can be linked.
-
-Boundary rule:
-
-- `.ai-loop/` is durable project memory and governance.
-- `.agents/` is runtime/tooling surface, such as linked skills.
-
-For the current research workflow, skills are not copied into every project.
-They are linked into `.agents/skills/` and recorded in
-`.ai-loop/skills/skill-source-map.md`.
-
-### `plugins/codex-loop-harness/`
-
-The first Codex plugin scaffold for distributing and discovering this workflow.
-It does not store project state. Project state remains in each project's
-`.ai-loop/`.
-
-Plugin skills currently included:
-
-- `loop-supervisor`: how Codex should start and supervise loop phases.
-- `loop-auditor`: how Codex should audit worker output.
-- `loop-recovery`: how to resume from `.ai-loop/` after interruption.
-- `research-loop-orchestrator`: how to select research skill profiles.
-
-The plugin is a distribution and guidance layer. The scripts remain the stable
-operating core.
-
-### `pilot-project/`
-
-A small fixture project used to test the loop flow. It is tracked by this
-repository and is not a nested git repository.
-
-## Current Operating Model
-
-The harness now uses a two-layer model:
-
-1. Script core: `loop-standard/scripts/ai-loop.ps1` is the recommended command.
-2. Plugin distribution: `plugins/codex-loop-harness/` helps Codex discover and
-   follow the workflow.
-
-All project-specific state belongs in the target project's `.ai-loop/`.
-
-For a global layout, use the repository-level platform dispatcher first:
+## Entrypoints
 
 ```bash
-./install.sh --install-root "$HOME/.codex/loop-harness" --install-plugin --create-shim --create-marketplace --force
+python3 plugins/codex-sci-loop/scripts/sci_loop.py --help
+python3 plugins/codex-sci-loop/scripts/audit_protocol.py --help
+python3 plugins/codex-sci-loop/scripts/capability_gate.py --help
 ```
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\install.ps1 -InstallRoot E:\codexfiles\loop\.tmp-install -InstallPlugin -CreateShim -SkillLibraryRoot E:\codexfiles\test\.agents\skills -Force
-```
+Bundled skills:
 
-The dispatcher sends Windows to `loop-standard/scripts/install-global.ps1`,
-Linux to `loop-standard/scripts/install-global.sh`, and Darwin/macOS to a clear
-placeholder exit. Linux installation uses native shell file operations and
-POSIX paths; the installed Linux shim still needs PowerShell 7 as `pwsh` to run
-the shared loop command core.
+- `loop-goal-bootstrap`
+- `loop-supervisor`
+- `loop-auditor`
+- `loop-recovery`
+- `research-loop-orchestrator`
+- `independent-completion-auditor`
 
-## How To Use In Another Project
+The final skill is restricted to the isolated reviewer subagent created by the
+LumiForge host.
 
-Replace `E:\some-project` with the target project path.
-
-Initialize the loop:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command init -ProjectRoot E:\some-project -CreateAgentsBootstrap
-```
-
-Link research skills when needed:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command link-skills -ProjectRoot E:\some-project -Profile full-research
-```
-
-Start a normal full-stack phase:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command start -ProjectRoot E:\some-project -PhaseId phase-001 -TaskKind fullstack -Title "Small fix" -Objective "Make one verifiable change" -VerifyCommand "npm test"
-```
-
-Start a physics or numerical research phase:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command start -ProjectRoot E:\some-project -PhaseId phase-001 -TaskKind physics-research -Profile physics-sim -Title "Simulation check" -Objective "Make one evidence-backed simulation change"
-```
-
-When the Supervisor intentionally restarts the same unfinished phase, `start`
-may use `-Force`. This refreshes that phase's metadata, prompt, requirements,
-and start-time Markdown ledger rows, and replaces the same phase entry in
-`status.json`. It is not an audit or accept gate bypass.
-
-After the worker finishes:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command collect -ProjectRoot E:\some-project -PhaseId phase-001
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command audit-pack -ProjectRoot E:\some-project -PhaseId phase-001
-```
-
-Before acceptance:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate -ProjectRoot E:\some-project -PhaseId phase-001
-```
-
-Accept only after Codex writes an audit with `Decision: ACCEPTED`:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command accept -ProjectRoot E:\some-project -PhaseId phase-001
-```
-
-If the audit decision is `REWORK` or `BLOCKED`, do not run `accept`; record the
-non-accepted decision:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision REWORK -Reason "Audit found a scoped fix is required."
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command decide -ProjectRoot E:\some-project -PhaseId phase-001 -Decision BLOCKED -Reason "Required evidence is missing."
-```
-
-`decide` writes `.ai-loop/status.json`, `phase_meta.json`, `rework.txt` or
-`blocked.txt`, generates `.ai-loop/audits/<phase>-findings.json`, and appends
-`.ai-loop/events/event-log.ndjson`. Later `resume` uses those files to report
-the next safe action.
-
-After interruption or in a new session, run:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project
-```
-
-`resume` reads `status.json`, required evidence, the artifact manifest, and
-`state-transitions.ndjson`. It reports the latest transition, recent
-transitions, transition consistency, missing evidence, the next safe action,
-and a copyable next safe command. If the transition log disagrees with
-`status.json`, it reports `Recovery decision: BLOCKED`.
-
-Scripts, plugins, and hooks can request machine-readable recovery state:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command resume -ProjectRoot E:\some-project -Json
-```
-
-`-Json` emits only JSON and does not append memory or handoff file bodies. The
-object includes `current_phase`, `missing_evidence`, `artifact_manifest`,
-`transitions`, `next_safe_action`, `next_safe_command`, and
-`recovery_decision`.
-
-Check whether a project and this kit are ready for a 1.0 delivery claim:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project
-```
-
-Use JSON for automation:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command readiness -ProjectRoot E:\some-project -Json
-```
-
-`readiness` is read-only. It checks kit scripts, templates, project `.ai-loop`,
-evidence integrity, state-machine support, plugin scaffold, test matrix, and
-loop-wide validation. Real global Codex plugin discovery modifies the user
-environment, so without explicit approval it is reported as a warning rather
-than silently passing or mutating global config.
-
-For release sign-off, use the aggregate command:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command release-check -ProjectRoot E:\some-project
-```
-
-`release-check` combines `readiness`, `validate-loop`, and the current
-non-global verification matrix. `-SkipMatrix` is available for quick
-diagnostics, but final release sign-off should run the full matrix.
-
-When tests or dogfood runs leave many ignored `.tmp-ai-loop-*` directories,
-inspect prune candidates with the default dry-run mode:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command prune-temp -ProjectRoot E:\some-project -MinAgeHours 24 -KeepLatest 2
-```
-
-`prune-temp` only considers `run-*` children under `.tmp-ai-loop-*` parents.
-It does not delete anything unless `-Force` is explicit, and it does not prune
-ordinary project folders or folders outside the harness temp namespace.
-Scripts, hooks, CI, and plugins can request machine-readable cleanup state with
-`-Json`:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command prune-temp -ProjectRoot E:\some-project -MinAgeHours 24 -KeepLatest 2 -Json
-```
-
-The JSON includes `mode`, `candidate_count`, `deleted_count`, `candidates`,
-`deleted`, `skipped`, and `generated_at`. `-Force -Json` still performs the
-deletion and records deleted run directories in `deleted`.
-
-When the decision is `REWORK`, the Supervisor can scaffold a bounded follow-up
-phase from the durable audit result:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command scaffold-rework -ProjectRoot E:\some-project -PhaseId phase-001 -ReworkPhaseId phase-002
-```
-
-`scaffold-rework` only accepts a durable `REWORK` source phase. It reads
-`.ai-loop/audits/<source>-audit.md`,
-`.ai-loop/audits/<source>-findings.json`, and
-`.ai-loop/runs/<source>/rework.txt`, then generates the new phase prompt,
-requirements, `rework_source.json`, and state records. Audit files can include
-`Finding:`, `Severity:`, `Required fix:`, `Evidence:`, and `Files:` lines; these
-are extracted into findings JSON. The Worker executes only the new bounded
-phase and must not reinterpret the global route or broaden audit scope.
-
-## Research Skill Profiles
-
-The first version assumes the shared skill library is:
-
-```text
-E:\codexfiles\test\.agents\skills
-```
-
-Profiles:
-
-- `research-core`: research task tree, invariant contract, deterministic
-  verification, skill compliance audit.
-- `physics-sim`: research task tree, invariant contract, bounded experiment
-  loop, deterministic verification, independent crosscheck, result provenance
-  audit, skill compliance audit.
-- `manuscript`: research task tree, deterministic verification, result
-  provenance audit, manuscript consistency audit, skill compliance audit.
-- `full-research`: all 8 research workflow skills.
-
-The 8 research skills are linked into each project with Windows directory
-junctions when possible. If linking fails, the source map records the failure
-and gates can block required phases. Linux uses symbolic links for project
-skill exposure. On Linux, the installer defaults the shared skill root to
-`${CODEX_HOME:-$HOME/.codex}/skills` and the Linux shim forwards that path as
-`-SkillLibraryRoot`.
-
-## Evidence Rule
-
-Codex must not accept a phase from a worker report alone.
-
-A valid phase must include evidence such as:
-
-- prompt
-- worker report
-- git status before and after
-- diff patch
-- verification log
-- changed files
-- phase requirements
-- evidence ledgers
-- artifact manifest hashing
-- skill usage records
-- required skill artifacts when triggers apply
-- Codex audit result
-
-Evidence integrity uses a dual-track model:
-
-- Markdown ledgers are for human audit.
-- `.ai-loop/evidence/artifact-manifest.json` is machine-readable and records SHA256, size, mtime, phase, and path.
-
-`collect` records both required evidence and required skill artifacts for the
-current phase in the artifact manifest. Required skill artifacts use the
-`skill-artifact` type. `validate` blocks them when they are missing, empty,
-contain a `MISSING:` placeholder, or no longer match the recorded SHA256.
-
-If evidence is missing, verification fails, skill artifacts are missing, or a
-required skill link is unavailable, the phase must be `BLOCKED` or `REWORK`
-unless the Supervisor uses a recorded force override.
-
-When a phase will use an external Worker, start it with
-`-RequireExternalWorkerEvidence -WorkerProfile <profile>`. This adds
-`external-worker-preflight.json/.md` and
-`external-worker-invocation.json/.log` to `phase_requirements.json`, the
-artifact manifest, validate gates, and the audit pack. Ordinary phases do not
-require these files by default.
-
-On this server, the `claude-mimo` profile invokes the existing `claude-mimo`
-command routed through LiteLLM at `127.0.0.1:4000`. The harness does not read or
-copy Claude/LiteLLM credentials. It also passes `--no-session-persistence` by
-default:
+## Provider-free validation
 
 ```bash
-ai-loop -Command invoke-worker -ProjectRoot /path/to/project -PhaseId phase-001 -WorkerProfile claude-mimo -AllowExternalService -Yolo
+python3 tests/test_sci_loop_distribution.py
+python3 tests/test_sci_loop_capability_abi.py
+python3 tests/test_sci_loop_audit_receipt.py
+python3 tests/test_sci_loop_codex_hooks.py
+bash loop-standard/scripts/Test-PlatformInstall.sh
 ```
 
-Use phase validation before acceptance:
+Validate plugin and skill packaging directly:
+
+```bash
+python3 ~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py \
+  plugins/codex-sci-loop
+
+for skill in plugins/codex-sci-loop/skills/*; do
+  python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"
+done
+```
+
+These checks do not call a real Provider, launch a browser, or install/update
+the currently running Codex plugin.
+
+## User-local installation
+
+Linux:
+
+```bash
+./install.sh \
+  --install-root "$HOME/.codex/loop-harness" \
+  --install-plugin \
+  --create-shim \
+  --create-marketplace \
+  --force
+```
+
+Windows:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate -ProjectRoot E:\some-project -PhaseId phase-001
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
+  -InstallRoot C:\path\to\loop-harness `
+  -InstallPlugin -CreateShim -CreateMarketplace -Force
 ```
 
-Use loop-wide validation when recovering or checking the whole control plane:
+Installation copies into the explicit destination; it does not silently
+replace a running plugin. LumiForge validates and atomically projects a
+certified copy into each account-private Codex home instead of loading a
+mutable source checkout.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command validate-loop -ProjectRoot E:\some-project
-```
+## Compatibility toolkit
 
-If an older project is blocked because its schema manifest is missing, its
-schema version is old, or template files are missing, run the non-destructive
-migration command first:
+Existing projects may continue to use `loop-standard/` for `init`, `start`,
+`collect`, `audit-pack`, `resume`, and schema migration. Its generic external
+worker interface is retained only for compatibility; the v1 native plugin and
+LumiForge Goal mode do not depend on it. New behavior should be added to the
+Python plugin core instead of duplicating an agent execution engine.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project
-```
+## Safety
 
-`migrate` fills missing templates, merges missing JSON properties, updates
-schema markers, and writes records under `.ai-loop/schema/migration-records/`
-plus `.ai-loop/schema/migration-log.md`. It does not overwrite project memory,
-evidence ledgers, or business files. Future schema versions are blocked unless
-the Supervisor explicitly uses `-Force`.
-
-Before modifying an older project, inspect the planned migration:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project -DryRun
-```
-
-Scripts, plugins, and hooks can request a machine-readable plan:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command migrate -ProjectRoot E:\some-project -DryRun -Json
-```
-
-`migrate -DryRun` does not create migration records, modify JSON, append event
-logs, or copy template files. It only reports the schema/template repair actions
-that would be applied. Future schemas still block unless `-Force` is explicit.
-
-`.ai-loop/schema/schema-version.json` records the current control-plane schema,
-minimum supported version, latest version, and `status.json` state-file schema.
-`validate-loop` blocks missing schema manifests, unsupported old versions,
-future versions, and config/status schema mismatches. Human-readable migration
-notes live in `.ai-loop/schema/migration-log.md`.
-State changes are also appended to `.ai-loop/events/state-transitions.ndjson`.
-Once a phase declares `transition_log`, `validate-loop` checks that the latest
-transition for that phase matches the current status in `status.json`.
-
-## What Has Been Verified
-
-Recent checks passed:
-
-- PowerShell parse check for scripts.
-- `Test-LoopStandard.ps1 -AllowPilotProject`.
-- `Test-PluginInstall.ps1`, which verifies a temporary install root, local
-  marketplace file, plugin manifest, plugin skills, shim `doctor`, and plugin
-  wrapper `doctor` under `.tmp-ai-loop-plugin-smoke/`.
-- `Test-PlatformInstall.sh`, which verifies the Linux install layout, local
-  marketplace file, plugin manifest, plugin skills, executable `bin/ai-loop`
-  shim, and shell syntax for the platform dispatcher.
-- `Test-TempIsolation.ps1`, which starts two plugin install smoke tests in
-  parallel and verifies that they use distinct per-run install roots instead of
-  contending over one fixed `.tmp-ai-loop-*` directory.
-- `Test-PruneTempFixtures.ps1`, which verifies `prune-temp` dry-run behavior,
-  latest-run retention, forced old-run deletion, namespace protection, and
-  idempotence.
-- `Test-PruneTempJson.ps1`, which verifies parseable `prune-temp -Json` and
-  `-Force -Json` output without mixed human-readable text.
-- `Test-MigrateDryRun.ps1`, which verifies `migrate -DryRun` and
-  `-DryRun -Json` planning, no-write behavior, future-schema blocking, and
-  real migration after planning.
-- `Test-Readiness.ps1`, which verifies readiness text/JSON output, no failing
-  checks for the root project, and parseable `blocked` JSON when `.ai-loop` is
-  missing.
-- `ai-loop.ps1 -Command validate-loop`, which checks whole `.ai-loop`
-  structure, `status.json`, phase references, accepted/rework/blocked audits,
-  recovery-critical files, and schema versions.
-- `ai-loop.ps1 doctor`.
-- Plugin wrapper `doctor`.
-- Temporary project behavior:
-  - `init` creates `.ai-loop/` and `.agents/skills/`.
-  - `link-skills -Profile full-research` links all 8 skills.
-  - full-stack phase can pass ordinary evidence gates.
-  - physics-research phase blocks when required skill artifacts are missing.
-  - force accept requires an override reason.
-  - `REWORK` / `BLOCKED` can be recorded with `decide` and recovered by
-    `resume`.
-  - broken skill links block validation.
-
-See `.ai-loop/reports/fixed-wrapper-plugin-report.md` for the latest detailed
-report.
-
-## Current Status
-
-Implemented:
-
-- reusable `loop-standard/` kit
-- `.ai-loop/` memory and constraint system
-- evidence ledgers
-- artifact manifest hashing
-- skill trigger matrix and skill usage records
-- phase gate automation
-- project-local evolution file
-- unified `ai-loop.ps1` wrapper
-- skill linking and skill source map
-- Codex plugin scaffold
-- repo-local plugin install/discovery smoke test
-
-Still planned:
-
-- real Codex global plugin install/discovery validation, after explicit user
-  approval
-- stronger recovery automation
-- broader state machine checks
-- evidence ledger automation improvements
-- skill trigger matrix expansion for full-stack and physics workflows
+- Never store passwords, tokens, Provider keys, or account files in `.ai-loop`.
+- Never load the production plugin directly from a mutable checkout.
+- Never accept executor prose as completion evidence.
+- Never reuse an audit receipt after protected inputs, workspace evidence, or
+  runtime identity changes.
+- Installation, remote push, tags, and production activation remain separate
+  authorization boundaries.

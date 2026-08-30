@@ -79,7 +79,7 @@ Expect-Ok -Result (Invoke-AiLoop -Arguments @(
     "-Title", "External Worker evidence fixture",
     "-Objective", "Require local preflight and invocation evidence for external Worker use.",
     "-VerifyCommand", "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\verify.ps1",
-    "-WorkerProfile", "kimi-code",
+    "-WorkerProfile", "claude-mimo",
     "-RequireExternalWorkerEvidence"
 )) -Label "start"
 

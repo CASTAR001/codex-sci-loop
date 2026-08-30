@@ -67,14 +67,14 @@ Confirm:
 Before invoking an external Worker:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command worker-preflight -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile kimi-code -Yolo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command worker-preflight -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile claude-mimo -Yolo
 ```
 
 Only invoke the Worker after preflight is safe or the user explicitly approves
 external service use:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command invoke-worker -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile kimi-code -AllowExternalService -Yolo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:\codexfiles\loop\loop-standard\scripts\ai-loop.ps1 -Command invoke-worker -ProjectRoot E:\some-project -PhaseId phase-001 -WorkerProfile claude-mimo -AllowExternalService -Yolo
 ```
 
 Confirm:

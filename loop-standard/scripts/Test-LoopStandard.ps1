@@ -58,7 +58,6 @@ $RequiredPaths = @(
     "docs\OPERATOR_CHECKLIST_1.0.md",
     "docs\RELEASE_NOTES_1.0.md",
     "docs\DELIVERY_AUDIT_1.0.md",
-    "docs\GLOBAL_INSTALL_PLAN.md",
     "docs\CONTROL_PLANE_BUILD_PLAN.md",
     "docs\AGENTS_VS_AI_LOOP_BOUNDARY.md",
     "docs\EXTERNAL_WORKER_PROTOCOL.md",
@@ -93,7 +92,6 @@ $RequiredPaths = @(
     ".ai-loop\templates\audit-input.md",
     ".ai-loop\templates\audit.md",
     "prompts\codex-supervisor.md",
-    "prompts\kimi-worker.md",
     "prompts\codex-audit.md",
     "scripts\ai-loop.ps1",
     "scripts\init-loop.ps1",
@@ -165,15 +163,11 @@ $RequiredPaths = @(
     "scripts\Test-GlobalPluginDiscoveryEvidence.ps1",
     "scripts\record-global-plugin-discovery.ps1",
     "scripts\Test-Phase028.ps1",
+    "scripts\Test-Phase029.ps1",
     "scripts\test-pilot-loop.ps1",
     "scripts\install-global.ps1",
     "scripts\install-global.sh",
-    "scripts\install-system-wide.sh",
-    "scripts\Test-GoalLoopHook.py",
     "scripts\Test-ValidateLoopMissingProperties.py",
-    "scripts\Test-CodexHookUpdateCheck.py",
-    "system\requirements.toml",
-    "system\codex-loop-wrapper.sh",
     "scripts\Test-PluginInstall.ps1",
     "scripts\Test-PlatformInstall.sh",
     "scripts\Initialize-AiLoop.ps1",
@@ -182,25 +176,29 @@ $RequiredPaths = @(
     "scripts\Prepare-LoopAuditPackage.ps1",
     "scripts\Accept-LoopPhase.ps1",
     "scripts\Test-LoopStandard.ps1",
-    "docs\SUDO_MULTI_USER_INSTALL.md",
-    "worker-profiles\kimi-code.json",
-    "worker-profiles\kimi-code.md",
     "worker-profiles\claude-mimo.json",
     "worker-profiles\claude-mimo.md",
     "..\README.md",
     "..\README_EN.md",
     "..\install.ps1",
     "..\install.sh",
-    "..\plugins\codex-loop-harness\.codex-plugin\plugin.json",
-    "..\plugins\codex-loop-harness\scripts\goal-loop-bootstrap.py",
-    "..\plugins\codex-loop-harness\scripts\check-codex-hook-after-update.py",
-    "..\plugins\codex-loop-harness\skills\loop-goal-bootstrap\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\loop-goal-bootstrap\agents\openai.yaml",
-    "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\loop-recovery\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\research-loop-orchestrator\SKILL.md",
-    "..\plugins\codex-loop-harness\scripts\ai-loop.ps1"
+    "..\plugins\codex-sci-loop\.codex-plugin\plugin.json",
+    "..\plugins\codex-sci-loop\README.md",
+    "..\plugins\codex-sci-loop\scripts\sci_loop.py",
+    "..\plugins\codex-sci-loop\scripts\capability_gate.py",
+    "..\plugins\codex-sci-loop\scripts\audit_protocol.py",
+    "..\plugins\codex-sci-loop\hooks\codex_adapter.py",
+    "..\plugins\codex-sci-loop\hooks\hooks.json",
+    "..\plugins\codex-sci-loop\skills\independent-completion-auditor\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-goal-bootstrap\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-supervisor\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-auditor\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-recovery\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\research-loop-orchestrator\SKILL.md",
+    "..\tests\test_sci_loop_distribution.py",
+    "..\tests\test_sci_loop_capability_abi.py",
+    "..\tests\test_sci_loop_audit_receipt.py",
+    "..\tests\test_sci_loop_codex_hooks.py"
 )
 
 foreach ($RelativePath in $RequiredPaths) {
@@ -218,11 +216,11 @@ foreach ($JsonRelativePath in @(".ai-loop\loop.config.json", ".ai-loop\status.js
     }
 }
 
-$PluginJsonPath = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-loop-harness\.codex-plugin\plugin.json"
+$PluginJsonPath = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-sci-loop\.codex-plugin\plugin.json"
 if (Test-Path -LiteralPath $PluginJsonPath) {
     try {
         $Plugin = Get-Content -LiteralPath $PluginJsonPath -Raw | ConvertFrom-Json
-        if ($Plugin.name -ne "codex-loop-harness") {
+        if ($Plugin.name -ne "codex-sci-loop") {
             Add-Problem "Plugin manifest has unexpected name: $($Plugin.name)"
         }
         if ([string]::IsNullOrWhiteSpace($Plugin.skills)) {
@@ -230,23 +228,6 @@ if (Test-Path -LiteralPath $PluginJsonPath) {
         }
     } catch {
         Add-Problem "Invalid plugin JSON: $($_.Exception.Message)"
-    }
-}
-
-$WorkerProfilePath = Join-Path $KitRoot "worker-profiles\kimi-code.json"
-if (Test-Path -LiteralPath $WorkerProfilePath) {
-    try {
-        $WorkerProfile = Get-Content -LiteralPath $WorkerProfilePath -Raw | ConvertFrom-Json
-        if ($WorkerProfile.profile -ne "kimi-code") {
-            Add-Problem "Worker profile has unexpected name: $($WorkerProfile.profile)"
-        }
-        foreach ($Field in @("command", "prompt_argument", "default_state_root", "state_env_var")) {
-            if ([string]::IsNullOrWhiteSpace([string]$WorkerProfile.$Field)) {
-                Add-Problem "Worker profile missing required field: $Field"
-            }
-        }
-    } catch {
-        Add-Problem "Invalid Worker profile JSON: $($_.Exception.Message)"
     }
 }
 
@@ -275,11 +256,12 @@ if (Test-Path -LiteralPath $ClaudeMimoProfilePath) {
 }
 
 foreach ($SkillFile in @(
-    "..\plugins\codex-loop-harness\skills\loop-goal-bootstrap\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\loop-supervisor\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\loop-auditor\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\loop-recovery\SKILL.md",
-    "..\plugins\codex-loop-harness\skills\research-loop-orchestrator\SKILL.md"
+    "..\plugins\codex-sci-loop\skills\independent-completion-auditor\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-goal-bootstrap\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-supervisor\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-auditor\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\loop-recovery\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\research-loop-orchestrator\SKILL.md"
 )) {
     $Path = Join-Path $KitRoot $SkillFile
     if (Test-Path -LiteralPath $Path) {
@@ -330,7 +312,7 @@ Get-ChildItem -LiteralPath (Join-Path $KitRoot "scripts") -Filter "*.ps1" | ForE
     }
 }
 
-$PluginScriptsDir = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-loop-harness\scripts"
+$PluginScriptsDir = Join-Path (Split-Path -Parent $KitRoot) "plugins\codex-sci-loop\scripts"
 if (Test-Path -LiteralPath $PluginScriptsDir -PathType Container) {
     Get-ChildItem -LiteralPath $PluginScriptsDir -Filter "*.ps1" | ForEach-Object {
         $Tokens = $null

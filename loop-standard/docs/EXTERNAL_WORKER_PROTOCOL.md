@@ -1,7 +1,7 @@
 # External Worker Protocol
 
-The loop harness is Worker-agnostic. Codex may supervise Kimi Code, another
-agent CLI, or a local Worker process, but every external invocation must pass
+The compatibility harness is Worker-agnostic. Codex may supervise an external
+agent CLI or a local Worker process, but every external invocation must pass
 through a recorded preflight.
 
 ## Preflight Decisions
@@ -30,8 +30,9 @@ through a recorded preflight.
 - Long-term memory or governance upgrades discovered during Worker use require
   a separate confirmation before being promoted.
 
-## Kimi Code
+## Compatibility profile
 
-The first Worker profile is `kimi-code`. It uses `kimi.cmd`, supports
-`--skills-dir`, and can use `KIMI_CODE_HOME` to keep runtime state out of
-`~/.kimi-code`.
+The retained legacy profile is `claude-mimo`. It is optional compatibility
+surface for the PowerShell toolkit and is not used by the native
+`codex-sci-loop` plugin. LumiForge Goal mode uses the active Codex thread plus
+the isolated native completion auditor instead of this external-worker path.

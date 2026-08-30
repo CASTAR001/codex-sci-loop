@@ -84,11 +84,12 @@ function Test-GlobalPluginDiscoveryEvidence {
         }
     }
 
+    $HistoricalPluginIdentity = [string]$Evidence.plugin_id -eq "codex-loop-harness"
     $Problems = New-Object System.Collections.Generic.List[string]
     if ([string]$Evidence.schema_version -ne "1.0") { $Problems.Add("schema_version must be 1.0") }
     if ([string]$Evidence.status -ne "pass") { $Problems.Add("status must be pass") }
     if ([string]$Evidence.approval_scope -ne "PLUGIN-GLOBAL") { $Problems.Add("approval_scope must be PLUGIN-GLOBAL") }
-    if ([string]$Evidence.plugin_id -ne "codex-loop-harness") { $Problems.Add("plugin_id must be codex-loop-harness") }
+    if (-not $HistoricalPluginIdentity -and [string]$Evidence.plugin_id -ne "codex-sci-loop") { $Problems.Add("plugin_id must be codex-sci-loop") }
     if ([string]$Evidence.marketplace_name -ne "loop-harness-local") { $Problems.Add("marketplace_name must be loop-harness-local") }
     foreach ($Field in @("install_root", "plugin_root", "manifest_path", "marketplace_path", "manifest_sha256", "marketplace_sha256", "validated_at")) {
         if ([string]::IsNullOrWhiteSpace([string]$Evidence.$Field)) {
@@ -112,6 +113,12 @@ function Test-GlobalPluginDiscoveryEvidence {
         return [pscustomobject][ordered]@{
             status = "invalid"
             notes = ($Problems -join "; ")
+        }
+    }
+    if ($HistoricalPluginIdentity) {
+        return [pscustomobject][ordered]@{
+            status = "stale"
+            notes = "Discovery evidence belongs to the previous plugin identity; the native v1 plugin is not installed by this source-only update."
         }
     }
     return [pscustomobject][ordered]@{
@@ -198,14 +205,20 @@ foreach ($Entry in @(
     Add-PathCheck -Id $Entry.Id -Area "docs" -Root $Entry.Root -RelativePath $Entry.Path -Requirement $Entry.Requirement
 }
 
-$PluginRoot = Join-Path $RepoRoot "plugins\codex-loop-harness"
+$PluginRoot = Join-Path $RepoRoot "plugins\codex-sci-loop"
 foreach ($Entry in @(
     @{ Id = "PLUGIN-MANIFEST"; Path = ".codex-plugin/plugin.json" },
+    @{ Id = "PLUGIN-CORE"; Path = "scripts/sci_loop.py" },
+    @{ Id = "PLUGIN-CAPABILITY"; Path = "scripts/capability_gate.py" },
+    @{ Id = "PLUGIN-AUDIT-PROTOCOL"; Path = "scripts/audit_protocol.py" },
+    @{ Id = "PLUGIN-HOOK-ADAPTER"; Path = "hooks/codex_adapter.py" },
+    @{ Id = "PLUGIN-HOOKS"; Path = "hooks/hooks.json" },
+    @{ Id = "PLUGIN-BOOTSTRAP"; Path = "skills/loop-goal-bootstrap/SKILL.md" },
     @{ Id = "PLUGIN-SUPERVISOR"; Path = "skills/loop-supervisor/SKILL.md" },
     @{ Id = "PLUGIN-AUDITOR"; Path = "skills/loop-auditor/SKILL.md" },
+    @{ Id = "PLUGIN-INDEPENDENT-AUDITOR"; Path = "skills/independent-completion-auditor/SKILL.md" },
     @{ Id = "PLUGIN-RECOVERY"; Path = "skills/loop-recovery/SKILL.md" },
-    @{ Id = "PLUGIN-RESEARCH"; Path = "skills/research-loop-orchestrator/SKILL.md" },
-    @{ Id = "PLUGIN-WRAPPER"; Path = "scripts/ai-loop.ps1" }
+    @{ Id = "PLUGIN-RESEARCH"; Path = "skills/research-loop-orchestrator/SKILL.md" }
 )) {
     Add-PathCheck -Id $Entry.Id -Area "plugin" -Root $PluginRoot -RelativePath $Entry.Path -Requirement "Codex plugin scaffold includes $($Entry.Path)."
 }
@@ -216,6 +229,8 @@ if ($GlobalPluginEvidence.status -eq "valid") {
     Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "pass" -Evidence $GlobalPluginEvidenceRelativePath -Notes $GlobalPluginEvidence.notes
 } elseif ($GlobalPluginEvidence.status -eq "missing") {
     Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "warn" -Evidence "repo-local plugin smoke tests" -Notes "Skipped by policy until the user explicitly approves modifying real global Codex configuration."
+} elseif ($GlobalPluginEvidence.status -eq "stale") {
+    Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "warn" -Evidence $GlobalPluginEvidenceRelativePath -Notes $GlobalPluginEvidence.notes
 } else {
     Add-Check -Id "PLUGIN-GLOBAL" -Area "plugin" -Requirement "Real global Codex plugin discovery is live-validated." -Status "fail" -Evidence $GlobalPluginEvidenceRelativePath -Notes $GlobalPluginEvidence.notes
 }
