@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Run a native Codex integration check with an isolated home and mock Responses.
 
+The fixture supplies canned model replies and compaction summaries. Assertions
+exercise Codex transport, persistence and installed checkpoint commands.
+
 Requires a POSIX host, Python 3.9+, Git, a supported Codex binary, and loopback.
 Invoke with python3 -B tests/test_sci_loop_native_codex.py [--codex PATH].
 """
@@ -31,6 +34,10 @@ ORIGINAL = "EARLY_USER_CONSTRAINT_7b63d\n目标：按最小二乘法拟合原始
 REVISED = "REVISED_USER_CONSTRAINT_a13f1\r\n撤销最小二乘，使用稳健中位数。保留阈值 ε < 0.01。\r\n"
 DECISION = "记录修订：排除最小二乘，改用稳健中位数。"
 NEXT = "在独立输入上核对残差阈值。"
+OLD_NEXT = "为最小二乘准备原始观测。"
+REPLACED_NEXT = "在原始观测上计算最小二乘残差。"
+COMPLETED = "已准备原始观测。"
+ACTION_MARKER = "prepared original observations\n"
 RECENT = "RECENT_USER_CONSTRAINT_6da58"
 FIRST_REPLY = "UNCOMPRESSED_ASSISTANT_409ec"
 FOLLOWUP_REPLY = "FOLLOWUP_AFTER_STOP_43189"
@@ -38,6 +45,7 @@ SUMMARIES = ("MOCK_COMPACTION_SUMMARY_253cd", "SECOND_COMPACTION_SUMMARY_0584b")
 BETWEEN = "CONTINUE_BETWEEN_COMPACTIONS_1f080"
 CONTINUE = "STOP_CONTINUATION_e11dd"
 RESUME = "AFTER_PROCESS_RESTART_94ca5"
+FRESH = "FRESH_THREAD_WITH_PROJECT_FILES_29bbe"
 INITIAL_CONTEXT = "INITIAL_PROJECT_CONTEXT_3ade7"
 UPDATED_CONTEXT = "UPDATED_PROJECT_CONTEXT_21b00"
 
@@ -382,6 +390,39 @@ def checkpoint(installed, workspace, env, *args, request=None):
     return result.stdout
 
 
+def read_checkpoint(app, installed, *args):
+    result = app.call("command/exec", command=checkpoint_cli(installed, *args),
+                      cwd=str(app.workspace), sandboxPolicy={"type": "workspaceWrite"}, timeoutMs=10000)
+    assert result["exitCode"] == 0, result
+    return json.loads(result["stdout"])
+
+
+def recover_checkpoint(app, installed):
+    current = read_checkpoint(app, installed, "show", "--full")
+    assert (current["request"], current["revision"], current["mode"], current["next"]) == (
+        REVISED, 2, "active", NEXT), current
+    assert [note["text"] for note in current["notes"]] == [DECISION], current
+    assert current["verification"]["status"] == "stale", current
+
+    latest_page = read_checkpoint(app, installed, "history", "--limit", "1", "--full")
+    latest, = latest_page["revisions"]
+    assert latest_page["current_next"] == NEXT and latest["is_current"], latest_page
+    assert latest["contract"]["request"] == REVISED, latest
+    older_page = read_checkpoint(app, installed, "history", "--before", str(latest_page["next_before"]),
+                                 "--limit", "1", "--full")
+    older, = older_page["revisions"]
+    assert older_page["next_before"] is None and not older["is_current"], older_page
+    assert older["contract"]["request"] == ORIGINAL, older
+    done, = older["notes"]
+    assert (done["kind"], done["text"], done["source"]) == ("completed", COMPLETED, "operator statement"), done
+    assert [(change["previous"], change["next"], change["cause"]) for change in older["pending_changes"]] == [
+        ("", OLD_NEXT, "start"), (OLD_NEXT, REPLACED_NEXT, "note"), (REPLACED_NEXT, "", "revise"),
+    ], older
+    evidence, = older["verification"]
+    assert evidence["recorded_status"] == "passed" and "tail" not in evidence, evidence
+    return current, latest_page, older_page
+
+
 def verify(executable: str):
     with tempfile.TemporaryDirectory(prefix="sci-loop-native-") as raw, responses_fixture() as provider:
         fixture = Path(raw).resolve()
@@ -398,14 +439,25 @@ def verify(executable: str):
         installed = install_fixture(executable, fixture, env)
         write_hook_fixture(config.parent, fixture)
         skills = discover_and_trust(executable, workspace, env, config, installed)
-        checkpoint(installed, workspace, env, "start", "--request-file", "-", request=ORIGINAL)
-        checkpoint(installed, workspace, env, "revise", "--from-revision", "1", "--request-file", "-", request=REVISED)
-        checkpoint(installed, workspace, env, "note", "--kind", "decision", "--note", DECISION, "--next", NEXT)
+        action_log = fixture / "action.log"
+        fixture_check = shlex.join([sys.executable, "-c",
+                                    f"with open({str(action_log)!r}, 'a') as f: f.write({ACTION_MARKER!r})"])
+        checkpoint(installed, workspace, env, "start", "--request-file", "-", "--next", OLD_NEXT,
+                   "--verify-command", fixture_check, request=ORIGINAL)
+        checkpoint(installed, workspace, env, "verify")
+        checkpoint(installed, workspace, env, "note", "--kind", "completed", "--note", COMPLETED,
+                   "--next", REPLACED_NEXT)
+        checkpoint(installed, workspace, env, "revise", "--from-revision", "1", "--request-file", "-",
+                   "--remove-verifier", "--note", DECISION, "--next", NEXT, request=REVISED)
+        state_file = workspace / ".ai-loop/checkpoints/main.json"
+        state_bytes = state_file.read_bytes()
+        state_mtime = state_file.stat().st_mtime_ns
+        assert action_log.read_text() == ACTION_MARKER
 
         for reply in (FIRST_REPLY, FOLLOWUP_REPLY, "REVISED_ASSISTANT", "RECENT_ASSISTANT",
                       FIRST_REPLY, FOLLOWUP_REPLY, "REVISED_ASSISTANT", "RECENT_ASSISTANT",
                       SUMMARIES[0], "BETWEEN_ASSISTANT", "BETWEEN_ASSISTANT", SUMMARIES[1],
-                      "RESUMED_ASSISTANT", "RESUMED_ASSISTANT", "CHECKLIST", "RESEARCH_CHECK"):
+                      "RESUMED_ASSISTANT", "RESUMED_ASSISTANT", "FRESH_ASSISTANT", "CHECKLIST", "RESEARCH_CHECK"):
             provider.replies.put(reply)
         with AppServer(executable, workspace, env) as app:
             app.initialize()
@@ -434,23 +486,25 @@ def verify(executable: str):
             app.initialize()
             resumed = app.call("thread/resume", threadId=thread_id, cwd=str(workspace))
             assert resumed["thread"]["id"] == thread_id
-            shown = app.call("command/exec", command=checkpoint_cli(installed, "show", "--full"),
-                             cwd=str(workspace), sandboxPolicy={"type": "workspaceWrite"}, timeoutMs=10000)
-            assert shown["exitCode"] == 0, shown
-            recovered = json.loads(shown["stdout"])
-            assert recovered["request"] == REVISED and recovered["revision"] == 2, recovered
-            assert recovered["next"] == NEXT and [note["text"] for note in recovered["notes"]] == [DECISION]
-            record = json.loads((workspace / recovered["checkpoint"]).read_text(encoding="utf-8"))
-            assert [item["request"] for item in record["contracts"]] == [ORIGINAL, REVISED]
+            recovered = recover_checkpoint(app, installed)
             assert not (control / ".ai-loop").exists()
             assert app.turn(thread_id, RESUME)["status"] == "completed"
             assert app.call("thread/resume", threadId=control_id, cwd=str(control))["thread"]["id"] == control_id
             assert app.turn(control_id, RESUME)["status"] == "completed"
             assert len(provider.requests) == 14
+            fresh_id = app.call("thread/start", cwd=str(workspace))["thread"]["id"]
+            assert fresh_id != thread_id and app.turn(fresh_id, FRESH)["status"] == "completed"
+            assert recover_checkpoint(app, installed) == recovered
             verify_skill_loading(app, provider, control, skills["research-verification"])
             assert_no_packaged_hook_runs(app, installed)
 
-        assert len(provider.requests) == 16 and provider.replies.empty()
+        assert state_file.read_bytes() == state_bytes and state_file.stat().st_mtime_ns == state_mtime
+        assert action_log.read_text() == ACTION_MARKER, "The original verifier ran more than once"
+        assert len(provider.requests) == 17 and provider.replies.empty()
+        fresh_user = messages(provider.requests[14], "user")
+        assert FRESH in fresh_user and all(ORIGINAL.splitlines()[0] not in text
+                                           and REVISED.splitlines()[0] not in text
+                                           and all(summary not in text for summary in SUMMARIES) for text in fresh_user)
         assert ORIGINAL in messages(provider.requests[0], "user")
         for index in (8, 11):
             assert any("SYNTHETIC_MANUAL_COMPACTION" in text for text in messages(provider.requests[index], "user"))
@@ -472,8 +526,9 @@ def verify(executable: str):
         assert any(e["hook_event_name"] == "SessionStart" and e["source"] == "compact" for e in hook_events)
         compact_hooks = [e["hook_event_name"] for e in hook_events if e.get("trigger") == "manual"]
         assert compact_hooks == ["PreCompact", "PostCompact"] * 2, compact_hooks
-        print("Native app-server: fixture Stop exit 2 continued once; two compactions and restart preserved exact checkpoint revisions and decisions.", flush=True)
-        print("Compared the captured prompts with an uncompressed restart in 14 loopback model requests.", flush=True)
+        print("Native app-server recovered the same checkpoint history after two compactions and restart "
+              "and in a fresh thread. The original verifier ran once and reads left the checkpoint untouched.", flush=True)
+        print("Compared compacted, uncompressed and fresh-thread prompts using canned loopback model replies.", flush=True)
 
 
 if __name__ == "__main__":
