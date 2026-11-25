@@ -11,6 +11,7 @@ import signal
 import subprocess
 import tempfile
 import threading
+import time
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -59,48 +60,84 @@ def atomic_json(path: Path, value: dict[str, Any]) -> None:
     atomic_text(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
 
 
+def stop_verifier(process: subprocess.Popen) -> None:
+    # The shell leader can exit while children in the same group retain stdout.
+    try:
+        if os.name == "posix":
+            os.killpg(process.pid, signal.SIGKILL)
+        else:
+            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    if process.poll() is None:
+        try:
+            process.kill()
+        except OSError:
+            pass
+
+
 def run_check(root: Path, command: str | list[str], timeout: int) -> dict:
-    """Hash all combined output and retain only its tail, including on timeout."""
+    """Bound wall time and retained output even if a descendant keeps the pipe open."""
     h = hashlib.sha256()
     tail = bytearray()
     count = 0
-    expired = threading.Event()
-    with subprocess.Popen(command, cwd=root, shell=isinstance(command, str), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                          stdin=subprocess.DEVNULL, start_new_session=os.name == "posix") as process:
-        def terminate():
-            try:
-                if os.name == "posix":
-                    os.killpg(process.pid, signal.SIGKILL)
-                else:
-                    # The verifier may be cmd.exe or PowerShell with a live child.
-                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-                    if process.poll() is None:
-                        process.kill()
-            except ProcessLookupError:
-                pass
+    errors = []
+    stopping = threading.Event()
+    eof = threading.Event()
+    buffer_lock = threading.Lock()
+    process = subprocess.Popen(
+        command, cwd=root, shell=isinstance(command, str), stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, bufsize=0, start_new_session=os.name == "posix",
+    )
 
-        def deadline():
-            expired.set()
-            terminate()
-
-        timer = threading.Timer(timeout, deadline)
-        timer.start()
+    def drain():
+        nonlocal count
         try:
-            for chunk in iter(lambda: process.stdout.read(65536), b""):
-                h.update(chunk)
-                count += len(chunk)
-                tail.extend(chunk)
-                del tail[:-OUTPUT_TAIL_BYTES]
-            code = process.wait()
-        finally:
-            timer.cancel()
-            timer.join()
-            if process.poll() is None:
-                terminate()
-    outcome = "timeout" if expired.is_set() else ("passed" if code == 0 else "failed")
-    return {"status": outcome, "exit_code": code, "output_bytes": count, "output_sha256": h.hexdigest(),
-            "tail": tail.decode("utf-8", errors="replace")}
+            while not stopping.is_set():
+                chunk = process.stdout.read(65536)
+                if not chunk:
+                    eof.set()
+                    return
+                with buffer_lock:
+                    h.update(chunk)
+                    count += len(chunk)
+                    tail.extend(chunk)
+                    del tail[:-OUTPUT_TAIL_BYTES]
+        except (ValueError, OSError) as exc:
+            if not stopping.is_set():
+                errors.append(exc)
+
+    reader = threading.Thread(target=drain, daemon=True)
+    deadline = time.monotonic() + timeout
+    complete = False
+    timed_out = False
+    try:
+        reader.start()
+        reader.join(timeout)
+        if reader.is_alive():
+            raise subprocess.TimeoutExpired(command, timeout)
+        process.wait(timeout=max(0, deadline - time.monotonic()))
+        if errors:
+            raise LoopError(f"could not read verifier output: {errors[0]}")
+        complete = True
+    except subprocess.TimeoutExpired:
+        timed_out = True
+    finally:
+        if not complete:
+            stopping.set()
+            stop_verifier(process)
+            try:
+                process.wait(timeout=0.5)
+            except subprocess.TimeoutExpired:
+                pass
+        # Unbuffered pipe. A deliberately detached child cannot delay CLI shutdown.
+        process.stdout.close()
+    outcome = "timeout" if timed_out else ("passed" if process.returncode == 0 else "failed")
+    with buffer_lock:
+        return {"status": outcome, "exit_code": process.returncode, "output_bytes": count,
+                "output_sha256": h.hexdigest(), "output_complete": eof.is_set(),
+                "tail": tail.decode("utf-8", errors="replace")}
 
 
 def git(root: Path, *arguments: str, timeout: int = 120) -> str:

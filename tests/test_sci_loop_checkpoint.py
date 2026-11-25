@@ -94,7 +94,7 @@ class Checkpoints(unittest.TestCase):
         self.command("git", "update-index", "--assume-unchanged", ".gitignore")
         self.start("exit 0")
         self.cli("verify")
-        (self.root / ".gitignore").write_text("clock\\n")
+        (self.root / ".gitignore").write_text("clock\n")
         self.assertEqual("stale", self.show()["verification"]["status"])
 
     def test_edits_during_verification_bounded_output_and_timeout(self):
@@ -112,7 +112,8 @@ class Checkpoints(unittest.TestCase):
 
     @unittest.skipUnless(os.name == "posix", "POSIX process interrupt")
     def test_interrupted_verifier_and_concurrent_writer(self):
-        self.start('python3 -c "import pathlib,time; pathlib.Path(\'clock\').touch(); time.sleep(10)"')
+        self.start("python3 -c \"import pathlib,time; pathlib.Path('clock').touch(); "
+                   "time.sleep(.7); pathlib.Path('after-interrupt').touch()\" &")
         with subprocess.Popen([sys.executable, "-B", str(CLI), "verify"], cwd=self.root, env=self.env,
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) as child:
             try:
@@ -124,6 +125,8 @@ class Checkpoints(unittest.TestCase):
             finally:
                 child.send_signal(signal.SIGINT)
                 child.wait(timeout=3)
+        time.sleep(0.8)
+        self.assertFalse((self.root / "after-interrupt").exists())
         self.assertEqual("interrupted", self.show()["verification"]["status"])
         self.cli("set-state", "--state", "paused", "--reason", "Inspect before retrying")
         self.assertEqual("paused", self.show()["mode"])
@@ -145,7 +148,7 @@ class Checkpoints(unittest.TestCase):
         self.assertEqual("stale", self.show()["review"]["freshness"])
 
     def test_finish_requires_current_evidence_and_respects_review_and_pending_work(self):
-        self.start("exit 0", "--require-review")
+        self.start("exit 0", "--require-review", "--tree-only")
         self.cli("finish", code=1)
         self.assertIn("finished", self.cli("set-state", "--state", "finished", "--reason", "claim", code=2))
         self.cli("verify")
@@ -168,6 +171,36 @@ class Checkpoints(unittest.TestCase):
         self.cli("set-state", "--state", "active", "--reason", "Recheck changed source")
         self.cli("verify")
         self.assertIn("review is required", self.cli("finish", code=1))
+
+    def test_head_change_invalidates_history_dependent_verification(self):
+        identity = ("git", "-c", "user.name=Fixture", "-c", "user.email=f@example.invalid")
+        self.command(*identity, "commit", "-qm", "base")
+        head = self.command("git", "rev-parse", "HEAD").strip()
+        self.start(f'test "$(git rev-parse HEAD)" = "{head}"')
+        self.cli("verify")
+        self.cli("finish")
+        self.command(*identity, "commit", "--allow-empty", "-qm", "new revision")
+        self.assertEqual("needs_recheck", self.show()["mode"])
+
+    @unittest.skipUnless(os.name == "posix", "POSIX process groups")
+    def test_timeout_is_bounded_with_detached_pipe_writer(self):
+        script = self.root / "helper.py"
+        script.write_text("""import os
+import time
+from pathlib import Path
+
+os.setsid()
+for _ in range(50):
+    if Path('stop-helper').exists() or not Path('helper.py').exists():
+        break
+    time.sleep(.1)
+""")
+        self.start("python3 helper.py &")
+        start = time.monotonic()
+        result = json.loads(self.cli("verify", "--timeout", "1", code=1))
+        self.assertEqual("timeout", result["status"])
+        (self.root / "stop-helper").touch()
+        self.assertLess(time.monotonic() - start, 3)
 
     def test_unknown_control_and_damaged_state(self):
         self.start("exit 0")

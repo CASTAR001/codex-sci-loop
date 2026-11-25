@@ -70,7 +70,8 @@ def contract(args, previous=None):
             raise LoopError(f"input must be a project-relative data file: {item}")
     review = args.require_review if args.require_review is not None else (previous or {}).get("require_review", False)
     return {"request": request_text(args.request_file), "command": command, "inputs": sorted(set(inputs)),
-            "require_review": review}
+            "require_review": review,
+            "tree_only": args.tree_only if args.tree_only is not None else (previous or {}).get("tree_only", False)}
 
 
 def checked_state(path: Path, task: str) -> dict:
@@ -82,6 +83,7 @@ def checked_state(path: Path, task: str) -> dict:
     for item in versions:
         if (not isinstance(item, dict) or not isinstance(item.get("request"), str)
                 or not item["request"].strip() or type(item.get("require_review", False)) is not bool
+                or type(item.get("tree_only", False)) is not bool
                 or not isinstance(item.get("inputs"), list) or "command" not in item
                 or not all(isinstance(name, str) for name in item["inputs"])
                 or (item.get("command") is not None and not isinstance(item["command"], str))):
@@ -117,8 +119,9 @@ def file_id(path: Path) -> str:
     return h.hexdigest()
 
 
-def workspace(root: Path, inputs: list[str]) -> dict:
+def workspace(root: Path, current: dict) -> dict:
     """Bind the index and actual dirty file bytes. Never store a second patch."""
+    inputs = current["inputs"]
     head = subprocess.run(["git", "rev-parse", "--verify", "--quiet", "HEAD"], cwd=root,
                           capture_output=True, timeout=120)
     if head.returncode not in (0, 1):
@@ -154,8 +157,9 @@ def workspace(root: Path, inputs: list[str]) -> dict:
             raise LoopError(f"cannot fingerprint directory or special file: {name}; check it in its own Git root")
     # ASCII JSON also represents filenames containing non-UTF-8 bytes losslessly.
     files_bytes = json.dumps(files, ensure_ascii=True, separators=(",", ":")).encode()
-    # Record HEAD for provenance; a commit containing only the checkpoint must stay fresh.
     hashes = [hashlib.sha256(value).hexdigest() for value in (index, status, files_bytes)]
+    if not current.get("tree_only", False):
+        hashes.append(head.stdout.decode().strip())
     return {"sha256": canonical_hash(hashes), "git_head": head.stdout.decode().strip() or None, "input_sha256": declared}
 
 
@@ -176,7 +180,7 @@ def summary(root: Path, path: Path, state: dict, full: bool, for_review: bool) -
     subject = None
     if for_review or review or result["status"] in {"passed", "failed", "timeout"}:
         try:
-            tree = workspace(root, current["inputs"])
+            tree = workspace(root, current)
         except (LoopError, OSError, subprocess.TimeoutExpired) as exc:
             if for_review:
                 raise
@@ -201,7 +205,7 @@ def summary(root: Path, path: Path, state: dict, full: bool, for_review: bool) -
         "checkpoint": str(path.relative_to(root)), "next": state["next"], "mode_reason": state.get("reason", ""),
         "notes": notes if full else notes[-3:], "note_count": len(notes),
         "verification": result, "command": current["command"], "inputs": current["inputs"],
-        "require_review": current.get("require_review", False),
+        "require_review": current.get("require_review", False), "tree_only": current.get("tree_only", False),
     }
     if for_review:
         info["review_subject"] = subject
@@ -243,11 +247,11 @@ def verify_checkpoint(root: Path, path: Path, state: dict, timeout: int) -> None
     state["verification"] = evidence
     atomic_json(path, state)
     try:
-        before = workspace(root, current["inputs"])
+        before = workspace(root, current)
         evidence.update(workspace_sha256=before["sha256"], git_head=before["git_head"],
                         input_sha256=before["input_sha256"])
         evidence.update(run_check(root, current["command"], timeout), finished_at=utc_now())
-        if workspace(root, current["inputs"])["sha256"] != before["sha256"]:
+        if workspace(root, current)["sha256"] != before["sha256"]:
             evidence["status"] = "stale"
     except (LoopError, OSError, subprocess.TimeoutExpired) as exc:
         evidence.update(status="unavailable", reason=str(exc))
@@ -294,7 +298,7 @@ def execute(root: Path, args) -> int:
             if args.next is not None:
                 state["next"] = args.next
         elif args.action == "review":
-            tree = workspace(root, state["contracts"][-1]["inputs"])
+            tree = workspace(root, state["contracts"][-1])
             if args.subject != review_subject(state, tree):
                 raise LoopError("review subject changed; inspect show --for-review and review the current evidence")
             state["review"] = {"revision": len(state["contracts"]), "subject": args.subject, "report": request_text(args.file), "at": utc_now(),
@@ -318,6 +322,11 @@ def parser():
         cmd.add_argument("--task", default="main")
         if name in {"start", "revise"}:
             cmd.add_argument("--request-file", required=True, help="full effective user contract (UTF-8 file or '-' for stdin)")
+            scope = cmd.add_mutually_exclusive_group()
+            scope.add_argument("--tree-only", action="store_true", default=None,
+                               help="exclude commit identity when the check depends only on source and declared inputs")
+            if name == "revise":
+                scope.add_argument("--bind-head", dest="tree_only", action="store_false", default=None)
             review = cmd.add_mutually_exclusive_group()
             review.add_argument("--require-review", action="store_true", default=None)
             if name == "revise":
