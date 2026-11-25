@@ -1,27 +1,27 @@
 {
   "id": "codex-sci-loop",
   "name": "codex-sci-loop",
-  "version": "1.1.0",
-  "description": "Save and resume project checkpoints and verify research results in Codex.",
+  "version": "1.2.0",
+  "description": "Keep the request, decisions and next step for tasks you want to resume.",
   "author": {
-    "name": "LumiForge"
+    "name": "CASTAR001"
   },
   "repository": "https://github.com/CASTAR001/codex-sci-loop",
   "skills": "./skills/",
   "interface": {
-    "displayName": "Codex Scientific Loop",
-    "shortDescription": "Project checkpoints and research verification.",
-    "longDescription": "Codex Scientific Loop keeps project-local task checkpoints and guides reproducible checks for research results.",
-    "developerName": "LumiForge",
+    "displayName": "Codex Task Checkpoints",
+    "shortDescription": "Save and resume everyday tasks.",
+    "longDescription": "Keep task checkpoints in your working folder. Add repeatable checks or a review when the task needs evidence.",
+    "developerName": "CASTAR001",
     "category": "Productivity",
     "capabilities": [
       "Read",
       "Write"
     ],
     "defaultPrompt": [
-      "Save a checkpoint so I can resume this task later.",
-      "Resume work from the most recent project checkpoint.",
-      "Verify this research result and record the evidence."
+      "Save a checkpoint for this task and record what remains.",
+      "Resume my task from its checkpoint.",
+      "Update the plan with my new constraint."
     ]
   }
 }

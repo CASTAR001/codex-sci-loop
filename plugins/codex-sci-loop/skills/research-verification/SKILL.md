@@ -1,17 +1,14 @@
 ---
 name: research-verification
-description: "Verify scientific or numerical claims with repeatable checks, or record an independent technical review against a specific task checkpoint and evidence."
+description: "Use when investigating or evaluating a scientific claim through a derivation, numerical experiment, simulation or empirical data analysis."
 ---
 
 # Research verification
 
-Choose checks that could disprove the claim. Examples include a dimensional or conservation identity, an analytic limit, grid refinement, and an independently implemented reference. Record the applicable assumptions, tolerance and acceptance rule in the task contract. Preserve input versions, seeds, parameters and the exact check command. Keep referenced data and meaningful negative results in the project.
+Start from the particular claim. Identify the assumptions and range where it should hold, what observation would contradict it, and how much error is acceptable. For a short calculation, the check and its result can live in the answer. For a continuing investigation, keep the applicable conditions in the task contract and reference the original data, derivation or experiment.
 
-Use the companion task checkpoint CLI (`../../scripts/checkpoint.py`). Supply `--input` for relevant Git-ignored data. Keep tentative findings under `note --kind hypothesis` and failures or eliminated approaches under `note --kind ruled-out`. A successful execution proves only the assertion actually exercised. Review derivations, assumptions and test coverage separately when they matter.
+Choose a check with a different failure mode from the implementation. For instance, a solver claiming second-order accuracy can be tested against a known exact solution on successively finer grids. Record the grid sizes, errors and observed order. For a derivation, a limiting case, a dimensional inconsistency or an independent derivation may be more informative. Match the check to the claim.
 
-For an independent review:
+Use the same project checkpoint as other tasks when persistence helps. Declare the check command and its inputs, including relevant data, parameters, seed and implementation. Keep hypotheses as attributed notes. Preserve a meaningful negative result with its conditions and an evidence path. Identify which measured result supports each conclusion and what remains unresolved.
 
-1. Run `show --for-review --full` and record `review_subject`. Give an authorized native reviewer the effective contract, exact evidence paths and subject identifier. Use a fresh context when available. Inspect source, original measurements and the derivation directly. Report any independence limitations.
-2. Return a report citing files, parameters or reproducible observations for each conclusion, with an overall outcome of `supported`, `rework`, `inconclusive` or `blocked`.
-3. Record it with `review --subject <original-digest> --reviewer <declared-identity> --outcome <outcome> --file <file-or-stdin-dash>`. Use stdin or a project control file for the report so writing it does not itself change the subject. A stale digest requires review of the changed evidence.
-4. `show` checks freshness. The review records attributed judgment. The native checkpoint supplies no identity attestation or signed acceptance. Repeated agreement between reviewers adds no independent measurement.
+Use independent review when assumptions, derivation or test sufficiency remain in question. Give an authorized reviewer the claim, original evidence and the subject from `show --for-review --full`. Record the report against that subject. Report the remaining uncertainty if evidence is insufficient. A process exit code establishes only the assertion exercised by that process.

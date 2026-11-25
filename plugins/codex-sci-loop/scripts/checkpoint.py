@@ -57,6 +57,13 @@ def checkpoint_path(root: Path, task: str) -> Path:
     return path
 
 
+def validate_input_names(inputs: list[str]) -> None:
+    for item in inputs:
+        relative = Path(item)
+        if relative.is_absolute() or not relative.parts or ".." in relative.parts or relative.parts[0].lower() in {".git", ".ai-loop"}:
+            raise LoopError(f"input must be a project-relative data file: {item}")
+
+
 def contract(args, previous=None):
     command = args.verify_command if args.verify_command is not None else (previous or {}).get("command")
     if getattr(args, "remove_verifier", False):
@@ -64,10 +71,7 @@ def contract(args, previous=None):
     if command is not None and not command.strip():
         raise LoopError("verification command is empty")
     inputs = args.input if args.input is not None else (previous or {}).get("inputs", [])
-    for item in inputs:
-        relative = Path(item)
-        if relative.is_absolute() or not relative.parts or ".." in relative.parts or relative.parts[0] in {".git", ".ai-loop"}:
-            raise LoopError(f"input must be a project-relative data file: {item}")
+    validate_input_names(inputs)
     review = args.require_review if args.require_review is not None else (previous or {}).get("require_review", False)
     return {"request": request_text(args.request_file), "command": command, "inputs": sorted(set(inputs)),
             "require_review": review,
@@ -77,7 +81,7 @@ def contract(args, previous=None):
 def checked_state(path: Path, task: str) -> dict:
     state = read_json(path)
     versions = state.get("contracts")
-    if (state.get("schema") != SCHEMA or state.get("task") != task or state.get("mode") not in (*OPERATOR_MODES, "finished")
+    if (state.get("schema") != SCHEMA or state.get("task") != task or state.get("mode") not in (*OPERATOR_MODES, "finished", "closed")
             or not isinstance(versions, list) or not versions or not isinstance(state.get("notes"), list)):
         raise LoopError("unrecognized or inconsistent checkpoint")
     for item in versions:
@@ -88,6 +92,7 @@ def checked_state(path: Path, task: str) -> dict:
                 or not all(isinstance(name, str) for name in item["inputs"])
                 or (item.get("command") is not None and not isinstance(item["command"], str))):
             raise LoopError("invalid task contract")
+        validate_input_names(item["inputs"])
     if (not isinstance(state.get("next"), str) or not all(
             isinstance(note, dict) and type(note.get("revision")) is int and isinstance(note.get("text"), str)
             for note in state["notes"])):
@@ -119,9 +124,31 @@ def file_id(path: Path) -> str:
     return h.hexdigest()
 
 
+def task_root(raw: str) -> Path:
+    root = Path(raw).expanduser().resolve()
+    if not root.is_dir():
+        raise LoopError(f"task folder does not exist: {root}")
+    if any(os.path.lexists(parent / ".git") for parent in (root, *root.parents)):
+        return resolve_project(str(root))
+    return root
+
+
 def workspace(root: Path, current: dict) -> dict:
-    """Bind the index and actual dirty file bytes. Never store a second patch."""
+    """Fingerprint the Git worktree, or only explicitly declared files in an ordinary folder."""
     inputs = current["inputs"]
+    declared = {}
+    for name in inputs:
+        path = root / name
+        if path.resolve() != path or not path.is_file() or not path.is_relative_to(root):
+            raise LoopError(f"declared input must be a regular file within the project: {name}")
+    if not os.path.lexists(root / ".git"):
+        if not inputs:
+            raise LoopError("verification or review outside Git needs explicit --input files, including the check script")
+        declared = {name: file_id(root / name) for name in inputs}
+        modes = {name: stat.S_IMODE((root / name).stat().st_mode) for name in inputs}
+        return {"sha256": canonical_hash({"declared_files": declared, "modes": modes}),
+                "git_head": None, "input_sha256": declared}
+
     head = subprocess.run(["git", "rev-parse", "--verify", "--quiet", "HEAD"], cwd=root,
                           capture_output=True, timeout=120)
     if head.returncode not in (0, 1):
@@ -134,11 +161,6 @@ def workspace(root: Path, current: dict) -> dict:
     for entry in index.split(b"\0"):
         if entry and (entry[:1].islower() or entry[:1] == b"S"):
             paths.add(os.fsdecode(entry.split(b"\t", 1)[1]))
-    declared = {}
-    for name in inputs:
-        path = root / name
-        if path.resolve() != path or not path.is_file() or not path.is_relative_to(root):
-            raise LoopError(f"declared input must be a regular file within the project: {name}")
     files = []
     for name in sorted(paths.union(inputs)):
         path = root / name
@@ -215,6 +237,8 @@ def summary(root: Path, path: Path, state: dict, full: bool, for_review: bool) -
         info["review"]["freshness"] = "current" if subject == review["subject"] else "stale"
         if full:
             info["review"]["report"] = review["report"]
+    if state["mode"] == "closed":
+        info["close_basis"] = "operator statement"
     if state["mode"] == "finished" and closeout_gaps(info):
         info["mode"] = "needs_recheck"
         info["recorded_mode"] = "finished"
@@ -271,15 +295,24 @@ def execute(root: Path, args) -> int:
             return 0
         if state["mode"] == "cancelled":
             raise LoopError("task was cancelled; use a new task id")
-        if args.action == "finish":
+        if args.action == "close":
+            current = state["contracts"][-1]
+            review = state.get("review") or {}
+            if state["mode"] not in {"active", "closed"} or state["next"]:
+                raise LoopError("close requires an active task with no pending action")
+            if (current["command"] or current["inputs"] or current.get("require_review")
+                    or review.get("revision") == len(state["contracts"])):
+                raise LoopError("this task has evidence requirements; use finish")
+            state["mode"] = "closed"
+        elif args.action == "finish":
             if state["mode"] not in {"active", "finished"}:
                 raise LoopError("only an active task can finish")
             issues = closeout_gaps(summary(root, path, state, False, False))
             if issues:
                 raise LoopError("cannot finish: " + ", ".join(issues))
             state["mode"] = "finished"
-        elif state["mode"] == "finished" and args.action != "set-state":
-            raise LoopError("use set-state --state active to reopen the finished task")
+        elif state["mode"] in {"finished", "closed"} and args.action != "set-state":
+            raise LoopError("use set-state --state active to reopen the task")
         elif args.action == "set-state":
             if not args.reason.strip():
                 raise LoopError("record a reason for the state change")
@@ -316,7 +349,7 @@ def execute(root: Path, args) -> int:
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(dest="action", required=True)
-    for name in ("start", "revise", "note", "verify", "show", "review", "finish", "set-state"):
+    for name in ("start", "revise", "note", "verify", "show", "review", "finish", "close", "set-state"):
         cmd = commands.add_parser(name)
         cmd.add_argument("--project-root", default=".")
         cmd.add_argument("--task", default="main")
@@ -338,11 +371,11 @@ def parser():
             inputs = cmd.add_mutually_exclusive_group()
             if name == "revise":
                 inputs.add_argument("--clear-inputs", dest="input", action="store_const", const=[])
-            inputs.add_argument("--input", action="append", help="also bind this regular file, e.g. ignored experimental data")
+            inputs.add_argument("--input", action="append", help="also bind this regular file, including files outside the Git index")
         if name == "revise":
             cmd.add_argument("--from-revision", required=True, type=int)
         if name == "note":
-            cmd.add_argument("--kind", choices=("decision", "hypothesis", "ruled-out"), default="decision")
+            cmd.add_argument("--kind", default="decision", help="label for this note")
             cmd.add_argument("--note")
             cmd.add_argument("--next", help="replace the pending action")
         if name == "review":
@@ -364,7 +397,7 @@ def parser():
 def main() -> int:
     args = parser().parse_args()
     try:
-        root = resolve_project(args.project_root)
+        root = task_root(args.project_root)
         with project_lock(root, create=args.action == "start"):
             return execute(root, args)
     except (LoopError, OSError, UnicodeError, subprocess.TimeoutExpired) as exc:

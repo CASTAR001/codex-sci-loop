@@ -22,7 +22,6 @@ class Checkpoints(unittest.TestCase):
         self.root = Path(temp.name).resolve()
         self.env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "GIT_CONFIG_NOSYSTEM": "1",
                     "GIT_CONFIG_GLOBAL": os.devnull}
-        self.env.pop("LUMIFORGE_SCI_LOOP_MODE", None)
         self.command("git", "init", "-q")
         (self.root / ".gitignore").write_text("data.bin\nclock\n", encoding="utf-8")
         self.command("git", "add", ".gitignore")
@@ -42,6 +41,49 @@ class Checkpoints(unittest.TestCase):
 
     def show(self):
         return json.loads(self.cli("show"))
+
+    def test_ordinary_checklist_in_plain_folder_without_git(self):
+        with tempfile.TemporaryDirectory() as plain:
+            self.env["PATH"] = ""
+
+            def task(action, *args, **options):
+                return self.cli(action, "--project-root", plain, *args, **options)
+
+            task("start", "--request-file", "-", stdin="Pack for the weekend. Keep the bag under 8 kg.")
+            task("note", "--kind", "packing", "--note", "Carry-on only", "--next", "Pack charger")
+            self.assertIn("pending action", task("close", code=1))
+            self.assertEqual("Pack charger", json.loads(task("show"))["next"])
+            task("note", "--next", "")
+            task("finish", code=1)
+            task("close")
+            saved = json.loads(task("show"))
+            self.assertEqual(("closed", "unverified", "operator statement"),
+                             (saved["mode"], saved["verification"]["status"], saved["close_basis"]))
+            self.assertFalse((Path(plain) / ".git").exists())
+            task("set-state", "--state", "active", "--reason", "Add another item")
+            self.assertEqual("active", json.loads(task("show"))["mode"])
+
+    def test_plain_folder_checks_use_declared_files(self):
+        with tempfile.TemporaryDirectory() as plain:
+            root = Path(plain)
+
+            def task(action, *args, **options):
+                return self.cli(action, "--project-root", plain, *args, **options)
+
+            (root / "plan.txt").write_text("Tuesday")
+            (root / "check.py").write_text("from pathlib import Path\n"
+                                           "raise SystemExit(Path('plan.txt').read_text() != 'Tuesday')\n")
+            task("start", "--request-file", "-", "--verify-command", "python3 check.py", stdin="Check the plan")
+            self.assertIn("explicit --input", task("verify", code=1))
+            task("revise", "--from-revision", "1", "--request-file", "-", "--input", "plan.txt",
+                 "--input", "check.py", stdin="Check the plan")
+            task("close", code=1)
+            self.assertEqual("passed", json.loads(task("verify"))["status"])
+            task("finish")
+            (root / "unrelated.txt").write_text("Lunch")
+            self.assertEqual("finished", json.loads(task("show"))["mode"])
+            (root / "plan.txt").write_text("Thursday")
+            self.assertEqual("needs_recheck", json.loads(task("show"))["mode"])
 
     def test_revision_notes_and_operator_control(self):
         self.start("exit 0")
@@ -137,6 +179,7 @@ class Checkpoints(unittest.TestCase):
         args = ("review", "--subject", subject, "--reviewer", "review-thread", "--outcome",
                 "inconclusive", "--file", "-")
         self.cli(*args, stdin="The derivation lacks a boundary condition (notes, line 2).")
+        self.cli("close", code=1)
         report = self.show()
         self.assertEqual("current", report["review"]["freshness"])
         self.assertEqual("unverified", report["verification"]["status"])
@@ -149,6 +192,7 @@ class Checkpoints(unittest.TestCase):
 
     def test_finish_requires_current_evidence_and_respects_review_and_pending_work(self):
         self.start("exit 0", "--require-review", "--tree-only")
+        self.cli("close", code=1)
         self.cli("finish", code=1)
         self.assertIn("finished", self.cli("set-state", "--state", "finished", "--reason", "claim", code=2))
         self.cli("verify")

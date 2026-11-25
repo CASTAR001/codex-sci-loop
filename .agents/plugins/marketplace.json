@@ -1,7 +1,7 @@
 {
   "name": "codex-sci-loop-local",
   "interface": {
-    "displayName": "Codex Scientific Loop"
+    "displayName": "Codex Task Checkpoints"
   },
   "plugins": [
     {
