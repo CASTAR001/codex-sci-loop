@@ -20,6 +20,10 @@ from loop_io import (
 
 SCHEMA = "sci-loop-checkpoint-v1"
 CONTEXT_LIMIT = 2048
+HISTORY_EVENT_LIMIT = 8
+HISTORY_FIELDS = (("notes", "notes"), ("artifacts", "artifacts"), ("pending_changes", "pending_changes"),
+                  ("mode_changes", "mode_changes"), ("verification_history", "verification"),
+                  ("review_history", "reviews"))
 CONTROL = (".", ":(exclude).ai-loop", ":(exclude).ai-loop/**")
 OPERATOR_MODES = ("active", "blocked", "paused", "cancelled")
 RESULTS = ("running", "passed", "failed", "timeout", "stale", "unavailable")
@@ -336,6 +340,27 @@ def review_record(review: dict) -> dict:
     return record
 
 
+def bound_history_events(revision: dict, task: str) -> None:
+    totals = {}
+    shortened = False
+    for _, field in HISTORY_FIELDS:
+        events = revision[field]
+        if len(events) > HISTORY_EVENT_LIMIT:
+            totals[field] = len(events)
+            revision[field] = events[-HISTORY_EVENT_LIMIT:]
+        for index, event in enumerate(revision[field]):
+            long_fields = [key for key in ("text", "previous", "next", "reason")
+                           if isinstance(event.get(key), str) and len(event[key]) > CONTEXT_LIMIT]
+            if long_fields:
+                preview = {key: event[key][:CONTEXT_LIMIT] for key in long_fields}
+                revision[field][index] = {**event, **preview, "truncated_fields": long_fields}
+                shortened = True
+    if totals:
+        revision["event_totals"] = totals
+    if totals or shortened or revision["request_truncated"]:
+        revision["full_query"] = f"history --revision {revision['revision']} --full --task {task}"
+
+
 def history(state: dict, args) -> dict:
     current = len(state["contracts"])
     if args.revision is not None:
@@ -359,9 +384,7 @@ def history(state: dict, args) -> dict:
             "request_truncated": not args.full and len(request) > CONTEXT_LIMIT,
             "notes": [], "artifacts": [], "pending_changes": [], "mode_changes": [], "verification": [], "reviews": [],
         }
-    for key, field in (("notes", "notes"), ("artifacts", "artifacts"), ("pending_changes", "pending_changes"),
-                       ("mode_changes", "mode_changes"), ("verification_history", "verification"),
-                       ("review_history", "reviews")):
+    for key, field in HISTORY_FIELDS:
         for record in state.get(key, []):
             if record["revision"] in revisions:
                 revisions[record["revision"]][field].append(record)
@@ -370,6 +393,9 @@ def history(state: dict, args) -> dict:
         record = state.get(key)
         if record and record.get("revision") in revisions:
             revisions[record["revision"]][field].append(compact(record))
+    if not args.full:
+        for revision in revisions.values():
+            bound_history_events(revision, state["task"])
     return {
         "task": state["task"], "current_revision": current, "recorded_mode": state["mode"],
         "current_next": state["next"], "revisions": list(revisions.values()),
@@ -583,7 +609,7 @@ def parser():
             position.add_argument("--before", type=int, help="exclude this revision and later ones")
             position.add_argument("--revision", type=int, help="read a single revision")
             cmd.add_argument("--limit", type=int, default=5, help="revisions per page, newest first (1–100)")
-            cmd.add_argument("--full", action="store_true", help="include complete contract text")
+            cmd.add_argument("--full", action="store_true", help="include complete contract text and recorded events")
     return result
 
 

@@ -150,6 +150,41 @@ class Checkpoints(unittest.TestCase):
         full, = json.loads(self.cli("history", "--revision", "1", "--full"))["revisions"]
         self.assertEqual(original, full["contract"]["request"])
 
+    def test_history_bounds_each_event_type_in_a_long_revision(self):
+        self.start("exit 0")
+        artifact = self.root / "item.txt"
+        long_note = "长" * 3000
+        for index in range(10):
+            artifact.write_text(str(index))
+            self.cli("note", "--note", long_note if index == 9 else str(index),
+                     "--next", str(index), "--artifact", artifact.name)
+            self.cli("set-state", "--state", "active", "--reason", str(index))
+            self.cli("verify")
+            subject = json.loads(self.cli("show", "--for-review"))["review_subject"]
+            self.cli("review", "--subject", subject, "--reviewer", "reader",
+                     "--outcome", "supported", "--file", "-", stdin=f"review {index}")
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", stdin="New revision")
+        before = self.path.read_bytes()
+        current, older = json.loads(self.cli("history"))["revisions"]
+        selected, = json.loads(self.cli("history", "--revision", "1"))["revisions"]
+        self.assertEqual(older, selected)
+        self.assertNotIn("event_totals", current)
+        self.assertNotIn("full_query", current)
+        self.assertEqual({"notes": 10, "artifacts": 10, "pending_changes": 11, "mode_changes": 10,
+                          "verification": 10, "reviews": 10}, older["event_totals"])
+        self.assertEqual("history --revision 1 --full --task main", older["full_query"])
+        full, = json.loads(self.cli(*older["full_query"].split()))["revisions"]
+        self.assertNotIn("event_totals", full)
+        for field, count in selected["event_totals"].items():
+            with self.subTest(field=field):
+                self.assertEqual(count, len(full[field]))
+                self.assertEqual(8, len(selected[field]))
+                self.assertEqual(full[field][-8:-1], selected[field][:-1])
+        self.assertEqual(["text"], selected["notes"][-1]["truncated_fields"])
+        self.assertEqual(long_note[:2048], selected["notes"][-1]["text"])
+        self.assertEqual(long_note, full["notes"][-1]["text"])
+        self.assertEqual(before, self.path.read_bytes())
+
     def test_artifact_observations_are_revision_scoped_and_bounded(self):
         names = ["会议记录.txt", "minutes.txt", "agenda.txt", "handout.txt"]
         body = "这是文件内容，不应复制到检查点。".encode()
