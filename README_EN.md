@@ -13,7 +13,7 @@ codex plugin add codex-sci-loop@codex-sci-loop-local
 
 ## Daily tasks
 
-Ask Codex to keep a checkpoint for a trip, a checklist or a writing project. The CLI at `plugins/codex-sci-loop/scripts/checkpoint.py` runs with Python 3.9+ in an ordinary task folder. In a Git project, use the worktree root. Each task has one JSON file in `.ai-loop/checkpoints/`. The default task ID is `main`.
+When you pause an ongoing project with an open action, Codex can save the decisions and next step in your task folder. For example, leave a moving plan pending a second quote, then point a fresh chat to the same folder and ask what comes next. The CLI at `plugins/codex-sci-loop/scripts/checkpoint.py` runs with Python 3.9+ in an ordinary task folder. In a Git project, use the worktree root. Each task has one JSON file in `.ai-loop/checkpoints/`. The default task ID is `main`.
 
 | Command | Purpose |
 | --- | --- |

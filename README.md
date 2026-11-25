@@ -11,7 +11,7 @@ codex plugin marketplace add .
 codex plugin add codex-sci-loop@codex-sci-loop-local
 ```
 
-在新会话中说「帮我记住这次出行的预算、已定行程和还没订的车票」，后续说「从上次的检查点继续」。插件公开 `task-checkpoint` 和 `research-verification` 两个技能，默认注册零个生命周期 Hook。
+在自己的任务文件夹里说「周六上午打包，搬运费上限 860 元，周三拿到第二家报价再选。今天先到这儿」。有已定事项和未完待办时，Codex 可以在收尾时把它们写入检查点。之后开一个新对话，指向同一文件夹，问「接着上次搬家的事，现在该办什么？」即可继续。插件公开 `task-checkpoint` 和 `research-verification` 两个技能，默认注册零个生命周期 Hook。
 
 ## 日常使用
 
