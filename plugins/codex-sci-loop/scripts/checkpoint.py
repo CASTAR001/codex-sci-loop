@@ -106,7 +106,7 @@ def checked_state(path: Path, task: str) -> dict:
     result = state["verification"]
     if result is not None and (not isinstance(result, dict) or result.get("status") not in RESULTS):
         raise LoopError("unrecognized verification record")
-    for key in ("pending_changes", "mode_changes", "verification_history", "review_history"):
+    for key in ("pending_changes", "mode_changes", "verification_history", "review_history", "artifacts"):
         records = state.get(key, [])
         if not isinstance(records, list) or not all(
                 isinstance(record, dict) and type(record.get("revision")) is int
@@ -122,12 +122,73 @@ def git_bytes(root: Path, *args: str) -> bytes:
     return result.stdout
 
 
+def file_digest(stream) -> str:
+    digest = hashlib.sha256()
+    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+        digest.update(chunk)
+    return digest.hexdigest()
+
+
 def file_id(path: Path) -> str:
     with path.open("rb") as stream:
-        h = hashlib.sha256()
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            h.update(chunk)
-    return h.hexdigest()
+        return file_digest(stream)
+
+
+def open_artifact(root: Path, relative: Path) -> int:
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NONBLOCK", 0)
+    if os.open not in os.supports_dir_fd or not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_DIRECTORY"):
+        return os.open(root / relative, flags)
+    # Resolve each component from the already opened parent, refusing symlinks.
+    directory_flags = flags | os.O_NOFOLLOW | os.O_DIRECTORY
+    directory = os.open(root, directory_flags)
+    try:
+        for part in relative.parts[:-1]:
+            child = os.open(part, directory_flags, dir_fd=directory)
+            os.close(directory)
+            directory = child
+        return os.open(relative.name, flags | os.O_NOFOLLOW, dir_fd=directory)
+    finally:
+        os.close(directory)
+
+
+def artifact_stat(path: Path):
+    if path.resolve() != path:
+        raise LoopError("artifact must remain inside the project and must contain no symlinks")
+    info = path.lstat()
+    if not stat.S_ISREG(info.st_mode):
+        raise LoopError("artifact must be a regular file")
+    return info
+
+
+def artifact_version(info) -> tuple:
+    return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns
+
+
+def observe_artifacts(root: Path, names: list[str], revision: int) -> list[dict]:
+    records = []
+    for relative in dict.fromkeys(Path(name) for name in names):
+        if (relative.anchor or not relative.parts or ".." in relative.parts
+                or relative.parts[0].lower() in {".git", ".ai-loop"}):
+            raise LoopError(f"artifact must be a project-relative file: {relative}")
+        path = root / relative
+        # Require filenames representable in the UTF-8 checkpoint format.
+        relative.as_posix().encode("utf-8")
+        try:
+            initial = artifact_stat(path)
+            with os.fdopen(open_artifact(root, relative), "rb") as stream:
+                opened = os.fstat(stream.fileno())
+                if not stat.S_ISREG(opened.st_mode) or artifact_version(opened) != artifact_version(initial):
+                    raise LoopError("artifact changed before it could be read")
+                digest = file_digest(stream)
+                if (stream.tell() != opened.st_size
+                        or artifact_version(os.fstat(stream.fileno())) != artifact_version(opened)
+                        or artifact_version(artifact_stat(path)) != artifact_version(opened)):
+                    raise LoopError("artifact changed while it was being read")
+        except (LoopError, OSError, RuntimeError) as exc:
+            raise LoopError(f"cannot observe artifact {relative}: {exc}") from exc
+        records.append({"revision": revision, "at": utc_now(), "path": relative.as_posix(), "sha256": digest,
+                        "size": opened.st_size, "source": "observed file contents"})
+    return records
 
 
 def task_root(raw: str) -> Path:
@@ -193,11 +254,15 @@ def workspace(root: Path, current: dict) -> dict:
 
 def review_subject(state: dict, tree: dict) -> str:
     revision = len(state["contracts"])
-    return canonical_hash({
+    subject = {
         "task": state["task"], "revision": revision, "contract": state["contracts"][-1],
         "notes": [note for note in state["notes"] if note["revision"] == revision],
         "workspace": tree["sha256"], "verification": state["verification"],
-    })
+    }
+    artifacts = [item for item in state.get("artifacts", []) if item["revision"] == revision]
+    if artifacts:
+        subject["artifacts"] = artifacts
+    return canonical_hash(subject)
 
 
 def summary(root: Path, path: Path, state: dict, full: bool, for_review: bool) -> dict:
@@ -226,12 +291,15 @@ def summary(root: Path, path: Path, state: dict, full: bool, for_review: bool) -
         elif result["status"] == "passed" and (type(result.get("exit_code")) is not int or result["exit_code"] != 0):
             raise LoopError("verification status disagrees with the recorded exit code")
     scope = current["request"]
-    notes = [note for note in state["notes"] if note["revision"] == len(state["contracts"])]
+    revision = len(state["contracts"])
+    notes = [note for note in state["notes"] if note["revision"] == revision]
+    artifacts = [item for item in state.get("artifacts", []) if item["revision"] == revision]
     info = {
         "task": state["task"], "mode": state["mode"], "revision": len(state["contracts"]),
         "request": scope if full else scope[:CONTEXT_LIMIT], "request_truncated": not full and len(scope) > CONTEXT_LIMIT,
         "checkpoint": str(path.relative_to(root)), "next": state["next"], "mode_reason": state.get("reason", ""),
         "notes": notes if full else notes[-3:], "note_count": len(notes),
+        "artifacts": artifacts if full else artifacts[-3:], "artifact_count": len(artifacts),
         "verification": result, "command": current["command"], "inputs": current["inputs"],
         "require_review": current.get("require_review", False), "tree_only": current.get("tree_only", False),
     }
@@ -289,9 +357,9 @@ def history(state: dict, args) -> dict:
             "revision": revision, "is_current": revision == current,
             "contract": {**recorded, "request": request if args.full else request[:CONTEXT_LIMIT]},
             "request_truncated": not args.full and len(request) > CONTEXT_LIMIT,
-            "notes": [], "pending_changes": [], "mode_changes": [], "verification": [], "reviews": [],
+            "notes": [], "artifacts": [], "pending_changes": [], "mode_changes": [], "verification": [], "reviews": [],
         }
-    for key, field in (("notes", "notes"), ("pending_changes", "pending_changes"),
+    for key, field in (("notes", "notes"), ("artifacts", "artifacts"), ("pending_changes", "pending_changes"),
                        ("mode_changes", "mode_changes"), ("verification_history", "verification"),
                        ("review_history", "reviews")):
         for record in state.get(key, []):
@@ -318,7 +386,10 @@ def record_next(state: dict, next_action: str, cause: str, at: str) -> None:
         state["next"] = next_action
 
 
-def record_note_and_next(state: dict, args, at: str) -> None:
+def record_snapshot(root: Path, state: dict, args, at: str) -> None:
+    artifacts = observe_artifacts(root, args.artifact, len(state["contracts"]))
+    if artifacts:
+        state.setdefault("artifacts", []).extend(artifacts)
     if args.note:
         state["notes"].append({"revision": len(state["contracts"]), "at": at, "kind": args.kind,
                                "text": args.note, "source": "operator statement"})
@@ -367,6 +438,15 @@ def verify_checkpoint(root: Path, path: Path, state: dict, timeout: int) -> None
         evidence.update(status="unavailable", reason=str(exc))
 
 
+def print_json(value: dict) -> None:
+    result = json.dumps(value, ensure_ascii=False)
+    try:
+        result.encode(sys.stdout.encoding or "utf-8")
+    except UnicodeEncodeError:
+        result = json.dumps(value, ensure_ascii=True)
+    print(result)
+
+
 def execute(root: Path, args) -> int:
     path = checkpoint_path(root, args.task)
     at = utc_now()
@@ -375,14 +455,14 @@ def execute(root: Path, args) -> int:
             raise LoopError("task already exists; use show or revise")
         state = {"schema": SCHEMA, "task": args.task, "contracts": [contract(args)], "mode": "active",
                  "notes": [], "next": "", "verification": None}
-        record_note_and_next(state, args, at)
+        record_snapshot(root, state, args, at)
     else:
         state = checked_state(path, args.task)
         if args.action == "show":
-            print(json.dumps(summary(root, path, state, args.full, args.for_review), ensure_ascii=True))
+            print_json(summary(root, path, state, args.full, args.for_review))
             return 0
         if args.action == "history":
-            print(json.dumps(history(state, args), ensure_ascii=True))
+            print_json(history(state, args))
             return 0
         previous_mode = state["mode"]
         previous_reason = state.get("reason", "")
@@ -416,11 +496,11 @@ def execute(root: Path, args) -> int:
             amended = contract(args, state["contracts"][-1])
             record_next(state, "", "revise", at)
             state["contracts"].append(amended)
-            record_note_and_next(state, args, at)
+            record_snapshot(root, state, args, at)
         elif args.action == "note":
-            if not args.note and args.next is None:
-                raise LoopError("provide --note or --next")
-            record_note_and_next(state, args, at)
+            if not args.note and args.next is None and not args.artifact:
+                raise LoopError("provide --note, --next or --artifact")
+            record_snapshot(root, state, args, at)
         elif args.action == "review":
             tree = workspace(root, state["contracts"][-1])
             if args.subject != review_subject(state, tree):
@@ -445,7 +525,7 @@ def execute(root: Path, args) -> int:
             state.setdefault("mode_changes", []).append(change)
     atomic_json(path, state)
     if args.action == "verify":
-        print(json.dumps(state["verification"], ensure_ascii=True))
+        print_json(state["verification"])
         return 0 if state["verification"]["status"] == "passed" else 1
     print(f"{args.task} {args.action} revision={len(state['contracts'])} mode={state['mode']}")
     return 0
@@ -483,6 +563,8 @@ def parser():
             cmd.add_argument("--kind", default="decision", help="label for this note")
             cmd.add_argument("--note")
             cmd.add_argument("--next", help="replace the pending action")
+            cmd.add_argument("--artifact", action="append", default=[], metavar="PATH",
+                             help="record an observed digest of this project-relative file (repeatable)")
         if name == "review":
             cmd.add_argument("--subject", required=True, help="digest obtained before independent review")
             cmd.add_argument("--reviewer", required=True, help="declared reviewer or native thread identifier")

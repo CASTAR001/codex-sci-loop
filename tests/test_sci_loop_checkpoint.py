@@ -150,6 +150,68 @@ class Checkpoints(unittest.TestCase):
         full, = json.loads(self.cli("history", "--revision", "1", "--full"))["revisions"]
         self.assertEqual(original, full["contract"]["request"])
 
+    def test_artifact_observations_are_revision_scoped_and_bounded(self):
+        names = ["会议记录.txt", "minutes.txt", "agenda.txt", "handout.txt"]
+        body = "这是文件内容，不应复制到检查点。".encode()
+        for name in names:
+            (self.root / name).write_bytes(body)
+        self.cli("start", "--request-file", "-", "--note", "约定", "--artifact", names[0], stdin="会议")
+        for name in names[1:]:
+            self.cli("note", "--artifact", name, "--artifact", "./" + name)
+        current = self.show()
+        self.assertEqual(4, current["artifact_count"])
+        self.assertEqual(names[1:], [item["path"] for item in current["artifacts"]])
+        self.assertEqual(names, [item["path"] for item in json.loads(self.cli("show", "--full"))["artifacts"]])
+        self.assertNotIn(body, self.path.read_bytes())
+        (self.root / names[0]).write_bytes(b"revised content")
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", "--artifact", names[0], stdin="会议改期")
+        (self.root / names[0]).unlink()
+        observed, = self.show()["artifacts"]
+        self.assertEqual((2, hashlib.sha256(b"revised content").hexdigest()),
+                         (observed["revision"], observed["sha256"]))
+        history = self.cli("history", "--full")
+        self.assertIn("会议改期", history)
+        old = json.loads(history)["revisions"][1]["artifacts"][0]
+        self.assertEqual((1, names[0], hashlib.sha256(body).hexdigest(), len(body), "observed file contents"),
+                         (old["revision"], old["path"], old["sha256"], old["size"], old["source"]))
+        self.assertTrue(old["at"])
+        self.env["PYTHONIOENCODING"] = "ascii"
+        fallback = self.cli("history", "--full")
+        self.assertTrue(fallback.isascii())
+        self.assertEqual(json.loads(history), json.loads(fallback))
+
+    def test_unusable_artifact_aborts_the_entire_snapshot(self):
+        (self.root / "report.txt").write_text("report")
+        (self.root / "directory").mkdir()
+        self.cli("start", "--request-file", "-", "--artifact", "missing", stdin="Prepare a report", code=1)
+        self.assertFalse(self.path.exists())
+        self.cli("start", "--request-file", "-", "--next", "Draft report", stdin="Prepare a report")
+        before = self.path.read_bytes()
+        for name in ("missing", "..", "directory", str(self.root / "report.txt"), ".ai-loop/checkpoints/main.json"):
+            with self.subTest(path=name):
+                self.cli("note", "--note", "Disallowed", "--next", "", "--artifact", "report.txt",
+                         "--artifact", name, code=1)
+                self.assertEqual(before, self.path.read_bytes())
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", "--artifact", "missing",
+                 "--next", "New next", stdin="Wrong revision", code=1)
+        self.assertEqual(before, self.path.read_bytes())
+
+    @unittest.skipUnless(os.name == "posix", "POSIX symlink and special file fixtures")
+    def test_symlinked_and_special_artifacts_are_refused(self):
+        target = self.root / "directory"
+        target.mkdir()
+        source = target / "report.txt"
+        source.write_text("report")
+        (self.root / "report-link").symlink_to(source)
+        (self.root / "directory-link").symlink_to(target, target_is_directory=True)
+        os.mkfifo(self.root / "pipe")
+        self.cli("start", "--request-file", "-", stdin="Prepare a report")
+        before = self.path.read_bytes()
+        for name in ("report-link", "directory-link/report.txt", "pipe"):
+            with self.subTest(path=name):
+                self.cli("note", "--artifact", name, code=1)
+                self.assertEqual(before, self.path.read_bytes())
+
     def test_history_retains_compact_superseded_evidence(self):
         self.start("printf evidence")
         first = json.loads(self.cli("verify"))
