@@ -155,11 +155,12 @@ def configure_capability(plugin: Path, temporary: Path) -> tuple[Path, Path, dic
     adapter_path = plugin / "adapters" / "codex-0.147.json"
     required = json.loads(required_path.read_text(encoding="utf-8"))
     adapter = json.loads(adapter_path.read_text(encoding="utf-8"))
+    manifest = json.loads((plugin / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     probe = {
         "schema": "sci-loop-runtime-probe-v1",
         "runtime": "codex",
         "runtime_version": "0.147.0",
-        "plugin_version": "1.0.0",
+        "plugin_version": manifest["version"],
         "adapter_id": adapter["adapter_id"],
         "plugin_tree_sha256": plugin_tree_hash(plugin),
         "runtime_artifact_sha256": "1" * 64,
@@ -185,7 +186,7 @@ def configure_capability(plugin: Path, temporary: Path) -> tuple[Path, Path, dic
         "issued_by": "lumiforge-runtime-certifier-v1",
         "runtime": "codex",
         "runtime_version": "0.147.0",
-        "plugin_version": "1.0.0",
+        "plugin_version": probe["plugin_version"],
         "adapter_id": adapter["adapter_id"],
         "plugin_tree_sha256": probe["plugin_tree_sha256"],
         "runtime_artifact_sha256": probe["runtime_artifact_sha256"],
@@ -206,8 +207,8 @@ def runtime_identity(plugin: Path, probe: Path, certificate: dict[str, Any], cer
         "state": "CERTIFIED",
         "runtime": "codex",
         "runtime_version": "0.147.0",
-        "plugin_version": "1.0.0",
-        "adapter_id": "codex-hooks-0.147-v1",
+        "plugin_version": certificate["plugin_version"],
+        "adapter_id": certificate["adapter_id"],
         "certificate_sha256": file_hash(certificate_path),
         "probe_sha256": file_hash(probe),
         "runtime_artifact_sha256": certificate["runtime_artifact_sha256"],
@@ -307,14 +308,16 @@ def promote_candidate(plugin: Path, plugin_data: Path, trusted: Path, private_ke
 
 
 def validate_hook_package(plugin: Path) -> None:
-    hooks = json.loads((plugin / "hooks" / "hooks.json").read_text(encoding="utf-8"))["hooks"]
+    manifest = json.loads((plugin / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert "hooks" not in manifest and not (plugin / "hooks" / "hooks.json").exists()
+    hooks = json.loads((plugin / "adapters" / "lumiforge" / "hooks.json").read_text(encoding="utf-8"))["hooks"]
     assert set(hooks) == {"SessionStart", "UserPromptSubmit", "PreToolUse", "SubagentStart", "SubagentStop", "Stop"}
     assert hooks["PreToolUse"][0]["matcher"] == "^Agent$"
     for groups in hooks.values():
         for group in groups:
             for handler in group["hooks"]:
                 assert handler["type"] == "command" and handler.get("async") is not True
-                assert "$PLUGIN_ROOT/hooks/codex_adapter.py" in handler["command"]
+                assert 'python3 -B "$PLUGIN_ROOT/hooks/codex_adapter.py"' in handler["command"]
     agent = (plugin / "agent-templates" / f"{REVIEWER}.toml").read_text(encoding="utf-8")
     assert f'name = "{REVIEWER}"' in agent
     assert 'sandbox_mode = "read-only"' in agent and 'approval_policy = "never"' in agent
@@ -329,8 +332,6 @@ def main() -> None:
     assert (SOURCE_PLUGIN / "certifications" / "receipt-authority-public.pub").read_text(
         encoding="utf-8"
     ).startswith("UNCONFIGURED:")
-    codex_home = Path.home() / ".codex"
-    codex_home_before = codex_home.stat() if codex_home.exists() else None
     with tempfile.TemporaryDirectory(prefix="lumiforge-codex-hooks-") as raw:
         temporary = Path(raw).resolve()
         plugin = temporary / "plugin"
@@ -424,23 +425,33 @@ def main() -> None:
         }
         fixture.write_text("stale after snapshot\n", encoding="utf-8")
         stale_block = hook(adapter, "stop", stop_event, environment)
-        assert stale_block["decision"] == "block" and "create the canonical audit snapshot" in stale_block["reason"]
+        assert stale_block["decision"] == "block" and "run collect" in stale_block["reason"]
         session_key = hashlib.sha256(b"session-001").hexdigest()
         request_path = plugin_data / "sessions" / session_key / "review-request.json"
         assert not request_path.exists()
         fixture.write_text("candidate\n", encoding="utf-8")
+        later_stop = {**stop_event, "turn_id": "turn-later"}
+        assert hook(adapter, "stop", later_stop, environment)["continue"] is False
+        pause_event = {**prompt_event, "turn_id": "turn-pause", "prompt": "sci-loop pause"}
+        pause = hook(adapter, "user-prompt-submit", pause_event, environment)
+        assert pause["decision"] == "block" and "paused" in pause["reason"]
+        paused = hook(adapter, "stop", later_stop, environment)
+        assert paused["continue"] is False and "paused" in paused["systemMessage"]
+        ordinary_while_paused = {**prompt_event, "turn_id": "turn-other", "prompt": "still paused"}
+        assert hook(adapter, "user-prompt-submit", ordinary_while_paused, environment)["decision"] == "block"
+        assert json.loads((run_dir / "request-envelope.json").read_text(encoding="utf-8")) == envelope
+        resume_event = {**prompt_event, "turn_id": "turn-resume", "prompt": "sci-loop resume"}
+        assert "resumed" in hook(adapter, "user-prompt-submit", resume_event, environment)["systemMessage"]
         blocked = hook(adapter, "stop", stop_event, environment)
         assert blocked["decision"] == "block" and REVIEWER in blocked["reason"]
-        revisions_before = list(envelope["revisions"])
-        internal_prompt = {**common(project, "UserPromptSubmit", "turn-002"), "prompt": blocked["reason"]}
-        assert hook(adapter, "user-prompt-submit", internal_prompt, environment) == {}
-        envelope_after = json.loads((run_dir / "request-envelope.json").read_text(encoding="utf-8"))
-        assert envelope_after["revisions"] == revisions_before
+        assert json.loads((run_dir / "request-envelope.json").read_text(encoding="utf-8")) == envelope
 
         repeated = dict(stop_event)
         repeated["stop_hook_active"] = True
         stopped = hook(adapter, "stop", repeated, environment)
         assert stopped["continue"] is False and "denied" in stopped["systemMessage"].lower()
+        assert "resumed" in hook(adapter, "user-prompt-submit", resume_event, environment)["systemMessage"]
+        assert hook(adapter, "stop", later_stop, environment)["continue"] is False
 
         request = json.loads(request_path.read_text(encoding="utf-8"))
         assert request["host_isolation_attested"] is False
@@ -474,6 +485,7 @@ def main() -> None:
         reviewer_start.update({"agent_id": "019-reviewer:001", "agent_type": REVIEWER})
         started = hook(adapter, "reviewer-start", reviewer_start, environment)
         assert started["hookSpecificOutput"]["hookEventName"] == "SubagentStart"
+        assert "systemMessage" in hook(adapter, "reviewer-start", reviewer_start, environment)
 
         unrelated_stop = {
             **common(project, "SubagentStop", "turn-003"),
@@ -512,8 +524,20 @@ def main() -> None:
         assert not (candidate.parent / "audit-receipt.json").exists()
 
         promote_candidate(plugin, plugin_data, trusted, private_key, snapshot)
+        assert hook(adapter, "user-prompt-submit", {**pause_event, "turn_id": "turn-final-pause"}, environment)[
+            "decision"
+        ] == "block"
+        assert hook(adapter, "stop", stop_event, environment)["continue"] is False
+        assert "resumed" in hook(adapter, "user-prompt-submit", {**resume_event, "turn_id": "turn-final-resume"}, environment)[
+            "systemMessage"
+        ]
         final = hook(adapter, "stop", stop_event, environment)
         assert final == {"continue": True}
+        assert hook(adapter, "stop", stop_event, environment) == {"continue": True}
+        fixture.write_text("changed after acceptance\n", encoding="utf-8")
+        no_longer_current = hook(adapter, "stop", stop_event, environment)
+        assert no_longer_current["continue"] is False and "historical" in no_longer_current["systemMessage"]
+        fixture.write_text("candidate\n", encoding="utf-8")
         resumed = json.loads(
             run("python3", str(core), "resume", "--project-root", str(project), "--json").stdout
         )
@@ -555,16 +579,32 @@ def main() -> None:
         malformed = dict(stop_event)
         malformed["unexpected"] = True
         failed_closed = hook(adapter, "stop", malformed, environment)
-        assert failed_closed.get("decision") == "block" or failed_closed.get("continue") is False
+        assert failed_closed["continue"] is False
 
-    codex_home_after = codex_home.stat() if codex_home.exists() else None
-    if codex_home_before and codex_home_after:
-        assert (codex_home_before.st_mtime_ns, codex_home_before.st_ctime_ns) == (
-            codex_home_after.st_mtime_ns,
-            codex_home_after.st_ctime_ns,
+        pending_project = temporary / "pending-project"
+        pending_project.mkdir()
+        run("git", "init", "-q", cwd=pending_project)
+        pending_prompt = {**common(pending_project, "UserPromptSubmit", "turn-pending"), "prompt": "first request"}
+        assert hook(adapter, "user-prompt-submit", pending_prompt, environment) == {}
+        assert not (pending_project / ".ai-loop").exists()
+        assert hook(adapter, "stop", {**stop_event, "cwd": str(pending_project)}, environment)["continue"] is False
+        assert hook(adapter, "stop", {**stop_event, "cwd": str(temporary)}, environment)["continue"] is False
+
+        next_phase = "hook-followup"
+        run(
+            "python3", str(core), "start", "--project-root", str(project), "--phase-id", next_phase,
+            "--title", "Follow-up", "--objective", "Preserve the actual user request", "--verify-command", "true",
         )
-    else:
-        assert codex_home_before is codex_home_after
+        fresh_prompt = {**prompt_event, "turn_id": "turn-next-request", "prompt": "new managed request"}
+        assert hook(adapter, "user-prompt-submit", fresh_prompt, environment) == {}
+        first_stop = hook(adapter, "stop", {**stop_event, "turn_id": "turn-first-stop"}, environment)
+        assert first_stop["decision"] == "block"
+        same_text = {**prompt_event, "turn_id": "turn-same-text", "prompt": first_stop["reason"]}
+        assert hook(adapter, "user-prompt-submit", same_text, environment) == {}
+        updated_request = json.loads(
+            (project / ".ai-loop" / "runs" / next_phase / "request-envelope.json").read_text(encoding="utf-8")
+        )
+        assert [item["text"] for item in updated_request["revisions"]] == [first_stop["reason"]]
 
     print(
         json.dumps(

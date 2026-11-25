@@ -88,11 +88,12 @@ def run_gate(
 def complete_probe(plugin_root: Path = PLUGIN) -> dict[str, Any]:
     contract = json.loads((plugin_root / "capabilities" / "required.json").read_text(encoding="utf-8"))
     adapter = json.loads((plugin_root / "adapters" / "codex-0.147.json").read_text(encoding="utf-8"))
+    manifest = json.loads((plugin_root / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     return {
         "schema": "sci-loop-runtime-probe-v1",
         "runtime": "codex",
         "runtime_version": "0.147.0",
-        "plugin_version": "1.0.0",
+        "plugin_version": manifest["version"],
         "adapter_id": adapter["adapter_id"],
         "plugin_tree_sha256": plugin_tree_hash(plugin_root),
         "runtime_artifact_sha256": "1" * 64,

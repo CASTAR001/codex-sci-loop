@@ -7,10 +7,10 @@ import argparse
 import hashlib
 import json
 import os
-import shutil
 import stat
 import sys
 import tempfile
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -26,6 +26,8 @@ import sci_loop as loop  # noqa: E402
 MAX_EVENT_BYTES = 2 * 1024 * 1024
 MAX_PROMPT_BYTES = 1024 * 1024
 REVIEWER_TYPE = "independent_completion_auditor"
+PAUSE_PROMPT = "sci-loop pause"
+RESUME_PROMPT = "sci-loop resume"
 COMMON = {"session_id", "transcript_path", "cwd", "hook_event_name", "model", "permission_mode"}
 EVENT_FIELDS = {
     "SessionStart": COMMON | {"source"},
@@ -48,10 +50,6 @@ COMMAND_EVENTS = {
 
 class AdapterError(RuntimeError):
     pass
-
-
-def canonical_bytes(value: Any) -> bytes:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
 def digest_text(value: str) -> str:
@@ -140,11 +138,11 @@ def private_directory(path: Path, root: Path) -> Path:
         raise AdapterError("adapter state escapes PLUGIN_DATA") from exc
     if path.exists() and (path.is_symlink() or not path.is_dir()):
         raise AdapterError("adapter state directory is unsafe")
-    relative = path.resolve().relative_to(root.resolve())
+    relative = path.relative_to(root)
     current = root
     for part in relative.parts:
         current = current / part
-        if current.exists() and current.is_symlink():
+        if current.is_symlink():
             raise AdapterError("adapter state path contains a symlink")
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     path.chmod(0o700)
@@ -166,7 +164,7 @@ def read_state(path: Path, label: str) -> dict[str, Any]:
     return value
 
 
-def current_phase(project: Path) -> tuple[dict[str, Path], dict[str, Any], dict[str, Any]] | None:
+def current_phase(project: Path) -> tuple[dict[str, Path], dict[str, Any]] | None:
     if not (project / ".ai-loop" / "loop.config.json").is_file():
         return None
     try:
@@ -174,9 +172,9 @@ def current_phase(project: Path) -> tuple[dict[str, Path], dict[str, Any], dict[
     except loop.LoopError as exc:
         raise AdapterError(str(exc)) from exc
     phase = status.get("current_phase")
-    if not isinstance(phase, dict) or phase.get("status") in {"accepted", "rework", "blocked"}:
+    if not isinstance(phase, dict):
         return None
-    return paths, status, phase
+    return paths, phase
 
 
 def runtime_bootstrap(project: Path, event: dict[str, Any], state_root: Path) -> None:
@@ -235,28 +233,50 @@ def runtime_bootstrap(project: Path, event: dict[str, Any], state_root: Path) ->
     )
 
 
-def continuation_marker(state: Path) -> Path:
-    return state / "continuation-prompt.json"
+def phase_control_path(state: Path, project: Path, phase_id: str) -> Path:
+    phase_key = digest_text(f"{project}\0{phase_id}")
+    return state / f"phase-control-{phase_key}.json"
 
 
-def capture_request(project: Path, event: dict[str, Any], state_root: Path) -> None:
+def read_phase_control(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {"state": "ready"}
+    value = read_state(path, "phase control")
+    if value.get("state") not in {"ready", "paused", "continuation-used"}:
+        raise AdapterError("managed phase control state is invalid")
+    return value
+
+
+def capture_request(project: Path, event: dict[str, Any], state_root: Path) -> dict[str, Any]:
     prompt = event.get("prompt")
     if not isinstance(prompt, str) or not prompt.strip() or len(prompt.encode("utf-8")) > MAX_PROMPT_BYTES:
         raise AdapterError("user prompt is empty or exceeds the capture limit")
     state = session_state(state_root, event)
+    phase_context = current_phase(project)
+    active = phase_context is not None and phase_context[1]["status"] not in {"accepted", "rework", "blocked"}
+    control_command = prompt.strip()
     event_hash = digest_text(f"{event['session_id']}\0{event['turn_id']}\0{prompt}")
+    if not active and control_command in {PAUSE_PROMPT, RESUME_PROMPT}:
+        return {"decision": "block", "reason": "No active sci-loop phase in this project."}
+    if active:
+        paths, phase = phase_context
+        control = phase_control_path(state, project, phase["phase_id"])
+        control_state = read_phase_control(control)
+        if control_command == PAUSE_PROMPT:
+            loop.atomic_json(control, {"state": "paused", "command_event_sha256": event_hash})
+            return {"decision": "block", "reason": f"sci-loop paused. Send `{RESUME_PROMPT}` to resume."}
+        if control_command == RESUME_PROMPT:
+            if control_state.get("command_event_sha256") != event_hash:
+                loop.atomic_json(control, {"state": "ready", "command_event_sha256": event_hash})
+            return {"systemMessage": "sci-loop resumed. Completion still requires a fresh signed receipt."}
+        if control_state["state"] == "paused":
+            return {"decision": "block", "reason": f"sci-loop is paused. Send `{RESUME_PROMPT}` first."}
     captured = private_directory(state / "captured-prompts", state_root) / f"{event_hash}.json"
     if captured.is_file():
-        return
-    marker_path = continuation_marker(state)
-    if marker_path.is_file():
-        marker = read_state(marker_path, "continuation prompt marker")
-        if marker == {"schema": "sci-loop-continuation-marker-v1", "prompt_sha256": digest_text(prompt)}:
-            marker_path.unlink()
-            loop.atomic_json(captured, {"schema": "sci-loop-captured-prompt-v1", "internal_continuation": True})
-            return
-    phase_context = current_phase(project)
-    if phase_context is None:
+        return {}
+    # Codex 0.147 injects Stop continuation messages into its running turn.
+    # UserPromptSubmit receives actual user prompts, even when the text matches one.
+    if not active:
         pending = private_directory(state_root / "pending-requests", state_root)
         loop.atomic_json(
             pending / f"{event_hash}.json",
@@ -274,8 +294,7 @@ def capture_request(project: Path, event: dict[str, Any], state_root: Path) -> N
             },
         )
         loop.atomic_json(captured, {"schema": "sci-loop-captured-prompt-v1", "internal_continuation": False})
-        return
-    paths, _status, phase = phase_context
+        return {}
     run_dir = paths["runs"] / str(phase["phase_id"])
     request_path = run_dir / "request-envelope.json"
     if not request_path.is_file():
@@ -290,16 +309,18 @@ def capture_request(project: Path, event: dict[str, Any], state_root: Path) -> N
         audit.validate_request(envelope)
         if envelope["request_id"] == f"request-{event_hash[:16]}" and envelope["original_request"] == prompt:
             loop.atomic_json(captured, {"schema": "sci-loop-captured-prompt-v1", "internal_continuation": False})
-            return
+            return {}
         revision_id = f"revision-{event_hash[:16]}"
         existing = {item.get("revision_id"): item.get("text") for item in envelope["revisions"]}
         if revision_id in existing:
             if existing[revision_id] != prompt:
                 raise AdapterError("captured request revision identity collided")
-            return
+            return {}
         envelope["revisions"].append({"revision_id": revision_id, "text": prompt})
     loop.atomic_json(request_path, envelope)
+    review_request_path(state).unlink(missing_ok=True)
     loop.atomic_json(captured, {"schema": "sci-loop-captured-prompt-v1", "internal_continuation": False})
+    return {}
 
 
 def review_request_path(state: Path) -> Path:
@@ -318,15 +339,13 @@ def prepare_review_request(
     project: Path,
     event: dict[str, Any],
     state_root: Path,
-    protected_root: Path | None,
+    protected_root: Path,
+    paths: dict[str, Path],
+    phase: dict[str, Any],
 ) -> dict[str, Any] | None:
-    phase_context = current_phase(project)
-    if phase_context is None:
-        return None
-    paths, _status, phase = phase_context
     phase_id = str(phase["phase_id"])
     snapshot_path = paths["runs"] / phase_id / "audit-snapshot.json"
-    if not snapshot_path.is_file() or protected_root is None:
+    if not snapshot_path.is_file():
         return None
     snapshot = audit.read_object(snapshot_path, "audit snapshot")
     certification_path = audit.protected_file(protected_root, "runtime-certification.json")
@@ -366,7 +385,11 @@ def validate_review_request(value: dict[str, Any]) -> None:
         raise AdapterError("review request schema is invalid")
     if value.get("reviewer_type") != REVIEWER_TYPE or not isinstance(value.get("delegation_message"), str):
         raise AdapterError("review request identity is invalid")
+    if not isinstance(value.get("phase_id"), str) or not loop.PHASE_ID_RE.fullmatch(value["phase_id"]):
+        raise AdapterError("review request phase id is invalid")
     audit.sha256(value.get("snapshot_sha256"), "review request snapshot")
+    if value["delegation_message"] != delegation_message(value["phase_id"], value["snapshot_sha256"]):
+        raise AdapterError("review request delegation changed")
     if not isinstance(value.get("host_isolation_attested"), bool):
         raise AdapterError("review request isolation attestation is invalid")
 
@@ -459,6 +482,7 @@ def reviewer_start(event: dict[str, Any], state_root: Path) -> dict[str, Any]:
         return {"systemMessage": "Independent audit isolation could not be verified; completion will remain blocked."}
     if not isinstance(event.get("agent_id"), str) or not event["agent_id"]:
         raise AdapterError("reviewer agent id is invalid")
+    spawn_path.unlink()
     loop.atomic_json(
         state / "reviewer-start.json",
         {
@@ -492,7 +516,14 @@ def atomic_copy(source: Path, target: Path, limit: int) -> None:
     temporary = Path(raw_temporary)
     try:
         with source.open("rb") as input_handle, os.fdopen(descriptor, "wb") as output_handle:
-            shutil.copyfileobj(input_handle, output_handle, length=1024 * 1024)
+            copied = 0
+            while chunk := input_handle.read(min(1024 * 1024, limit + 1 - copied)):
+                copied += len(chunk)
+                if copied > limit:
+                    raise AdapterError("reviewer transcript exceeds the size limit")
+                output_handle.write(chunk)
+            if not copied:
+                raise AdapterError("reviewer transcript is empty")
             output_handle.flush()
             os.fsync(output_handle.fileno())
         temporary.chmod(0o600)
@@ -533,6 +564,11 @@ def reviewer_stop(project: Path, event: dict[str, Any], state_root: Path) -> dic
             raise ValueError("root is not an object")
         snapshot_path = project / ".ai-loop" / "runs" / request["phase_id"] / "audit-snapshot.json"
         snapshot = audit.read_object(snapshot_path, "audit snapshot")
+        if audit.canonical_hash(snapshot) != request["snapshot_sha256"]:
+            raise ValueError("the independent review snapshot changed")
+        _, request_hash = audit.read_object_with_hash(snapshot_path.with_name("request-envelope.json"), "request envelope")
+        if request_hash != snapshot.get("source_hashes", {}).get("request_envelope_sha256"):
+            raise ValueError("the user request changed during independent review")
         audit.validate_outcome(snapshot, outcome)
         if outcome.get("reviewer_thread_id") != event["agent_id"]:
             raise ValueError("reviewer result thread identity does not match the observed subagent")
@@ -578,12 +614,15 @@ def invalid_reviewer_output(event: dict[str, Any], reason: str) -> dict[str, Any
 
 
 def stop_reason(phase: dict[str, Any], request: dict[str, Any] | None) -> str:
-    if phase.get("status") == "started":
-        return "Continue the active sci-loop phase: finish the scoped work and collect deterministic evidence."
+    if phase.get("status") in {"started", "collecting"}:
+        return "Finish the scoped sci-loop work and collect deterministic evidence."
     if phase.get("status") == "evidence_collected":
-        return "Continue the sci-loop closeout: prepare the canonical audit package and snapshot."
+        return "Prepare the canonical sci-loop audit package and snapshot."
     if request is None:
-        return "Continue the sci-loop closeout: create the canonical audit snapshot before requesting review."
+        return (
+            "Continue the sci-loop closeout. If the request, workspace, or verification changed, run collect "
+            "and audit-pack again. Create the current canonical audit snapshot before requesting review."
+        )
     return (
         "Continue the sci-loop closeout. After LumiForge attests the read-only boundary, spawn exactly "
         "independent_completion_auditor with fork_turns=none and the following exact message, then wait for "
@@ -592,52 +631,49 @@ def stop_reason(phase: dict[str, Any], request: dict[str, Any] | None) -> str:
     )
 
 
+def stop_denied(reason: str) -> dict[str, Any]:
+    return {"continue": False, "stopReason": reason, "systemMessage": reason}
+
+
 def stop_hook(project: Path, event: dict[str, Any], state_root: Path) -> dict[str, Any]:
     phase_context = current_phase(project)
     if phase_context is None:
-        return {}
-    paths, _status, phase = phase_context
-    phase_id = str(phase["phase_id"])
+        return stop_denied("Managed sci-loop has no phase with a signed completion decision.")
+    paths, phase = phase_context
+    phase_id = phase["phase_id"]
+    control = phase_control_path(session_state(state_root, event), project, phase_id)
+    control_state = read_phase_control(control)
+    if control_state["state"] == "paused":
+        return stop_denied(f"sci-loop paused. Send `{RESUME_PROMPT}` to resume.")
+    if phase["status"] in {"blocked", "rework"}:
+        return stop_denied(f"sci-loop phase {phase_id} is {phase['status']} and requires follow-up.")
     trusted_raw = os.environ.get("LUMIFORGE_SCI_LOOP_TRUSTED_ROOT", "")
-    protected: Path | None = None
-    if trusted_raw:
+    if not trusted_raw:
+        return stop_denied("Managed sci-loop requires a protected receipt root.")
+    protected = audit.trusted_root(trusted_raw, project)
+    if phase["status"] in {"audit_prepared", "accepted"}:
         try:
-            protected = audit.trusted_root(trusted_raw, project)
             payload, _exit_code = audit.gate(project, phase_id, protected)
             if payload["state"] == "ALLOW_COMPLETE":
                 audit.apply_terminal_decision(project, phase_id, payload)
                 return {"continue": True}
             if payload["state"] == "BLOCK_REQUIRES_USER":
                 audit.apply_terminal_decision(project, phase_id, payload)
-                return {
-                    "continue": False,
-                    "stopReason": "Independent audit requires user input.",
-                    "systemMessage": "sci-loop is blocked pending user input; it is not complete.",
-                }
+                return stop_denied("Independent audit requires user input before sci-loop can complete.")
         except (audit.AuditProtocolError, loop.LoopError):
             pass
-    snapshot_path = paths["runs"] / phase_id / "audit-snapshot.json"
+    if phase["status"] == "accepted":
+        return stop_denied("The historical sci-loop acceptance could not be revalidated against current evidence.")
+    if event["stop_hook_active"] or control_state["state"] == "continuation-used":
+        return stop_denied(f"Completion remains denied. Send `{RESUME_PROMPT}` to authorize another continuation.")
+    request = None
     try:
-        request = (
-            prepare_review_request(project, event, state_root, protected)
-            if snapshot_path.is_file()
-            else None
-        )
+        if phase["status"] == "audit_prepared":
+            request = prepare_review_request(project, event, state_root, protected, paths, phase)
     except (audit.AuditProtocolError, loop.LoopError):
-        request = None
-    reason = stop_reason(phase, request)
-    state = session_state(state_root, event)
-    loop.atomic_json(
-        continuation_marker(state),
-        {"schema": "sci-loop-continuation-marker-v1", "prompt_sha256": digest_text(reason)},
-    )
-    if event.get("stop_hook_active") is True:
-        return {
-            "continue": False,
-            "stopReason": "sci-loop completion gate did not pass.",
-            "systemMessage": "Completion remains denied; LumiForge will surface the non-passing gate state.",
-        }
-    return {"decision": "block", "reason": reason}
+        pass
+    loop.atomic_json(control, {**control_state, "state": "continuation-used"})
+    return {"decision": "block", "reason": stop_reason(phase, request)}
 
 
 def session_start(project: Path, event: dict[str, Any], state_root: Path) -> dict[str, Any]:
@@ -654,7 +690,9 @@ def error_output(command: str, error: Exception, event: dict[str, Any] | None) -
         return {"decision": "block", "reason": message}
     if command == "reviewer-start":
         return {"systemMessage": message}
-    if command in {"reviewer-stop", "stop"}:
+    if command == "stop":
+        return stop_denied(message)
+    if command == "reviewer-stop":
         if event and event.get("stop_hook_active") is not True:
             return {"decision": "block", "reason": message}
         return {"continue": False, "stopReason": message, "systemMessage": "sci-loop failed closed."}
@@ -690,23 +728,25 @@ def main() -> int:
         event = read_event(COMMAND_EVENTS[args.command])
         project = git_project(event["cwd"])
         if project is None:
-            emit({})
-            return 0
+            raise AdapterError("managed sci-loop requires a Git project")
         state_root = plugin_data()
         if args.command == "session-start":
             output = session_start(project, event, state_root)
-        elif args.command == "user-prompt-submit":
-            runtime_bootstrap(project, event, state_root)
-            capture_request(project, event, state_root)
-            output = {}
-        elif args.command == "reviewer-pre-tool":
-            output = pre_tool(event, state_root)
-        elif args.command == "reviewer-start":
-            output = reviewer_start(event, state_root)
-        elif args.command == "reviewer-stop":
-            output = reviewer_stop(project, event, state_root)
         else:
-            output = stop_hook(project, event, state_root)
+            if args.command == "user-prompt-submit":
+                runtime_bootstrap(project, event, state_root)
+            lock = loop.project_lock(project) if loop.control_paths(project)["config"].is_file() else nullcontext()
+            with lock:
+                if args.command == "user-prompt-submit":
+                    output = capture_request(project, event, state_root)
+                elif args.command == "reviewer-pre-tool":
+                    output = pre_tool(event, state_root)
+                elif args.command == "reviewer-start":
+                    output = reviewer_start(event, state_root)
+                elif args.command == "reviewer-stop":
+                    output = reviewer_stop(project, event, state_root)
+                else:
+                    output = stop_hook(project, event, state_root)
         emit(output)
     except Exception as exc:
         emit(error_output(args.command, exc, event))

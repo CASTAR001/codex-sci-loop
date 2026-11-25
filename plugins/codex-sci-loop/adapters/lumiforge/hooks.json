@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" session-start",
+            "command": "python3 -B \"$PLUGIN_ROOT/hooks/codex_adapter.py\" session-start",
             "timeout": 20,
             "statusMessage": "Validating sci-loop runtime"
           }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" user-prompt-submit",
+            "command": "python3 -B \"$PLUGIN_ROOT/hooks/codex_adapter.py\" user-prompt-submit",
             "timeout": 20
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-pre-tool",
+            "command": "python3 -B \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-pre-tool",
             "timeout": 10,
             "statusMessage": "Validating independent reviewer isolation"
           }
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-start",
+            "command": "python3 -B \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-start",
             "timeout": 10
           }
         ]
@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-stop",
+            "command": "python3 -B \"$PLUGIN_ROOT/hooks/codex_adapter.py\" reviewer-stop",
             "timeout": 30,
             "statusMessage": "Validating independent audit output"
           }
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$PLUGIN_ROOT/hooks/codex_adapter.py\" stop",
+            "command": "python3 -B \"$PLUGIN_ROOT/hooks/codex_adapter.py\" stop",
             "timeout": 30,
             "statusMessage": "Checking signed completion receipt"
           }

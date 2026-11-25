@@ -58,17 +58,26 @@ def file_hash(path: Path) -> str:
 
 
 def read_object(path: Path, label: str) -> dict[str, Any]:
+    value, _digest = read_object_with_hash(path, label)
+    return value
+
+
+def read_object_with_hash(path: Path, label: str) -> tuple[dict[str, Any], str]:
     try:
-        if path.stat().st_size > MAX_JSON_BYTES:
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise AuditProtocolError("BLOCK_INVALID", f"{label} is unsafe")
+        with path.open("rb") as handle:
+            raw = handle.read(MAX_JSON_BYTES + 1)
+        if len(raw) > MAX_JSON_BYTES:
             raise AuditProtocolError("BLOCK_INVALID", f"{label} exceeds the JSON size limit")
-        value = json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(raw.decode("utf-8"))
     except FileNotFoundError as exc:
         raise AuditProtocolError("BLOCK_INVALID", f"{label} is missing") from exc
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise AuditProtocolError("BLOCK_INVALID", f"{label} is not valid JSON: {exc}") from exc
     if not isinstance(value, dict):
         raise AuditProtocolError("BLOCK_INVALID", f"{label} root must be an object")
-    return value
+    return value, hashlib.sha256(raw).hexdigest()
 
 
 def exact_fields(value: dict[str, Any], fields: set[str], label: str) -> None:
@@ -244,67 +253,29 @@ def current_workspace(
     phase: dict[str, Any],
     run_dir: Path,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    repositories = loop.resolve_evidence_repositories(root, config)
-    heads = phase.get("repository_heads")
-    if not isinstance(heads, dict) or set(heads) != set(repositories):
-        raise AuditProtocolError("BLOCK_STALE", "evidence repository identities changed")
-    patches: list[str] = []
-    statuses: list[str] = []
-    changed: list[str] = []
-    records: list[dict[str, Any]] = []
-    for repository_id, repository in repositories.items():
-        base = heads.get(repository_id)
-        if not isinstance(base, str) or not base:
-            raise AuditProtocolError("BLOCK_INVALID", "repository base commit is missing")
-        patch = loop.tracked_patch(repository_id, repository, base)
-        patch += loop.untracked_business_patch(root, repository_id, repository)
-        status = loop.business_status(repository_id, repository)
-        files = loop.changed_files(repository_id, repository, base)
-        patches.append(patch)
-        statuses.append(loop.prefix_lines(repository_id, status))
-        changed.extend(item if repository_id == "." else f"{repository_id}/{item}" for item in files)
-        records.append(
-            {
-                "repository": repository_id,
-                "base_commit": base,
-                "current_head": loop.git(repository, "rev-parse", "HEAD").strip(),
-                "status_sha256": hashlib.sha256(status.encode("utf-8")).hexdigest(),
-                "patch_sha256": hashlib.sha256(patch.encode("utf-8")).hexdigest(),
-                "changed_files_sha256": canonical_hash(files),
-            }
-        )
-    actual_patch = "".join(patches)
-    actual_status = "".join(statuses)
-    actual_changed = "\n".join(sorted(set(changed))) + "\n"
-    expected = {
-        "diff.patch": actual_patch,
-        "status_after.txt": actual_status,
-        "changed_files.txt": actual_changed,
-    }
-    for name, content in expected.items():
+    expected, records = loop.capture_workspace(root, config, phase)
+    manifest = []
+    for name, evidence_id in (
+        ("diff.patch", "workspace.patch"),
+        ("status_after.txt", "workspace.status"),
+        ("changed_files.txt", "workspace.changed-files"),
+    ):
         path = run_dir / name
-        try:
-            captured = path.read_text(encoding="utf-8")
-        except OSError as exc:
-            raise AuditProtocolError("BLOCK_INVALID", f"captured evidence is unreadable: {name}") from exc
-        if captured != content:
+        entry = evidence_entry(evidence_id, path)
+        if entry["sha256"] != hashlib.sha256(expected[name].encode("utf-8")).hexdigest():
             raise AuditProtocolError("BLOCK_STALE", f"captured evidence is stale: {name}")
-    manifest = [
-        evidence_entry("workspace.patch", run_dir / "diff.patch"),
-        evidence_entry("workspace.status", run_dir / "status_after.txt"),
-        evidence_entry("workspace.changed-files", run_dir / "changed_files.txt"),
-        evidence_entry("verification.log", run_dir / "verify.log"),
-    ]
+        manifest.append(entry)
     return records, manifest
 
 
-def phase_by_id(status: dict[str, Any], phase_id: str) -> dict[str, Any]:
+def phase_by_id(status: dict[str, Any], phase_id: str, *, allow_accepted: bool = False) -> dict[str, Any]:
     current = status.get("current_phase")
     if not isinstance(current, dict) or current.get("phase_id") != phase_id:
         raise AuditProtocolError("BLOCK_INVALID", "phase is not current")
-    if current.get("status") != "audit_prepared":
+    accepted = current.get("status") == "accepted" and current.get("audit_snapshot_sha256")
+    if current.get("status") != "audit_prepared" and not (allow_accepted and accepted):
         raise AuditProtocolError("BLOCK_INVALID", "phase is not ready for independent audit")
-    if current.get("verify_exit_code") != 0:
+    if type(current.get("verify_exit_code")) is not int or current["verify_exit_code"] != 0:
         raise AuditProtocolError("BLOCK_AUDIT", "deterministic verification did not pass")
     return current
 
@@ -346,25 +317,41 @@ def protected_file(root: Path, name: str, required: bool = True) -> Path:
     return path
 
 
-def build_snapshot(project_root: Path, phase_id: str, certification_path: Path) -> dict[str, Any]:
+def build_snapshot(
+    project_root: Path, phase_id: str, certification_path: Path, *, allow_accepted: bool = False,
+) -> dict[str, Any]:
     paths, config, status = loop.validate_project(project_root)
-    phase = phase_by_id(status, phase_id)
+    phase = phase_by_id(status, phase_id, allow_accepted=allow_accepted)
     run_dir = paths["runs"] / phase_id
     request_path = run_dir / "request-envelope.json"
     criteria_path = run_dir / "acceptance-criteria.json"
     claims_path = run_dir / "completion-claims.json"
-    request = read_object(request_path, "request envelope")
-    criteria = read_object(criteria_path, "acceptance criteria")
-    claims = read_object(claims_path, "completion claims")
-    certification = read_object(certification_path, "runtime certification")
+    request, request_hash = read_object_with_hash(request_path, "request envelope")
+    criteria, criteria_hash = read_object_with_hash(criteria_path, "acceptance criteria")
+    claims, claims_hash = read_object_with_hash(claims_path, "completion claims")
+    certification, certification_hash = read_object_with_hash(certification_path, "runtime certification")
     validate_request(request)
     criterion_ids = validate_criteria(criteria)
     validate_claims(claims, criterion_ids)
     validate_certification(certification, receipt_public_key())
+    certification_entry = evidence_entry("runtime.certification", certification_path)
+    if certification_entry["sha256"] != certification_hash:
+        raise AuditProtocolError("BLOCK_STALE", "runtime certification changed while building the audit snapshot")
+    log = evidence_entry("verification.log", run_dir / "verify.log")
+    command = nonempty_text(phase.get("verify_command"), "verification command")
+    binding = phase.get("verification_binding")
+    expected = {
+        "request_envelope_sha256": request_hash,
+        "command": command.strip(),
+        "log_sha256": log["sha256"],
+    }
+    if not isinstance(binding, dict) or any(binding.get(key) != value for key, value in expected.items()):
+        raise AuditProtocolError("BLOCK_STALE", "verification is stale; run collect and audit-pack again")
     repositories, manifest = current_workspace(project_root, config, phase, run_dir)
-    manifest.append(evidence_entry("runtime.certification", certification_path))
-    verify_log = run_dir / "verify.log"
-    return {
+    if binding.get("workspace_sha256") != canonical_hash(repositories):
+        raise AuditProtocolError("BLOCK_STALE", "verification is stale; run collect and audit-pack again")
+    manifest.extend((certification_entry, log))
+    snapshot = {
         "schema": "sci-loop-audit-snapshot-v1",
         "phase_id": phase_id,
         "phase_title": nonempty_text(phase.get("title"), "phase title"),
@@ -373,21 +360,24 @@ def build_snapshot(project_root: Path, phase_id: str, certification_path: Path) 
         "acceptance_criteria": criteria,
         "completion_claims": claims,
         "source_hashes": {
-            "request_envelope_sha256": file_hash(request_path),
-            "acceptance_criteria_sha256": file_hash(criteria_path),
-            "completion_claims_sha256": file_hash(claims_path),
-            "runtime_certification_sha256": file_hash(certification_path),
+            "request_envelope_sha256": request_hash,
+            "acceptance_criteria_sha256": criteria_hash,
+            "completion_claims_sha256": claims_hash,
+            "runtime_certification_sha256": certification_hash,
         },
         "workspace": {"repositories": repositories},
         "verification": {
-            "command": nonempty_text(phase.get("verify_command"), "verification command"),
+            "command": command,
             "exit_code": 0,
-            "log_sha256": file_hash(verify_log),
-            "log_bytes": verify_log.stat().st_size,
+            "log_sha256": log["sha256"],
+            "log_bytes": log["bytes"],
         },
         "evidence_manifest": sorted(manifest, key=lambda item: item["id"]),
         "runtime_certification": certification,
     }
+    if phase["status"] == "accepted" and phase["audit_snapshot_sha256"] != canonical_hash(snapshot):
+        raise AuditProtocolError("BLOCK_STALE", "workspace no longer matches the recorded terminal decision")
+    return snapshot
 
 
 def derived_outcome(results: list[dict[str, Any]]) -> str:
@@ -532,38 +522,38 @@ def verify_receipt_signature(receipt: dict[str, Any], signature_path: Path) -> N
 
 
 def gate(project_root: Path, phase_id: str, protected_root: Path) -> tuple[dict[str, Any], int]:
+    receipt_path = protected_file(protected_root, "audit-receipt.json", required=False)
+    signature_path = protected_file(protected_root, "audit-receipt.sig", required=False)
+    if not receipt_path.is_file() or not signature_path.is_file():
+        raise AuditProtocolError("BLOCK_AUDIT", "audit receipt or signature is missing")
     certification_path = protected_file(protected_root, "runtime-certification.json")
     run_dir = project_root / ".ai-loop" / "runs" / phase_id
     snapshot_path = run_dir / "audit-snapshot.json"
     saved_snapshot = read_object(snapshot_path, "audit snapshot")
-    current_snapshot = build_snapshot(project_root, phase_id, certification_path)
+    current_snapshot = build_snapshot(project_root, phase_id, certification_path, allow_accepted=True)
     if canonical_bytes(saved_snapshot) != canonical_bytes(current_snapshot):
         raise AuditProtocolError("BLOCK_STALE", "audit snapshot is no longer current")
     snapshot_hash = canonical_hash(saved_snapshot)
     outcome_path = protected_file(protected_root, "audit-outcome.json")
     observation_path = protected_file(protected_root, "reviewer-observation.json")
     transcript_path = protected_file(protected_root, "reviewer-transcript.log")
-    receipt_path = protected_file(protected_root, "audit-receipt.json", required=False)
-    signature_path = protected_file(protected_root, "audit-receipt.sig", required=False)
-    outcome = read_object(outcome_path, "audit outcome")
+    outcome, outcome_hash = read_object_with_hash(outcome_path, "audit outcome")
     overall = validate_outcome(saved_snapshot, outcome)
-    observation = read_object(observation_path, "reviewer observation")
+    observation, observation_hash = read_object_with_hash(observation_path, "reviewer observation")
     validate_observation(observation, snapshot_hash, outcome["reviewer_thread_id"])
     transcript_size = transcript_path.stat().st_size
     if not 1 <= transcript_size <= MAX_REVIEWER_TRANSCRIPT_BYTES:
         raise AuditProtocolError("BLOCK_AUDIT", "reviewer transcript size is invalid")
-    if not receipt_path.is_file() or not signature_path.is_file():
-        raise AuditProtocolError("BLOCK_AUDIT", "audit receipt or signature is missing")
     receipt = read_object(receipt_path, "audit receipt")
     verify_receipt_signature(receipt, signature_path)
     expected_receipt = {
         "schema": "sci-loop-audit-receipt-v1",
         "issued_by": "lumiforge-independent-audit-host-v1",
         "snapshot_sha256": snapshot_hash,
-        "audit_outcome_sha256": file_hash(outcome_path),
+        "audit_outcome_sha256": outcome_hash,
         "reviewer_transcript_sha256": file_hash(transcript_path),
-        "reviewer_observation_sha256": file_hash(observation_path),
-        "runtime_certification_sha256": file_hash(certification_path),
+        "reviewer_observation_sha256": observation_hash,
+        "runtime_certification_sha256": saved_snapshot["source_hashes"]["runtime_certification_sha256"],
         "receipt_authority_public_key_sha256": file_hash(receipt_public_key()),
         "receipt_signature_algorithm": "ed25519",
         "reviewer_thread_id": outcome["reviewer_thread_id"],
@@ -598,9 +588,10 @@ def gate_result(state: str, reasons: list[str], phase_id: str, snapshot_hash: st
 def cmd_snapshot(project_root: Path, args: argparse.Namespace) -> int:
     protected_root = trusted_root(args.trusted_root, project_root)
     certification_path = protected_file(protected_root, "runtime-certification.json")
-    snapshot = build_snapshot(project_root, args.phase_id, certification_path)
-    output = project_root / ".ai-loop" / "runs" / args.phase_id / "audit-snapshot.json"
-    loop.atomic_json(output, snapshot)
+    with loop.project_lock(project_root):
+        snapshot = build_snapshot(project_root, args.phase_id, certification_path)
+        output = project_root / ".ai-loop" / "runs" / args.phase_id / "audit-snapshot.json"
+        loop.atomic_json(output, snapshot)
     print(json.dumps({"ok": True, "snapshot_sha256": canonical_hash(snapshot)}, sort_keys=True))
     return 0
 
@@ -622,8 +613,15 @@ def apply_terminal_decision(
         raise AuditProtocolError("BLOCK_AUDIT", "non-terminal gate state cannot finalize a phase")
     paths, _config, status = loop.validate_project(project_root)
     decision = "accepted" if payload["state"] == "ALLOW_COMPLETE" else "blocked"
+    phase = phase_by_id(status, phase_id, allow_accepted=True)
+    if phase["status"] == decision and phase.get("audit_snapshot_sha256") == payload["snapshot_sha256"]:
+        return
+    if phase["status"] != "audit_prepared":
+        raise AuditProtocolError("BLOCK_STALE", "phase was already finalized with a different decision")
     decided_at = loop.utc_now()
-    status = loop.update_phase(status, phase_id, status=decision, decided_at=decided_at)
+    status = loop.update_phase(
+        status, phase_id, status=decision, decided_at=decided_at, audit_snapshot_sha256=payload["snapshot_sha256"],
+    )
     status["last_decision"] = decision.upper()
     loop.atomic_json(paths["status"], status)
     loop.append_event(
@@ -637,9 +635,10 @@ def apply_terminal_decision(
 
 def run_gate_command(project_root: Path, args: argparse.Namespace, finalize: bool) -> int:
     protected_root = trusted_root(args.trusted_root, project_root)
-    payload, exit_code = gate(project_root, args.phase_id, protected_root)
-    if finalize and payload["state"] in {"ALLOW_COMPLETE", "BLOCK_REQUIRES_USER"}:
-        apply_terminal_decision(project_root, args.phase_id, payload)
+    with loop.project_lock(project_root):
+        payload, exit_code = gate(project_root, args.phase_id, protected_root)
+        if finalize and payload["state"] in {"ALLOW_COMPLETE", "BLOCK_REQUIRES_USER"}:
+            apply_terminal_decision(project_root, args.phase_id, payload)
     print(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
     return exit_code
 

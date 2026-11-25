@@ -66,12 +66,13 @@ def schema(name: str) -> dict[str, Any]:
 
 
 def certification() -> dict[str, Any]:
+    manifest = json.loads((PLUGIN / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
     return {
         "schema": "sci-loop-runtime-certification-identity-v1",
         "state": "CERTIFIED",
         "runtime": "codex",
         "runtime_version": "0.147.0",
-        "plugin_version": "1.0.0",
+        "plugin_version": manifest["version"],
         "adapter_id": "codex-hooks-0.147-v1",
         "certificate_sha256": "1" * 64,
         "probe_sha256": "2" * 64,
@@ -338,7 +339,23 @@ def main() -> None:
         write_json(request_path, request)
         decision = command("completion-gate", project, trusted, 30)
         assert decision["state"] == "BLOCK_STALE"
+        assert "verification is stale" in command("snapshot", project, trusted, 30)["reasons"][0]
         write_json(request_path, request_envelope())
+
+        verify_path = request_path.with_name("verify.log")
+        log = verify_path.read_bytes()
+        verify_path.write_bytes(log + b"extra line\n")
+        assert "verification is stale" in command("snapshot", project, trusted, 30)["reasons"][0]
+        verify_path.write_bytes(log)
+
+        status_path = project / ".ai-loop" / "status.json"
+        status_bytes = status_path.read_bytes()
+        legacy_status = json.loads(status_bytes)
+        legacy_status["current_phase"].pop("verification_binding")
+        legacy_status["phases"][-1].pop("verification_binding")
+        write_json(status_path, legacy_status)
+        assert "verification is stale" in command("snapshot", project, trusted, 30)["reasons"][0]
+        status_path.write_bytes(status_bytes)
 
         changed_certification = certification()
         changed_certification["runtime_artifact_sha256"] = "9" * 64
@@ -457,9 +474,27 @@ def main() -> None:
             expect=1,
         ).stdout
 
-        set_audit(trusted, snapshot, "PASS")
+        write_json(request_path, request)
+        fixture.write_text("staged candidate one\n", encoding="utf-8")
+        run("git", "add", "fixture.txt", cwd=project)
+        fixture.write_text("candidate\n", encoding="utf-8")
+        run("python3", str(CORE), "collect", "--project-root", str(project), "--phase-id", PHASE_ID)
+        run("python3", str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", PHASE_ID)
+        refreshed = command("snapshot", project, trusted, 0)
+        updated_snapshot = json.loads(request_path.with_name("audit-snapshot.json").read_text(encoding="utf-8"))
+        assert updated_snapshot["request"] == request and refreshed["snapshot_sha256"] != canonical_hash(snapshot)
+        assert command("completion-gate", project, trusted, 30)["state"] == "BLOCK_STALE"
+        set_audit(trusted, updated_snapshot, "PASS")
         decision = command("finalize", project, trusted, 0)
         assert decision["state"] == "ALLOW_COMPLETE"
+        assert command("completion-gate", project, trusted, 0) == decision
+        assert command("finalize", project, trusted, 0) == decision
+        fixture.write_text("staged candidate two\n", encoding="utf-8")
+        run("git", "add", "fixture.txt", cwd=project)
+        fixture.write_text("candidate\n", encoding="utf-8")
+        assert "verification is stale" in command("completion-gate", project, trusted, 30)["reasons"][0]
+        fixture.write_text("changed after finalize\n", encoding="utf-8")
+        assert command("completion-gate", project, trusted, 30)["state"] == "BLOCK_STALE"
         resumed = json.loads(
             run("python3", str(CORE), "resume", "--project-root", str(project), "--json").stdout
         )
