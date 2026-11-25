@@ -180,8 +180,11 @@ class AppServer:
         )
         self.send({"method": "initialized"})
 
-    def turn(self, thread_id, prompt):
-        response = self.call("turn/start", threadId=thread_id, input=[{"type": "text", "text": prompt}])
+    def turn(self, thread_id, prompt, *, skill=None):
+        inputs = [{"type": "text", "text": prompt}]
+        if skill is not None:
+            inputs.append({"type": "skill", "name": skill["name"], "path": skill["path"]})
+        response = self.call("turn/start", threadId=thread_id, input=inputs)
         return self.completed(thread_id, response["turn"]["id"])
 
     def completed(self, thread_id, turn_id=None):
@@ -316,9 +319,12 @@ def discover_and_trust(executable: str, workspace: Path, env: dict[str, str], co
     hooks = discovery["data"][0]["hooks"]
     plugin_hooks = [hook for hook in hooks if Path(hook["sourcePath"]).is_relative_to(installed)]
     assert not plugin_hooks, plugin_hooks
-    plugin_skills = {skill["name"].removeprefix(f"{PLUGIN_NAME}:") for skill in skills["data"][0]["skills"]
-                     if Path(skill["path"]).is_relative_to(installed)}
-    assert plugin_skills == PLUGIN_SKILLS, plugin_skills
+    plugin_skills = {
+        skill["name"].removeprefix(f"{PLUGIN_NAME}:"): skill
+        for skill in skills["data"][0]["skills"]
+        if Path(skill["path"]).is_relative_to(installed)
+    }
+    assert set(plugin_skills) == PLUGIN_SKILLS, list(plugin_skills)
     with config.open("a", encoding="utf-8") as stream:
         for hook in hooks:
             if hook["sourcePath"] != str(config.parent / "hooks.json"):
@@ -326,11 +332,35 @@ def discover_and_trust(executable: str, workspace: Path, env: dict[str, str], co
             assert hook["trustStatus"] == "untrusted", hook
             stream.write(f'\n[hooks.state.{json.dumps(hook["key"])}]\ntrusted_hash = {json.dumps(hook["currentHash"])}\n')
     print(f"Discovered {', '.join(sorted(plugin_skills))} and zero packaged lifecycle hooks", flush=True)
+    return plugin_skills
 
 
-def messages(request, role):
-    return [part["text"] for item in request["input"] if item.get("role") == role
+def messages(request, role=None):
+    return [part["text"] for item in request["input"] if role is None or item.get("role") == role
             for part in item.get("content", ()) if "text" in part]
+
+
+def verify_skill_loading(app, provider, workspace, skill):
+    skill_file = Path(skill["path"])
+    body = skill_file.read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
+    body_lines = [line for line in body.splitlines() if len(line.strip()) >= 40]
+    assert body_lines, "Expected substantive research skill instructions"
+
+    thread_id = app.call("thread/start", cwd=str(workspace))["thread"]["id"]
+    start = len(provider.requests)
+    routine = "Make a short checklist for preparing a meeting room."
+    research = f"${skill['name']} Check whether a claimed numerical convergence rate survives grid refinement."
+    assert app.turn(thread_id, routine)["status"] == "completed"
+    assert app.turn(thread_id, research, skill=skill)["status"] == "completed"
+    daily_request, research_request = provider.requests[start:]
+
+    assert routine in messages(daily_request, "user")
+    daily_text = "\n".join((daily_request.get("instructions") or "", *messages(daily_request)))
+    assert all(line not in daily_text for line in body_lines), "Research instructions appeared during the ordinary turn"
+    assert research in messages(research_request, "user")
+    research_text = "\n".join((research_request.get("instructions") or "", *messages(research_request)))
+    assert body in research_text, "Explicit skill input did not inject the installed research instructions"
+    print("Ordinary checklist omitted research instructions. Explicit native skill input loaded the installed body.", flush=True)
 
 
 def assert_no_packaged_hook_runs(app, installed):
@@ -367,7 +397,7 @@ def verify(executable: str):
             subprocess.run(["git", "init", "-q"], cwd=project, env=env, check=True, timeout=10)
         installed = install_fixture(executable, fixture, env)
         write_hook_fixture(config.parent, fixture)
-        discover_and_trust(executable, workspace, env, config, installed)
+        skills = discover_and_trust(executable, workspace, env, config, installed)
         checkpoint(installed, workspace, env, "start", "--request-file", "-", request=ORIGINAL)
         checkpoint(installed, workspace, env, "revise", "--from-revision", "1", "--request-file", "-", request=REVISED)
         checkpoint(installed, workspace, env, "note", "--kind", "decision", "--note", DECISION, "--next", NEXT)
@@ -375,7 +405,7 @@ def verify(executable: str):
         for reply in (FIRST_REPLY, FOLLOWUP_REPLY, "REVISED_ASSISTANT", "RECENT_ASSISTANT",
                       FIRST_REPLY, FOLLOWUP_REPLY, "REVISED_ASSISTANT", "RECENT_ASSISTANT",
                       SUMMARIES[0], "BETWEEN_ASSISTANT", "BETWEEN_ASSISTANT", SUMMARIES[1],
-                      "RESUMED_ASSISTANT", "RESUMED_ASSISTANT"):
+                      "RESUMED_ASSISTANT", "RESUMED_ASSISTANT", "CHECKLIST", "RESEARCH_CHECK"):
             provider.replies.put(reply)
         with AppServer(executable, workspace, env) as app:
             app.initialize()
@@ -416,9 +446,11 @@ def verify(executable: str):
             assert app.turn(thread_id, RESUME)["status"] == "completed"
             assert app.call("thread/resume", threadId=control_id, cwd=str(control))["thread"]["id"] == control_id
             assert app.turn(control_id, RESUME)["status"] == "completed"
+            assert len(provider.requests) == 14
+            verify_skill_loading(app, provider, control, skills["research-verification"])
             assert_no_packaged_hook_runs(app, installed)
 
-        assert len(provider.requests) == 14 and provider.replies.empty()
+        assert len(provider.requests) == 16 and provider.replies.empty()
         assert ORIGINAL in messages(provider.requests[0], "user")
         for index in (8, 11):
             assert any("SYNTHETIC_MANUAL_COMPACTION" in text for text in messages(provider.requests[index], "user"))
