@@ -1,6 +1,6 @@
 # Codex Task Checkpoints
 
-Use `task-checkpoint` to save a request, decisions and the next action in the task's own folder. Resume it later with `show`. For a tracking-only task, `close` records an operator-reported end once the pending action is clear.
+Use `task-checkpoint` to save requests, decisions, completed actions and the next step in the task's own folder. Use `show` for current work and `history` for earlier agreements. Attach observed artifact hashes with `--artifact` at the time of a checkpoint. For a tracking-only task, `close` records an operator-reported end once the pending action is clear.
 
 The Python 3.9+ CLI is `scripts/checkpoint.py`. Run it from the task folder using the absolute script path. Git projects use the worktree root. For a verifiable deliverable, declare a command, run `verify` and use `finish` to check the agreed evidence. An ordinary folder requires explicit `--input` files for verification or review.
 

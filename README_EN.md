@@ -20,9 +20,13 @@ When you pause an ongoing project with an open action, Codex can save the decisi
 | `start --request-file spec.md` | Preserve the supplied request and constraints. Use `-` to read UTF-8 from stdin. |
 | `note --note '…' --next '…'` | Record a decision and the pending action. |
 | `revise --from-revision N --request-file revised.md` | Replace the active contract and preserve prior versions. |
+| `note --kind action --note '…' --artifact result.txt` | Record a completed action and observe the file’s size and SHA-256. The same flags plus `--next` work on `start` and `revise` in one write. |
+| `history --limit 5` | Read revisions with past actions, decisions, pending changes and evidence. Continue with `--before N` or use `--revision N --full`. |
 | `show` | Read the current contract, decisions, pending work and evidence. Use `--full` for the full current request. |
 | `close` | Close a tracking-only task after clearing the pending action with `note --next ''`. Verification remains unverified. |
 | `set-state --state paused --reason '…'` | Pause a task. Other operator states are active, blocked and cancelled. |
+
+For a long-running project, its existing Codex instructions can ask for checkpoints at material changes, completed milestones and pauses with an open action. Point a new chat to that project. Implicit skill selection can miss a pause. A successful write makes the recorded facts available to later chats.
 
 ## Evidence when needed
 

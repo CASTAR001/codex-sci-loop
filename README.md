@@ -20,14 +20,15 @@ codex plugin add codex-sci-loop@codex-sci-loop-local
 ```sh
 checkpoint="$PWD/plugins/codex-sci-loop/scripts/checkpoint.py"
 cd /path/to/trip
-printf '%s\n' '安排周末出行，住宿预算不超过 800 元。' | python3 "$checkpoint" start --request-file -
-python3 "$checkpoint" note --note '周六上午出发' --next '预订返程车票'
+printf '%s\n' '安排周末出行，住宿预算不超过 800 元。' | python3 "$checkpoint" start --request-file - --note '周六上午出发' --next '预订返程车票'
 python3 "$checkpoint" show
 ```
 
+- **记录重要操作**。生成或修改了值得追溯的文件时，可在同一次 `start`、`revise` 或 `note` 中附 `--kind action --note '改动及原因' --artifact 相对路径`。程序读取该文件，记录当时的大小和 SHA-256，原内容由项目或 Git 保存。
+- **查早期安排**。问“为什么改、当初做过什么”时，用 `history --limit 5` 查最近五版。按返回的 `next_before` 用 `--before N` 往前翻，或用 `history --revision 1 --full` 查第一版。每版有各自的执行笔记、文件指纹、待办变更和当时的验证记录。
 - **变更约定**。`revise --from-revision 1 --request-file revised.md` 保存一版完整的新约定，原文和旧修订都可追溯。调用方负责提供与用户意图一致的文本。
 - **继续与结束**。`show` 恢复当前约定、决定和待办，`show --full` 展开完整内容。完成待办后，用 `note --next ''` 清空，再用 `close` 记录任务已结束。此时状态为 `closed`，验证仍为 `unverified`。暂停、阻塞、继续和取消用 `set-state --state … --reason '…'`。
-- **存储**。每个任务占一份 `.ai-loop/checkpoints/<id>.json`，项目共用一个空锁文件。默认 ID 为 `main`，可在命令后指定 `--task <id>`。插件按需读取检查点，不复制完整对话。
+- **存储**。每个任务占一份 `.ai-loop/checkpoints/<id>.json`，项目共用一个空锁文件。默认 ID 为 `main`，可在命令后指定 `--task <id>`。恢复只需指向同一项目文件夹。需要长期值守的项目可在已有项目指令中写明「每次约束变更、关键产物落地或带待办暂停时保存项目检查点。接手先读当前状态，追查旧决定再读历史」。技能由模型选择，实际落盘以后才能保证跨对话读取。
 
 ## 需要证据的任务
 

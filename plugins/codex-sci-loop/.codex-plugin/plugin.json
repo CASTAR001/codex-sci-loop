@@ -1,8 +1,8 @@
 {
   "id": "codex-sci-loop",
   "name": "codex-sci-loop",
-  "version": "1.2.1",
-  "description": "Keep the request, decisions and next step for tasks you want to resume.",
+  "version": "1.3.0",
+  "description": "Keep project decisions, completed actions, requirement changes and the next step.",
   "author": {
     "name": "CASTAR001"
   },
@@ -19,7 +19,7 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Save a checkpoint for this task and record what remains.",
+      "Record what we changed, why, and what comes next.",
       "Resume my task from its checkpoint.",
       "Update the plan with my new constraint."
     ]
