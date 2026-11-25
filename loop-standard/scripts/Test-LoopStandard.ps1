@@ -187,14 +187,11 @@ $RequiredPaths = @(
     "..\plugins\codex-sci-loop\README.md",
     "..\plugins\codex-sci-loop\scripts\sci_loop.py",
     "..\plugins\codex-sci-loop\scripts\checkpoint.py",
-    "..\plugins\codex-sci-loop\scripts\capability_gate.py",
-    "..\plugins\codex-sci-loop\scripts\audit_protocol.py",
+    "..\plugins\codex-sci-loop\scripts\loop_io.py",
     "..\plugins\codex-sci-loop\skills\task-checkpoint\SKILL.md",
     "..\plugins\codex-sci-loop\skills\research-verification\SKILL.md",
     "..\tests\test_sci_loop_distribution.py",
-    "..\tests\test_sci_loop_capability_abi.py",
-    "..\tests\test_sci_loop_audit_receipt.py",
-    "..\tests\test_sci_loop_codex_hooks.py"
+    "..\tests\test_sci_loop_checkpoint.py"
 )
 
 foreach ($RelativePath in $RequiredPaths) {

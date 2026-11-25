@@ -22,9 +22,7 @@ function Invoke-Checked {
 
 foreach ($Test in @(
     "test_sci_loop_distribution.py",
-    "test_sci_loop_capability_abi.py",
-    "test_sci_loop_audit_receipt.py",
-    "test_sci_loop_codex_hooks.py"
+    "test_sci_loop_checkpoint.py"
 )) {
     $TestPath = Join-Path $RepoRoot (Join-Path "tests" $Test)
     Invoke-Checked -Label $Test -Action { & python3 $TestPath }

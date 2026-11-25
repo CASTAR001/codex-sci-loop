@@ -14,8 +14,7 @@ Use the lowercase PowerShell scripts in `scripts/` as the standard interface.
 The earlier PascalCase scripts are retained as compatibility helpers.
 
 See `OPERATOR_RUNBOOK.md` for the concise human operating procedure.
-System-wide Codex installation is deliberately outside this compatibility kit;
-LumiForge projects the certified native plugin into account-private homes.
+The repository README covers installation of the native Codex plugin.
 See `CONTROL_PLANE_BUILD_PLAN.md` for the next-stage memory, evidence, state,
 role, recovery, change-control, and skill-dispatch plan.
 See `AGENTS_VS_AI_LOOP_BOUNDARY.md` for the boundary between root bootstrap,

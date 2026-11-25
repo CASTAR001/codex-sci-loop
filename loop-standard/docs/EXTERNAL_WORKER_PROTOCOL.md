@@ -32,7 +32,6 @@ through a recorded preflight.
 
 ## Compatibility profile
 
-The retained legacy profile is `claude-mimo`. It is optional compatibility
-surface for the PowerShell toolkit and is not used by the native
-`codex-sci-loop` plugin. LumiForge Goal mode uses the active Codex thread plus
-the isolated native completion auditor instead of this external-worker path.
+The optional `claude-mimo` profile belongs to the PowerShell compatibility
+toolkit. The native `codex-sci-loop` plugin uses Codex's own execution and
+review tools.

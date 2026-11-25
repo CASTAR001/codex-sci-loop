@@ -21,7 +21,7 @@ from typing import Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "codex-sci-loop"
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 MARKETPLACE = "codex-sci-loop-local"
 PLUGIN = ROOT / "plugins" / NAME
 MANIFEST = Path(".codex-plugin") / "plugin.json"
@@ -128,7 +128,8 @@ def assert_structure() -> None:
             description = json.loads(description)
         assert description.strip() and len(description) <= 1024, skill_path
 
-    assert CORE.is_file()
+    assert {path.name for path in PLUGIN.iterdir() if path.is_dir()} == {".codex-plugin", "scripts", "skills"}
+    assert {path.name for path in CORE.parent.iterdir()} == {"checkpoint.py", "loop_io.py", "sci_loop.py"}
     cache_artifacts = [
         path.relative_to(PLUGIN).as_posix()
         for path in PLUGIN.rglob("*")
@@ -238,136 +239,86 @@ def commit_fixture(run: RunCommand, project: Path, name: str, contents: str) -> 
     (project / name).write_text(contents, encoding="utf-8")
     run("git", "add", name, cwd=project)
     run(
-        "git", "-c", "user.name=LumiForge Test", "-c", "user.email=fixture@example.invalid",
+        "git", "-c", "user.name=Sci Loop Fixture", "-c", "user.email=fixture@example.invalid",
         "commit", "-qm", "fixture", cwd=project,
     )
 
 
-def assert_native_lifecycle(run: RunCommand) -> None:
-    with tempfile.TemporaryDirectory(prefix="lumiforge-sci-loop-") as raw:
+def assert_read_only_phase_recovery(run: RunCommand) -> None:
+    with tempfile.TemporaryDirectory(prefix="sci-loop-legacy-phase-") as raw:
         project = Path(raw).resolve()
         commit_fixture(run, project, "fixture.txt", "baseline\n")
         nested = project / "nested"
         nested.mkdir()
         commit_fixture(run, nested, "nested.txt", "nested baseline\n")
-        run(sys.executable, str(CORE), "init", "--project-root", str(project))
-        assert "refusing to overwrite" in run(
-            sys.executable, str(CORE), "init", "--project-root", str(project), expect=1
-        ).stderr
-        config_path = project / ".ai-loop" / "loop.config.json"
-        config = json.loads(config_path.read_text(encoding="utf-8"))
-        config["evidence_repositories"] = [".", "nested"]
-        config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
-        run(sys.executable, str(CORE), "validate", "--project-root", str(project))
-        run(
-            sys.executable,
-            str(CORE),
-            "start",
-            "--project-root",
-            str(project),
-            "--phase-id",
-            "fixture-phase",
-            "--title",
-            "Fixture phase",
-            "--objective",
-            "Exercise the native evidence lifecycle.",
-            "--verify-command",
-            "printf '%s\\n' 'fixture verification: OK'",
-        )
-        run_dir = project / ".ai-loop" / "runs" / "fixture-phase"
-        (project / "fixture.txt").write_text("changed\n", encoding="utf-8")
-        (project / "new-evidence.txt").write_text("new\n", encoding="utf-8")
-        (nested / "nested.txt").write_text("nested changed\n", encoding="utf-8")
-        (nested / "nested-new.txt").write_text("nested new\n", encoding="utf-8")
-        (run_dir / "report.md").write_text("# Execution report\n\nFixture completed.\n", encoding="utf-8")
-        run(sys.executable, str(CORE), "collect", "--project-root", str(project), "--phase-id", "fixture-phase")
-        run(sys.executable, str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", "fixture-phase")
-        audit = project / ".ai-loop" / "audits" / "fixture-phase-audit.md"
-        audit.write_text("# Audit\n\nDecision: ACCEPTED\n\nEvidence inspected.\n", encoding="utf-8")
-        assert "host-authorized" in run(
-            sys.executable,
-            str(CORE),
-            "decide",
-            "--project-root",
-            str(project),
-            "--phase-id",
-            "fixture-phase",
-            "--decision",
-            "accepted",
-            expect=1,
-        ).stderr
-        audit.write_text("# Audit\n\nDecision: REWORK\n\nEvidence inspected.\n", encoding="utf-8")
-        run(
-            sys.executable,
-            str(CORE),
-            "decide",
-            "--project-root",
-            str(project),
-            "--phase-id",
-            "fixture-phase",
-            "--decision",
-            "rework",
-        )
-        resumed = json.loads(
-            run(sys.executable, str(CORE), "resume", "--project-root", str(project), "--json").stdout
-        )
-        assert resumed["decision"] == "REWORK_REQUIRED"
-        verify_log = (run_dir / "verify.log").read_text(encoding="utf-8")
-        assert "fixture verification: OK" in verify_log
-        assert "verify_exit_code=0" in verify_log
-        diff = (run_dir / "diff.patch").read_text(encoding="utf-8")
-        assert "diff --git a/fixture.txt b/fixture.txt" in diff
-        assert "new-evidence.txt" in diff
-        assert "diff --git a/nested/nested.txt b/nested/nested.txt" in diff
-        assert "nested/nested-new.txt" in diff
-        assert ".ai-loop/status.json" not in diff
-        heads = json.loads((run_dir / "repository_heads.json").read_text(encoding="utf-8"))
-        assert set(heads) == {".", "nested"}
-        journal = project / ".ai-loop" / "events" / "state-transitions.ndjson"
-        assert journal.is_file()
-        if os.name != "nt":
-            assert journal.stat().st_mode & 0o777 == 0o600
+        heads = {key: run("git", "rev-parse", "HEAD", cwd=repo).stdout.strip()
+                 for key, repo in ((".", project), ("nested", nested))}
+        base = project / ".ai-loop"
+        phase_id = "fixture-phase"
+        phase_dir = base / "runs" / phase_id
+        phase_dir.mkdir(parents=True)
 
+        def write(relative: str, contents: str) -> None:
+            target = base / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(contents, encoding="utf-8")
 
-def assert_failed_verification_cannot_use_prose_acceptance(run: RunCommand) -> None:
-    with tempfile.TemporaryDirectory(prefix="lumiforge-sci-loop-failed-") as raw:
-        project = Path(raw).resolve()
-        commit_fixture(run, project, "fixture.txt", "baseline\n")
-        run(sys.executable, str(CORE), "init", "--project-root", str(project))
-        run(
-            sys.executable,
-            str(CORE),
-            "start",
-            "--project-root",
-            str(project),
-            "--phase-id",
-            "failed-phase",
-            "--title",
-            "Failed fixture phase",
-            "--objective",
-            "Prove that failed verification cannot be accepted.",
-            "--verify-command",
-            "exit 7",
-        )
-        failed_run = project / ".ai-loop" / "runs" / "failed-phase"
-        (failed_run / "report.md").write_text("# Execution report\n\nVerification is expected to fail.\n", encoding="utf-8")
-        run(sys.executable, str(CORE), "collect", "--project-root", str(project), "--phase-id", "failed-phase")
-        run(sys.executable, str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", "failed-phase")
-        failed_audit = project / ".ai-loop" / "audits" / "failed-phase-audit.md"
-        failed_audit.write_text("# Audit\n\nDecision: ACCEPTED\n", encoding="utf-8")
-        assert "host-authorized" in run(
-            sys.executable,
-            str(CORE),
-            "decide",
-            "--project-root",
-            str(project),
-            "--phase-id",
-            "failed-phase",
-            "--decision",
-            "accepted",
-            expect=1,
-        ).stderr
-        assert "verify_exit_code=7" in (failed_run / "verify.log").read_text(encoding="utf-8")
+        def snapshot() -> dict[Path, bytes]:
+            return {path.relative_to(base): path.read_bytes() for path in base.rglob("*") if path.is_file()}
+
+        # Fields and control files written by the legacy Python 2.0 schema.
+        write("loop.config.json", json.dumps({
+            "schema_version": "2.0", "runtime_mode": "native-codex-loop", "executor": "codex",
+            "evidence_repositories": [".", "nested"],
+        }))
+        for relative in ("README.md", "memory/activeContext.md", "memory/constraint-ledger.md",
+                         "gates/pre-action-check.md", "prompts/codex-loop.prompt.md"):
+            write(relative, "# Preserved legacy control file\n")
+        phase = {
+            "phase_id": phase_id, "title": "Fixture phase", "objective": "Preserve legacy evidence.",
+            "verify_command": "exit 7", "status": "audit_prepared",
+            "base_commit": heads["."], "repository_heads": heads, "run_dir": f".ai-loop/runs/{phase_id}",
+            "started_at": "2026-11-24T01:00:00Z", "evidence_collected_at": "2026-11-24T02:00:00Z",
+            "audit_prepared_at": "2026-11-24T03:00:00Z", "decided_at": None, "verify_exit_code": 7,
+        }
+        write(f"runs/{phase_id}/phase.json", json.dumps(phase))
+        write(f"runs/{phase_id}/verify.log", "[sci-loop] verify_exit_code=7\n")
+        write(f"runs/{phase_id}/prompt.md", "# Fixture phase\n\nPreserve legacy evidence.\n")
+
+        def write_status(current: dict | None, decision: str | None = None) -> None:
+            write("status.json", json.dumps({
+                "schema_version": "2.0", "current_phase": current, "phases": [current] if current else [],
+                "last_decision": decision,
+            }))
+
+        args = ("--project-root", str(project))
+        for state, expected in (("started", "CONTINUE_ACTIVE_PHASE"), ("collecting", "CONTINUE_ACTIVE_PHASE"),
+                                ("evidence_collected", "CONTINUE_ACTIVE_PHASE"), ("audit_prepared", "CONTINUE_ACTIVE_PHASE"),
+                                ("blocked", "BLOCKED"), ("rework", "REWORK_REQUIRED"),
+                                ("accepted", "READY_FOR_NEXT_PHASE"), ("none", "READY_FOR_NEXT_PHASE")):
+            record = None if state == "none" else {**phase, "status": state}
+            if state == "accepted":
+                record.update(decided_at="2026-11-24T04:00:00Z", verify_exit_code=0, audit_snapshot_sha256="a" * 64)
+            write_status(record, state.upper() if state in {"accepted", "blocked", "rework"} else None)
+            before = snapshot()
+            assert "VALIDATE: OK" in run(sys.executable, str(CORE), "validate", *args).stdout
+            result = json.loads(run(sys.executable, str(CORE), "resume", *args, "--json").stdout)
+            assert result["decision"] == expected and result["status"] == state
+            assert result["phase_id"] == ("" if state == "none" else phase_id)
+            assert result["read_only"] is True
+            if state == "accepted":
+                assert result["acceptance_scope"] == "recorded historical decision only"
+                assert result["audit_snapshot_sha256"] == "a" * 64
+            assert snapshot() == before
+
+        write_status(phase)
+        before = snapshot()
+        for action in ("start", "init", "collect", "audit-pack", "decide"):
+            run(sys.executable, str(CORE), action, *args, expect=2)
+        assert snapshot() == before
+        assert not (base / ".lock").exists()
+        write("status.json", json.dumps({"schema_version": "2.0", "current_phase": phase, "phases": []}))
+        assert "phase history" in run(sys.executable, str(CORE), "resume", *args, expect=1).stderr
 
 
 def main() -> None:
@@ -381,8 +332,7 @@ def main() -> None:
         env = isolated_environment(root)
         run = partial(run_command, cwd=root, env=env)
         assert_core_distribution(run, CORE)
-        assert_native_lifecycle(run)
-        assert_failed_verification_cannot_use_prose_acceptance(run)
+        assert_read_only_phase_recovery(run)
         assert not list(Path(env["CODEX_HOME"]).iterdir())
         assert not (Path(env["HOME"]) / ".codex").exists()
         if args.codex_install:

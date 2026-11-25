@@ -210,8 +210,7 @@ foreach ($Entry in @(
     @{ Id = "PLUGIN-MANIFEST"; Path = ".codex-plugin/plugin.json" },
     @{ Id = "PLUGIN-CORE"; Path = "scripts/sci_loop.py" },
     @{ Id = "PLUGIN-CHECKPOINT"; Path = "scripts/checkpoint.py" },
-    @{ Id = "PLUGIN-CAPABILITY"; Path = "scripts/capability_gate.py" },
-    @{ Id = "PLUGIN-AUDIT-PROTOCOL"; Path = "scripts/audit_protocol.py" },
+    @{ Id = "PLUGIN-LOOP-IO"; Path = "scripts/loop_io.py" },
     @{ Id = "PLUGIN-TASK-SKILL"; Path = "skills/task-checkpoint/SKILL.md" },
     @{ Id = "PLUGIN-RESEARCH"; Path = "skills/research-verification/SKILL.md" }
 )) {
