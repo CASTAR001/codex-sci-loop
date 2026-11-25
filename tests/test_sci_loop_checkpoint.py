@@ -62,6 +62,10 @@ class Checkpoints(unittest.TestCase):
             self.assertFalse((Path(plain) / ".git").exists())
             task("set-state", "--state", "active", "--reason", "Add another item")
             self.assertEqual("active", json.loads(task("show"))["mode"])
+            recorded, = json.loads(task("history"))["revisions"]
+            closed, reopened = recorded["mode_changes"]
+            self.assertEqual(("closed", "operator statement"), (closed["mode"], closed["close_basis"]))
+            self.assertEqual(("active", "Add another item"), (reopened["mode"], reopened["reason"]))
 
     def test_plain_folder_checks_use_declared_files(self):
         with tempfile.TemporaryDirectory() as plain:
@@ -109,6 +113,69 @@ class Checkpoints(unittest.TestCase):
         self.cli("set-state", "--state", "cancelled", "--reason", "User ended this task")
         self.cli("verify", code=1)
         self.assertEqual("cancelled", self.show()["mode"])
+
+    def test_atomic_revision_snapshots_and_paginated_history(self):
+        original = "Old agreement " + "a" * 2100 + "\r\n"
+        self.cli("start", "--request-file", "-", "--note", "Carry-on only", "--next", "Pack charger",
+                 stdin=original)
+        self.cli("start", "--request-file", "-", "--next", "duplicate", stdin=original, code=1)
+        self.cli("note", "--kind", "completed", "--note", "Charger packed", "--next", "Check weather")
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", "--next", "incorrect", stdin="", code=1)
+        self.assertEqual("Check weather", self.show()["next"])
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", "--kind", "decision",
+                 "--note", "Leave a day later", "--next", "Move tickets", stdin="Updated trip agreement")
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", "--note", "stale retry",
+                 stdin="Updated trip agreement", code=1)
+        current = self.show()
+        self.assertEqual("Move tickets", current["next"])
+        self.assertEqual(["Leave a day later"], [note["text"] for note in current["notes"]])
+        self.assertNotIn("pending_changes", current)
+        current_page = json.loads(self.cli("history", "--limit", "1"))
+        self.assertEqual(2, current_page["next_before"])
+        current_revision, = current_page["revisions"]
+        self.assertTrue(current_revision["is_current"])
+        self.assertEqual("Move tickets", current_page["current_next"])
+        self.assertEqual("Move tickets", current_revision["pending_changes"][0]["next"])
+        old_page = json.loads(self.cli("history", "--before", str(current_page["next_before"]), "--limit", "1"))
+        self.assertIsNone(old_page["next_before"])
+        old, = old_page["revisions"]
+        self.assertFalse(old["is_current"])
+        self.assertTrue(old["request_truncated"])
+        self.assertEqual(["Carry-on only", "Charger packed"], [note["text"] for note in old["notes"]])
+        self.assertEqual(("completed", "operator statement"), (old["notes"][1]["kind"], old["notes"][1]["source"]))
+        self.assertEqual([], old["verification"])
+        self.assertEqual([("", "Pack charger"), ("Pack charger", "Check weather"), ("Check weather", "")],
+                         [(change["previous"], change["next"]) for change in old["pending_changes"]])
+        self.assertEqual("revise", old["pending_changes"][-1]["cause"])
+        full, = json.loads(self.cli("history", "--revision", "1", "--full"))["revisions"]
+        self.assertEqual(original, full["contract"]["request"])
+
+    def test_history_retains_compact_superseded_evidence(self):
+        self.start("printf evidence")
+        first = json.loads(self.cli("verify"))
+        second = json.loads(self.cli("verify"))
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", "--verify-command", "exit 1",
+                 stdin="Compare another result")
+        self.cli("verify", code=1)
+        old, = json.loads(self.cli("history", "--revision", "1"))["revisions"]
+        self.assertEqual(["passed", "passed"], [record["recorded_status"] for record in old["verification"]])
+        self.assertEqual([first["output_sha256"], second["output_sha256"]],
+                         [record["output_sha256"] for record in old["verification"]])
+        self.assertTrue(all("tail" not in record and "status" not in record for record in old["verification"]))
+        self.assertEqual("failed", self.show()["verification"]["status"])
+
+    def test_history_accepts_existing_checkpoint_without_fabricating_old_actions(self):
+        self.start("exit 0")
+        self.cli("revise", "--from-revision", "1", "--request-file", "-", stdin="New goal")
+        state = json.loads(self.path.read_text())
+        state["next"] = "Already pending in a legacy checkpoint"
+        self.path.write_text(json.dumps(state))
+        old, = json.loads(self.cli("history", "--revision", "1"))["revisions"]
+        self.assertEqual([], old["pending_changes"])
+        self.cli("note", "--next", "")
+        current, = json.loads(self.cli("history", "--revision", "2"))["revisions"]
+        self.assertEqual("Already pending in a legacy checkpoint", current["pending_changes"][0]["previous"])
+        self.assertEqual("", current["pending_changes"][0]["next"])
 
     def test_real_scientific_verifier_and_mutated_inputs(self):
         # A one-point consistency check has a narrow, measurable interpretation.
@@ -172,6 +239,8 @@ class Checkpoints(unittest.TestCase):
         self.assertEqual("interrupted", self.show()["verification"]["status"])
         self.cli("set-state", "--state", "paused", "--reason", "Inspect before retrying")
         self.assertEqual("paused", self.show()["mode"])
+        recorded, = json.loads(self.cli("history"))["revisions"]
+        self.assertEqual("interrupted", recorded["verification"][0]["recorded_status"])
 
     def test_review_binds_the_original_subject_and_stays_distinct_from_verification(self):
         self.start("exit 0")
@@ -189,6 +258,12 @@ class Checkpoints(unittest.TestCase):
         self.cli("verify")
         self.assertEqual("passed", self.show()["verification"]["status"])
         self.assertEqual("stale", self.show()["review"]["freshness"])
+        subject = json.loads(self.cli("show", "--for-review"))["review_subject"]
+        self.cli("review", "--subject", subject, "--reviewer", "review-thread", "--outcome", "supported",
+                 "--file", "-", stdin="Rechecked the evidence with periodic boundaries.")
+        recorded, = json.loads(self.cli("history"))["revisions"]
+        self.assertEqual(["inconclusive", "supported"], [review["outcome"] for review in recorded["reviews"]])
+        self.assertTrue(all("report_sha256" in review and "report" not in review for review in recorded["reviews"]))
 
     def test_finish_requires_current_evidence_and_respects_review_and_pending_work(self):
         self.start("exit 0", "--require-review", "--tree-only")

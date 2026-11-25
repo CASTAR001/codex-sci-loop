@@ -106,6 +106,12 @@ def checked_state(path: Path, task: str) -> dict:
     result = state["verification"]
     if result is not None and (not isinstance(result, dict) or result.get("status") not in RESULTS):
         raise LoopError("unrecognized verification record")
+    for key in ("pending_changes", "mode_changes", "verification_history", "review_history"):
+        records = state.get(key, [])
+        if not isinstance(records, list) or not all(
+                isinstance(record, dict) and type(record.get("revision")) is int
+                and 1 <= record["revision"] <= len(versions) for record in records):
+            raise LoopError(f"invalid {key} in checkpoint")
     return state
 
 
@@ -247,6 +253,85 @@ def summary(root: Path, path: Path, state: dict, full: bool, for_review: bool) -
     return info
 
 
+def verification_record(result: dict) -> dict:
+    record = dict(result)
+    record.pop("tail", None)
+    status = record.pop("status")
+    record["recorded_status"] = "interrupted" if status == "running" else status
+    return record
+
+
+def review_record(review: dict) -> dict:
+    record = dict(review)
+    report = record.pop("report")
+    record["report_sha256"] = hashlib.sha256(report.encode("utf-8")).hexdigest()
+    return record
+
+
+def history(state: dict, args) -> dict:
+    current = len(state["contracts"])
+    if args.revision is not None:
+        if not 1 <= args.revision <= current:
+            raise LoopError("history revision is outside the recorded range")
+        first = last = args.revision
+    else:
+        before = args.before if args.before is not None else current + 1
+        if not 1 <= before <= current + 1 or not 1 <= args.limit <= 100:
+            raise LoopError("history expects --before within the recorded range and --limit from 1 to 100")
+        last = before - 1
+        first = max(1, before - args.limit)
+
+    revisions = {}
+    for revision in range(last, first - 1, -1):
+        recorded = state["contracts"][revision - 1]
+        request = recorded["request"]
+        revisions[revision] = {
+            "revision": revision, "is_current": revision == current,
+            "contract": {**recorded, "request": request if args.full else request[:CONTEXT_LIMIT]},
+            "request_truncated": not args.full and len(request) > CONTEXT_LIMIT,
+            "notes": [], "pending_changes": [], "mode_changes": [], "verification": [], "reviews": [],
+        }
+    for key, field in (("notes", "notes"), ("pending_changes", "pending_changes"),
+                       ("mode_changes", "mode_changes"), ("verification_history", "verification"),
+                       ("review_history", "reviews")):
+        for record in state.get(key, []):
+            if record["revision"] in revisions:
+                revisions[record["revision"]][field].append(record)
+    for key, field, compact in (("verification", "verification", verification_record),
+                                ("review", "reviews", review_record)):
+        record = state.get(key)
+        if record and record.get("revision") in revisions:
+            revisions[record["revision"]][field].append(compact(record))
+    return {
+        "task": state["task"], "current_revision": current, "recorded_mode": state["mode"],
+        "current_next": state["next"], "revisions": list(revisions.values()),
+        "next_before": first if args.revision is None and first > 1 else None,
+    }
+
+
+def record_next(state: dict, next_action: str, cause: str, at: str) -> None:
+    if next_action != state["next"]:
+        state.setdefault("pending_changes", []).append({
+            "revision": len(state["contracts"]), "at": at, "previous": state["next"],
+            "next": next_action, "cause": cause, "source": "operator statement",
+        })
+        state["next"] = next_action
+
+
+def record_note_and_next(state: dict, args, at: str) -> None:
+    if args.note:
+        state["notes"].append({"revision": len(state["contracts"]), "at": at, "kind": args.kind,
+                               "text": args.note, "source": "operator statement"})
+    if args.next is not None:
+        record_next(state, args.next, args.action, at)
+
+
+def archive_evidence(state: dict, key: str, compact) -> None:
+    record = state.get(key)
+    if record and type(record.get("revision")) is int and 1 <= record["revision"] <= len(state["contracts"]):
+        state.setdefault(f"{key}_history", []).append(compact(record))
+
+
 def closeout_gaps(info: dict) -> list[str]:
     gaps = []
     review = info.get("review")
@@ -268,6 +353,7 @@ def verify_checkpoint(root: Path, path: Path, state: dict, timeout: int) -> None
         raise LoopError("verification requires a declared command and positive timeout")
     evidence = {"status": "running", "revision": len(state["contracts"]),
                 "contract_sha256": canonical_hash(current), "started_at": utc_now()}
+    archive_evidence(state, "verification", verification_record)
     state["verification"] = evidence
     atomic_json(path, state)
     try:
@@ -283,16 +369,23 @@ def verify_checkpoint(root: Path, path: Path, state: dict, timeout: int) -> None
 
 def execute(root: Path, args) -> int:
     path = checkpoint_path(root, args.task)
+    at = utc_now()
     if args.action == "start":
         if path.exists():
             raise LoopError("task already exists; use show or revise")
         state = {"schema": SCHEMA, "task": args.task, "contracts": [contract(args)], "mode": "active",
                  "notes": [], "next": "", "verification": None}
+        record_note_and_next(state, args, at)
     else:
         state = checked_state(path, args.task)
         if args.action == "show":
             print(json.dumps(summary(root, path, state, args.full, args.for_review), ensure_ascii=True))
             return 0
+        if args.action == "history":
+            print(json.dumps(history(state, args), ensure_ascii=True))
+            return 0
+        previous_mode = state["mode"]
+        previous_reason = state.get("reason", "")
         if state["mode"] == "cancelled":
             raise LoopError("task was cancelled; use a new task id")
         if args.action == "close":
@@ -320,24 +413,36 @@ def execute(root: Path, args) -> int:
         elif args.action == "revise":
             if args.from_revision != len(state["contracts"]):
                 raise LoopError("contract revision changed; read show before replacing it")
-            state["contracts"].append(contract(args, state["contracts"][-1]))
-            state["next"] = ""
+            amended = contract(args, state["contracts"][-1])
+            record_next(state, "", "revise", at)
+            state["contracts"].append(amended)
+            record_note_and_next(state, args, at)
         elif args.action == "note":
             if not args.note and args.next is None:
                 raise LoopError("provide --note or --next")
-            if args.note:
-                state["notes"].append({"revision": len(state["contracts"]), "at": utc_now(), "kind": args.kind,
-                                       "text": args.note, "source": "operator statement"})
-            if args.next is not None:
-                state["next"] = args.next
+            record_note_and_next(state, args, at)
         elif args.action == "review":
             tree = workspace(root, state["contracts"][-1])
             if args.subject != review_subject(state, tree):
                 raise LoopError("review subject changed; inspect show --for-review and review the current evidence")
-            state["review"] = {"revision": len(state["contracts"]), "subject": args.subject, "report": request_text(args.file), "at": utc_now(),
-                               "reviewer": args.reviewer, "outcome": args.outcome}
+            review = {"revision": len(state["contracts"]), "subject": args.subject,
+                      "report": request_text(args.file), "at": at,
+                      "reviewer": args.reviewer, "outcome": args.outcome}
+            previous = state.get("review")
+            if previous and any(previous.get(key) != review[key] for key in
+                                ("revision", "subject", "report", "reviewer", "outcome")):
+                archive_evidence(state, "review", review_record)
+            state["review"] = review
         elif args.action == "verify":
             verify_checkpoint(root, path, state, args.timeout)
+        if state["mode"] != previous_mode or state.get("reason", "") != previous_reason:
+            change = {"revision": len(state["contracts"]), "at": at, "previous": previous_mode,
+                      "mode": state["mode"], "cause": args.action}
+            if args.action == "set-state":
+                change["reason"] = args.reason
+            elif args.action == "close":
+                change["close_basis"] = "operator statement"
+            state.setdefault("mode_changes", []).append(change)
     atomic_json(path, state)
     if args.action == "verify":
         print(json.dumps(state["verification"], ensure_ascii=True))
@@ -349,7 +454,7 @@ def execute(root: Path, args) -> int:
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(dest="action", required=True)
-    for name in ("start", "revise", "note", "verify", "show", "review", "finish", "close", "set-state"):
+    for name in ("start", "revise", "note", "verify", "show", "history", "review", "finish", "close", "set-state"):
         cmd = commands.add_parser(name)
         cmd.add_argument("--project-root", default=".")
         cmd.add_argument("--task", default="main")
@@ -374,7 +479,7 @@ def parser():
             inputs.add_argument("--input", action="append", help="also bind this regular file, including files outside the Git index")
         if name == "revise":
             cmd.add_argument("--from-revision", required=True, type=int)
-        if name == "note":
+        if name in {"start", "revise", "note"}:
             cmd.add_argument("--kind", default="decision", help="label for this note")
             cmd.add_argument("--note")
             cmd.add_argument("--next", help="replace the pending action")
@@ -391,6 +496,12 @@ def parser():
         if name == "show":
             cmd.add_argument("--for-review", action="store_true", help="identify the exact evidence to review")
             cmd.add_argument("--full", action="store_true", help="include full current request and verification output tail")
+        if name == "history":
+            position = cmd.add_mutually_exclusive_group()
+            position.add_argument("--before", type=int, help="exclude this revision and later ones")
+            position.add_argument("--revision", type=int, help="read a single revision")
+            cmd.add_argument("--limit", type=int, default=5, help="revisions per page, newest first (1–100)")
+            cmd.add_argument("--full", action="store_true", help="include complete contract text")
     return result
 
 
