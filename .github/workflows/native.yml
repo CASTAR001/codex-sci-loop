@@ -5,6 +5,9 @@ on:
       - 'plugins/codex-sci-loop/**'
       - '.agents/plugins/marketplace.json'
       - 'tests/test_sci_loop_*.py'
+      - 'tests/measure_turn_usage.py'
+      - 'tests/test_measure_turn_usage.py'
+      - 'tests/probe_skill_routing.py'
       - 'install.sh'
       - '.github/workflows/native.yml'
   workflow_dispatch:
@@ -38,5 +41,8 @@ jobs:
       - run: npm install --no-audit --no-fund --prefix "$RUNNER_TEMP/sci-loop-cli" "@openai/codex@$CODEX_TEST_VERSION"
       - run: echo "$RUNNER_TEMP/sci-loop-cli/node_modules/.bin" >> "$GITHUB_PATH"
       - run: python3 -B tests/test_sci_loop_checkpoint.py
+      - run: python3 -B tests/test_measure_turn_usage.py
       - run: python3 -B tests/test_sci_loop_distribution.py --codex-install
       - run: python3 -B tests/test_sci_loop_native_codex.py
+      - run: python3 -B tests/probe_skill_routing.py --suite daily-long
+      - run: python3 -B tests/probe_skill_routing.py --suite daily-long --without-plugin
