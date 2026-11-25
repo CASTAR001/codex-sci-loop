@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 
 from measure_turn_usage import FIELDS, summarize_usage, token_counts
-from test_sci_loop_native_codex import AppServer, install_fixture
+from test_sci_loop_native_codex import AppServer, PLUGIN_NAME, PLUGIN_SKILLS, install_fixture
 
 
 CASES = {
@@ -48,6 +48,30 @@ FOLLOWUP_CASES = {
     "move": ["最近在安排搬家，项目文件夹是 {folder}。打包约了周六上午九点，搬运费上限 860 元，押金要留现金。第二家的报价周三才到，到了再选搬运公司。今天先到这儿。"],
     "keys": ["在排下周的社区练习室钥匙交接，事情放在 {folder}。现在定下备用钥匙只放前台，交接时说「石榴42」。管理员发新版值班表前排不了周二的领取人，等她回了再补。咱们这会儿先散。"],
 }
+
+
+DAILY_AB_CASES = {
+    "shelf": [
+        "社区交换书架这周先安排到这里。总预算 730 元，放在南门门厅，只用现有旧木板。请在项目目录 {folder} 的 notice.txt 写一句给邻居看的通知，通知只写地点和材料。周三还得问物业消防通道宽度，下次接着办。",
+        "物业刚回复：南门挡推车，改放东侧连廊；总预算收紧到 620 元，材料不变。原来问消防通道宽度的事撤销，下一步周四请木工量墙。请同步修改原来的 notice.txt，通知仍只写地点和材料，后面按这版办。",
+        "接着这份书架安排。请只回复：当前预算、地点、材料、唯一待办；最初预算和地点、撤销的待办、改址原因，以及实际改过的文件名。确实不知道的写未知，不改文件。",
+    ],
+    "shelf-recall": [
+        "接着项目目录 {folder} 的书架安排。请只回复：当前预算、地点、材料、唯一待办；最初预算和地点、撤销的待办、改址原因，以及实际改过的文件名。确实不知道的写未知，不改文件。",
+    ],
+    "move": [
+        "这几天在安排搬家。搬运费上限 860 元，周六上午 9 点打包，押金留现金。请在项目目录 {folder} 的 notice.txt 写一行给邻居的告示，只写打包时间和电梯会短时占用。周三等第二家公司报价再选。今天先到这里。",
+        "已经收到报价，选第二家，因为它能配合新时间。周六改成下午 2 点，上限改为 790 元，押金方式不变。原来的等报价划掉，下一步只需确认报价是否包含楼梯搬运。请更新同一份 notice.txt，告示仍只写打包时间和电梯会短时占用。",
+        "接着这次搬家。请只回复：当前预算、打包时间、押金方式、唯一待办；原预算和原打包时间、撤销的待办、选第二家的原因，以及实际改过的文件名。确实不知道的写未知，不改文件。",
+    ],
+    "move-recall": [
+        "接着项目目录 {folder} 的这次搬家。请只回复：当前预算、打包时间、押金方式、唯一待办；原预算和原打包时间、撤销的待办、选第二家的原因，以及实际改过的文件名。确实不知道的写未知，不改文件。",
+    ],
+}
+
+
+SUITES = {"original": CASES, "followup": FOLLOWUP_CASES, "daily-ab": DAILY_AB_CASES}
+SHARED_WORKSPACE = {"handoff": "shelf", "shelf-recall": "shelf", "move-recall": "move"}
 
 
 def model_usage_updates(events, thread_id, turn_id):
@@ -125,9 +149,35 @@ def checkpoint_snapshots(workspace):
     return snapshots
 
 
-def probe(executable, live, suite="original"):
-    cases = FOLLOWUP_CASES if suite == "followup" else CASES
-    sandbox = "workspace-write" if suite == "followup" else "read-only"
+def notice_snapshot(workspace):
+    path = workspace / "notice.txt"
+    if not path.exists() and not path.is_symlink():
+        return None
+    if path.resolve() != path or not path.is_file():
+        raise ValueError(f"Unexpected notice path in the test workspace: {path}")
+    raw = path.read_bytes()
+    return {"text": raw.decode("utf-8", errors="replace"), "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def verify_discovery(app, workspaces, installed):
+    folders = sorted({str(path) for path in workspaces.values()})
+    found = app.call("skills/list", cwds=folders)["data"]
+    assert {row["cwd"] for row in found} == set(folders)
+    if installed is None:
+        for row in found:
+            assert not any(skill["name"].startswith(f"{PLUGIN_NAME}:")
+                           or skill["name"] in PLUGIN_SKILLS for skill in row["skills"]), row["cwd"]
+        return []
+    skills = [installed / "skills" / name / "SKILL.md" for name in sorted(PLUGIN_SKILLS)]
+    for row in found:
+        enabled = {Path(s["path"]) for s in row["skills"] if s["enabled"]}
+        assert set(skills) <= enabled, row["cwd"]
+    return skills
+
+
+def probe(executable, live, suite="original", without_plugin=False):
+    cases = SUITES[suite]
+    sandbox = "read-only" if suite == "original" else "workspace-write"
     with tempfile.TemporaryDirectory(prefix="sci-loop-routing-") as raw:
         root = Path(raw).resolve()
         home = root / "home"
@@ -144,20 +194,15 @@ def probe(executable, live, suite="original"):
             f'sandbox_mode = "{sandbox}"\nweb_search = "disabled"\n'
             '[features]\nplugins = true\napps = false\n'
             '[analytics]\nenabled = false\n', encoding="utf-8")
-        installed = install_fixture(executable, root, env)
+        installed = None if without_plugin else install_fixture(executable, root, env)
         with AppServer(executable, root, env) as app:
             app.initialize()
-            workspaces = {name: root / ("shelf" if name == "handoff" else name) for name in cases}
+            workspaces = {name: root / SHARED_WORKSPACE.get(name, name) for name in cases}
             for workspace in set(workspaces.values()):
                 workspace.mkdir()
-            folders = sorted({str(path) for path in workspaces.values()})
-            found = app.call("skills/list", cwds=folders)["data"]
-            skills = [installed / "skills" / name / "SKILL.md" for name in ("research-verification", "task-checkpoint")]
-            assert {row["cwd"] for row in found} == set(folders)
-            for row in found:
-                enabled = {Path(s["path"]) for s in row["skills"] if s["enabled"]}
-                assert set(skills) <= enabled, row["cwd"]
-            print(f"Both installed skills available. {len(cases)} chats, {sum(map(len, cases.values()))} task turns.",
+            skills = verify_discovery(app, workspaces, installed)
+            discovery = "Both installed skills available" if skills else "Both plugin skills absent"
+            print(f"{discovery}. {len(cases)} chats, {sum(map(len, cases.values()))} task turns.",
                   flush=True)
             if not live:
                 print("Preflight only. No model turns started.")
@@ -181,28 +226,40 @@ def probe(executable, live, suite="original"):
             for path in skills:
                 body = path.read_text(encoding="utf-8").split("\n---\n", 1)[1]
                 skill_markers[path] = [line[:90] for line in body.splitlines() if len(line) > 65]
+            threads = set()
             for name, prompts in cases.items():
-                started = app.call("thread/start", cwd=str(workspaces[name]), ephemeral=True)
+                workspace = workspaces[name]
+                started = app.call("thread/start", cwd=str(workspace), ephemeral=True)
                 thread = started["thread"]["id"]
-                print(json.dumps({"case": name, "model": started["model"], "provider": started["modelProvider"]}),
+                assert thread not in threads, (name, thread)
+                threads.add(thread)
+                print(json.dumps({"case": name, "model": started["model"], "provider": started["modelProvider"],
+                                  "threadId": thread, "workspace": str(workspace),
+                                  "pluginInstalled": installed is not None}),
                       flush=True)
                 baseline = dict.fromkeys(FIELDS, 0)
                 for i, prompt in enumerate(prompts, start=1):
-                    prompt = prompt.replace("{folder}", str(workspaces[name]))
+                    prompt = prompt.replace("{folder}", str(workspace))
                     print(f"{name} {i}: {prompt}", flush=True)
                     baseline = live_turn(app, thread, prompt, skill_markers, baseline)
-                    if suite == "followup":
-                        print(json.dumps({"checkpoints": checkpoint_snapshots(workspaces[name])},
-                                         ensure_ascii=False), flush=True)
+                    if suite != "original":
+                        evidence = {"checkpoints": checkpoint_snapshots(workspace)}
+                        if suite == "daily-ab":
+                            evidence.update(case=name, turn=i, notice=notice_snapshot(workspace))
+                        print(json.dumps(evidence, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--codex", default="codex")
-    parser.add_argument("--suite", choices=("original", "followup"), default="original")
+    parser.add_argument("--suite", choices=SUITES, default="original")
+    parser.add_argument("--without-plugin", action="store_true",
+                        help="run daily-ab without installing the plugin in the temporary Codex home")
     parser.add_argument("--live", action="store_true", help="authorize real model usage for the selected suite")
     args = parser.parse_args()
+    if args.without_plugin and args.suite != "daily-ab":
+        parser.error("--without-plugin requires --suite daily-ab")
     executable = shutil.which(args.codex)
     if executable is None:
         parser.error("Codex executable not found")
-    probe(executable, args.live, args.suite)
+    probe(executable, args.live, args.suite, args.without_plugin)
