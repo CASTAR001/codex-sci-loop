@@ -5,6 +5,7 @@ Usage is the latest model call observed within each turn, as reported by app-ser
 """
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -32,6 +33,21 @@ CASES = {
 }
 
 
+FOLLOWUP_CASES = {
+    "covariance": ["同事说，对同一量测 n 次取平均，标准误总会变成单次的 1/√n。设每次方差都是 σ²，任意两次的相关系数都是 ρ。你能从协方差把结论推出来，说明同事的话何时成立，并检查 ρ=1 的情形吗？"],
+    "conduction": ["一块厚度为 L 的平板，左右端保持在 T_h 和 T_c，T_h>T_c。材料的热导率是 k(T)=k₀(1+αT)。有人在稳态热流公式中直接用热端的热导率。请从一维无热源的导热方程算出热流密度，并说明什么时候这个替代才合理。"],
+    "tickets": ["科学馆的‘误差与测量’展每张票 48 元，每 4 张只收 3 张的钱，不足 4 张按原价。我们买 10 张，一共多少钱？写一个算式和金额就好。"],
+    "agenda": ["我要排版会议议程，把‘验证实验假设、检查适用条件、记录推导结论’各改成一个四字栏目标题，只给我三个标题。"],
+    "shelf": [
+        "社区交换书架今天先定到这里：总预算不超过 730 元，放在南门门厅，材料只用现有旧木板。等周三再请物业确认消防通道宽度。我周五会换个对话接着办，不想从头再讲一遍。这个项目的文件夹是 {folder}。",
+        "物业刚回复。南门方案取消，改放东侧连廊，预算也收紧到 620 元。原先问消防通道宽度的待办撤销，下一步换成周四请木工量墙。其他照旧，周五按这版往下办。",
+    ],
+    "handoff": ["接着上次的社区交换书架安排。项目文件夹是 {folder}。请告诉我现在定下来的预算、地点、材料，以及接下来要办的那一件事。"],
+    "move": ["最近在安排搬家，项目文件夹是 {folder}。打包约了周六上午九点，搬运费上限 860 元，押金要留现金。第二家的报价周三才到，到了再选搬运公司。今天先到这儿。"],
+    "keys": ["在排下周的社区练习室钥匙交接，事情放在 {folder}。现在定下备用钥匙只放前台，交接时说「石榴42」。管理员发新版值班表前排不了周二的领取人，等她回了再补。咱们这会儿先散。"],
+}
+
+
 def last_model_usage(events, thread_id, turn_id):
     for event in reversed(events):
         params = event.get("params", {})
@@ -49,7 +65,7 @@ def last_model_usage(events, thread_id, turn_id):
     return usage
 
 
-def live_turn(app, thread, prompt, skill_path, body_lines):
+def live_turn(app, thread, prompt, skill_markers):
     start = len(app.events)
     result = app.call("turn/start", threadId=thread, input=[{"type": "text", "text": prompt}])
     turn_id = result["turn"]["id"]
@@ -75,9 +91,12 @@ def live_turn(app, thread, prompt, skill_path, body_lines):
             continue
         if item["type"] == "commandExecution":
             output = item.get("aggregatedOutput") or ""
+            named = [path.parent.name for path in skill_markers if str(path) in item["command"]]
+            read = [path.parent.name for path, lines in skill_markers.items() if any(line in output for line in lines)]
             observations.append({"type": item["type"], "command": item["command"], "exit": item.get("exitCode"),
-                                 "names_skill_file": str(skill_path) in item["command"],
-                                 "body_in_output": any(line in output for line in body_lines),
+                                 "names_skill_file": "research-verification" in named,
+                                 "body_in_output": "research-verification" in read,
+                                 "skill_paths_in_command": named, "skill_bodies_in_output": read,
                                  "output_excerpt": output[-1000:]})
         elif item["type"] not in {"reasoning", "plan"}:
             observations.append({"type": item["type"], "detail": item})
@@ -90,7 +109,22 @@ def live_turn(app, thread, prompt, skill_path, body_lines):
     }, ensure_ascii=False), flush=True)
 
 
-def probe(executable, live):
+def checkpoint_snapshots(workspace):
+    snapshots = []
+    for path in sorted((workspace / ".ai-loop" / "checkpoints").glob("*.json")):
+        if path.resolve() != path or not path.is_file():
+            raise ValueError(f"Unexpected checkpoint path in the test workspace: {path}")
+        raw = path.read_bytes()
+        state = json.loads(raw)
+        snapshots.append({"task": state["task"], "mode": state["mode"], "revision": len(state["contracts"]),
+                          "request": state["contracts"][-1]["request"], "next": state["next"],
+                          "sha256": hashlib.sha256(raw).hexdigest()})
+    return snapshots
+
+
+def probe(executable, live, suite="original"):
+    cases = FOLLOWUP_CASES if suite == "followup" else CASES
+    sandbox = "workspace-write" if suite == "followup" else "read-only"
     with tempfile.TemporaryDirectory(prefix="sci-loop-routing-") as raw:
         root = Path(raw).resolve()
         home = root / "home"
@@ -104,20 +138,24 @@ def probe(executable, live):
                 env[key] = os.environ[key]
         (home / "config.toml").write_text(
             'cli_auth_credentials_store = "ephemeral"\napproval_policy = "never"\n'
-            'sandbox_mode = "read-only"\nweb_search = "disabled"\n'
+            f'sandbox_mode = "{sandbox}"\nweb_search = "disabled"\n'
             '[features]\nplugins = true\napps = false\n'
             '[analytics]\nenabled = false\n', encoding="utf-8")
         installed = install_fixture(executable, root, env)
         with AppServer(executable, root, env) as app:
             app.initialize()
-            workspaces = {name: root / name for name in CASES}
-            for workspace in workspaces.values():
+            workspaces = {name: root / ("shelf" if name == "handoff" else name) for name in cases}
+            for workspace in set(workspaces.values()):
                 workspace.mkdir()
-            found = app.call("skills/list", cwds=[str(path) for path in workspaces.values()])["data"]
-            skill_path = installed / "skills" / "research-verification" / "SKILL.md"
-            assert {row["cwd"] for row in found} == {str(path) for path in workspaces.values()}
-            assert all(any(Path(s["path"]) == skill_path and s["enabled"] for s in row["skills"]) for row in found)
-            print("Installed research skill is discoverable in every workspace.", flush=True)
+            folders = sorted({str(path) for path in workspaces.values()})
+            found = app.call("skills/list", cwds=folders)["data"]
+            skills = [installed / "skills" / name / "SKILL.md" for name in ("research-verification", "task-checkpoint")]
+            assert {row["cwd"] for row in found} == set(folders)
+            for row in found:
+                enabled = {Path(s["path"]) for s in row["skills"] if s["enabled"]}
+                assert set(skills) <= enabled, row["cwd"]
+            print(f"Both installed skills available. {len(cases)} chats, {sum(map(len, cases.values()))} task turns.",
+                  flush=True)
             if not live:
                 print("Preflight only. No model turns started.")
                 return
@@ -136,24 +174,31 @@ def probe(executable, live):
                     raise SystemExit("No login callback received. No live model turns started.") from None
                 if not notice["params"]["success"]:
                     raise RuntimeError("The temporary Codex sign-in did not succeed.")
-            body = skill_path.read_text(encoding="utf-8").split("\n---\n", 1)[1]
-            lines = [line[:90] for line in body.splitlines() if len(line) > 65]
-            for name, prompts in CASES.items():
+            skill_markers = {}
+            for path in skills:
+                body = path.read_text(encoding="utf-8").split("\n---\n", 1)[1]
+                skill_markers[path] = [line[:90] for line in body.splitlines() if len(line) > 65]
+            for name, prompts in cases.items():
                 started = app.call("thread/start", cwd=str(workspaces[name]), ephemeral=True)
                 thread = started["thread"]["id"]
                 print(json.dumps({"case": name, "model": started["model"], "provider": started["modelProvider"]}),
                       flush=True)
                 for i, prompt in enumerate(prompts, start=1):
+                    prompt = prompt.replace("{folder}", str(workspaces[name]))
                     print(f"{name} {i}: {prompt}", flush=True)
-                    live_turn(app, thread, prompt, skill_path, lines)
+                    live_turn(app, thread, prompt, skill_markers)
+                    if suite == "followup":
+                        print(json.dumps({"checkpoints": checkpoint_snapshots(workspaces[name])},
+                                         ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--codex", default="codex")
-    parser.add_argument("--live", action="store_true", help="authorize real model usage for four ephemeral chats")
+    parser.add_argument("--suite", choices=("original", "followup"), default="original")
+    parser.add_argument("--live", action="store_true", help="authorize real model usage for the selected suite")
     args = parser.parse_args()
     executable = shutil.which(args.codex)
     if executable is None:
         parser.error("Codex executable not found")
-    probe(executable, args.live)
+    probe(executable, args.live, args.suite)
