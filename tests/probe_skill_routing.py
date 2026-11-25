@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Observe implicit skill selection in live Codex. Run manually with --live.
 
-Usage is the latest model call observed within each turn, as reported by app-server.
+Report the latest model call and whole-turn usage as observed by app-server.
 """
 
 import argparse
@@ -10,8 +10,10 @@ import json
 import os
 import shutil
 import tempfile
+import time
 from pathlib import Path
 
+from measure_turn_usage import FIELDS, summarize_usage, token_counts
 from test_sci_loop_native_codex import AppServer, install_fixture
 
 
@@ -48,25 +50,18 @@ FOLLOWUP_CASES = {
 }
 
 
-def last_model_usage(events, thread_id, turn_id):
-    for event in reversed(events):
+def model_usage_updates(events, thread_id, turn_id):
+    for event in events:
         params = event.get("params", {})
         if (event.get("method") == "thread/tokenUsage/updated"
                 and params.get("threadId") == thread_id and params.get("turnId") == turn_id):
-            last = (params.get("tokenUsage") or {}).get("last") or {}
-            break
-    else:
-        last = {}
-
-    usage = {}
-    for key in ("inputTokens", "cachedInputTokens"):
-        count = last.get(key)
-        usage[key] = count if type(count) is int and count >= 0 else "unknown"
-    return usage
+            usage = params.get("tokenUsage") or {}
+            yield token_counts(usage.get("total") or {}), token_counts(usage.get("last") or {})
 
 
-def live_turn(app, thread, prompt, skill_markers):
+def live_turn(app, thread, prompt, skill_markers, baseline):
     start = len(app.events)
+    started_at = time.monotonic()
     result = app.call("turn/start", threadId=thread, input=[{"type": "text", "text": prompt}])
     turn_id = result["turn"]["id"]
 
@@ -76,9 +71,12 @@ def live_turn(app, thread, prompt, skill_markers):
                 and params.get("turn", {}).get("id") == turn_id)
 
     turn = app.wait_for(matching, "live turn", since=start, timeout=240)["params"]["turn"]
+    elapsed = time.monotonic() - started_at
     if turn["status"] != "completed":
         raise RuntimeError(f"Live turn {turn['status']}: {turn.get('error')}")
     events = app.events[start:]
+    updates = list(model_usage_updates(events, thread, turn_id))
+    total, last = updates[-1] if updates else ({}, {})
     items = [e["params"]["item"] for e in events if e.get("method") == "item/completed"
              and e["params"].get("threadId") == thread and e["params"].get("turnId") == turn_id]
     observations = []
@@ -103,10 +101,15 @@ def live_turn(app, thread, prompt, skill_markers):
     print(json.dumps({
         "threadId": thread,
         "turnId": turn_id,
-        "tokenUsage": {"last": last_model_usage(events, thread, turn_id)},
+        "tokenUsage": {
+            "last": {key: last.get(key, "unknown") for key in ("inputTokens", "cachedInputTokens")},
+            "turn": summarize_usage(updates, baseline),
+        },
+        "elapsedSeconds": round(elapsed, 3),
         "tools": observations,
         "messages": messages,
     }, ensure_ascii=False), flush=True)
+    return total
 
 
 def checkpoint_snapshots(workspace):
@@ -183,10 +186,11 @@ def probe(executable, live, suite="original"):
                 thread = started["thread"]["id"]
                 print(json.dumps({"case": name, "model": started["model"], "provider": started["modelProvider"]}),
                       flush=True)
+                baseline = dict.fromkeys(FIELDS, 0)
                 for i, prompt in enumerate(prompts, start=1):
                     prompt = prompt.replace("{folder}", str(workspaces[name]))
                     print(f"{name} {i}: {prompt}", flush=True)
-                    live_turn(app, thread, prompt, skill_markers)
+                    baseline = live_turn(app, thread, prompt, skill_markers, baseline)
                     if suite == "followup":
                         print(json.dumps({"checkpoints": checkpoint_snapshots(workspaces[name])},
                                          ensure_ascii=False), flush=True)
