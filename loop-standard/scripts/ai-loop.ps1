@@ -849,7 +849,7 @@ switch ($Command) {
         if (-not (Test-Path -LiteralPath $PluginManifest -PathType Leaf)) { throw "Plugin manifest missing: $PluginManifest" }
         $Plugin = Get-Content -LiteralPath $PluginManifest -Raw | ConvertFrom-Json
         if ($Plugin.name -ne "codex-sci-loop") { throw "Unexpected plugin name: $($Plugin.name)" }
-        foreach ($SkillName in @("independent-completion-auditor", "loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")) {
+        foreach ($SkillName in @("task-checkpoint", "research-verification")) {
             $SkillPath = Join-Path $PluginRoot (Join-Path "skills\$SkillName" "SKILL.md")
             $SkillCheck = Test-PluginSkillFile -Path $SkillPath
             if ($SkillCheck -ne "ok") {
@@ -857,12 +857,12 @@ switch ($Command) {
             }
         }
         $PluginCore = Join-Path $PluginRoot "scripts\sci_loop.py"
-        $HookManifest = Join-Path $PluginRoot "hooks\hooks.json"
+        $CheckpointScript = Join-Path $PluginRoot "scripts\checkpoint.py"
         if (-not (Test-Path -LiteralPath $PluginCore -PathType Leaf)) {
             throw "Native plugin core missing: $PluginCore"
         }
-        if (-not (Test-Path -LiteralPath $HookManifest -PathType Leaf)) {
-            throw "Native plugin hook manifest missing: $HookManifest"
+        if (-not (Test-Path -LiteralPath $CheckpointScript -PathType Leaf)) {
+            throw "Native checkpoint script missing: $CheckpointScript"
         }
         if ($SkillProblems.Count -gt 0) {
             throw "Missing required research skills: $($SkillProblems -join ', ')"
@@ -875,7 +875,7 @@ switch ($Command) {
         Write-Output "Required research skills: OK"
         Write-Output "Plugin manifest JSON: OK"
         Write-Output "Plugin skill frontmatter: OK"
-        Write-Output "Native plugin core and hooks: OK"
+        Write-Output "Native plugin core and checkpoint script: OK"
         Write-Output "Template artifact manifest: OK"
         Write-Output "Template schema manifest: OK"
         Write-Output "External Worker harness: OK"

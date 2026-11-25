@@ -105,9 +105,12 @@ foreach ($Path in @(
     $ShimPath,
     $MarketplacePath,
     $PluginCore,
-    $HookManifest
+    (Join-Path $PluginRoot "scripts\checkpoint.py")
 )) {
     Test-RequiredFile -Path $Path
+}
+if (Test-Path -LiteralPath $HookManifest) {
+    Add-Problem "native plugin copy contains a hook registration manifest"
 }
 
 $Manifest = Read-JsonFile -Path $ManifestPath
@@ -132,7 +135,7 @@ if ($null -ne $Marketplace) {
     }
 }
 
-$ExpectedSkillNames = @("independent-completion-auditor", "loop-goal-bootstrap", "loop-supervisor", "loop-auditor", "loop-recovery", "research-loop-orchestrator")
+$ExpectedSkillNames = @("task-checkpoint", "research-verification")
 foreach ($SkillName in $ExpectedSkillNames) {
     $SkillPath = Join-Path $PluginRoot "skills\$SkillName\SKILL.md"
     Test-RequiredFile -Path $SkillPath

@@ -209,16 +209,11 @@ $PluginRoot = Join-Path $RepoRoot "plugins\codex-sci-loop"
 foreach ($Entry in @(
     @{ Id = "PLUGIN-MANIFEST"; Path = ".codex-plugin/plugin.json" },
     @{ Id = "PLUGIN-CORE"; Path = "scripts/sci_loop.py" },
+    @{ Id = "PLUGIN-CHECKPOINT"; Path = "scripts/checkpoint.py" },
     @{ Id = "PLUGIN-CAPABILITY"; Path = "scripts/capability_gate.py" },
     @{ Id = "PLUGIN-AUDIT-PROTOCOL"; Path = "scripts/audit_protocol.py" },
-    @{ Id = "PLUGIN-HOOK-ADAPTER"; Path = "hooks/codex_adapter.py" },
-    @{ Id = "PLUGIN-HOOKS"; Path = "hooks/hooks.json" },
-    @{ Id = "PLUGIN-BOOTSTRAP"; Path = "skills/loop-goal-bootstrap/SKILL.md" },
-    @{ Id = "PLUGIN-SUPERVISOR"; Path = "skills/loop-supervisor/SKILL.md" },
-    @{ Id = "PLUGIN-AUDITOR"; Path = "skills/loop-auditor/SKILL.md" },
-    @{ Id = "PLUGIN-INDEPENDENT-AUDITOR"; Path = "skills/independent-completion-auditor/SKILL.md" },
-    @{ Id = "PLUGIN-RECOVERY"; Path = "skills/loop-recovery/SKILL.md" },
-    @{ Id = "PLUGIN-RESEARCH"; Path = "skills/research-loop-orchestrator/SKILL.md" }
+    @{ Id = "PLUGIN-TASK-SKILL"; Path = "skills/task-checkpoint/SKILL.md" },
+    @{ Id = "PLUGIN-RESEARCH"; Path = "skills/research-verification/SKILL.md" }
 )) {
     Add-PathCheck -Id $Entry.Id -Area "plugin" -Root $PluginRoot -RelativePath $Entry.Path -Requirement "Codex plugin scaffold includes $($Entry.Path)."
 }

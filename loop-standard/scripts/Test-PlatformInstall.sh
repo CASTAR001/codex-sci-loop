@@ -56,16 +56,18 @@ require_file "$INSTALL_ROOT/loop-standard/scripts/Test-ValidateLoopMissingProper
 require_file "$INSTALL_ROOT/loop-standard/scripts/validate-loop.ps1"
 require_file "$INSTALL_ROOT/plugins/codex-sci-loop/.codex-plugin/plugin.json"
 require_file "$INSTALL_ROOT/plugins/codex-sci-loop/scripts/sci_loop.py"
+require_file "$INSTALL_ROOT/plugins/codex-sci-loop/scripts/checkpoint.py"
 require_file "$INSTALL_ROOT/plugins/codex-sci-loop/scripts/capability_gate.py"
 require_file "$INSTALL_ROOT/plugins/codex-sci-loop/scripts/audit_protocol.py"
-require_file "$INSTALL_ROOT/plugins/codex-sci-loop/hooks/codex_adapter.py"
-require_file "$INSTALL_ROOT/plugins/codex-sci-loop/hooks/hooks.json"
-require_file "$INSTALL_ROOT/plugins/codex-sci-loop/skills/independent-completion-auditor/SKILL.md"
-require_file "$INSTALL_ROOT/plugins/codex-sci-loop/skills/loop-goal-bootstrap/SKILL.md"
-require_file "$INSTALL_ROOT/plugins/codex-sci-loop/skills/loop-supervisor/SKILL.md"
+require_file "$INSTALL_ROOT/plugins/codex-sci-loop/skills/task-checkpoint/SKILL.md"
+require_file "$INSTALL_ROOT/plugins/codex-sci-loop/skills/research-verification/SKILL.md"
 require_file "$INSTALL_ROOT/.agents/plugins/marketplace.json"
 require_file "$INSTALL_ROOT/bin/ai-loop"
 require_dir "$INSTALL_ROOT/loop-standard/templates/.ai-loop"
+
+if [[ -e "$INSTALL_ROOT/plugins/codex-sci-loop/hooks/hooks.json" ]]; then
+    add_problem "native plugin copy contains a hook registration manifest"
+fi
 
 if [[ -e "$INSTALL_ROOT/bin/ai-loop" && ! -x "$INSTALL_ROOT/bin/ai-loop" ]]; then
     add_problem "Linux shim is not executable: $INSTALL_ROOT/bin/ai-loop"

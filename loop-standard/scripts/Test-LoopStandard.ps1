@@ -182,19 +182,15 @@ $RequiredPaths = @(
     "..\README_EN.md",
     "..\install.ps1",
     "..\install.sh",
+    "..\.agents\plugins\marketplace.json",
     "..\plugins\codex-sci-loop\.codex-plugin\plugin.json",
     "..\plugins\codex-sci-loop\README.md",
     "..\plugins\codex-sci-loop\scripts\sci_loop.py",
+    "..\plugins\codex-sci-loop\scripts\checkpoint.py",
     "..\plugins\codex-sci-loop\scripts\capability_gate.py",
     "..\plugins\codex-sci-loop\scripts\audit_protocol.py",
-    "..\plugins\codex-sci-loop\hooks\codex_adapter.py",
-    "..\plugins\codex-sci-loop\hooks\hooks.json",
-    "..\plugins\codex-sci-loop\skills\independent-completion-auditor\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-goal-bootstrap\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-supervisor\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-auditor\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-recovery\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\research-loop-orchestrator\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\task-checkpoint\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\research-verification\SKILL.md",
     "..\tests\test_sci_loop_distribution.py",
     "..\tests\test_sci_loop_capability_abi.py",
     "..\tests\test_sci_loop_audit_receipt.py",
@@ -256,12 +252,8 @@ if (Test-Path -LiteralPath $ClaudeMimoProfilePath) {
 }
 
 foreach ($SkillFile in @(
-    "..\plugins\codex-sci-loop\skills\independent-completion-auditor\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-goal-bootstrap\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-supervisor\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-auditor\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\loop-recovery\SKILL.md",
-    "..\plugins\codex-sci-loop\skills\research-loop-orchestrator\SKILL.md"
+    "..\plugins\codex-sci-loop\skills\task-checkpoint\SKILL.md",
+    "..\plugins\codex-sci-loop\skills\research-verification\SKILL.md"
 )) {
     $Path = Join-Path $KitRoot $SkillFile
     if (Test-Path -LiteralPath $Path) {

@@ -27,14 +27,8 @@ PLUGIN = ROOT / "plugins" / NAME
 MANIFEST = Path(".codex-plugin") / "plugin.json"
 MARKETPLACE_MANIFEST = ROOT / ".agents" / "plugins" / "marketplace.json"
 CORE = PLUGIN / "scripts" / "sci_loop.py"
-EXPECTED_SKILLS = {
-    "independent-completion-auditor",
-    "loop-goal-bootstrap",
-    "loop-supervisor",
-    "loop-auditor",
-    "loop-recovery",
-    "research-loop-orchestrator",
-}
+HOOK_MANIFEST = Path("hooks") / "hooks.json"
+EXPECTED_SKILLS = {"task-checkpoint", "research-verification"}
 PROHIBITED_RUNTIME_PATTERNS = (
     r"claude[-_ ]?mimo",
     r"external[-_ ]?worker",
@@ -101,6 +95,7 @@ def assert_structure() -> None:
     assert manifest["name"] == manifest["id"] == NAME
     assert manifest["version"] == VERSION
     assert manifest["skills"] == "./skills/"
+    assert "hooks" not in manifest and not (PLUGIN / HOOK_MANIFEST).exists()
     assert manifest["description"].strip()
     assert manifest["author"]["name"].strip()
     interface = manifest["interface"]
@@ -173,19 +168,12 @@ def assert_codex_install(run: RunCommand, cwd: Path, env: dict[str, str]) -> Non
     bundle = Path(installed["installedPath"]).resolve()
     assert bundle.is_relative_to(Path(env["CODEX_HOME"]) / "plugins" / "cache")
     assert (bundle / MANIFEST).read_bytes() == (PLUGIN / MANIFEST).read_bytes()
+    assert not (bundle / HOOK_MANIFEST).exists()
     assert_core_distribution(run, bundle / CORE.relative_to(PLUGIN))
+    run(sys.executable, str(bundle / "scripts" / "checkpoint.py"), "--help")
+    assert_codex_discovery(codex, cwd, env, plugin_id, bundle)
 
-    skills = list_codex_skills(codex, cwd, env)
-    discovered = {
-        skill["name"]: Path(skill["path"]).resolve()
-        for skill in skills if skill.get("pluginId") == plugin_id and skill["enabled"]
-    }
-    assert discovered == {
-        f"{NAME}:{name}": bundle / "skills" / name / "SKILL.md" for name in EXPECTED_SKILLS
-    }, discovered
-
-
-def list_codex_skills(codex: str, cwd: Path, env: dict[str, str]) -> list[dict]:
+def assert_codex_discovery(codex: str, cwd: Path, env: dict[str, str], plugin_id: str, bundle: Path) -> None:
     with subprocess.Popen(
         [codex, "app-server", "--stdio"], cwd=cwd, env=env,
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8",
@@ -204,7 +192,11 @@ def list_codex_skills(codex: str, cwd: Path, env: dict[str, str]) -> list[dict]:
             {"id": 1, "method": "initialize", "params": {"clientInfo": {"name": NAME, "version": VERSION}}},
             {"method": "initialized"},
             {"id": 2, "method": "skills/list", "params": {"cwds": [str(cwd)]}},
+            {"id": 3, "method": "plugin/read", "params": {
+                "marketplacePath": str(MARKETPLACE_MANIFEST), "pluginName": NAME,
+            }},
         )
+        results = {}
         try:
             for request in requests:
                 server.stdin.write(json.dumps(request) + "\n")
@@ -217,6 +209,7 @@ def list_codex_skills(codex: str, cwd: Path, env: dict[str, str]) -> list[dict]:
                     reply = json.loads(line)
                     if reply.get("id") == request["id"]:
                         assert "result" in reply, reply
+                        results[request["method"]] = reply["result"]
                         break
         finally:
             server.stdin.close()
@@ -225,9 +218,19 @@ def list_codex_skills(codex: str, cwd: Path, env: dict[str, str]) -> list[dict]:
             except subprocess.TimeoutExpired:
                 server.kill()
             reader.join(timeout=5)
-    result, = reply["result"]["data"]
+    result, = results["skills/list"]["data"]
     assert not result["errors"], result["errors"]
-    return result["skills"]
+    discovered = {
+        skill["name"]: Path(skill["path"]).resolve()
+        for skill in result["skills"] if skill.get("pluginId") == plugin_id and skill["enabled"]
+    }
+    assert discovered == {
+        f"{NAME}:{name}": bundle / "skills" / name / "SKILL.md" for name in EXPECTED_SKILLS
+    }, discovered
+    plugin = results["plugin/read"]["plugin"]
+    assert plugin["summary"]["id"] == plugin_id
+    assert plugin["summary"]["installed"] and plugin["summary"]["enabled"]
+    assert plugin["hooks"] == [], plugin["hooks"]
 
 
 def commit_fixture(run: RunCommand, project: Path, name: str, contents: str) -> None:

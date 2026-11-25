@@ -2,7 +2,7 @@
   "id": "codex-sci-loop",
   "name": "codex-sci-loop",
   "version": "1.1.0",
-  "description": "Resume routine Codex work from a local checkpoint or run an audited phase with durable evidence.",
+  "description": "Save and resume project checkpoints and verify research results in Codex.",
   "author": {
     "name": "LumiForge"
   },
@@ -10,8 +10,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Scientific Loop",
-    "shortDescription": "Local checkpoints and audited Codex phases.",
-    "longDescription": "Codex Scientific Loop saves project-local checkpoints and supports audited phases with reproducible verification, source diffs, and explicit completion decisions.",
+    "shortDescription": "Project checkpoints and research verification.",
+    "longDescription": "Codex Scientific Loop keeps project-local task checkpoints and guides reproducible checks for research results.",
     "developerName": "LumiForge",
     "category": "Productivity",
     "capabilities": [
@@ -20,8 +20,8 @@
     ],
     "defaultPrompt": [
       "Save a checkpoint so I can resume this task later.",
-      "Start an audited phase and prepare its evidence for review.",
-      "Resume work from the current project state."
+      "Resume work from the most recent project checkpoint.",
+      "Verify this research result and record the evidence."
     ]
   }
 }
