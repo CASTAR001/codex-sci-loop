@@ -1,116 +1,43 @@
 # codex-sci-loop
 
-`codex-sci-loop` 是一套给原生 Codex 使用的、项目本地优先的证据闭环插件。它不替换
-Codex 的 Agent 内核，也不启动另一套 Worker 引擎；当前 Codex 线程负责执行工作，插件
-负责保存阶段状态、验证结果、Git 证据、独立复核结果与可恢复状态。
+给 macOS 与 Linux 原生 Codex 使用的任务可靠性插件，Windows 为辅助平台。短任务直接用 Codex。需要跨会话保留约束、复跑实验或审核结论时，再建立项目检查点。插件只公开 `task-checkpoint` 和 `research-verification` 两个技能，默认注册零个生命周期 Hook。
 
-Agent 进入仓库时先读取短入口 `AGENTS.md`，再按其中指向读取项目控制面；不要用聊天
-历史替代落盘事实。
+## 安装与使用
 
-## v1 架构
+在本仓库根目录运行 `./install.sh`。macOS 和 Linux 都通过本机 Codex CLI 安装，不依赖 PowerShell。也可以直接运行以下两条命令。请保留注册 marketplace 时使用的源码目录。
 
-- `plugins/codex-sci-loop/`：正式的 1.0.0 插件。包含 Python 阶段控制核心、能力 ABI、
-  Codex hook adapter、签名审计协议、schemas 与 6 个 skills。
-- `loop-standard/`：旧项目仍可使用的 PowerShell 兼容工具箱。它不是 LumiForge 的原生
-  Agent 运行时，也不会被插件当作执行引擎。
-- `.ai-loop/`：本仓库自身的历史控制面和审计证据。历史记录保留，不代表当前推荐架构。
-- `tests/`：插件分发、能力认证、签名收据和 Codex hooks 的 provider-free 测试。
-
-插件的核心边界是：
-
-1. 原始 Goal 请求由 host adapter 在模型执行前捕获，不从聊天记忆重建。
-2. 当前 Codex 线程只能提交可验证的完成声明，不能凭自己的总结完成验收。
-3. 独立复核由隔离的原生 Codex subagent 执行，必须使用 `fork_turns=none`，只读取规范化
-   audit snapshot，不继承执行线程的推理历史。
-4. 只有 host 受保护目录中的新鲜签名收据可以放行完成；普通 Markdown 审计文本不能
-   伪造 PASS。
-5. Codex 更新后先比较能力 ABI、adapter、运行时制品与行为证据。没有冲突时继续运行；
-   只有关键能力变更或证据过期时才要求重新认证或升级插件。
-
-## 插件内容
-
-主要入口：
-
-```bash
-python3 plugins/codex-sci-loop/scripts/sci_loop.py --help
-python3 plugins/codex-sci-loop/scripts/audit_protocol.py --help
-python3 plugins/codex-sci-loop/scripts/capability_gate.py --help
+```sh
+codex plugin marketplace add .
+codex plugin add codex-sci-loop@codex-sci-loop-local
 ```
 
-主要 skills：
+在新的 Codex 会话中，可以说「为这个长任务保存检查点，保留我的约束和验收条件」，或「从项目里的检查点恢复，先告诉我哪次验证仍然有效」。Windows 可以用相同的 Codex 命令或仓库根目录的 `install.ps1`。
 
-- `loop-goal-bootstrap`
-- `loop-supervisor`
-- `loop-auditor`
-- `loop-recovery`
-- `research-loop-orchestrator`
-- `independent-completion-auditor`
+## 用命令复跑
 
-其中最后一个只允许在 LumiForge host 创建的隔离复核 subagent 中使用。
+原生核心只需要 Python 3.9+ 和 Git。macOS/Linux 可从 zsh 或 Bash 调用；验证脚本可显式选择 `bash` 或 `zsh`，Windows 可指定 `pwsh -NoProfile -File …`。从插件仓库取得 CLI 路径，然后进入**待处理项目自己的 Git 根目录**。下面假定该项目已有用户确认的 `request.md` 和可复跑的检查脚本。
 
-## 本地验证
+```sh
+checkpoint="$PWD/plugins/codex-sci-loop/scripts/checkpoint.py"
+cd /path/to/research-project
 
-这些检查不调用真实 Provider，不启动浏览器，也不会安装或更新当前 Codex：
-
-```bash
-python3 tests/test_sci_loop_distribution.py
-python3 tests/test_sci_loop_capability_abi.py
-python3 tests/test_sci_loop_audit_receipt.py
-python3 tests/test_sci_loop_codex_hooks.py
-bash loop-standard/scripts/Test-PlatformInstall.sh
+python3 "$checkpoint" start --request-file request.md --verify-command 'bash tests/check.sh'
+python3 "$checkpoint" note --kind hypothesis --note '误差可能来自边界条件' --next '检查网格加密结果'
+python3 "$checkpoint" verify
+python3 "$checkpoint" show
 ```
 
-插件和 skill 的格式还可以直接验证：
+- **意图变更**。用 `revise --from-revision 1 --request-file revised.md` 替换完整的有效约定。旧版本逐字保留。明确撤销的要求从新约定移除。程序能保存输入原文，原文与实际聊天请求的一致性取决于提供者。
+- **验证和复核**。`verify` 执行约定中的命令，记录退出码、Git 版本、输入和输出摘要及最后 8 KiB 输出。`--input path` 可以把被 Git 忽略的实验数据纳入验证。默认绑定当前 Git 提交；纯内容检查可显式选用 `--tree-only`，以免只保存检查点的提交触发重验。高风险任务可在建立或修订约定时指定 `--require-review`。复核人从 `show --for-review --full` 获取待审对象的摘要，再对照原始证据提交结论。具体命令见[科研复核技能](plugins/codex-sci-loop/skills/research-verification/SKILL.md)。
+- **恢复和收尾**。`show` 重新判断证据时效。中断后先检查命令可能产生的副作用。完成待办后用 `note --next ''` 清空，再执行 `finish`。校验失败、复核不足或待办未清均会阻止收尾。已结束任务发生相关变动后会显示 `needs_recheck`。暂停、阻塞、继续和取消使用 `set-state --state … --reason '…'`。
+- **文件和成本**。每个任务一份 `.ai-loop/checkpoints/<id>.json`，项目共用一个空锁文件。默认任务名为 `main`，每个命令可选 `--task <id>`。恢复默认展示最新约定的前 2,048 个字符和最近三条当前修订的笔记，`show --full` 可读完整当前记录。检查点不保存整段聊天或工作树补丁。完整测量数据、需要长期引用的失败实验和重要日志保存在项目原有位置。验证会读取受跟踪的变更和显式输入，大文件的哈希计算有实际成本。
 
-```bash
-python3 ~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py \
-  plugins/codex-sci-loop
+项目内可写检查点适用于协作中的恢复和一致性检查。记录的复核人身份属于署名声明。程序无法防止有工作区写权限的操作者篡改文件，也无法判断测试是否充分覆盖科学问题。
 
-for skill in plugins/codex-sci-loop/skills/*; do
-  python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"
-done
-```
+## 兼容与维护
 
-## 用户目录安装
+已有 `.ai-loop/loop.config.json` 的项目继续使用原协议，检查点命令会识别冲突。旧 Python 阶段由 `sci_loop.py resume --project-root <root> --json` 恢复。旧 PowerShell 项目使用 `loop-standard/`。LumiForge 签名收据及能力认证留在兼容路径，宿主需要显式投影模板并重新认证。普通 Codex 完成检查点工作无需这些服务。
 
-安装只复制到指定目录，不会自动替换正在运行的 Codex 插件。更新真实 Codex 前应先审查
-diff、跑完上述测试，并在新的 Codex 会话中验证发现结果。
+本地运行 `python3 -B tests/test_sci_loop_checkpoint.py`。发行验证用 `python3 -B tests/test_sci_loop_distribution.py --codex-install`，真实客户端压缩和重启验证用 `python3 -B tests/test_sci_loop_native_codex.py`。后两项使用临时 Codex 环境。
 
-Linux：
-
-```bash
-./install.sh \
-  --install-root "$HOME/.codex/loop-harness" \
-  --install-plugin \
-  --create-shim \
-  --create-marketplace \
-  --force
-```
-
-Windows：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
-  -InstallRoot C:\path\to\loop-harness `
-  -InstallPlugin -CreateShim -CreateMarketplace -Force
-```
-
-LumiForge 不从可变源码目录直接加载插件。它会验证并原子投影一份认证副本到各账号私有
-Codex home；收据根、复核观察和账号数据仍由 host 隔离。
-
-## 兼容工具箱
-
-已有项目若仍使用 `loop-standard/`，可以继续通过 `ai-loop.ps1` 完成 `init`、`start`、
-`collect`、`audit-pack`、`resume` 和 schema migration。它保留通用外部 Worker 兼容接口，
-但 v1 原生插件和 LumiForge Goal 模式不依赖该接口。新的功能应优先加入 Python 插件核心，
-避免再次复制一套 Agent 执行内核。
-
-## 安全与运维
-
-- 不把密码、token、Provider key 或账号文件写入 `.ai-loop`。
-- 不从可写的源码 checkout 直接运行正式插件。
-- 不把执行线程 prose 当作验收证据。
-- 不复用旧审计收据；任何受保护输入、workspace diff 或 runtime identity 变化都会使其失效。
-- 安装、远端 push、tag 以及正式环境切换始终是独立授权动作。
-
-English documentation: [README_EN.md](README_EN.md).
+[本轮架构审查与实测报告](docs/native-codex-review.md) · [English](README_EN.md)

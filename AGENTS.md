@@ -1,29 +1,9 @@
-# AGENTS.md
+# Working on codex-sci-loop
 
-This repository uses a local `.ai-loop/` control plane. Keep this file short:
-it is only the bootstrap entrypoint.
+Use the root README for the supported user workflow. The primary target is native Codex on macOS and Linux, with secondary Windows support. Keep host-specific integration out of the default lifecycle.
 
-Before planning or modifying files, read:
+The current maintainer context is in `.ai-loop/memory/activeContext.md`. Use the constraints in `.ai-loop/memory/constraint-ledger.md`. Preserve historical runs, audits and experimental results. New native tests use temporary projects and isolated Codex homes.
 
-1. `.ai-loop/README.md`
-2. `.ai-loop/memory/activeContext.md`
-3. `.ai-loop/memory/constraint-ledger.md`
-4. `.ai-loop/gates/pre-action-check.md`
+Validate a change through its public entry point. For contracts and verification run `python3 -B tests/test_sci_loop_checkpoint.py`. For changes to packaging or the Codex interface also run the distribution and native app-server tests described in the README. Signed protocol changes have separate receipt, capability and adapter suites.
 
-After meaningful work, update:
-
-- `.ai-loop/memory/activeContext.md`
-- `.ai-loop/memory/progress.md`
-- `.ai-loop/memory/handoff-summary.md`
-
-Governance files are read-only by default. Do not modify `.ai-loop/memory/`,
-`.ai-loop/roles/`, `.ai-loop/gates/`, `.ai-loop/events/`, `.ai-loop/evidence/`,
-`.ai-loop/skills/`, `.ai-loop/evolution/`, `.ai-loop/prompts/`,
-`.ai-loop/templates/`, or `.ai-loop/workers/` unless the user explicitly
-declares a harness maintenance phase.
-
-Do not accept work from prose alone. Inspect evidence, diffs, verification logs,
-status, changed files, and relevant source.
-
-For `.agents/` vs `.ai-loop/` boundaries, read
-`loop-standard/docs/AGENTS_VS_AI_LOOP_BOUNDARY.md` when changing structure.
+Keep source, operator-writable records and independently observed evidence distinguishable. Restrict Git commits to the intended paths. Remote publication and changes to personal Codex installations require separate authorization.

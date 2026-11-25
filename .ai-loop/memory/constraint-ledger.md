@@ -1,41 +1,9 @@
-# Constraint Ledger
+# Maintainer constraints
 
-## Hard Constraints
-
-- Worker may execute only the current assigned phase.
-- Worker must not redefine the project goal or global route.
-- Worker must not silently broaden file scope.
-- Worker must not modify governance files unless the Supervisor explicitly
-  declares a harness maintenance phase.
-- Governance files include `.ai-loop/memory/`, `.ai-loop/roles/`,
-  `.ai-loop/gates/`, `.ai-loop/events/`, `.ai-loop/evidence/`,
-  `.ai-loop/skills/`, `.ai-loop/evolution/`, `.ai-loop/prompts/`, and
-  `.ai-loop/templates/`.
-- Verification must produce command output, logs, tests, diffs, or reproducible
-  artifacts.
-- "Looks correct", "it runs", "probably fixed", and fluent prose are not
-  evidence.
-- If evidence is missing, mark `BLOCKED` or `REWORK`, not `ACCEPTED`.
-- If required skill artifacts are missing, mark `BLOCKED` or `REWORK`, unless
-  the Supervisor records an explicit force-override reason.
-- If an invariant or stop rule fails, stop and report; do not patch around it.
-- Do not skip required scientific correctness skills when the task involves
-  numerical, symbolic, experimental, research, or correctness-sensitive claims.
-- Do not claim a scientific or numerical result is correct without deterministic
-  verification or an appropriate cross-check.
-- Do not use chat history as an authoritative fact source; facts must land in
-  files.
-
-## User Preferences
-
-- Prefer concrete procedures over many alternatives.
-- Prefer reusable framework over ad hoc prompt chains.
-- Prefer evidence-based verification over subjective review.
-- Keep root `AGENTS.md` short; put detailed rules in `.ai-loop/`.
-
-## Native Execution Rule
-
-The plugin must not depend on a second Agent engine. The active Codex thread
-executes the bounded phase; an isolated native subagent may audit completion
-but cannot continue implementation or authorize its own result. Every claim
-must follow the same evidence and signed-receipt requirements.
+- Preserve user intent, constraints and revisions separately from model-written decisions and hypotheses.
+- Bind reproducible results to their inputs. A command exit code supports only the claim the command actually checks.
+- Native checkpoints are writable by project collaborators. Record reviewer attribution and review freshness; externally authenticated acceptance needs its own trust boundary.
+- Keep the native macOS/Linux path independent of PowerShell and of a managed receipt issuer. Default installs have no lifecycle hooks.
+- Use isolated projects and Codex homes for tests. Leave historical runs and raw scientific evidence intact. Protect user work, local configuration and credentials.
+- Keep the old phase protocol and signed-receipt rules applicable to their original state and explicit managed deployments. Validate compatibility on fixtures before changing them.
+- Publish, push or replace a real installation only with the user's authorization.

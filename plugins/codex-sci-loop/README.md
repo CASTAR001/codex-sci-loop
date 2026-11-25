@@ -1,37 +1,11 @@
 # Codex Scientific Loop
 
-This portable plugin adds project-local, evidence-gated phase management to a
-native Codex runtime. It does not launch or replace an agent engine. The active
-Codex thread performs the requested work, while the bundled core records phase
-state, verification output, and Git evidence in `.ai-loop/`.
+For long tasks in a native Codex session, use `task-checkpoint` to capture the effective request and recover project state. Use `research-verification` for repeatable checks and independent review. The installed package declares no automatic lifecycle hooks.
 
-Completion is governed by `scripts/audit_protocol.py`. It creates a canonical
-snapshot from the raw request, acceptance criteria, completion claims, current
-workspace evidence, deterministic verification, and runtime certification. A
-separate clean-room reviewer must return strict per-item outcomes. Only a fresh
-host-issued receipt from a protected root can finalize `PASS`; prose audit files
-cannot accept or block a phase.
+Run `python3 scripts/checkpoint.py --help` from this package to see the CLI. In a target Git project use the absolute script path with `start --request-file …`, `show`, `verify` or `finish`. The checkpoint is operator-writable. A passing command supports the property it actually tested. Record assumptions and review any broader claim separately.
 
-The default `hooks/hooks.json` maps the certified Codex lifecycle events into
-this protocol. The lifecycle adapter is inert unless the host explicitly sets
-`LUMIFORGE_SCI_LOOP_MODE=goal`; installing the portable plugin into an ordinary
-Codex home therefore cannot block normal prompts or sessions. In a managed Goal
-runtime, `UserPromptSubmit` captures requests and active-loop revisions and any
-certification failure remains fail-closed. The `Agent` pre-tool guard requires the exact
-delegation and `fork_turns=none`; subagent start/stop hooks bind the observed
-native identity and opaque transcript; `Stop` continues or denies the turn
-until the signed gate passes. Hook names and wire shapes remain confined to the
-adapter.
+## Older phase projects
 
-The command entrypoint is:
+`scripts/sci_loop.py` reads native v1 phase state. Old evidence without a verification binding needs a fresh `collect` and `audit-pack` for a new signed decision. A recorded terminal decision is historical. A compatible host can recheck it using `audit_protocol.py gate` and the original protected receipt.
 
-```bash
-python3 <plugin-root>/scripts/sci_loop.py --help
-python3 <plugin-root>/scripts/audit_protocol.py --help
-```
-
-Installation is managed by LumiForge. Do not point a running account directly
-at a mutable source checkout. The receipt root and reviewer observation files
-must remain outside the executor's write boundary. The bundled custom-agent
-file is only a template: LumiForge must project it into the account-private
-Codex home and independently attest the outer read-only boundary before review.
+Managed integration assets include the explicit template `adapters/lumiforge/hooks.json`, its reviewer skill under `adapters/lumiforge/skills/`, the adapter executable under `hooks/`, and the signed audit and capability protocols. A host projecting these assets must certify the final projected tree and enforce its own external write boundary. The ordinary Codex installation has no signing authority. Host operation and PowerShell project migration are outside the checkpoint workflow.
