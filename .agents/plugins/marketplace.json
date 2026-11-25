@@ -1,0 +1,20 @@
+{
+  "name": "codex-sci-loop-local",
+  "interface": {
+    "displayName": "Codex Scientific Loop"
+  },
+  "plugins": [
+    {
+      "name": "codex-sci-loop",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-sci-loop"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

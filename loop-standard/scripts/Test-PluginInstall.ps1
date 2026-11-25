@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$InstallRoot = "",
-    [string]$SkillLibraryRoot = "E:\codexfiles\test\.agents\skills",
+    [string]$SkillLibraryRoot = "",
     [switch]$KeepTemp
 )
 
@@ -65,6 +65,19 @@ if ((Test-Path -LiteralPath $TempRoot) -and -not $KeepTemp) {
 }
 New-Item -ItemType Directory -Force -Path $TempRoot | Out-Null
 
+if ([string]::IsNullOrWhiteSpace($SkillLibraryRoot)) {
+    $SkillLibraryRoot = Join-Path $TempRoot "skills"
+    foreach ($SkillName in @(
+        "research-task-tree", "invariant-contract", "bounded-experiment-loop",
+        "deterministic-verification", "independent-crosscheck", "result-provenance-audit",
+        "manuscript-consistency-audit", "skill-compliance-audit"
+    )) {
+        $SkillDir = Join-Path $SkillLibraryRoot $SkillName
+        New-Item -ItemType Directory -Force -Path $SkillDir | Out-Null
+        Set-Content -LiteralPath (Join-Path $SkillDir "SKILL.md") -Value "# $SkillName fixture"
+    }
+}
+
 $InstallScript = Join-Path $KitRoot "scripts\install-global.ps1"
 & $PowerShellHost -NoProfile -File $InstallScript `
     -InstallRoot $InstallRoot `
@@ -98,8 +111,10 @@ foreach ($Path in @(
 }
 
 $Manifest = Read-JsonFile -Path $ManifestPath
+$SourceManifest = Read-JsonFile -Path (Join-Path $RepoRoot "plugins\codex-sci-loop\.codex-plugin\plugin.json")
 if ($null -ne $Manifest) {
     if ($Manifest.name -ne "codex-sci-loop") { Add-Problem "unexpected plugin name: $($Manifest.name)" }
+    if ($null -ne $SourceManifest -and $Manifest.version -ne $SourceManifest.version) { Add-Problem "installed plugin version differs from source: $($Manifest.version)" }
     if ($Manifest.skills -ne "./skills/") { Add-Problem "plugin skills path should be ./skills/: $($Manifest.skills)" }
     if ([string]::IsNullOrWhiteSpace($Manifest.interface.displayName)) { Add-Problem "plugin manifest missing interface.displayName" }
 }
@@ -138,7 +153,7 @@ if ($LASTEXITCODE -ne 0 -or (($ShimDoctor | Out-String) -notmatch "Doctor:\s+OK"
 }
 
 $PluginVersion = @(& python3 $PluginCore --version 2>&1)
-if ($LASTEXITCODE -ne 0 -or (($PluginVersion | Out-String).Trim() -ne "1.0.0")) {
+if ($LASTEXITCODE -ne 0 -or $null -eq $SourceManifest -or (($PluginVersion | Out-String).Trim() -ne $SourceManifest.version)) {
     Add-Problem "plugin core version check failed: $($PluginVersion | Out-String)"
 }
 $PluginDistribution = @(& python3 $PluginCore validate-distribution 2>&1)

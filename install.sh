@@ -9,8 +9,8 @@ case "$OS_NAME" in
         exec bash "$SCRIPT_DIR/loop-standard/scripts/install-global.sh" "$@"
         ;;
     Darwin)
-        printf '%s\n' "macOS installer placeholder: platform-specific packaging is reserved for a later phase." >&2
-        printf '%s\n' "Use the Windows or Linux installer on those platforms for now." >&2
+        printf '%s\n' "The compatibility toolkit installer supports Linux and Windows." >&2
+        printf 'Install the Codex plugin with:\n  codex plugin marketplace add "%s"\n  codex plugin add codex-sci-loop@codex-sci-loop-local\n' "$SCRIPT_DIR" >&2
         exit 3
         ;;
     MINGW*|MSYS*|CYGWIN*)

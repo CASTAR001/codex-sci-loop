@@ -3,21 +3,30 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
+import queue
 import re
+import shutil
 import subprocess
+import sys
 import tempfile
+import threading
+from functools import partial
 from pathlib import Path
+from typing import Callable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN = ROOT / "plugins" / "codex-sci-loop"
+NAME = "codex-sci-loop"
+VERSION = "1.1.0"
+MARKETPLACE = "codex-sci-loop-local"
+PLUGIN = ROOT / "plugins" / NAME
+MANIFEST = Path(".codex-plugin") / "plugin.json"
+MARKETPLACE_MANIFEST = ROOT / ".agents" / "plugins" / "marketplace.json"
 CORE = PLUGIN / "scripts" / "sci_loop.py"
-SYSTEM_SKILLS = Path.home() / ".codex" / "skills" / ".system"
-PLUGIN_VALIDATOR = SYSTEM_SKILLS / "plugin-creator" / "scripts" / "validate_plugin.py"
-SKILL_VALIDATOR = SYSTEM_SKILLS / "skill-creator" / "scripts" / "quick_validate.py"
 EXPECTED_SKILLS = {
     "independent-completion-auditor",
     "loop-goal-bootstrap",
@@ -35,32 +44,95 @@ PROHIBITED_RUNTIME_PATTERNS = (
     r"require[-_ ]?external[-_ ]?worker[-_ ]?evidence",
     r"worker[-_ ]?profile",
 )
+RunCommand = Callable[..., subprocess.CompletedProcess[str]]
 
 
-def run(*command: str, cwd: Path | None = None, expect: int = 0) -> subprocess.CompletedProcess[str]:
+def isolated_environment(root: Path) -> dict[str, str]:
+    home, codex_home, temp = (root / name for name in ("home", "codex", "tmp"))
+    for path in (home, codex_home, temp):
+        path.mkdir()
+    env = {
+        key: os.environ[key]
+        for key in ("PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT")
+        if key in os.environ
+    }
+    return {
+        **env,
+        "HOME": str(home),
+        "USERPROFILE": str(home),
+        "APPDATA": str(home),
+        "LOCALAPPDATA": str(home),
+        "XDG_CONFIG_HOME": str(home),
+        "XDG_CACHE_HOME": str(home),
+        "XDG_DATA_HOME": str(home),
+        "XDG_STATE_HOME": str(home),
+        "CODEX_HOME": str(codex_home),
+        "TMPDIR": str(temp),
+        "TMP": str(temp),
+        "TEMP": str(temp),
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+
+
+def run_command(
+    *command: str, cwd: Path, env: dict[str, str], expect: int = 0
+) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         command,
-        cwd=cwd or ROOT,
+        cwd=cwd,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        capture_output=True,
         check=False,
         timeout=120,
-        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        env=env,
     )
     if result.returncode != expect:
         raise AssertionError(
-            f"command returned {result.returncode}, expected {expect}: {' '.join(command)}\n{result.stdout}"
+            f"command returned {result.returncode}, expected {expect}: {' '.join(command)}\n"
+            f"{result.stdout}{result.stderr}"
         )
     return result
 
 
 def assert_structure() -> None:
-    manifest = json.loads((PLUGIN / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert manifest["name"] == "codex-sci-loop"
-    assert manifest["version"] == "1.0.0"
+    manifest = json.loads((PLUGIN / MANIFEST).read_text(encoding="utf-8"))
+    assert manifest["name"] == manifest["id"] == NAME
+    assert manifest["version"] == VERSION
+    assert manifest["skills"] == "./skills/"
+    assert manifest["description"].strip()
+    assert manifest["author"]["name"].strip()
+    interface = manifest["interface"]
+    for field in ("displayName", "shortDescription", "longDescription", "developerName", "category"):
+        assert interface[field].strip(), f"empty plugin interface field: {field}"
+
+    marketplace = json.loads(MARKETPLACE_MANIFEST.read_text(encoding="utf-8"))
+    assert marketplace["name"] == MARKETPLACE
+    assert marketplace["interface"]["displayName"].strip()
+    entry, = marketplace["plugins"]
+    assert entry["name"] == NAME
+    assert entry["source"] == {"source": "local", "path": f"./plugins/{NAME}"}
+    assert (ROOT / entry["source"]["path"]).resolve() == PLUGIN
+    assert entry["policy"] == {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}
+    assert entry["category"] == interface["category"]
+
     skills = {path.name for path in (PLUGIN / "skills").iterdir() if path.is_dir()}
     assert skills == EXPECTED_SKILLS
+    for name in sorted(EXPECTED_SKILLS):
+        skill_path = PLUGIN / "skills" / name / "SKILL.md"
+        skill_text = skill_path.read_text(encoding="utf-8")
+        opening, _, remainder = skill_text.partition("\n")
+        frontmatter, closing, body = remainder.partition("\n---\n")
+        assert opening == "---" and closing and body.strip(), skill_path
+        assert re.findall(r"^name:[ \t]*(.*)$", frontmatter, re.MULTILINE) == [name], skill_path
+        descriptions = re.findall(r"^description:[ \t]*(.*)$", frontmatter, re.MULTILINE)
+        assert len(descriptions) == 1, skill_path
+        description = descriptions[0].strip()
+        if description.startswith('"'):
+            description = json.loads(description)
+        assert description.strip() and len(description) <= 1024, skill_path
+
     assert CORE.is_file()
     cache_artifacts = [
         path.relative_to(PLUGIN).as_posix()
@@ -83,56 +155,109 @@ def assert_runtime_has_no_removed_routes() -> None:
     assert not matches, "removed runtime routes remain:\n" + "\n".join(matches)
 
 
-def assert_valid_plugin_and_skills() -> None:
-    assert PLUGIN_VALIDATOR.is_file()
-    assert SKILL_VALIDATOR.is_file()
-    output = run("python3", str(PLUGIN_VALIDATOR), str(PLUGIN)).stdout
-    assert "Plugin validation passed" in output
-    for name in sorted(EXPECTED_SKILLS):
-        output = run("python3", str(SKILL_VALIDATOR), str(PLUGIN / "skills" / name)).stdout
-        assert "Skill is valid" in output
-    assert run("python3", str(CORE), "--version").stdout.strip() == "1.0.0"
-    assert "DISTRIBUTION: OK" in run("python3", str(CORE), "validate-distribution").stdout
+def assert_core_distribution(run: RunCommand, core: Path) -> None:
+    assert run(sys.executable, str(core), "--version").stdout.strip() == VERSION
+    assert "DISTRIBUTION: OK" in run(sys.executable, str(core), "validate-distribution").stdout
 
 
-def commit_fixture(project: Path) -> None:
+def assert_codex_install(run: RunCommand, cwd: Path, env: dict[str, str]) -> None:
+    codex = shutil.which("codex")
+    assert codex is not None, "--codex-install requires the Codex CLI on PATH"
+    plugin_id = f"{NAME}@{MARKETPLACE}"
+    market = json.loads(run(codex, "plugin", "marketplace", "add", str(ROOT), "--json").stdout)
+    assert market["marketplaceName"] == MARKETPLACE
+    assert Path(market["installedRoot"]).resolve() == ROOT
+    installed = json.loads(run(codex, "plugin", "add", plugin_id, "--json").stdout)
+    assert installed["pluginId"] == plugin_id
+    assert installed["version"] == VERSION
+    bundle = Path(installed["installedPath"]).resolve()
+    assert bundle.is_relative_to(Path(env["CODEX_HOME"]) / "plugins" / "cache")
+    assert (bundle / MANIFEST).read_bytes() == (PLUGIN / MANIFEST).read_bytes()
+    assert_core_distribution(run, bundle / CORE.relative_to(PLUGIN))
+
+    skills = list_codex_skills(codex, cwd, env)
+    discovered = {
+        skill["name"]: Path(skill["path"]).resolve()
+        for skill in skills if skill.get("pluginId") == plugin_id and skill["enabled"]
+    }
+    assert discovered == {
+        f"{NAME}:{name}": bundle / "skills" / name / "SKILL.md" for name in EXPECTED_SKILLS
+    }, discovered
+
+
+def list_codex_skills(codex: str, cwd: Path, env: dict[str, str]) -> list[dict]:
+    with subprocess.Popen(
+        [codex, "app-server", "--stdio"], cwd=cwd, env=env,
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8",
+    ) as server:
+        assert server.stdin is not None and server.stdout is not None
+        messages = queue.Queue()
+
+        def read_messages() -> None:
+            for line in server.stdout:
+                messages.put(line)
+            messages.put(None)
+
+        reader = threading.Thread(target=read_messages, daemon=True)
+        reader.start()
+        requests = (
+            {"id": 1, "method": "initialize", "params": {"clientInfo": {"name": NAME, "version": VERSION}}},
+            {"method": "initialized"},
+            {"id": 2, "method": "skills/list", "params": {"cwds": [str(cwd)]}},
+        )
+        try:
+            for request in requests:
+                server.stdin.write(json.dumps(request) + "\n")
+                server.stdin.flush()
+                if "id" not in request:
+                    continue
+                while True:
+                    line = messages.get(timeout=15)
+                    assert line is not None, f"Codex closed stdio before replying to {request['method']}"
+                    reply = json.loads(line)
+                    if reply.get("id") == request["id"]:
+                        assert "result" in reply, reply
+                        break
+        finally:
+            server.stdin.close()
+            try:
+                server.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                server.kill()
+            reader.join(timeout=5)
+    result, = reply["result"]["data"]
+    assert not result["errors"], result["errors"]
+    return result["skills"]
+
+
+def commit_fixture(run: RunCommand, project: Path, name: str, contents: str) -> None:
     run("git", "init", "-q", cwd=project)
-    run("git", "config", "user.name", "LumiForge Test", cwd=project)
-    run("git", "config", "user.email", "test.invalid@example.invalid", cwd=project)
-    (project / "fixture.txt").write_text("baseline\n", encoding="utf-8")
-    run("git", "add", "fixture.txt", cwd=project)
-    run("git", "commit", "-qm", "fixture", cwd=project)
+    (project / name).write_text(contents, encoding="utf-8")
+    run("git", "add", name, cwd=project)
+    run(
+        "git", "-c", "user.name=LumiForge Test", "-c", "user.email=fixture@example.invalid",
+        "commit", "-qm", "fixture", cwd=project,
+    )
 
 
-def nested_fixture(project: Path) -> Path:
-    nested = project / "nested"
-    nested.mkdir()
-    run("git", "init", "-q", cwd=nested)
-    run("git", "config", "user.name", "LumiForge Test", cwd=nested)
-    run("git", "config", "user.email", "test.invalid@example.invalid", cwd=nested)
-    (nested / "nested.txt").write_text("nested baseline\n", encoding="utf-8")
-    run("git", "add", "nested.txt", cwd=nested)
-    run("git", "commit", "-qm", "nested fixture", cwd=nested)
-    return nested
-
-
-def assert_native_lifecycle() -> None:
+def assert_native_lifecycle(run: RunCommand) -> None:
     with tempfile.TemporaryDirectory(prefix="lumiforge-sci-loop-") as raw:
         project = Path(raw).resolve()
-        commit_fixture(project)
-        nested = nested_fixture(project)
-        base = (Path.home() / ".codex").stat() if (Path.home() / ".codex").exists() else None
-        run("python3", str(CORE), "init", "--project-root", str(project))
+        commit_fixture(run, project, "fixture.txt", "baseline\n")
+        nested = project / "nested"
+        nested.mkdir()
+        commit_fixture(run, nested, "nested.txt", "nested baseline\n")
+        run(sys.executable, str(CORE), "init", "--project-root", str(project))
         assert "refusing to overwrite" in run(
-            "python3", str(CORE), "init", "--project-root", str(project), expect=1
-        ).stdout
+            sys.executable, str(CORE), "init", "--project-root", str(project), expect=1
+        ).stderr
         config_path = project / ".ai-loop" / "loop.config.json"
         config = json.loads(config_path.read_text(encoding="utf-8"))
         config["evidence_repositories"] = [".", "nested"]
         config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
-        run("python3", str(CORE), "validate", "--project-root", str(project))
+        run(sys.executable, str(CORE), "validate", "--project-root", str(project))
         run(
-            "python3",
+            sys.executable,
             str(CORE),
             "start",
             "--project-root",
@@ -144,7 +269,7 @@ def assert_native_lifecycle() -> None:
             "--objective",
             "Exercise the native evidence lifecycle.",
             "--verify-command",
-            "python3 -c 'print(\"fixture verification: OK\")'",
+            "printf '%s\\n' 'fixture verification: OK'",
         )
         run_dir = project / ".ai-loop" / "runs" / "fixture-phase"
         (project / "fixture.txt").write_text("changed\n", encoding="utf-8")
@@ -152,12 +277,12 @@ def assert_native_lifecycle() -> None:
         (nested / "nested.txt").write_text("nested changed\n", encoding="utf-8")
         (nested / "nested-new.txt").write_text("nested new\n", encoding="utf-8")
         (run_dir / "report.md").write_text("# Execution report\n\nFixture completed.\n", encoding="utf-8")
-        run("python3", str(CORE), "collect", "--project-root", str(project), "--phase-id", "fixture-phase")
-        run("python3", str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", "fixture-phase")
+        run(sys.executable, str(CORE), "collect", "--project-root", str(project), "--phase-id", "fixture-phase")
+        run(sys.executable, str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", "fixture-phase")
         audit = project / ".ai-loop" / "audits" / "fixture-phase-audit.md"
         audit.write_text("# Audit\n\nDecision: ACCEPTED\n\nEvidence inspected.\n", encoding="utf-8")
         assert "host-authorized" in run(
-            "python3",
+            sys.executable,
             str(CORE),
             "decide",
             "--project-root",
@@ -167,10 +292,10 @@ def assert_native_lifecycle() -> None:
             "--decision",
             "accepted",
             expect=1,
-        ).stdout
+        ).stderr
         audit.write_text("# Audit\n\nDecision: REWORK\n\nEvidence inspected.\n", encoding="utf-8")
         run(
-            "python3",
+            sys.executable,
             str(CORE),
             "decide",
             "--project-root",
@@ -181,7 +306,7 @@ def assert_native_lifecycle() -> None:
             "rework",
         )
         resumed = json.loads(
-            run("python3", str(CORE), "resume", "--project-root", str(project), "--json").stdout
+            run(sys.executable, str(CORE), "resume", "--project-root", str(project), "--json").stdout
         )
         assert resumed["decision"] == "REWORK_REQUIRED"
         verify_log = (run_dir / "verify.log").read_text(encoding="utf-8")
@@ -195,20 +320,19 @@ def assert_native_lifecycle() -> None:
         assert ".ai-loop/status.json" not in diff
         heads = json.loads((run_dir / "repository_heads.json").read_text(encoding="utf-8"))
         assert set(heads) == {".", "nested"}
-        assert (project / ".ai-loop" / "events" / "state-transitions.ndjson").is_file()
-        assert (project / ".ai-loop" / "events" / "state-transitions.ndjson").stat().st_mode & 0o777 == 0o600
+        journal = project / ".ai-loop" / "events" / "state-transitions.ndjson"
+        assert journal.is_file()
+        if os.name != "nt":
+            assert journal.stat().st_mode & 0o777 == 0o600
 
-        after = (Path.home() / ".codex").stat() if (Path.home() / ".codex").exists() else None
-        assert (base.st_mtime_ns, base.st_ctime_ns) == (after.st_mtime_ns, after.st_ctime_ns) if base and after else base is after
 
-
-def assert_failed_verification_cannot_use_prose_acceptance() -> None:
+def assert_failed_verification_cannot_use_prose_acceptance(run: RunCommand) -> None:
     with tempfile.TemporaryDirectory(prefix="lumiforge-sci-loop-failed-") as raw:
         project = Path(raw).resolve()
-        commit_fixture(project)
-        run("python3", str(CORE), "init", "--project-root", str(project))
+        commit_fixture(run, project, "fixture.txt", "baseline\n")
+        run(sys.executable, str(CORE), "init", "--project-root", str(project))
         run(
-            "python3",
+            sys.executable,
             str(CORE),
             "start",
             "--project-root",
@@ -224,12 +348,12 @@ def assert_failed_verification_cannot_use_prose_acceptance() -> None:
         )
         failed_run = project / ".ai-loop" / "runs" / "failed-phase"
         (failed_run / "report.md").write_text("# Execution report\n\nVerification is expected to fail.\n", encoding="utf-8")
-        run("python3", str(CORE), "collect", "--project-root", str(project), "--phase-id", "failed-phase")
-        run("python3", str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", "failed-phase")
+        run(sys.executable, str(CORE), "collect", "--project-root", str(project), "--phase-id", "failed-phase")
+        run(sys.executable, str(CORE), "audit-pack", "--project-root", str(project), "--phase-id", "failed-phase")
         failed_audit = project / ".ai-loop" / "audits" / "failed-phase-audit.md"
         failed_audit.write_text("# Audit\n\nDecision: ACCEPTED\n", encoding="utf-8")
         assert "host-authorized" in run(
-            "python3",
+            sys.executable,
             str(CORE),
             "decide",
             "--project-root",
@@ -239,18 +363,32 @@ def assert_failed_verification_cannot_use_prose_acceptance() -> None:
             "--decision",
             "accepted",
             expect=1,
-        ).stdout
+        ).stderr
         assert "verify_exit_code=7" in (failed_run / "verify.log").read_text(encoding="utf-8")
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--codex-install", action="store_true", help="also install into a temporary Codex home")
+    args = parser.parse_args()
     assert_structure()
     assert_runtime_has_no_removed_routes()
-    assert_valid_plugin_and_skills()
-    assert_native_lifecycle()
-    assert_failed_verification_cannot_use_prose_acceptance()
-    digest = hashlib.sha256(CORE.read_bytes()).hexdigest()
-    print(json.dumps({"ok": True, "plugin": "codex-sci-loop", "version": "1.0.0", "core_sha256": digest}))
+    with tempfile.TemporaryDirectory(prefix="sci-loop-distribution-") as raw:
+        root = Path(raw).resolve()
+        env = isolated_environment(root)
+        run = partial(run_command, cwd=root, env=env)
+        assert_core_distribution(run, CORE)
+        assert_native_lifecycle(run)
+        assert_failed_verification_cannot_use_prose_acceptance(run)
+        assert not list(Path(env["CODEX_HOME"]).iterdir())
+        assert not (Path(env["HOME"]) / ".codex").exists()
+        if args.codex_install:
+            assert_codex_install(run, root, env)
+    print(json.dumps({
+        "ok": True, "plugin": NAME, "version": VERSION,
+        "core_sha256": hashlib.sha256(CORE.read_bytes()).hexdigest(),
+        "codex_install": "passed" if args.codex_install else "not_requested",
+    }))
 
 
 if __name__ == "__main__":

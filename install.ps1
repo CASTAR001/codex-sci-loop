@@ -38,7 +38,12 @@ switch ($Platform) {
         exit $LASTEXITCODE
     }
     "macos" {
-        throw "macOS installer placeholder: platform-specific packaging is reserved for a later phase."
+        throw @"
+The compatibility toolkit installer supports Linux and Windows.
+Install the Codex plugin with:
+  codex plugin marketplace add "$RepoRoot"
+  codex plugin add codex-sci-loop@codex-sci-loop-local
+"@
     }
     default {
         throw "Unsupported platform for loop harness install."
