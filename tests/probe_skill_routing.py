@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Observe implicit skill selection in live Codex. Run manually with --live."""
+"""Observe implicit skill selection in live Codex. Run manually with --live.
+
+Usage is the latest model call observed within each turn, as reported by app-server.
+"""
 
 import argparse
 import json
@@ -29,6 +32,23 @@ CASES = {
 }
 
 
+def last_model_usage(events, thread_id, turn_id):
+    for event in reversed(events):
+        params = event.get("params", {})
+        if (event.get("method") == "thread/tokenUsage/updated"
+                and params.get("threadId") == thread_id and params.get("turnId") == turn_id):
+            last = (params.get("tokenUsage") or {}).get("last") or {}
+            break
+    else:
+        last = {}
+
+    usage = {}
+    for key in ("inputTokens", "cachedInputTokens"):
+        count = last.get(key)
+        usage[key] = count if type(count) is int and count >= 0 else "unknown"
+    return usage
+
+
 def live_turn(app, thread, prompt, skill_path, body_lines):
     start = len(app.events)
     result = app.call("turn/start", threadId=thread, input=[{"type": "text", "text": prompt}])
@@ -42,7 +62,8 @@ def live_turn(app, thread, prompt, skill_path, body_lines):
     turn = app.wait_for(matching, "live turn", since=start, timeout=240)["params"]["turn"]
     if turn["status"] != "completed":
         raise RuntimeError(f"Live turn {turn['status']}: {turn.get('error')}")
-    items = [e["params"]["item"] for e in app.events[start:] if e.get("method") == "item/completed"
+    events = app.events[start:]
+    items = [e["params"]["item"] for e in events if e.get("method") == "item/completed"
              and e["params"].get("threadId") == thread and e["params"].get("turnId") == turn_id]
     observations = []
     messages = []
@@ -60,7 +81,13 @@ def live_turn(app, thread, prompt, skill_path, body_lines):
                                  "output_excerpt": output[-1000:]})
         elif item["type"] not in {"reasoning", "plan"}:
             observations.append({"type": item["type"], "detail": item})
-    print(json.dumps({"tools": observations, "messages": messages}, ensure_ascii=False), flush=True)
+    print(json.dumps({
+        "threadId": thread,
+        "turnId": turn_id,
+        "tokenUsage": {"last": last_model_usage(events, thread, turn_id)},
+        "tools": observations,
+        "messages": messages,
+    }, ensure_ascii=False), flush=True)
 
 
 def probe(executable, live):
