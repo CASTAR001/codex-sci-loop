@@ -70,7 +70,27 @@ DAILY_AB_CASES = {
 }
 
 
-SUITES = {"original": CASES, "followup": FOLLOWUP_CASES, "daily-ab": DAILY_AB_CASES}
+LONG_SHELF = [
+    *DAILY_AB_CASES["shelf"][:2],
+    "木工量完了，可用墙面宽 176 厘米。现有三块旧板，每块长 80 厘米、深 22 厘米。把这三个尺寸和数量写到 materials.txt；承重还没确认，先别答应放精装大部头。",
+    "整理一下采购。支架每组 26 元要 6 组，螺钉一包 18 元，防滑垫两包每包 11 元。把明细、小计和按现预算算的余额写到 budget.txt，给我两个总数。",
+    "物业补充，东侧连廊只能摆两层，第三块旧板留作备用。请在 materials.txt 写清楚装几层、用几块、留几块。目前的预算先不动。",
+    "把开放日先定在周日。上午 10 到 12 点由小何值守，下午 2 到 4 点由阿宁值守。请写值班表 shifts.txt。时间只加到值班表，邻居那份通知保持原来的格式。",
+    "刚拿到实际报价，支架降到每组 23 元，组数不变，其他项目照旧。请更新 budget.txt；顺便告诉我改价比原估算省了多少，旧价留在变更记录里。",
+    "小何周日临时有事。上午改成小林，阿宁下午不变。请只更新给志愿者用的 shifts.txt，把对外通知什么时候更新留到稍后决定。",
+    "把眼下的情况给我理一下：场地为什么改过，备用板为什么留着，现在还需要向谁核实哪件事？如果还没有指定核实对象就写未指定。先不改文件。",
+    "木工已确认每层限重 12 公斤。把这个数和‘两层分别限重’写进 materials.txt。以后无需再等承重答复。",
+    "新增一项印刷费 32 元。总预算从 620 元降为 550 元。请更新 budget.txt 并重新计算余额。场地、材料和值班人继续按已经定下的安排。",
+    "现在准备对外开放。请新建 opening.txt，把地点、开放时段和每层限重写成两句话。之前给邻居看的 notice.txt 还要留着。",
+    "临时调整，下午开放结束时间从 4 点提前到 3 点半，其他时间不变。请把对外开放说明和值班表都改好。",
+    "我明天去现场，不想重复买东西。请把最新花费、预算余额、板材数量和两个班次列成四行给我，每一行附能核对的文件名；这轮不用改文件。",
+    "最后还剩开门这件事。物业周六交钥匙给小林，领取后由她通知阿宁。请在 shifts.txt 记清这个交接顺序。今天先到这里。",
+    "隔了一段，帮我接上：最初和现行预算、第一次改址原因、原先向物业问什么、两次支架单价、何人接替上午班、为什么留一块板、最后的钥匙待办、当前总花费和余额。拿不准的写未知。这次不要改文件。",
+]
+
+SUITES = {"original": CASES, "followup": FOLLOWUP_CASES, "daily-ab": DAILY_AB_CASES,
+          "daily-long": {"shelf": LONG_SHELF, "shelf-recall": [
+              "接着项目目录 {folder} 的书架安排。" + LONG_SHELF[-1]]}}
 SHARED_WORKSPACE = {"handoff": "shelf", "shelf-recall": "shelf", "move-recall": "move"}
 
 
@@ -244,7 +264,7 @@ def probe(executable, live, suite="original", without_plugin=False):
                     baseline = live_turn(app, thread, prompt, skill_markers, baseline)
                     if suite != "original":
                         evidence = {"checkpoints": checkpoint_snapshots(workspace)}
-                        if suite == "daily-ab":
+                        if suite in ("daily-ab", "daily-long"):
                             evidence.update(case=name, turn=i, notice=notice_snapshot(workspace))
                         print(json.dumps(evidence, ensure_ascii=False), flush=True)
 
@@ -254,11 +274,11 @@ if __name__ == "__main__":
     parser.add_argument("--codex", default="codex")
     parser.add_argument("--suite", choices=SUITES, default="original")
     parser.add_argument("--without-plugin", action="store_true",
-                        help="run daily-ab without installing the plugin in the temporary Codex home")
+                        help="run a daily comparison without installing the plugin in the temporary Codex home")
     parser.add_argument("--live", action="store_true", help="authorize real model usage for the selected suite")
     args = parser.parse_args()
-    if args.without_plugin and args.suite != "daily-ab":
-        parser.error("--without-plugin requires --suite daily-ab")
+    if args.without_plugin and args.suite not in ("daily-ab", "daily-long"):
+        parser.error("--without-plugin requires a daily comparison suite")
     executable = shutil.which(args.codex)
     if executable is None:
         parser.error("Codex executable not found")
