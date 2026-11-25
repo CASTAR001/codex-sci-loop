@@ -1,7 +1,7 @@
 # Current architecture
 
-Version 1.1 targets native Codex on macOS and Linux, with secondary Windows support. The ordinary package exposes task-checkpoint and research-verification and registers zero lifecycle hooks. Project-local contracts, deterministic verification and optional attributed reviews are handled by scripts/checkpoint.py. Codex owns execution, compaction, scheduling and delegation.
+Version 1.2 targets native Codex on macOS and Linux, with secondary Windows support. Task checkpoints work in ordinary folders and Git worktrees. Operator-reported closure, reproducible checks and attributed review have distinct meanings. Domain methods live in the on-demand research-verification skill. The plugin registers zero lifecycle hooks.
 
-The older Python phase tools and PowerShell toolkit remain available to projects using their state formats. Signed receipts require a separately certified host and protected evidence. The LumiForge template lives under adapters/lumiforge/ and is opt-in.
+The old Python phase format has a read-only reader. PowerShell projects retain their original toolkit.
 
-The current behavioral evidence, run conditions and limits are collected in [the native architecture review](../../docs/native-codex-review.md).
+Behavioral evidence and limits are in [the architecture review](../../docs/native-codex-review.md).

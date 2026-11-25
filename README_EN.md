@@ -1,37 +1,37 @@
 # codex-sci-loop
 
-Sci Loop gives native Codex on macOS and Linux an opt-in, project-local checkpoint for long tasks. Windows is a secondary platform. Codex owns planning, execution, compaction and subagents. The plugin exposes two skills and registers zero lifecycle hooks in a normal installation.
+Use project-local checkpoints to pick up an everyday task where you left it. Native Codex handles execution, planning, compaction and delegation. The plugin exposes two skills and registers zero lifecycle hooks. macOS and Linux are the primary platforms, with secondary Windows support.
 
 ## Install
 
-Run `./install.sh` from this checkout on macOS or Linux, or use the Codex CLI directly. Keep the registered marketplace directory available for future updates.
+Run `./install.sh` from this checkout or use the CLI commands below. Windows users can also run `install.ps1`. Keep the registered marketplace directory available for updates.
 
 ```sh
 codex plugin marketplace add .
 codex plugin add codex-sci-loop@codex-sci-loop-local
 ```
 
-In a new session, ask Codex to save a task checkpoint or resume one. Windows users can use the same Codex commands or `install.ps1`.
+## Daily tasks
 
-## Checkpoints
+Ask Codex to keep a checkpoint for a trip, a checklist or a writing project. The CLI at `plugins/codex-sci-loop/scripts/checkpoint.py` runs with Python 3.9+ in an ordinary task folder. In a Git project, use the worktree root. Each task has one JSON file in `.ai-loop/checkpoints/`. The default task ID is `main`.
 
-The CLI at `plugins/codex-sci-loop/scripts/checkpoint.py` requires Python 3.9+ and Git. Run it in the target Git root. Commands accept `--project-root` and `--task` after the action. Each task owns one JSON file under `.ai-loop/checkpoints/`. A shared process lock serializes updates.
-
-| Action | Result |
+| Command | Purpose |
 | --- | --- |
-| `start --request-file spec.md --verify-command 'bash tests/check.sh'` | Saves the complete effective request. Optional `--input file` binds ignored data and `--require-review` sets a review condition. |
-| `revise --from-revision N --request-file revised.md` | Preserves previous versions and replaces the active contract. Old verification becomes stale. |
-| `note --kind decision --note '…' --next '…'` | Records an attributed statement and the pending action. Hypotheses and ruled-out approaches have separate kinds. |
-| `verify` | Runs the declared command, hashes the relevant workspace and captures the exit code, input hashes, output hash and last 8 KiB. |
-| `show` | Recovers the effective contract, current notes, pending action, verification and review freshness. Use `--full` for the complete current request. |
-| `show --for-review --full` | Identifies a review subject for an independent reader. Submit the report with `review --subject … --reviewer … --outcome … --file …`. |
-| `finish` | Requires current evidence and an empty pending action. A changed subject can reopen a recorded finish as `needs_recheck`. |
-| `set-state --state paused --reason '…'` | Records an operator transition. Other choices are active, blocked and cancelled. |
+| `start --request-file spec.md` | Preserve the supplied request and constraints. Use `-` to read UTF-8 from stdin. |
+| `note --note '…' --next '…'` | Record a decision and the pending action. |
+| `revise --from-revision N --request-file revised.md` | Replace the active contract and preserve prior versions. |
+| `show` | Read the current contract, decisions, pending work and evidence. Use `--full` for the full current request. |
+| `close` | Close a tracking-only task after clearing the pending action with `note --next ''`. Verification remains unverified. |
+| `set-state --state paused --reason '…'` | Pause a task. Other operator states are active, blocked and cancelled. |
 
-By default, verification binds Git HEAD. Declare `--tree-only` only when the check is independent of commit identity and history. Local checks assume cooperating writers. Review attribution relies on the operator. External services, undeclared ignored files and machine-specific environments need their own provenance. Keep long-lived measurements, significant failed experiments and primary evidence in their project locations.
+## Evidence when needed
 
-## Existing projects
+For tasks with measurable acceptance conditions, declare a repeatable command with `--verify-command`. Use `verify` to execute it and `finish` to check the agreed conditions. For independent judgment add `--require-review`, obtain the subject with `show --for-review --full`, and submit a report using `review`. Changed evidence can reopen a finished task as `needs_recheck`.
 
-Existing phase projects keep their original state and recovery tools. The legacy Python CLI is `sci_loop.py`. The PowerShell toolkit lives under `loop-standard/`. The managed signed-receipt integration requires an explicitly configured, recertified host and has no default lifecycle registration.
+In an ordinary folder, declare every relevant file including the verifier script using repeated `--input`. Git projects additionally bind the worktree, index and normally HEAD. Operators are responsible for undeclared dependencies, review attribution and the accuracy of the supplied request.
 
-[Chinese guide](README.md) · [Architecture review and test results](docs/native-codex-review.md)
+The research-verification skill applies when evaluating a scientific claim. It helps choose an appropriate check and interpret what the evidence supports. Routine tasks use the general checkpoint skill.
+
+For an old Python phase project, use `sci_loop.py resume --project-root <root> --json` for read-only recovery. Older PowerShell projects retain their toolkit under `loop-standard/`.
+
+[Chinese guide](README.md) · [Architecture and test results](docs/native-codex-review.md)

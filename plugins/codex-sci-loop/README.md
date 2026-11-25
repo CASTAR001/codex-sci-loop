@@ -1,11 +1,9 @@
-# Codex Scientific Loop
+# Codex Task Checkpoints
 
-For long tasks in a native Codex session, use `task-checkpoint` to capture the effective request and recover project state. Use `research-verification` for repeatable checks and independent review. The installed package declares no automatic lifecycle hooks.
+Use `task-checkpoint` to save a request, decisions and the next action in the task's own folder. Resume it later with `show`. For a tracking-only task, `close` records an operator-reported end once the pending action is clear.
 
-Run `python3 scripts/checkpoint.py --help` from this package to see the CLI. In a target Git project use the absolute script path with `start --request-file …`, `show`, `verify` or `finish`. The checkpoint is operator-writable. A passing command supports the property it actually tested. Record assumptions and review any broader claim separately.
+The Python 3.9+ CLI is `scripts/checkpoint.py`. Run it from the task folder using the absolute script path. Git projects use the worktree root. For a verifiable deliverable, declare a command, run `verify` and use `finish` to check the agreed evidence. An ordinary folder requires explicit `--input` files for verification or review.
 
-## Older phase projects
+Use `research-verification` when evaluating a scientific claim, such as whether a numerical method has the predicted order of accuracy. Scientific checks use the same CLI. No lifecycle hooks are registered.
 
-`scripts/sci_loop.py` reads native v1 phase state. Old evidence without a verification binding needs a fresh `collect` and `audit-pack` for a new signed decision. A recorded terminal decision is historical. A compatible host can recheck it using `audit_protocol.py gate` and the original protected receipt.
-
-Managed integration assets include the explicit template `adapters/lumiforge/hooks.json`, its reviewer skill under `adapters/lumiforge/skills/`, the adapter executable under `hooks/`, and the signed audit and capability protocols. A host projecting these assets must certify the final projected tree and enforce its own external write boundary. The ordinary Codex installation has no signing authority. Host operation and PowerShell project migration are outside the checkpoint workflow.
+Older Python phase state can be inspected with `scripts/sci_loop.py resume` or `validate`; both require `--project-root`.
