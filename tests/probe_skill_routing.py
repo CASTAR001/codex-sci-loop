@@ -103,7 +103,10 @@ def probe(executable, live):
                     return (event.get("method") == "account/login/completed"
                             and event["params"].get("loginId") == login["loginId"])
 
-                notice = app.wait_for(matching_login, "interactive sign-in", timeout=300)
+                try:
+                    notice = app.wait_for(matching_login, "interactive sign-in", timeout=300)
+                except AssertionError:
+                    raise SystemExit("No login callback received. No live model turns started.") from None
                 if not notice["params"]["success"]:
                     raise RuntimeError("The temporary Codex sign-in did not succeed.")
             body = skill_path.read_text(encoding="utf-8").split("\n---\n", 1)[1]
