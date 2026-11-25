@@ -143,12 +143,12 @@ class AppServer:
         self.process.stdin.write(json.dumps(message) + "\n")
         self.process.stdin.flush()
 
-    def wait_for(self, predicate, label, *, since=None):
+    def wait_for(self, predicate, label, *, since=None, timeout=25):
         if since is not None:
             for event in self.events[since:]:
                 if predicate(event):
                     return event
-        deadline = time.monotonic() + 25
+        deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             try:
                 line = self.messages.get(timeout=max(0.0, deadline - time.monotonic()))
