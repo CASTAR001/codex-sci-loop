@@ -21,7 +21,7 @@ from typing import Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "codex-sci-loop"
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 MARKETPLACE = "codex-sci-loop-local"
 PLUGIN = ROOT / "plugins" / NAME
 MANIFEST = Path(".codex-plugin") / "plugin.json"

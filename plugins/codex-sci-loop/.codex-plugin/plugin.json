@@ -1,7 +1,7 @@
 {
   "id": "codex-sci-loop",
   "name": "codex-sci-loop",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Keep the request, decisions and next step for tasks you want to resume.",
   "author": {
     "name": "CASTAR001"

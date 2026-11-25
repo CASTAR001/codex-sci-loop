@@ -1,6 +1,6 @@
 ---
 name: research-verification
-description: "Use when investigating or evaluating a scientific claim through a derivation, numerical experiment, simulation or empirical data analysis."
+description: "Use when deriving or checking a mathematical or scientific conclusion, especially when assumptions, approximations or limits of validity matter. Also use for testing claims against numerical or empirical evidence. Routine arithmetic and text editing need no special checks."
 ---
 
 # Research verification
