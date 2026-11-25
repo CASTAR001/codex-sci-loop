@@ -1,5 +1,6 @@
-# macOS Install Placeholder
+# macOS Installation
 
-macOS packaging is intentionally reserved for a later phase. The platform
-dispatcher detects Darwin and exits with a clear placeholder message instead of
-using the Windows or Linux install path by accident.
+With the Codex CLI on PATH, run `./install.sh` from the repository root to
+register this checkout as a local marketplace and install the Codex plugin.
+
+The PowerShell compatibility toolkit provides installers for Linux and Windows.

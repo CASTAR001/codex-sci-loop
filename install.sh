@@ -2,6 +2,18 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+
+if [[ "${1:-}" == "--legacy-toolkit" ]]; then
+    shift
+elif [[ $# -eq 0 ]]; then
+    if ! command -v codex >/dev/null 2>&1; then
+        printf '%s\n' "Native plugin installation requires the Codex CLI (codex) on PATH." >&2
+        exit 127
+    fi
+    codex plugin marketplace add "$SCRIPT_DIR"
+    exec codex plugin add codex-sci-loop@codex-sci-loop-local
+fi
+
 OS_NAME="$(uname -s 2>/dev/null || printf 'unknown')"
 
 case "$OS_NAME" in
@@ -10,7 +22,7 @@ case "$OS_NAME" in
         ;;
     Darwin)
         printf '%s\n' "The compatibility toolkit installer supports Linux and Windows." >&2
-        printf 'Install the Codex plugin with:\n  codex plugin marketplace add "%s"\n  codex plugin add codex-sci-loop@codex-sci-loop-local\n' "$SCRIPT_DIR" >&2
+        printf 'Run "%s/install.sh" without arguments to install the Codex plugin.\n' "$SCRIPT_DIR" >&2
         exit 3
         ;;
     MINGW*|MSYS*|CYGWIN*)

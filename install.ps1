@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [switch]$LegacyToolkit,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Arguments
 )
@@ -25,6 +26,18 @@ function Get-LoopInstallPlatform {
 }
 
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+if (-not $LegacyToolkit -and -not $Arguments) {
+    $Codex = Get-Command codex -CommandType Application -ErrorAction SilentlyContinue
+    if ($null -eq $Codex) {
+        throw "Native plugin installation requires the Codex CLI (codex) on PATH."
+    }
+    & $Codex.Source plugin marketplace add $RepoRoot
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    & $Codex.Source plugin add codex-sci-loop@codex-sci-loop-local
+    exit $LASTEXITCODE
+}
+
 $Platform = Get-LoopInstallPlatform
 
 switch ($Platform) {
@@ -38,12 +51,7 @@ switch ($Platform) {
         exit $LASTEXITCODE
     }
     "macos" {
-        throw @"
-The compatibility toolkit installer supports Linux and Windows.
-Install the Codex plugin with:
-  codex plugin marketplace add "$RepoRoot"
-  codex plugin add codex-sci-loop@codex-sci-loop-local
-"@
+        throw "The compatibility toolkit installer supports Linux and Windows. Run install.ps1 without arguments to install the Codex plugin."
     }
     default {
         throw "Unsupported platform for loop harness install."

@@ -126,7 +126,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "$(uname -s 2>/dev/null || true)" != "Linux" ]]; then
-    fail "install-global.sh is the Linux installer. Use install.ps1 on Windows; macOS is a placeholder." 2
+    fail "install-global.sh is the Linux installer for the compatibility toolkit. Use install.ps1 with toolkit flags on Windows." 2
 fi
 
 if [[ -n "$INSTALL_ROOT" && -n "$CODEX_HOME_ARG" ]]; then

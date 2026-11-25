@@ -65,8 +65,9 @@ requires `external-worker-preflight.json/.md` and
 `external-worker-evidence`, and validate/audit block if they are missing or
 stale.
 
-To install a temporary global layout with platform detection, run the dispatcher
-from the repository root:
+The repository root installers call Codex for native plugin installation when
+run without arguments. To install a separate compatibility-toolkit layout,
+pass the existing toolkit flags from the repository root:
 
 ```bash
 ./install.sh --install-root "$HOME/.codex/loop-harness" --install-plugin --create-shim --create-marketplace --force
@@ -82,9 +83,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
   -Force
 ```
 
-The dispatcher sends Windows to `scripts\install-global.ps1`, Linux to
-`scripts/install-global.sh`, and Darwin/macOS to a placeholder that exits
-without installing.
+The toolkit dispatcher routes Windows options to `scripts\install-global.ps1`
+and Linux options to `scripts/install-global.sh`. Use the native plugin
+installation on macOS.
 
 To call the Windows installer directly:
 

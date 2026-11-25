@@ -1,9 +1,10 @@
-# Linux Install Notes
+# Linux Installation
 
-Linux uses `install.sh` at the repository root or
-`loop-standard/scripts/install-global.sh` directly. The installer uses POSIX
-paths, writes an executable `bin/ai-loop` shim, and stores the default global
-layout under `${CODEX_HOME:-$HOME/.codex}/loop-harness`.
+With the Codex CLI on PATH, run `./install.sh` from the repository root to
+register this checkout as a local marketplace and install the Codex plugin.
 
-The loop command surface is still implemented by the shared PowerShell core, so
-the Linux shim expects PowerShell 7 as `pwsh` when running loop commands.
+For the compatibility toolkit, run `./install.sh --legacy-toolkit` or use the
+existing installer flags. The dispatcher forwards toolkit parameters to
+`loop-standard/scripts/install-global.sh`. Its default install root is
+`${CODEX_HOME:-$HOME/.codex}/loop-harness`. The optional `bin/ai-loop` shim uses
+PowerShell 7 (`pwsh`).

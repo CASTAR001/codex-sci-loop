@@ -14,7 +14,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 if ([System.IO.Path]::DirectorySeparatorChar -ne "\") {
-    throw "install-global.ps1 is the Windows installer. Use ./install.sh on Linux. macOS install is reserved for a later phase."
+    throw "install-global.ps1 is the Windows installer for the compatibility toolkit. Use ./install.sh with toolkit flags on Linux."
 }
 
 function Resolve-TargetRoot {
