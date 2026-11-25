@@ -4,61 +4,24 @@
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import json
 import os
-import re
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any, NoReturn
 
 
-VERSION = "1.0.0"
+sys.dont_write_bytecode = True
+from loop_io import (
+    LoopError, OUTPUT_TAIL_BYTES, PHASE_ID_RE, atomic_json, atomic_text, canonical_hash,
+    digest, git, project_lock, read_json, resolve_project, run_check, utc_now,
+)
+
+VERSION = "1.1.0"
 SCHEMA_VERSION = "2.0"
-PHASE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,95}$")
 DECIDED_PHASE_STATES = {"accepted", "rework", "blocked"}
 CONTROL_PATHSPECS = (".", ":(exclude).ai-loop", ":(exclude).ai-loop/**")
-
-
-class LoopError(RuntimeError):
-    """A safe, operator-facing loop failure."""
-
-
-def utc_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
-def read_json(path: Path) -> dict[str, Any]:
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except FileNotFoundError as exc:
-        raise LoopError(f"required file is missing: {path}") from exc
-    except (OSError, json.JSONDecodeError) as exc:
-        raise LoopError(f"cannot read valid JSON from {path}: {exc}") from exc
-    if not isinstance(value, dict):
-        raise LoopError(f"JSON root must be an object: {path}")
-    return value
-
-
-def atomic_text(path: Path, value: str, mode: int = 0o600) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
-    temporary_path = Path(temporary)
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
-            handle.write(value)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.chmod(temporary_path, mode)
-        os.replace(temporary_path, path)
-    finally:
-        temporary_path.unlink(missing_ok=True)
-
-
-def atomic_json(path: Path, value: dict[str, Any]) -> None:
-    atomic_text(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
 
 
 def run(command: list[str], cwd: Path, timeout: int = 120) -> subprocess.CompletedProcess[str]:
@@ -77,25 +40,6 @@ def run(command: list[str], cwd: Path, timeout: int = 120) -> subprocess.Complet
         return subprocess.CompletedProcess(command, 124, output + "\ncommand timed out\n")
     except OSError as exc:
         return subprocess.CompletedProcess(command, 127, f"{exc}\n")
-
-
-def git(root: Path, *arguments: str, timeout: int = 120) -> str:
-    result = run(["git", "-C", str(root), *arguments], root, timeout)
-    if result.returncode != 0:
-        detail = result.stdout.strip().splitlines()
-        message = detail[-1][:300] if detail else f"exit {result.returncode}"
-        raise LoopError(f"git {' '.join(arguments)} failed: {message}")
-    return result.stdout
-
-
-def resolve_project(raw: str) -> Path:
-    candidate = Path(raw).expanduser().resolve()
-    if not candidate.is_dir():
-        raise LoopError(f"project root is not a directory: {candidate}")
-    resolved = Path(git(candidate, "rev-parse", "--show-toplevel").strip()).resolve()
-    if resolved != candidate:
-        raise LoopError(f"project root must be the Git root: {resolved}")
-    return resolved
 
 
 def control_paths(root: Path) -> dict[str, Path]:
@@ -139,7 +83,7 @@ def default_status() -> dict[str, Any]:
 
 def cmd_init(root: Path, _args: argparse.Namespace) -> None:
     paths = control_paths(root)
-    if paths["base"].exists():
+    if any(p.name != ".lock" for p in paths["base"].iterdir()):
         raise LoopError(f"refusing to overwrite existing control state: {paths['base']}")
     templates = {
         "README.md": "# Project loop state\n\nThis directory contains durable phase evidence for native Codex work.\n",
@@ -184,6 +128,16 @@ def validate_project(root: Path) -> tuple[dict[str, Path], dict[str, Any], dict[
     resolve_evidence_repositories(root, config)
     if not isinstance(status.get("phases"), list):
         raise LoopError("status phases must be an array")
+    phases = status["phases"]
+    ids = []
+    for item in phases:
+        if not isinstance(item, dict) or not PHASE_ID_RE.fullmatch(str(item.get("phase_id", ""))):
+            raise LoopError("invalid phase record in status")
+        if item.get("status") not in DECIDED_PHASE_STATES | {"started", "collecting", "evidence_collected", "audit_prepared"}:
+            raise LoopError("unknown phase state")
+        ids.append(item["phase_id"])
+    if len(set(ids)) != len(ids) or status.get("current_phase") != (phases[-1] if phases else None):
+        raise LoopError("current phase disagrees with phase history")
     return paths, config, status
 
 
@@ -239,6 +193,8 @@ def cmd_resume(root: Path, args: argparse.Namespace) -> None:
             "phase_id": "",
             "status": phase.get("status", "none") if isinstance(phase, dict) else "none",
             "next": "Start one bounded phase.",
+            "acceptance_scope": "recorded historical decision only" if phase else None,
+            "audit_snapshot_sha256": phase.get("audit_snapshot_sha256") if phase else None,
         }
     elif phase.get("status") == "blocked":
         payload = {
@@ -252,12 +208,13 @@ def cmd_resume(root: Path, args: argparse.Namespace) -> None:
             "decision": "REWORK_REQUIRED",
             "phase_id": str(phase.get("phase_id", "")),
             "status": "rework",
-            "next": "Start a bounded follow-up derived only from the recorded audit findings.",
+            "next": "Inspect the audit findings, revise this phase and recollect evidence.",
         }
     else:
         phase_id = str(phase.get("phase_id", ""))
         state = str(phase.get("status", "unknown"))
         next_by_state = {
+            "collecting": "Verification was interrupted. Inspect possible side effects before retrying collect.",
             "started": f"Execute .ai-loop/runs/{phase_id}/prompt.md, then collect evidence.",
             "evidence_collected": f"Prepare the audit pack for {phase_id}.",
             "audit_prepared": f"Run an isolated audit for {phase_id} and record its decision.",
@@ -344,11 +301,11 @@ def cmd_start(root: Path, args: argparse.Namespace) -> None:
 
 
 def changed_files(repository_key: str, repository: Path, base: str) -> list[str]:
-    tracked_arguments = ["diff", "--name-only", base]
+    tracked_arguments = ["diff", "--no-renames", "--name-only", "-z", base]
     if repository_key == ".":
         tracked_arguments.extend(["--", *CONTROL_PATHSPECS])
-    tracked = git(repository, *tracked_arguments).splitlines()
-    untracked = git(repository, "ls-files", "--others", "--exclude-standard").splitlines()
+    tracked = git(repository, *tracked_arguments).split("\0")
+    untracked = git(repository, "ls-files", "--others", "--exclude-standard", "-z").rstrip("\0").split("\0")
     if repository_key == ".":
         untracked = [item for item in untracked if item != ".ai-loop" and not item.startswith(".ai-loop/")]
     return sorted({item for item in tracked + untracked if item})
@@ -358,17 +315,19 @@ def untracked_business_patch(project_root: Path, repository_key: str, repository
     chunks: list[str] = []
     source_prefix = "a/" if repository_key == "." else f"a/{repository_key}/"
     target_prefix = "b/" if repository_key == "." else f"b/{repository_key}/"
-    for relative in git(repository, "ls-files", "--others", "--exclude-standard").splitlines():
+    for relative in git(repository, "ls-files", "--others", "--exclude-standard", "-z").rstrip("\0").split("\0"):
         if repository == project_root and (
             not relative or relative == ".ai-loop" or relative.startswith(".ai-loop/")
         ):
             continue
-        candidate = (repository / relative).resolve()
+        if not relative:
+            continue
+        candidate = repository / relative
         try:
             candidate.relative_to(repository)
         except ValueError as exc:
             raise LoopError(f"untracked path escapes evidence repository {repository_key}: {relative}") from exc
-        if not candidate.is_file():
+        if not (candidate.is_file() or candidate.is_symlink()):
             continue
         result = run(
             [
@@ -381,7 +340,7 @@ def untracked_business_patch(project_root: Path, repository_key: str, repository
                 f"--src-prefix={source_prefix}",
                 f"--dst-prefix={target_prefix}",
                 "--",
-                "/dev/null",
+                os.devnull,
                 relative,
             ],
             repository,
@@ -398,6 +357,8 @@ def tracked_patch(repository_key: str, repository: Path, base: str) -> str:
     target_prefix = "b/" if repository_key == "." else f"b/{repository_key}/"
     arguments = [
         "diff",
+        "--no-ext-diff",
+        "--no-textconv",
         "--binary",
         f"--src-prefix={source_prefix}",
         f"--dst-prefix={target_prefix}",
@@ -408,14 +369,7 @@ def tracked_patch(repository_key: str, repository: Path, base: str) -> str:
     return git(repository, *arguments, timeout=300)
 
 
-def cmd_collect(root: Path, args: argparse.Namespace) -> None:
-    paths, config, status = validate_project(root)
-    phase = status.get("current_phase")
-    if not isinstance(phase, dict) or phase.get("phase_id") != args.phase_id:
-        raise LoopError(f"phase is not current: {args.phase_id}")
-    if phase.get("status") != "started":
-        raise LoopError(f"phase is not collectable from state: {phase.get('status')}")
-    run_dir = paths["runs"] / args.phase_id
+def capture_workspace(root: Path, config: dict[str, Any], phase: dict[str, Any]) -> tuple[dict[str, str], list[dict[str, Any]]]:
     repositories = resolve_evidence_repositories(root, config)
     heads = phase.get("repository_heads")
     if not isinstance(heads, dict) or set(heads) != set(repositories):
@@ -423,40 +377,80 @@ def cmd_collect(root: Path, args: argparse.Namespace) -> None:
     patches: list[str] = []
     statuses: list[str] = []
     changed: list[str] = []
+    records = []
     for key, repository in repositories.items():
         base = heads.get(key)
         if not isinstance(base, str) or not base:
             raise LoopError(f"missing evidence repository head: {key}")
-        patches.append(tracked_patch(key, repository, base))
-        patches.append(untracked_business_patch(root, key, repository))
-        statuses.append(prefix_lines(key, business_status(key, repository)))
-        changed.extend(
-            item if key == "." else f"{key}/{item}"
-            for item in changed_files(key, repository, base)
-        )
-    patch = "".join(patches)
-    atomic_text(run_dir / "diff.patch", patch)
-    atomic_text(run_dir / "status_after.txt", "".join(statuses))
-    atomic_text(run_dir / "changed_files.txt", "\n".join(sorted(set(changed))) + "\n")
+        patch = tracked_patch(key, repository, base) + untracked_business_patch(root, key, repository)
+        repo_status = business_status(key, repository)
+        files = changed_files(key, repository, base)
+        patches.append(patch)
+        statuses.append(prefix_lines(key, repo_status))
+        changed.extend(item if key == "." else f"{key}/{item}" for item in files)
+        index_args = ["ls-files", "--stage", "-z"]
+        if key == ".":
+            index_args.extend(["--", *CONTROL_PATHSPECS])
+        records.append({
+            "repository": key, "base_commit": base,
+            "current_head": git(repository, "rev-parse", "HEAD").strip(),
+            "status_sha256": digest(repo_status.encode()), "patch_sha256": digest(patch.encode()),
+            "index_sha256": digest(git(repository, *index_args).encode()),
+            "changed_files_sha256": canonical_hash(files),
+        })
+    return {
+        "diff.patch": "".join(patches), "status_after.txt": "".join(statuses),
+        "changed_files.txt": "\n".join(sorted(set(changed))) + "\n",
+    }, records
+
+
+def cmd_collect(root: Path, args: argparse.Namespace) -> None:
+    paths, config, status = validate_project(root)
+    phase = status.get("current_phase")
+    if not isinstance(phase, dict) or phase.get("phase_id") != args.phase_id:
+        raise LoopError(f"phase is not current: {args.phase_id}")
+    if phase.get("status") not in {"started", "collecting", "evidence_collected", "audit_prepared", "rework"}:
+        raise LoopError(f"phase is not collectable from state: {phase.get('status')}")
+    run_dir = paths["runs"] / args.phase_id
+    envelope = run_dir / "request-envelope.json"
+
+    def request_hash():
+        return digest(envelope.read_bytes()) if envelope.exists() else None
+
+    if args.timeout <= 0:
+        raise LoopError("verification timeout must be positive")
     command = str(phase.get("verify_command", "")).strip()
     if not command:
         raise LoopError("verification command is empty")
-    verification = run(["bash", "-lc", command], root, timeout=args.timeout)
-    atomic_text(
-        run_dir / "verify.log",
-        verification.stdout + f"\n[sci-loop] verify_exit_code={verification.returncode}\n",
-    )
-    collected_at = utc_now()
+    update_phase(status, args.phase_id, status="collecting", verification_binding=None, verify_exit_code=None)
+    atomic_json(paths["status"], status)
+    before_request = request_hash()
+    before, records = capture_workspace(root, config, phase)
+    del before
+    verification = run_check(root, ["bash", "-c", command], args.timeout)
+    code = 124 if verification["status"] == "timeout" else verification["exit_code"]
+    evidence, after_records = capture_workspace(root, config, phase)
+    log = verification["tail"]
+    if verification["output_bytes"] > OUTPUT_TAIL_BYTES:
+        log = (f"[sci-loop] last {OUTPUT_TAIL_BYTES} of {verification['output_bytes']} bytes; "
+               f"output_sha256={verification['output_sha256']}\n" + log)
+    log += f"\n[sci-loop] verify_exit_code={code}\n"
+    atomic_text(run_dir / "verify.log", log)
+    if before_request != request_hash() or records != after_records:
+        raise LoopError("verification inputs changed during collection; inspect outputs and recollect")
+    for name, contents in evidence.items():
+        atomic_text(run_dir / name, contents)
+    binding = {
+        "request_envelope_sha256": before_request, "command": command,
+        "log_sha256": digest(log.encode()), "workspace_sha256": canonical_hash(records),
+    }
     status = update_phase(
-        status,
-        args.phase_id,
-        status="evidence_collected",
-        evidence_collected_at=collected_at,
-        verify_exit_code=verification.returncode,
+        status, args.phase_id, status="evidence_collected", evidence_collected_at=utc_now(),
+        verify_exit_code=code, verification_binding=binding, audit_prepared_at=None,
     )
     atomic_json(paths["status"], status)
-    append_event(paths, "evidence_collected", args.phase_id, verify_exit_code=verification.returncode)
-    print(f"COLLECTED {args.phase_id} verify_exit_code={verification.returncode}")
+    append_event(paths, "evidence_collected", args.phase_id, verify_exit_code=code)
+    print(f"COLLECTED {args.phase_id} verify_exit_code={code}")
 
 
 def cmd_audit_pack(root: Path, args: argparse.Namespace) -> None:
@@ -471,17 +465,9 @@ def cmd_audit_pack(root: Path, args: argparse.Namespace) -> None:
     missing = [name for name in required if not (run_dir / name).is_file()]
     if missing:
         raise LoopError("audit evidence is missing: " + ", ".join(missing))
-    sections = [f"# Audit Input: {args.phase_id}\n"]
-    for title, name in (
-        ("Phase Prompt", "prompt.md"),
-        ("Execution Report", "report.md"),
-        ("Changed Files", "changed_files.txt"),
-        ("Diff", "diff.patch"),
-        ("Verification", "verify.log"),
-        ("Status After", "status_after.txt"),
-    ):
-        body = (run_dir / name).read_text(encoding="utf-8")
-        sections.append(f"\n## {title}\n\n{body}")
+    # The snapshot binds the original files. Keep this legacy Markdown entrypoint small.
+    sections = [f"# Audit Input: {args.phase_id}\n\n"]
+    sections.extend(f"- [{name}](../runs/{args.phase_id}/{name})\n" for name in required)
     audit_input = paths["audits"] / f"{args.phase_id}-audit-input.md"
     atomic_text(audit_input, "".join(sections))
     prepared_at = utc_now()
@@ -526,17 +512,12 @@ def cmd_validate_distribution(_root: Path | None, _args: argparse.Namespace) -> 
     if manifest.get("name") != "codex-sci-loop" or manifest.get("version") != VERSION:
         raise LoopError("plugin manifest identity does not match the bundled core")
     skills = plugin_root / "skills"
-    required = {
-        "independent-completion-auditor",
-        "loop-goal-bootstrap",
-        "loop-supervisor",
-        "loop-auditor",
-        "loop-recovery",
-        "research-loop-orchestrator",
-    }
+    required = {"task-checkpoint", "research-verification"}
     present = {path.name for path in skills.iterdir() if path.is_dir() and (path / "SKILL.md").is_file()}
     if present != required:
         raise LoopError(f"skill set mismatch: expected {sorted(required)}, got {sorted(present)}")
+    if (plugin_root / "hooks" / "hooks.json").exists() or manifest.get("hooks"):
+        raise LoopError("native checkpoints require no global lifecycle hooks")
     print("DISTRIBUTION: OK")
 
 
@@ -585,8 +566,12 @@ def main() -> int:
     args = parser().parse_args()
     try:
         root = None if getattr(args, "project_optional", False) else resolve_project(args.project_root)
-        args.handler(root, args)
-    except LoopError as exc:
+        if root is None:
+            args.handler(root, args)
+        else:
+            with project_lock(root, create=args.command == "init"):
+                args.handler(root, args)
+    except (LoopError, OSError, UnicodeError) as exc:
         fail(str(exc))
     return 0
 
