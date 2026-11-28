@@ -21,7 +21,7 @@ from typing import Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "codex-sci-loop"
-VERSION = "1.3.0"
+VERSION = "1.4.0-alpha.1"
 MARKETPLACE = "codex-sci-loop-local"
 PLUGIN = ROOT / "plugins" / NAME
 MANIFEST = Path(".codex-plugin") / "plugin.json"
@@ -129,7 +129,7 @@ def assert_structure() -> None:
         assert description.strip() and len(description) <= 1024, skill_path
 
     assert {path.name for path in PLUGIN.iterdir() if path.is_dir()} == {".codex-plugin", "scripts", "skills"}
-    assert {path.name for path in CORE.parent.iterdir()} == {"checkpoint.py", "loop_io.py", "sci_loop.py"}
+    assert {path.name for path in CORE.parent.iterdir()} == {"checkpoint.py", "exchange.py", "loop_io.py", "sci_loop.py"}
     cache_artifacts = [
         path.relative_to(PLUGIN).as_posix()
         for path in PLUGIN.rglob("*")

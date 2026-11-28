@@ -85,6 +85,8 @@ class ResponsesFixture(BaseHTTPRequestHandler):
                 },
             },
         )
+        if isinstance(message,dict):
+            events[1]["item"]=message
         payload = "".join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events).encode()
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
@@ -293,7 +295,7 @@ def install_fixture(executable: str, fixture: Path, env: dict[str, str]) -> Path
     return installed_path
 
 
-def write_hook_fixture(home: Path, fixture: Path):
+def write_hook_fixture(home: Path, fixture: Path, exchange_hook=None):
     script = fixture / "lifecycle_hook.py"
     script.write_text(
         f'''import json
@@ -316,6 +318,8 @@ else:
     command = shlex.join([sys.executable, str(script)])
     events = ("SessionStart", "UserPromptSubmit", "PreCompact", "PostCompact", "Stop")
     hooks = {event: [{"hooks": [{"type": "command", "command": command}]}] for event in events}
+    if exchange_hook:
+        hooks["SessionStart"].append({"hooks":[{"type":"command","command":exchange_hook}]})
     (home / "hooks.json").write_text(json.dumps({"hooks": hooks}), encoding="utf-8")
 
 

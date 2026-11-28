@@ -627,7 +627,17 @@ def main() -> int:
     try:
         root = task_root(args.project_root)
         with project_lock(root, create=args.action == "start"):
-            return execute(root, args)
+            result = execute(root, args)
+        session = os.environ.get("CODEX_THREAD_ID")
+        if result == 0 and session and args.action not in ("show", "history") and (root / ".ai-loop/exchange/v1/mailbox.sqlite3").is_file():
+            from exchange import dispatch
+            import sqlite3
+            try:
+                dispatch(root, "codex", session, {"protocol":1, "op":"milestone", "checkpoint":args.task})
+            except (ValueError, OSError, sqlite3.Error) as exc:
+                if str(exc) != "session has not joined":
+                    print("Checkpoint saved; shared update pending: " + str(exc), file=sys.stderr)
+        return result
     except (LoopError, OSError, UnicodeError, subprocess.TimeoutExpired) as exc:
         print(f"sci-loop: {exc}", file=sys.stderr)
         return 1

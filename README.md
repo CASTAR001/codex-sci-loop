@@ -49,3 +49,17 @@ python3 "$checkpoint" show
 本地回归用 `python3 -B tests/test_sci_loop_checkpoint.py`；隔离安装与真实客户端实验分别用 `python3 -B tests/test_sci_loop_distribution.py --codex-install` 和 `python3 -B tests/test_sci_loop_native_codex.py`。
 
 [架构与实测报告](docs/native-codex-review.md) · [English](README_EN.md)
+
+## 同工作区跨对话交接（候选版）
+
+两个独立的 Codex 或 OpenCode 对话可以在本地目录异步交接。告诉双方各自的别名、相同的任务名、要配对的对象和允许共享的字段即可。Codex 沿用 task-checkpoint 技能，OpenCode 使用 long-conversation-loop 插件的 loop_exchange。一个目录首次主动 join 时创建 `.ai-loop/exchange/v1/mailbox.sqlite3`；Git worktree 各自独立。需要 Python 3、标准库 SQLite 和本地磁盘。已有检查点继续独立存取。
+
+供脚本或调试使用的入口为 `plugins/codex-sci-loop/scripts/exchange.py`。在 Codex 会话内执行，保留宿主提供的 CODEX_THREAD_ID。每次从标准输入读取一个 UTF-8 JSON 对象，返回包含 ok 与 data 或 error 的 JSON。例如双方分别提交以下对象，将别名和 peer 互换。加入时的 checkpoint 可省略，填写后才能投影对应检查点的获准字段。
+
+```json
+{"protocol":1,"op":"join","task":"导出","alias":"审核","checkpoint":"review"}
+{"protocol":1,"op":"link","peer":"主线","fields":["next","artifacts"]}
+{"protocol":1,"op":"sync","peer":"主线"}
+```
+
+通过 sync 读取实际内容后按页 ack，再用版本凭据发言。卡片列出最近三次变更和未解决的问题／约束。证据可按序号和索引主动验证。export 输出本参与者的收发记录。默认没有后台工作或生命周期钩子。若希望在恢复或压缩后提醒收件，可在受信项目的 SessionStart 命令钩子中调用当前安装版本的 `python3 -IB "/绝对路径/exchange.py" --codex-hook`（Windows 可用 `py -3 -IB "C:/完整路径/exchange.py" --codex-hook`）。通过 Codex 的钩子信任流程启用；升级后核对脚本路径。钩子只提示有未读变更，正文仍从工具中读取。双方停用后可按需备份交换目录；聊天记录、验证命令和未选择的检查点字段持续留在原位置。同一系统账户可访问磁盘中的协作记录。

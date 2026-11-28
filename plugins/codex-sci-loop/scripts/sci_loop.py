@@ -12,7 +12,7 @@ from typing import Any
 sys.dont_write_bytecode = True
 from loop_io import LoopError, PHASE_ID_RE, git, read_json, resolve_project
 
-VERSION = "1.3.0"
+VERSION = "1.4.0-alpha.1"
 SCHEMA_VERSION = "2.0"
 PHASE_STATES = {"accepted", "blocked", "rework", "started", "collecting", "evidence_collected", "audit_prepared"}
 
