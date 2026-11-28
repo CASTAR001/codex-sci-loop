@@ -259,12 +259,14 @@ class Checkpoints(unittest.TestCase):
         self.assertEqual(hashlib.sha256(raw).hexdigest(), result["artifacts"][0]["sha256"])
         # Both Windows clients need the same inherited worktree permissions.
         def access_descriptor(directory):
-            return subprocess.check_output([
-                "powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
-                f"(Get-Acl -LiteralPath '{directory}').GetSecurityDescriptorSddlForm('Access')",
-            ], cwd=project, timeout=20).strip()
+            export = self.root / "acl-fixture.txt"
+            subprocess.run(["icacls.exe", directory, "/save", str(export)], cwd=project,
+                           stdout=subprocess.DEVNULL, check=True, timeout=10)
+            # icacls /save emits UTF-16LE pairs of path and portable DACL SDDL.
+            _, descriptor = export.read_bytes().decode("utf-16-le").lstrip("\ufeff").splitlines()
+            return descriptor
         expected_acl = access_descriptor("reference-directory")
-        self.assertIn(b"(D;", expected_acl)
+        self.assertIn("(D;", expected_acl)
         self.assertEqual(expected_acl, access_descriptor(".ai-loop"))
         target = self.root / "outside"
         target.mkdir()
