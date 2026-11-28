@@ -69,7 +69,15 @@ def digest(value):
 def project(directory):
     root = Path(directory).resolve(strict=True)
     require(root.is_dir(), "workspace must be a directory")
-    if any(os.path.lexists(p / ".git") for p in (root, *root.parents)):
+    def has_git_metadata(folder):
+        marker = folder / ".git"
+        # A workspace-write sandbox may mount an empty read-only marker even
+        # in an ordinary folder. Real worktrees have HEAD or a gitdir file.
+        if marker.is_dir():
+            return (marker / "HEAD").is_file() or (marker / "commondir").is_file()
+        return marker.is_file() and marker.stat().st_size > 0
+
+    if any(has_git_metadata(p) for p in (root, *root.parents)):
         paths = [
             p
             for p in os.get_exec_path()

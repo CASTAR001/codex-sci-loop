@@ -17,6 +17,30 @@ from test_sci_loop_native_codex import (
 )
 
 
+def execute_exchange(app, sid, provider, cmd, request):
+    json_input = json.dumps({"protocol": 1, **request})
+    command = "printf '%s' " + shlex.quote(json_input) + " | " + shlex.join(cmd)
+    provider.replies.put(
+        {
+            "type": "function_call",
+            "name": "exec_command",
+            "call_id": "call_" + request["op"],
+            "id": "fc_" + request["op"],
+            "arguments": json.dumps({"cmd": command, "login": False}),
+        }
+    )
+    provider.replies.put("Tool processed.")
+    assert app.turn(sid, "Exercise " + request["op"])["status"] == "completed"
+    outputs = [
+        i["output"] for i in provider.requests[-1]["input"] if i.get("type") == "function_call_output"
+    ]
+    assert outputs, "No native shell tool result"
+    raw=outputs[-1]
+    result=json.JSONDecoder().raw_decode(raw[raw.index('{"ok":'):])[0]
+    assert result["ok"],result
+    return result["data"]
+
+
 def verify():
     executable = shutil.which("codex")
     with tempfile.TemporaryDirectory(prefix="native-mailbox-") as tmp, responses_fixture() as provider:
@@ -43,31 +67,12 @@ def verify():
             )
             return json.loads(result.stdout)["data"]
 
-        def execute(app, sid, request):
-            json_input = json.dumps({"protocol": 1, **request})
-            command = "printf '%s' " + shlex.quote(json_input) + " | " + shlex.join(cmd)
-            provider.replies.put(
-                {
-                    "type": "function_call",
-                    "name": "exec_command",
-                    "call_id": "call_" + request["op"],
-                    "id": "fc_" + request["op"],
-                    "arguments": json.dumps({"cmd": command, "login": False}),
-                }
-            )
-            provider.replies.put("Tool processed.")
-            assert app.turn(sid, "Exercise " + request["op"])["status"] == "completed"
-            outputs = [
-                i["output"] for i in provider.requests[-1]["input"] if i.get("type") == "function_call_output"
-            ]
-            assert outputs and '"ok": true' in str(outputs[-1]), outputs
-
         as_peer(op="join", alias="main")
         with AppServer(executable, workspace, env) as app:
             app.initialize()
             sid = app.call("thread/start", cwd=str(workspace))["thread"]["id"]
-            execute(app, sid, {"op": "join", "alias": "review"})
-            execute(app, sid, {"op": "link", "peer": "main"})
+            execute_exchange(app, sid, provider, cmd, {"op": "join", "alias": "review"})
+            execute_exchange(app, sid, provider, cmd, {"op": "link", "peer": "main"})
             as_peer(op="link", peer="review")
             basis = as_peer(op="sync", peer="review")["basis"]
             as_peer(
@@ -92,7 +97,7 @@ def verify():
             provider.replies.put("Resumed.")
             assert app.turn(sid, "After restart")["status"] == "completed"
             assert "unread shared updates" in str(provider.requests[-1]["input"])
-            execute(app, sid, {"op": "sync", "peer": "main"})
+            execute_exchange(app, sid, provider, cmd, {"op": "sync", "peer": "main"})
             assert "UNTRUSTED_REMOTE_BODY" in str(provider.requests[-1]["input"])
         print(
             "Codex supplied the identity to its actual shell tool. Compact and resume delivered only the fixed notice; manual sync retrieved the private fixture body."

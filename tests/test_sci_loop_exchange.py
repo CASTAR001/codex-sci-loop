@@ -1,5 +1,6 @@
 """Exercise the delivered CLI in separate processes; no credentials, server or model."""
 
+from contextlib import closing
 import concurrent.futures
 import json
 import os
@@ -122,7 +123,7 @@ class Mailbox(unittest.TestCase):
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
             replies = list(pool.map(lambda _: self.call("main", "publish", **req), range(12)))
         self.assertEqual(sum(not r["duplicate"] for r in replies), 1)
-        with sqlite3.connect(self.db) as db:
+        with closing(sqlite3.connect(self.db)) as db:
             db.execute("PRAGMA user_version=99")
         self.call("main", "publish", fail="unsupported mailbox format", **req)
 
@@ -199,6 +200,14 @@ class Mailbox(unittest.TestCase):
         self.assertEqual(
             json.loads(self.call("main", "sync", peer="worker")["entries"][0]["body"])["next"], "waiting"
         )
+
+    def test_empty_sandbox_git_marker_is_an_ordinary_workspace(self):
+        marker=self.root/".git"
+        marker.mkdir()
+        self.assertEqual(self.call("main","join",alias="main")["joined"],"main")
+        marker.rmdir()
+        marker.touch()
+        self.assertEqual(self.call("main","peers")["self"],"main")
 
     def test_link_generation_and_aborted_transaction(self):
         self.pair()

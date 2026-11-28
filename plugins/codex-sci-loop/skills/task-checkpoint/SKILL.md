@@ -1,6 +1,6 @@
 ---
 name: task-checkpoint
-description: "Use when a user pauses a project with an open action, changes a prior agreement, or asks to pick up earlier work. Save project decisions, completed actions and the next step, including when the immediate deliverable is just a small file and the user does not ask to save. One-off answers stay in chat."
+description: "Use when a user pauses a project with an open action, changes a prior agreement, asks to pick up earlier work, or requests a handoff or update from another conversation in the same workspace. Save project decisions, completed actions and the next step, including when the immediate deliverable is just a small file and the user does not ask to save. One-off answers stay in chat."
 ---
 
 # Task checkpoint
