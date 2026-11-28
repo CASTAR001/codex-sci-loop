@@ -108,14 +108,14 @@ class Mailbox(unittest.TestCase):
 
     def test_withdrawing_corrected_answer_reopens_question(self):
         self.pair()
-        q=self.send("worker","main","approve?", "q","question")["seq"]
-        answer=self.send("main","worker","yes","a","reply",ref=q)["seq"]
-        amend=self.send("main","worker","only local","b","correct",ref=answer)["seq"]
-        self.assertEqual(self.call("main","inspect",peer="worker")["open_count"],0)
-        self.send("main","worker","pending","c","withdraw",ref=amend)
-        self.assertEqual(self.call("main","inspect",peer="worker")["open_count"],1)
-        self.send("main","worker","confirmed locally","d","reply",ref=q)
-        self.assertEqual(self.call("main","inspect",peer="worker")["open_count"],0)
+        q = self.send("worker", "main", "approve?", "q", "question")["seq"]
+        answer = self.send("main", "worker", "yes", "a", "reply", ref=q)["seq"]
+        amend = self.send("main", "worker", "only local", "b", "correct", ref=answer)["seq"]
+        self.assertEqual(self.call("main", "inspect", peer="worker")["open_count"], 0)
+        self.send("main", "worker", "pending", "c", "withdraw", ref=amend)
+        self.assertEqual(self.call("main", "inspect", peer="worker")["open_count"], 1)
+        self.send("main", "worker", "confirmed locally", "d", "reply", ref=q)
+        self.assertEqual(self.call("main", "inspect", peer="worker")["open_count"], 0)
 
     def test_atomic_writes_and_versions(self):
         self.pair()
@@ -201,13 +201,27 @@ class Mailbox(unittest.TestCase):
             json.loads(self.call("main", "sync", peer="worker")["entries"][0]["body"])["next"], "waiting"
         )
 
+    def test_takeover_keeps_history_but_requires_new_sharing_consent(self):
+        self.call("old", "join", alias="old", checkpoint="notes")
+        self.call("main", "join", alias="main")
+        self.call("old", "link", peer="main", fields=["next"])
+        self.call("main", "link", peer="old")
+        self.send("old", "main", "current", "1")
+        self.read("main", "old")
+        ticket = self.call("old", "offer")["ticket"]
+        self.call("new", "claim", ticket=ticket, host="opencode")
+        result = self.call("new", "milestone", host="opencode", progress={"next": ["private"]})
+        self.assertEqual(result["published"], [])
+        self.assertEqual(self.call("main", "inspect", peer="old")["recent"][0]["excerpt"], "current")
+        self.assertFalse(self.call("main", "notice")["pending"])
+
     def test_empty_sandbox_git_marker_is_an_ordinary_workspace(self):
-        marker=self.root/".git"
+        marker = self.root / ".git"
         marker.mkdir()
-        self.assertEqual(self.call("main","join",alias="main")["joined"],"main")
+        self.assertEqual(self.call("main", "join", alias="main")["joined"], "main")
         marker.rmdir()
         marker.touch()
-        self.assertEqual(self.call("main","peers")["self"],"main")
+        self.assertEqual(self.call("main", "peers")["self"], "main")
 
     def test_link_generation_and_aborted_transaction(self):
         self.pair()

@@ -69,6 +69,7 @@ def digest(value):
 def project(directory):
     root = Path(directory).resolve(strict=True)
     require(root.is_dir(), "workspace must be a directory")
+
     def has_git_metadata(folder):
         marker = folder / ".git"
         # A workspace-write sandbox may mount an empty read-only marker even
@@ -193,7 +194,36 @@ def dispatch(root, client, session, req):
         require(version == VERSION, "unsupported mailbox format")
         result = operate(conn, root, client, identity, req)
         conn.commit()
-        return result
+    if op == "evidence":
+        # The immutable reference is authorized above. Never hold a SQLite read
+        # lock while reading a potentially large file from disk.
+        return verify_evidence(root, result)
+    return result
+
+
+def verify_evidence(root, evidence):
+    path = evidence_path(root, evidence["path"])
+    state = "unavailable"
+    if path.is_file():
+        h = hashlib.sha256()
+        with path.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                h.update(chunk)
+        state = "unchanged" if h.hexdigest() == evidence["sha256"] else "changed"
+    return {"path": evidence["path"], "state": state}
+
+
+def binding_checkpoint(req, client):
+    checkpoint = req.get("checkpoint")
+    if checkpoint is not None:
+        require(client == "codex", "local checkpoint binding is Codex-only")
+        require(
+            isinstance(checkpoint, str)
+            and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,95}", checkpoint)
+            and not re.match(r"^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)", checkpoint),
+            "invalid checkpoint ID",
+        )
+    return checkpoint
 
 
 def operate(db, root, client, identity, req):
@@ -201,15 +231,7 @@ def operate(db, root, client, identity, req):
     me = db.execute("SELECT * FROM peers WHERE session=?", (identity,)).fetchone()
     if op == "join":
         alias, task = name(req.get("alias")), name(req.get("task", "main"))
-        checkpoint = req.get("checkpoint")
-        if checkpoint is not None:
-            require(client == "codex", "local checkpoint binding is Codex-only")
-            require(
-                isinstance(checkpoint, str)
-                and re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,95}", checkpoint)
-                and not re.match(r"^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)", checkpoint),
-                "invalid checkpoint ID",
-            )
+        checkpoint = binding_checkpoint(req, client)
         if me:
             require(
                 (me["alias"], me["task"], me["checkpoint"]) == (alias, task, checkpoint),
@@ -228,10 +250,17 @@ def operate(db, root, client, identity, req):
     if op == "claim":
         require(not me, "session already bound")
         secret = string(req.get("ticket"), 128, "handoff ticket")
-        changed = db.execute(
-            "UPDATE peers SET claim=NULL,session=? WHERE claim=?", (identity, digest(secret))
+        owner = db.execute("SELECT id FROM peers WHERE claim=?", (digest(secret),)).fetchone()
+        require(owner, "invalid or consumed ticket")
+        who = owner["id"]
+        db.execute(
+            "UPDATE peers SET session=?,claim=NULL,checkpoint=? WHERE id=?",
+            (identity, binding_checkpoint(req, client), who),
         )
-        require(changed.rowcount == 1, "invalid or consumed ticket")
+        # Preserve mailbox history and seen positions, but a new owner must select
+        # their own checkpoint and explicitly consent to share its fields.
+        db.execute("UPDATE edges SET fields='[]',epoch=? WHERE owner=?", (secrets.token_hex(12), who))
+        db.execute("DELETE FROM drafts WHERE owner=?", (who,))
         return {"claimed": True}
     if op == "notice" and not me:
         return {"pending": False}
@@ -275,7 +304,7 @@ def operate(db, root, client, identity, req):
         )
         return max(one, two), two
 
-    by_id = {r["id"]:r for r in linked}
+    by_id = {r["id"]: r for r in linked}
 
     def link_epoch(peer):
         edge = by_id[peer]
@@ -413,7 +442,7 @@ def operate(db, root, client, identity, req):
                 db.execute(
                     """INSERT INTO events(sender,dest,key,kind,topic,body,source,basis,fingerprint)
                     VALUES(?,?,?,'status','status',?,'checkpoint',?,?)""",
-                    (who, peer, key, body, json.dumps({friend["alias"]:basis(peer)}), digest(body)),
+                    (who, peer, key, body, json.dumps({friend["alias"]: basis(peer)}), digest(body)),
                 )
                 sent.append(friend["alias"])
             db.execute("DELETE FROM drafts WHERE owner=? AND peer=?", (who, peer))
@@ -445,16 +474,7 @@ def operate(db, root, client, identity, req):
         files = json.loads(row["body"]).get("artifacts", [])
         index = req.get("index")
         require(type(index) is int and 0 <= index < len(files), "unknown artifact")
-        evidence = files[index]
-        path = evidence_path(root, evidence["path"])
-        state = "unavailable"
-        if path.is_file():
-            h = hashlib.sha256()
-            with path.open("rb") as stream:
-                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                    h.update(chunk)
-            state = "unchanged" if h.hexdigest() == evidence["sha256"] else "changed"
-        return {"path": evidence["path"], "state": state}
+        return files[index]
     if op == "inspect":
         if "seq" in req:
             r = db.execute(
@@ -481,7 +501,8 @@ def operate(db, root, client, identity, req):
         def preview(r):
             change = db.execute(
                 """SELECT seq,kind FROM events WHERE ref=? AND kind IN ('correct','withdraw')
-                   UNION ALL SELECT seq,'reply' FROM active_answers WHERE question=? ORDER BY seq DESC LIMIT 1""", (r["seq"],r["seq"])
+                   UNION ALL SELECT seq,'reply' FROM active_answers WHERE question=? ORDER BY seq DESC LIMIT 1""",
+                (r["seq"], r["seq"]),
             ).fetchone()
             return {
                 "replaced_by": change["seq"] if change else None,
@@ -539,8 +560,11 @@ def operate(db, root, client, identity, req):
         body, source = string(body, 4096, "body (1–4096 characters)"), "peer-report"
     require(ref is None or type(ref) is int and ref > 0, "invalid reference")
     fingerprint = digest([peer, kind, body, ref, source])
-    prior = db.execute("""SELECT seq,fingerprint FROM events WHERE sender=? AND key=?
-        UNION ALL SELECT seq,fingerprint FROM reused_snapshots WHERE sender=? AND key=?""", (who,key,who,key)).fetchone()
+    prior = db.execute(
+        """SELECT seq,fingerprint FROM events WHERE sender=? AND key=?
+        UNION ALL SELECT seq,fingerprint FROM reused_snapshots WHERE sender=? AND key=?""",
+        (who, key, who, key),
+    ).fetchone()
     if prior:
         require(prior["fingerprint"] == fingerprint, "idempotency key reused for different content")
         return {"seq": prior["seq"], "duplicate": True}
@@ -562,7 +586,8 @@ def operate(db, root, client, identity, req):
     if kind in ("reply", "correct", "withdraw"):
         r = db.execute("SELECT * FROM events WHERE seq=?", (ref,)).fetchone()
         require(
-            r and r["kind"] != "withdraw"
+            r
+            and r["kind"] != "withdraw"
             and (
                 (kind == "reply" and r["sender"] == peer and r["dest"] == who and r["topic"] == "question")
                 or (kind != "reply" and r["sender"] == who and r["dest"] == peer)
@@ -573,7 +598,7 @@ def operate(db, root, client, identity, req):
             not db.execute(
                 """SELECT 1 FROM events WHERE ref=? AND kind IN ('withdraw','correct')
                 UNION ALL SELECT 1 FROM active_answers WHERE question=? AND ?='reply'""",
-                (ref,ref,kind),
+                (ref, ref, kind),
             ).fetchone(),
             "message already resolved or superseded",
         )
@@ -590,11 +615,23 @@ def operate(db, root, client, identity, req):
             (who, peer),
         ).fetchone()
         if latest and body == latest["body"]:
-            db.execute("INSERT INTO reused_snapshots VALUES(?,?,?,?)",(who,key,latest["seq"],fingerprint))
+            db.execute("INSERT INTO reused_snapshots VALUES(?,?,?,?)", (who, key, latest["seq"], fingerprint))
             return {"seq": latest["seq"], "unchanged": True}
     seq = db.execute(
         "INSERT INTO events(sender,dest,key,kind,topic,body,ref,reply_to,source,basis,fingerprint) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-        (who, peer, key, kind, topic, body, ref, reply_to, source, json.dumps(expected,sort_keys=True), fingerprint),
+        (
+            who,
+            peer,
+            key,
+            kind,
+            topic,
+            body,
+            ref,
+            reply_to,
+            source,
+            json.dumps(expected, sort_keys=True),
+            fingerprint,
+        ),
     ).lastrowid
     return {"seq": seq, "duplicate": False}
 

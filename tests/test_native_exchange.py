@@ -31,13 +31,11 @@ def execute_exchange(app, sid, provider, cmd, request):
     )
     provider.replies.put("Tool processed.")
     assert app.turn(sid, "Exercise " + request["op"])["status"] == "completed"
-    outputs = [
-        i["output"] for i in provider.requests[-1]["input"] if i.get("type") == "function_call_output"
-    ]
+    outputs = [i["output"] for i in provider.requests[-1]["input"] if i.get("type") == "function_call_output"]
     assert outputs, "No native shell tool result"
-    raw=outputs[-1]
-    result=json.JSONDecoder().raw_decode(raw[raw.index('{"ok":'):])[0]
-    assert result["ok"],result
+    raw = outputs[-1]
+    result = json.JSONDecoder().raw_decode(raw[raw.index('{"ok":') :])[0]
+    assert result["ok"], result
     return result["data"]
 
 

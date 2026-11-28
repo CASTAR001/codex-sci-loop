@@ -242,6 +242,11 @@ class Checkpoints(unittest.TestCase):
     def test_windows_git_path_codepage_and_junction(self):
         project = self.root / "资料 and notes"
         project.mkdir()
+        # A private temporary parent can propagate explicit ACEs without an (I) display
+        # flag. Give this disposable parent a distinctive inheritable restriction.
+        subprocess.run(["icacls.exe", str(project), "/deny", "*S-1-5-7:(OI)(CI)(RX)"],
+                       check=True, stdout=subprocess.DEVNULL, timeout=10)
+        (project / "reference-directory").mkdir()
         self.command("git", "-C", str(project), "init", "-q")
         request = project / "约定.txt"
         raw = "周一\r\n再核对\n".encode("utf-8")
@@ -253,8 +258,14 @@ class Checkpoints(unittest.TestCase):
         self.assertEqual(raw.decode("utf-8"), result["request"])
         self.assertEqual(hashlib.sha256(raw).hexdigest(), result["artifacts"][0]["sha256"])
         # Both Windows clients need the same inherited worktree permissions.
-        acl = subprocess.check_output(["icacls.exe", ".ai-loop"], cwd=project, timeout=10)
-        self.assertIn(b"(I)", acl)  # Windows marks inherited entries with (I).
+        def access_descriptor(directory):
+            return subprocess.check_output([
+                "powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+                f"(Get-Acl -LiteralPath '{directory}').GetSecurityDescriptorSddlForm('Access')",
+            ], cwd=project, timeout=20).strip()
+        expected_acl = access_descriptor("reference-directory")
+        self.assertIn(b"(D;", expected_acl)
+        self.assertEqual(expected_acl, access_descriptor(".ai-loop"))
         target = self.root / "outside"
         target.mkdir()
         (target / "result.txt").write_bytes(b"outside")
