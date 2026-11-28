@@ -181,12 +181,18 @@ def observe_artifacts(root: Path, names: list[str], revision: int) -> list[dict]
             initial = artifact_stat(path)
             with os.fdopen(open_artifact(root, relative), "rb") as stream:
                 opened = os.fstat(stream.fileno())
-                if not stat.S_ISREG(opened.st_mode) or artifact_version(opened) != artifact_version(initial):
+                path_version = artifact_version(initial)
+                handle_version = artifact_version(opened)
+                # On Windows stat and fstat can use different meanings for ctime.
+                # Compare ctime within each source before and after reading.
+                matches = (path_version[:-1] == handle_version[:-1] if os.name == "nt"
+                           else path_version == handle_version)
+                if not stat.S_ISREG(opened.st_mode) or not matches:
                     raise LoopError("artifact changed before it could be read")
                 digest = file_digest(stream)
                 if (stream.tell() != opened.st_size
-                        or artifact_version(os.fstat(stream.fileno())) != artifact_version(opened)
-                        or artifact_version(artifact_stat(path)) != artifact_version(opened)):
+                        or artifact_version(os.fstat(stream.fileno())) != handle_version
+                        or artifact_version(artifact_stat(path)) != path_version):
                     raise LoopError("artifact changed while it was being read")
         except (LoopError, OSError, RuntimeError) as exc:
             raise LoopError(f"cannot observe artifact {relative}: {exc}") from exc
@@ -465,7 +471,10 @@ def verify_checkpoint(root: Path, path: Path, state: dict, timeout: int) -> None
 
 
 def print_json(value: dict) -> None:
-    result = json.dumps(value, ensure_ascii=False)
+    # ASCII escapes produce portable JSON on a redirected Windows code page.
+    escaped = (os.name == "nt" and not sys.stdout.isatty()
+               and (sys.stdout.encoding or "").lower() not in {"utf-8", "utf8"})
+    result = json.dumps(value, ensure_ascii=escaped)
     try:
         result.encode(sys.stdout.encoding or "utf-8")
     except UnicodeEncodeError:

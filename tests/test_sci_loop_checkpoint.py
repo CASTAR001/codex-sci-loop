@@ -4,6 +4,7 @@
 import hashlib
 import json
 import os
+import shlex
 from pathlib import Path
 import signal
 import subprocess
@@ -15,23 +16,29 @@ import unittest
 CLI = Path(__file__).resolve().parents[1] / "plugins/codex-sci-loop/scripts/checkpoint.py"
 
 
+def python_command(*args):
+    argv = [sys.executable, *args]
+    return subprocess.list2cmdline(argv) if os.name == "nt" else shlex.join(argv)
+
+
 class Checkpoints(unittest.TestCase):
     def setUp(self):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name).resolve()
         self.env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "GIT_CONFIG_NOSYSTEM": "1",
-                    "GIT_CONFIG_GLOBAL": os.devnull}
+                    "GIT_CONFIG_GLOBAL": os.devnull, "PYTHONIOENCODING": "utf-8"}
         self.command("git", "init", "-q")
         (self.root / ".gitignore").write_text("data.bin\nclock\n", encoding="utf-8")
         self.command("git", "add", ".gitignore")
         self.path = self.root / ".ai-loop/checkpoints/main.json"
 
     def command(self, *args, stdin=None, code=0):
-        p = subprocess.run(args, cwd=self.root, env=self.env, input=stdin, text=True,
+        data = None if stdin is None else stdin.encode("utf-8")
+        p = subprocess.run(args, cwd=self.root, env=self.env, input=data,
                            capture_output=True, timeout=15)
         self.assertEqual(code, p.returncode, (p.stdout, p.stderr))
-        return p.stdout + p.stderr
+        return (p.stdout + p.stderr).decode("utf-8")
 
     def cli(self, *args, **options):
         return self.command(sys.executable, "-B", str(CLI), *args, **options)
@@ -77,7 +84,7 @@ class Checkpoints(unittest.TestCase):
             (root / "plan.txt").write_text("Tuesday")
             (root / "check.py").write_text("from pathlib import Path\n"
                                            "raise SystemExit(Path('plan.txt').read_text() != 'Tuesday')\n")
-            task("start", "--request-file", "-", "--verify-command", "python3 check.py", stdin="Check the plan")
+            task("start", "--request-file", "-", "--verify-command", python_command("check.py"), stdin="Check the plan")
             self.assertIn("explicit --input", task("verify", code=1))
             task("revise", "--from-revision", "1", "--request-file", "-", "--input", "plan.txt",
                  "--input", "check.py", stdin="Check the plan")
@@ -108,7 +115,7 @@ class Checkpoints(unittest.TestCase):
         self.assertEqual("", recovered["next"])
         self.assertEqual([], recovered["notes"])
         self.assertEqual("stale", recovered["verification"]["status"])
-        state = json.loads(self.path.read_text())
+        state = json.loads(self.path.read_text(encoding="utf-8"))
         self.assertEqual("Goal A\nKeep ε below 0.01.\n", state["contracts"][0]["request"])
         self.cli("set-state", "--state", "cancelled", "--reason", "User ended this task")
         self.cli("verify", code=1)
@@ -231,6 +238,35 @@ class Checkpoints(unittest.TestCase):
                  "--next", "New next", stdin="Wrong revision", code=1)
         self.assertEqual(before, self.path.read_bytes())
 
+    @unittest.skipUnless(os.name == "nt", "Windows code pages and junctions")
+    def test_windows_git_path_codepage_and_junction(self):
+        project = self.root / "资料 and notes"
+        project.mkdir()
+        self.command("git", "-C", str(project), "init", "-q")
+        request = project / "约定.txt"
+        raw = "周一\r\n再核对\n".encode("utf-8")
+        request.write_bytes(raw)
+        self.env["PYTHONIOENCODING"] = "cp936"
+        self.cli("start", "--project-root", str(project), "--request-file", str(request),
+                 "--artifact", request.name)
+        result = json.loads(self.cli("show", "--project-root", str(project), "--full"))
+        self.assertEqual(raw.decode("utf-8"), result["request"])
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), result["artifacts"][0]["sha256"])
+        # Both Windows clients need the same inherited worktree permissions.
+        acl = subprocess.check_output(["icacls.exe", ".ai-loop"], cwd=project, timeout=10)
+        self.assertIn(b"(I)", acl)  # Windows marks inherited entries with (I).
+        target = self.root / "outside"
+        target.mkdir()
+        (target / "result.txt").write_bytes(b"outside")
+        link = project / "junction"
+        subprocess.run(["cmd.exe", "/d", "/c", "mklink", "/J", str(link), str(target)],
+                       check=True, stdout=subprocess.DEVNULL, timeout=10)
+        self.addCleanup(link.rmdir)
+        path = project / ".ai-loop/checkpoints/main.json"
+        before = path.read_bytes()
+        self.cli("note", "--project-root", str(project), "--artifact", "junction/result.txt", code=1)
+        self.assertEqual(before, path.read_bytes())
+
     @unittest.skipUnless(os.name == "posix", "POSIX symlink and special file fixtures")
     def test_symlinked_and_special_artifacts_are_refused(self):
         target = self.root / "directory"
@@ -248,7 +284,7 @@ class Checkpoints(unittest.TestCase):
                 self.assertEqual(before, self.path.read_bytes())
 
     def test_history_retains_compact_superseded_evidence(self):
-        self.start("printf evidence")
+        self.start(python_command("-c", "print('evidence', end='')"))
         first = json.loads(self.cli("verify"))
         second = json.loads(self.cli("verify"))
         self.cli("revise", "--from-revision", "1", "--request-file", "-", "--verify-command", "exit 1",
@@ -264,7 +300,7 @@ class Checkpoints(unittest.TestCase):
     def test_history_accepts_existing_checkpoint_without_fabricating_old_actions(self):
         self.start("exit 0")
         self.cli("revise", "--from-revision", "1", "--request-file", "-", stdin="New goal")
-        state = json.loads(self.path.read_text())
+        state = json.loads(self.path.read_text(encoding="utf-8"))
         state["next"] = "Already pending in a legacy checkpoint"
         self.path.write_text(json.dumps(state))
         old, = json.loads(self.cli("history", "--revision", "1"))["revisions"]
@@ -281,7 +317,7 @@ class Checkpoints(unittest.TestCase):
                           "print('measured', v)\nraise SystemExit(abs(v - 2.0) > 0.01)\n")
         data = self.root / "data.bin"
         data.write_text("2.003")
-        self.start("python3 check.py", "--input", "data.bin")
+        self.start(python_command("check.py"), "--input", "data.bin")
         passed = json.loads(self.cli("verify"))
         self.assertEqual(0, passed["exit_code"])
         self.assertIn("2.003", passed["tail"])
@@ -304,16 +340,17 @@ class Checkpoints(unittest.TestCase):
         self.assertEqual("stale", self.show()["verification"]["status"])
 
     def test_edits_during_verification_bounded_output_and_timeout(self):
-        self.start("python3 -c \"open('result.txt','w').write('42')\"")
+        self.start(python_command("-c", "open('result.txt','w').write('42')"))
         self.assertEqual("stale", json.loads(self.cli("verify", code=1))["status"])
         self.cli("revise", "--from-revision", "1", "--request-file", "-", "--verify-command",
-                 "python3 -c \"print('x'*100000)\"", stdin="Check output")
+                 python_command("-c", "import sys; sys.stdout.buffer.write(b'x'*100000 + bytes([10]))"),
+                 stdin="Check output")
         result = json.loads(self.cli("verify"))
         self.assertEqual(100001, result["output_bytes"])
         self.assertEqual(8192, len(result["tail"]))
         self.assertLess(self.path.stat().st_size, 12000)
         self.cli("revise", "--from-revision", "2", "--request-file", "-", "--verify-command",
-                 'python3 -c "import time; time.sleep(5)"', stdin="Check deadline")
+                 python_command("-c", "import time; time.sleep(5)"), stdin="Check deadline")
         self.assertEqual("timeout", json.loads(self.cli("verify", "--timeout", "1", code=1))["status"])
 
     @unittest.skipUnless(os.name == "posix", "POSIX process interrupt")
@@ -392,7 +429,8 @@ class Checkpoints(unittest.TestCase):
         identity = ("git", "-c", "user.name=Fixture", "-c", "user.email=f@example.invalid")
         self.command(*identity, "commit", "-qm", "base")
         head = self.command("git", "rev-parse", "HEAD").strip()
-        self.start(f'test "$(git rev-parse HEAD)" = "{head}"')
+        self.start(python_command("-c", "import subprocess; "
+                                 f"raise SystemExit(subprocess.check_output(['git','rev-parse','HEAD']).strip() != b'{head}')"))
         self.cli("verify")
         self.cli("finish")
         self.command(*identity, "commit", "--allow-empty", "-qm", "new revision")
@@ -420,7 +458,7 @@ for _ in range(50):
 
     def test_unknown_control_and_damaged_state(self):
         self.start("exit 0")
-        state = json.loads(self.path.read_text())
+        state = json.loads(self.path.read_text(encoding="utf-8"))
         state["mode"] = "success"
         self.path.write_text(json.dumps(state))
         self.assertIn("inconsistent checkpoint", self.cli("show", code=1))

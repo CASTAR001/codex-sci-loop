@@ -143,7 +143,8 @@ def run_check(root: Path, command: str | list[str], timeout: int) -> dict:
 def git(root: Path, *arguments: str, timeout: int = 120) -> str:
     try:
         result = subprocess.run(["git", "-C", str(root), *arguments], cwd=root,
-                                text=True, capture_output=True, timeout=timeout)
+                                text=True, encoding="utf-8" if os.name == "nt" else None,
+                                capture_output=True, timeout=timeout)
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise LoopError(f"cannot run git {arguments[0]}: {exc}") from exc
     if result.returncode != 0:
@@ -171,7 +172,9 @@ def project_lock(root: Path, *, create: bool = False):
     if directory.is_symlink() or lock.is_symlink():
         raise LoopError("unsafe control or lock path")
     if create:
-        directory.mkdir(mode=0o700, exist_ok=True)
+        # Python 3.13+ maps 0700 to a private Windows ACL owned by the creating
+        # account. Inherit the project ACL so both Codex clients can reopen it.
+        directory.mkdir(mode=0o777 if os.name == "nt" else 0o700, exist_ok=True)
     with lock.open("a+b") as handle:
         try:
             if os.name == "nt":
