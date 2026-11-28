@@ -46,3 +46,29 @@ jobs:
       - run: python3 -B tests/test_sci_loop_native_codex.py
       - run: python3 -B tests/probe_skill_routing.py --suite daily-long
       - run: python3 -B tests/probe_skill_routing.py --suite daily-long --without-plugin
+
+  windows-checkpoints:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    env:
+      CODEX_TEST_VERSION: ${{ inputs.codex_version || '0.172.0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -B tests/test_sci_loop_checkpoint.py
+      - name: Install the test CLI
+        run: |
+          $prefix = Join-Path $env:RUNNER_TEMP 'sci-loop-cli'
+          npm install --no-audit --no-fund --prefix $prefix "@openai/codex@$env:CODEX_TEST_VERSION"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Join-Path $prefix 'node_modules/.bin' >> $env:GITHUB_PATH
+      - run: python -B tests/test_sci_loop_distribution.py --codex-install
