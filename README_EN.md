@@ -1,6 +1,6 @@
 # codex-sci-loop
 
-Use project-local checkpoints to pick up an everyday task where you left it. Native Codex handles execution, planning, compaction and delegation. The plugin exposes two skills and registers zero lifecycle hooks. macOS and Linux are the primary platforms, with secondary Windows support.
+Version `1.4.0-alpha.1`. Use project-local checkpoints to pick up an everyday task where you left it. Native Codex handles execution, planning, compaction and delegation. The plugin exposes two skills and registers zero lifecycle hooks. macOS and Linux are the primary platforms, with secondary Windows support.
 
 ## Install
 
@@ -10,6 +10,14 @@ Run `./install.sh` from this checkout or use the CLI commands below. Windows use
 codex plugin marketplace add .
 codex plugin add codex-sci-loop@codex-sci-loop-local
 ```
+
+## Share updates between chats
+
+Open the same local project directory or Git worktree in both chats. This works between two Codex chats or with the [OpenCode long-conversation-loop plugin](https://github.com/CASTAR001/opencodex/tree/main/projects/long-conversation-loop) version 0.2.0-alpha.1 or compatible.
+
+Ask each chat to join the same task under a different alias. Once both have joined, ask each to pair with the other. You can then leave a question, close a chat, and pick up the reply later. By default the mailbox carries explicit messages. When pairing, the owner can choose to share fields from a bound checkpoint, such as its next action or artifact references.
+
+The first join creates `.ai-loop/exchange/v1/mailbox.sqlite3`. Use a local disk and Python 3 with SQLite. Normal installation provides manual sync. A trusted project-specific SessionStart hook can optionally call the installed `scripts/exchange.py --codex-hook` with Python to notify a resumed or compacted chat. The hook emits a fixed reminder and the chat retrieves message contents through sync. [Cross-platform checks](https://github.com/CASTAR001/codex-sci-loop/actions/runs/46139614537)
 
 ## Daily tasks
 

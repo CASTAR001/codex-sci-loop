@@ -6,4 +6,8 @@ The Python 3.9+ CLI is `scripts/checkpoint.py`. Run it from the task folder usin
 
 Use `research-verification` when evaluating a scientific claim, such as whether a numerical method has the predicted order of accuracy. Scientific checks use the same CLI. No lifecycle hooks are registered.
 
+## Workspace exchange
+
+Version `1.4.0-alpha.1` includes `scripts/exchange.py` for a local mailbox shared by paired conversations. Open the same project directory in both chats, ask each to join the same task with a distinct alias, then pair them by alias. You can ask for an update or leave a question even when the recipient is offline. The task-checkpoint skill explains how to check recent changes, read messages and acknowledge a page. Manual sync works immediately after pairing; reminders on Codex resume or compaction require a trusted project-specific SessionStart hook. [Installation and pairing guide](https://github.com/CASTAR001/codex-sci-loop#同工作区跨对话交接)
+
 Older Python phase state can be inspected with `scripts/sci_loop.py resume` or `validate`; both require `--project-root`.
